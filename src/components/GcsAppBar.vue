@@ -11,37 +11,6 @@
         <v-spacer></v-spacer>
 
         <v-row no-gutters>
-<!--            <v-col cols="8" sm="6">-->
-<!--                <v-text-field-->
-<!--                    class="mx-2" style="width: 1%"-->
-<!--                    dense hide-details outlined-->
-<!--                    ref="host"-->
-<!--                    v-model="host" :rules="host_rule"-->
-<!--                    placeholder="203.253.128.177"-->
-<!--                    label="HOST*"-->
-<!--                    required-->
-<!--                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
-<!--                ></v-text-field>-->
-<!--                <v-text-field-->
-<!--                        class="mx-2" style="width: 1%"-->
-<!--                        dense hide-details outlined-->
-<!--                        ref="gcs"-->
-<!--                        v-model="gcs" :rules="gcs_rule"-->
-<!--                        placeholder="KETI_GCS"-->
-<!--                        label="GCS*"-->
-<!--                        required-->
-<!--                        :disabled="MOBIUS_CONNECTION_CONNECTED"-->
-<!--                ></v-text-field>-->
-<!--                <v-btn-->
-<!--                    class="mx-2"-->
-<!--                    tile @click="GcsAppBarCreated"-->
-<!--                    elevation="5"-->
-<!--                    color="primary"-->
-<!--                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
-<!--                > {{ MOBIUS_CONNECTION_TEXT }}-->
-<!--                </v-btn>-->
-<!--            </v-col>-->
-
             <v-col cols="3">
                 <!--                            <v-text-field hide-details ref="host" v-model="host" :rules="host_rule" placeholder="203.253.128.177" label="Host*" required></v-text-field>-->
                 <v-text-field
@@ -343,13 +312,13 @@
                     <v-card-text>
                         <v-container>
                             <v-row>
-                                <v-col cols="12" sm="4">
+                                <v-col cols="12" sm="6">
                                     <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_update_rule" label="Drone Host*" required></v-text-field>
                                 </v-col>
-                                <v-col cols="12" sm="4">
+                                <v-col cols="12" sm="6">
                                     <v-text-field disabled ref="drone_name" v-model="drone_name" :rules="drone_name_update_rule" label="Drone Name*" required></v-text-field>
                                 </v-col>
-                                <v-col cols="12" sm="4">
+                                <v-col cols="12" sm="6">
                                     <v-text-field disabled ref="drone_id" v-model="drone_id" :rules="drone_id_rule" label="Drone ID*" hint="Unique ID of Drone" persistent-hint required
                                     ></v-text-field>
                                 </v-col>
@@ -1115,13 +1084,13 @@
 
                 for(let el in this.form) {
                     if(Object.prototype.hasOwnProperty.call(this.form, el)) {
-                        if (!this.form[el]) {
-                            this.formHasErrors = true;
-
-                            console.log(el);
-                        }
-
-                        console.log(el);
+                        // if (!this.form[el]) {
+                        //     this.formHasErrors = true;
+                        //
+                        //     console.log(el);
+                        // }
+                        //
+                        // console.log(el);
 
                         this.$refs[el].validate(true);
                     }
@@ -1142,6 +1111,23 @@
                     payload.system_id = this.system_id;
 
                     this.$store.commit('updateDroneInfos', payload);
+
+                    this.selected = null;
+                    this.selected = [];
+                    this.drone_infos = null;
+                    this.drone_infos = [];
+
+                    for(let dName in this.$store.state.drone_infos) {
+                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if(dName !== 'unknown') {
+                                this.drone_infos.push(this.$store.state.drone_infos[dName]);
+                            }
+
+                            if(this.$store.state.drone_infos[dName].selected) {
+                                this.selected.push(this.$store.state.drone_infos[dName]);
+                            }
+                        }
+                    }
 
                     let self = this;
                     this.postDroneInfos(function () {

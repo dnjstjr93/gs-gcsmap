@@ -1272,6 +1272,11 @@ export default new Vuex.Store({
 
         resetDroneInfos(state, payload) {
             console.log('resetDroneInfos', payload);
+
+            if (!Object.hasOwnProperty.call(payload, 'unknown')) {
+                payload.unknown = {}
+            }
+
             state.drone_infos = null;
             state.drone_infos = {};
             state.drone_infos = JSON.parse(JSON.stringify(payload));
