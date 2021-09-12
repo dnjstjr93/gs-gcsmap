@@ -24,57 +24,57 @@ Vue.use(Vuex)
 // <v-row justify="space-between"></v-row> // not centered - spaced evenly between
 
 const defaultForm = Object.freeze({
-  first: '',
-  last: '',
-  bio: '',
-  favoriteAnimal: '',
-  age: null,
-  terms: false,
+    first: '',
+    last: '',
+    bio: '',
+    favoriteAnimal: '',
+    age: null,
+    terms: false,
 });
 
 const _defaultPosition = Object(
     {
-      type: 'goto',
-      owner: 'unknown',
-      m_icon: {
-        path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
-        fillColor: "grey",
-        fillOpacity: 0.9,
-        strokeWeight: 0.9,
-        strokeColor: 'grey',
-        rotation: 0,
-        scale: 1.8,
-        anchor: {x: 12, y: 24},
-        labelOrigin: {x: 12, y: 12}
-      },
-      m_label: {
-        text: 'T',
-        color: 'white',
-        fontSize: '25px',
-        fontWeight: 'bold'
-      },
-      selected: false,
-      targeted: false,
-      lat: 37.404523241167965,
-      lng: 127.15821741355862,
-      alt: 20,
-      speed: 5,
-      radius: 10,
-      turningSpeed: 10,
+        type: 'goto',
+        owner: 'unknown',
+        m_icon: {
+            path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
+            fillColor: "grey",
+            fillOpacity: 0.9,
+            strokeWeight: 0.9,
+            strokeColor: 'grey',
+            rotation: 0,
+            scale: 1.8,
+            anchor: {x: 12, y: 24},
+            labelOrigin: {x: 12, y: 12}
+        },
+        m_label: {
+            text: 'T',
+            color: 'white',
+            fontSize: '25px',
+            fontWeight: 'bold'
+        },
+        selected: false,
+        targeted: false,
+        lat: 37.404523241167965,
+        lng: 127.15821741355862,
+        alt: 20,
+        speed: 5,
+        radius: 10,
+        turningSpeed: 10,
     }
 );
 
 const _defaultMarkerIcon = Object(
     {
-      path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
-      fillColor: "grey",
-      fillOpacity: 1,
-      strokeWeight: 1,
-      strokeColor: 'grey',
-      rotation: 0,
-      scale: 2,
-      anchor: {x: 12, y: 24},
-      labelOrigin: {x: 12, y: 12}
+        path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
+        fillColor: "grey",
+        fillOpacity: 1,
+        strokeWeight: 1,
+        strokeColor: 'grey',
+        rotation: 0,
+        scale: 2,
+        anchor: {x: 12, y: 24},
+        labelOrigin: {x: 12, y: 12}
     }
 );
 
@@ -295,1274 +295,1275 @@ const droneSvgPath = "M 527.42,434.24\n" +
 // };
 
 const _defaultDroneInfo = {
-  name: "KETI_Air_01",
-  id: "Zeus",
-  bat_cell: 6,
-  goto_positions: [
-    "37.1710644:128.4724337:50:5:255:25",
-    "37.1703954:128.4696845:50:10:255:25",
-    "37.1703954:128.4696845:100:10:255:25",
-    "37.1703954:128.4696845:150:10:255:25",
-    "37.1703954:128.4696845:200:10:255:25",
-    "37.1703954:128.4696845:300:10:255:25",
-    "37.1703954:128.4696845:400:10:255:25",
-    "37.1703954:128.4696845:500:10:255:25",
-    "37.1703954:128.4696845:600:10:255:25",
-    "37.1707969:128.4712104:250:7:70:25",
-  ],
-  "system_id": 12
+    name: "KETI_Air_01",
+    id: "Zeus",
+    bat_cell: 6,
+    goto_positions: [
+        "37.1710644:128.4724337:50:5:255:25",
+        "37.1703954:128.4696845:50:10:255:25",
+        "37.1703954:128.4696845:100:10:255:25",
+        "37.1703954:128.4696845:150:10:255:25",
+        "37.1703954:128.4696845:200:10:255:25",
+        "37.1703954:128.4696845:300:10:255:25",
+        "37.1703954:128.4696845:400:10:255:25",
+        "37.1703954:128.4696845:500:10:255:25",
+        "37.1703954:128.4696845:600:10:255:25",
+        "37.1707969:128.4712104:250:7:70:25",
+    ],
+    "system_id": 12
 };
 
 export default new Vuex.Store({
-  state: {
-    MOBIUS_CONNECTION_CONNECTED: false,
-    VUE_APP_MOBIUS_HOST: '203.253.128.177',
-    VUE_APP_MOBIUS_GCS: 'KETI_GCS',
+    state: {
+        MOBIUS_CONNECTION_CONNECTED: false,
+        VUE_APP_MOBIUS_HOST: '203.253.128.177',
+        VUE_APP_MOBIUS_GCS: 'KETI_GCS',
 
-    refColorValue: {
-      red: '#F44336',
-      pink: '#E91E63',
-      purple: '#9C27B0',
-      'deep-purple': '#673AB7',
-      indigo: '#3F51B5',
-      blue: '#2196F3',
-      'light-blue': '#03A9F4',
-      cyan: '#00BCD4',
-      teal: '#009688',
-      green: '#4CAF50',
-      'light-green': '#8BC34A',
-      lime: '#CDDC39',
-      yellow: '#FFEB3B',
-      amber: '#FFC107',
-      orange: '#FF9800',
-      'deep-orange': '#FF5722',
-      brown: '#795548',
-      'blue-grey': '#607D8B'
-    },
-
-    refColorName: {
-      '#F44336': 'red' ,
-      '#E91E63': 'pink',
-      '#9C27B0': 'purple',
-      '#673AB7': 'deep-purple',
-      '#3F51B5': 'indigo',
-      '#2196F3': 'blue',
-      '#03A9F4': 'light-blue',
-      '#00BCD4': 'cyan',
-      '#009688': 'teal',
-      '#4CAF50': 'green',
-      '#8BC34A': 'light-green',
-      '#CDDC39': 'lime',
-      '#FFEB3B': 'yellow',
-      '#FFC107': 'amber',
-      '#FF9800': 'orange',
-      '#FF5722': 'deep-orange',
-      '#795548': 'brown',
-      '#607D8B': 'blue-grey'
-    },
-
-    // markerColor: [
-    //     'red',
-    //     'pink',
-    //     'purple',
-    //     'deep-purple',
-    //     'indigo',
-    //     'blue',
-    //     'light-blue',
-    //     'cyan',
-    //     'teal',
-    //     'green',
-    //     'light-green',
-    //     'lime',
-    //     'yellow',
-    //     'amber',
-    //     'orange',
-    //     'deep-orange',
-    //     'brown',
-    //     'blue-grey'
-    // ],
-
-    form: Object.assign({}, defaultForm),
-
-    defaultPosition: Object.assign({}, _defaultPosition),
-    defaultMarkerIcon: Object.assign({}, _defaultMarkerIcon),
-
-    adding: false,
-    gotoMarkers: [],
-    tempMarkers: {
-      unknown: []
-    },
-
-    curDronePositions: {},
-    movingMarkers: {},
-
-    tempPayload: {},
-
-    defaultDroneIcon: {
-      path: droneSvgPath,
-      fillColor: "grey",
-      fillOpacity: 0.8,
-      strokeWeight: 0.8,
-      strokeColor: 'white',
-      rotation: 0,
-      scale: 0.1,
-      anchor: {x: 350, y: 351},
-      labelOrigin: {x: 350, y: 370}
-    },
-
-    defaultDroneLabel: {
-      text: 'D',
-      color: 'white',
-      fontSize: '24px',
-      fontWeight: 'bold'
-    },
-
-    defaultDroneInfo: Object.assign({}, _defaultDroneInfo), //JSON.parse(JSON.stringify(_defaultDroneInfo)),
-
-    drone_infos: {},
-
-    //selectedDrone: {},
-
-    unknown_info: {},
-
-    countFlying: 0,
-
-    mode_items: ['STABILIZE', 'ACRO', 'ALT_HOLD', 'AUTO', 'GUIDED', 'LOITER',
-      'RTL', 'CIRCLE', 'POSITION', 'LAND', 'OF_LOITER', 'DRIFT', 'RESERVED_12', 'SPORT',
-      'FLIP', 'AUTOTUNE', 'POS_HOLD', 'BRAKE', 'THROW', 'AVOID_ADSB', 'GUIDED_NOGPS', 'SAFE_RTL'],
-    command_tab_left_x: 0,
-    command_tab_max_height: 640,
-    currentCommandTab: 'virtual',
-    // dronesChecked: {},
-
-    curTargetedTempMarkerIndex: {},
-
-    trackingLines: {},
-    homeCircle: {},
-
-    targetLines: {},
-    missionLines: {},
-
-    targetCircles: {},
-    missionCircles: {},
-
-    distanceTarget: {},
-  },
-
-  mutations: {
-    initTempMarkers(state, payload) {
-      state.tempMarkers.unknown = null;
-      state.tempMarkers.unknown = [];
-      state.tempMarkers.unknown = JSON.parse(JSON.stringify(payload));
-    },
-
-    setDroneColorMap(state, payload) {
-      state.drone_infos[payload.pName].color = payload.color;
-    },
-
-    updatePosition(state, payload) {
-      console.log(payload);
-      console.log(state.gotoMarkers[payload.mIndex].positions[payload.pIndex].lat);
-      state.gotoMarkers[payload.mIndex].positions[payload.pIndex].lat = payload.lat;
-      state.gotoMarkers[payload.mIndex].positions[payload.pIndex].lng = payload.lng;
-    },
-
-    updateFillColor(state, payload) {
-      console.log(payload);
-      state.gotoMarkers[payload.mIndex].m_icon.fillColor = payload.fillColor;
-    },
-
-    updateLabelText(state, payload) {
-      console.log(payload);
-      state.gotoMarkers[payload.mIndex].positions[payload.pIndex].m_label.fontSize = '14px';
-      state.gotoMarkers[payload.mIndex].positions[payload.pIndex].m_label.text = String(payload.text) + ':' + String(state.gotoMarkers[payload.mIndex].positions[payload.pIndex].alt);
-    },
-
-    initUnknownInfo(state, unknown) {
-      state.unknown_info = null;
-      state.unknown_info = {};
-      state.unknown_info = JSON.parse(JSON.stringify(unknown));
-
-      for(let idx in state.unknown_info.goto_positions) {
-        if(Object.prototype.hasOwnProperty.call(state.unknown_info.goto_positions, idx)) {
-          let pos_arr = state.unknown_info.goto_positions[idx].split(':');
-
-          let pos = JSON.parse(JSON.stringify(state.defaultPosition));
-          pos.lat = parseFloat(pos_arr[0]);
-          pos.lng = parseFloat(pos_arr[1]);
-          pos.alt = parseFloat(pos_arr[2]);
-          pos.speed = parseFloat(pos_arr[3]);
-          pos.radius = parseFloat(pos_arr[4]);
-          pos.turningSpeed = parseFloat(pos_arr[5]);
-          pos.color = 'grey';
-          pos.m_icon.fillColor = 'grey';
-          pos.m_label.fontSize = '14px';
-          pos.m_label.text = 'T:' + String(pos.alt);
-
-          state.drone_infos['unknown'].color = pos.color;
-          state.tempMarkers['unknown'].push(pos);
-          pos = null;
-        }
-      }
-    },
-
-    updateTempPosition(state, payload) {
-      console.log('updateTempPosition', payload);
-
-      // let self = this;
-      let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-
-      state.tempMarkers = null;
-
-      state.tempMarkers = JSON.parse(JSON.stringify(temp));
-      temp = null;
-
-      state.tempMarkers[payload.pName][payload.pIndex].lat = payload.lat;
-      state.tempMarkers[payload.pName][payload.pIndex].lng = payload.lng;
-      state.tempMarkers[payload.pName][payload.pIndex].targeted = payload.value;
-
-      let drone = state.drone_infos[payload.pName];
-
-      drone.goto_positions[payload.pIndex] = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
-
-      let _temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-      state.drone_infos[payload.pName] = null;
-      state.drone_infos[payload.pName] = {};
-      state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(_temp));
-      _temp = null;
-
-      if(payload.pName === 'unknown') {
-        state.unknown_info = null;
-        state.unknown_info = {};
-        state.unknown_info = JSON.parse(JSON.stringify(state.drone_infos.unknown));
-      }
-      else {
-        // let _selected = [];
-        // for (let dName in state.drone_infos) {
-        //     if (Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-        //         if (state.drone_infos[dName].selected) {
-        //             _selected.push(state.drone_infos[dName]);
-        //         }
-        //     }
-        // }
-
-        this.commit('updateDroneInfosSelected');
-      }
-
-      axios({
-        validateStatus: function (status) {
-          // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-          return status < 500;
+        refColorValue: {
+            red: '#F44336',
+            pink: '#E91E63',
+            purple: '#9C27B0',
+            'deep-purple': '#673AB7',
+            indigo: '#3F51B5',
+            blue: '#2196F3',
+            'light-blue': '#03A9F4',
+            cyan: '#00BCD4',
+            teal: '#009688',
+            green: '#4CAF50',
+            'light-green': '#8BC34A',
+            lime: '#CDDC39',
+            yellow: '#FFEB3B',
+            amber: '#FFC107',
+            orange: '#FF9800',
+            'deep-orange': '#FF5722',
+            brown: '#795548',
+            'blue-grey': '#607D8B'
         },
-        method: 'post',
-        url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-        headers: {
-          'X-M2M-RI': String(parseInt(Math.random()*10000)),
-          'X-M2M-Origin': 'SVue',
-          'Content-Type': 'application/json;ty=4'
+
+        refColorName: {
+            '#F44336': 'red',
+            '#E91E63': 'pink',
+            '#9C27B0': 'purple',
+            '#673AB7': 'deep-purple',
+            '#3F51B5': 'indigo',
+            '#2196F3': 'blue',
+            '#03A9F4': 'light-blue',
+            '#00BCD4': 'cyan',
+            '#009688': 'teal',
+            '#4CAF50': 'green',
+            '#8BC34A': 'light-green',
+            '#CDDC39': 'lime',
+            '#FFEB3B': 'yellow',
+            '#FFC107': 'amber',
+            '#FF9800': 'orange',
+            '#FF5722': 'deep-orange',
+            '#795548': 'brown',
+            '#607D8B': 'blue-grey'
         },
-        data: {
-          'm2m:cin': {
-            con: state.drone_infos
-          }
-        }
-      }).then(
-          function (res) {
-            console.log('updateTempPosition-axios', res.data);
-          }
-      ).catch(
-          function (err) {
-            console.log(err.message);
-          }
-      );
-    },
 
-    selectTempMarker(state, payload) {
-      console.log(payload);
+        // markerColor: [
+        //     'red',
+        //     'pink',
+        //     'purple',
+        //     'deep-purple',
+        //     'indigo',
+        //     'blue',
+        //     'light-blue',
+        //     'cyan',
+        //     'teal',
+        //     'green',
+        //     'light-green',
+        //     'lime',
+        //     'yellow',
+        //     'amber',
+        //     'orange',
+        //     'deep-orange',
+        //     'brown',
+        //     'blue-grey'
+        // ],
 
-      state.tempMarkers[payload.pName].forEach((pos) => {
-        pos.selected = false;
-      });
+        form: Object.assign({}, defaultForm),
 
-      state.tempMarkers[payload.pName][payload.pIndex].selected = payload.selected;
-    },
+        defaultPosition: Object.assign({}, _defaultPosition),
+        defaultMarkerIcon: Object.assign({}, _defaultMarkerIcon),
 
-    setSelected(state, payload) {
-      state.tempMarkers[payload.pName][payload.pIndex].selected = payload.value;
-    },
-
-    setAllTempMarker(state, value) {
-      console.log(value);
-
-      if (value) {
-        for (let pName in state.tempMarkers) {
-          if (Object.prototype.hasOwnProperty.call(state.tempMarkers, pName)) {
-            state.tempMarkers[pName].forEach((pos) => {
-              if (!pos.selected) {
-                pos.selected = true;
-                let temp = JSON.parse(JSON.stringify(pos.m_icon));
-                pos.m_icon = null;
-                pos.m_icon = JSON.parse(JSON.stringify(temp));
-                temp = null;
-                pos.m_icon.strokeWeight = 5;
-                pos.m_icon.strokeColor = 'springgreen';
-              }
-            });
-          }
-        }
-      }
-      else {
-        for (let pName in state.tempMarkers) {
-          if (Object.prototype.hasOwnProperty.call(state.tempMarkers, pName)) {
-            state.tempMarkers[pName].forEach((pos) => {
-              if (pos.selected) {
-                pos.selected = false;
-                let temp = JSON.parse(JSON.stringify(pos.m_icon));
-                pos.m_icon = null;
-                pos.m_icon = JSON.parse(JSON.stringify(temp));
-                temp = null
-                pos.m_icon.strokeWeight = 1;
-                pos.m_icon.strokeColor = 'grey';
-              }
-            });
-          }
-        }
-      }
-    },
-
-    setTargetAllTempMarker(state, payload) {
-      console.log(payload);
-
-      if (payload.value) {
-        state.tempMarkers[payload.pName].forEach((pos, pIndex) => {
-          if(!pos.selected) {
-            if (!pos.targeted) {
-              pos.targeted = true;
-              let temp = JSON.parse(JSON.stringify(pos.m_icon));
-              pos.m_icon = null;
-              pos.m_icon = JSON.parse(JSON.stringify(temp));
-              temp = null;
-              pos.m_icon.strokeWeight = 4;
-              pos.m_icon.strokeColor = '#FFFF8D';
-
-              state.curTargetedTempMarkerIndex[payload.pName] = pIndex;
-            }
-          }
-        });
-      }
-      else {
-        state.tempMarkers[payload.pName].forEach((pos) => {
-          if(!pos.selected) {
-            if (pos.targeted) {
-              pos.targeted = false;
-              let temp = JSON.parse(JSON.stringify(pos.m_icon));
-              pos.m_icon = null;
-              pos.m_icon = JSON.parse(JSON.stringify(temp));
-              temp = null;
-              pos.m_icon.strokeWeight = 1;
-              pos.m_icon.strokeColor = 'grey';
-
-              state.curTargetedTempMarkerIndex[payload.pName] = null;
-            }
-          }
-        });
-      }
-    },
-
-    setTempMarker(state, payload) {
-      console.log(payload);
-
-      let value = payload.value;
-      let pName = payload.pName;
-      let pIndex = payload.pIndex;
-
-      let temp = JSON.parse(JSON.stringify(state.tempMarkers[pName][pIndex].m_icon));
-
-      if (value) {
-        if (!state.tempMarkers[pName][pIndex].selected) {
-          state.tempMarkers[pName][pIndex].selected = true;
-          state.tempMarkers[pName][pIndex].m_icon = null;
-          state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
-          temp = null;
-          state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 5;
-          state.tempMarkers[pName][pIndex].m_icon.strokeColor = 'springgreen';
-        }
-      }
-      else {
-        if (state.tempMarkers[pName][pIndex].selected) {
-          state.tempMarkers[pName][pIndex].selected = false;
-          state.tempMarkers[pName][pIndex].m_icon = null;
-          state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
-          temp = null;
-          state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 1;
-          state.tempMarkers[pName][pIndex].m_icon.strokeColor = 'grey';
-        }
-      }
-    },
-
-    setTargetTempMarker(state, payload) {
-      console.log(payload);
-
-      let value = payload.value;
-      let pName = payload.pName;
-      let pIndex = payload.pIndex;
-
-      let temp = JSON.parse(JSON.stringify(state.tempMarkers[pName][pIndex].m_icon));
-
-      if (value) {
-        if (!state.tempMarkers[pName][pIndex].targeted) {
-          state.tempMarkers[pName][pIndex].targeted = true;
-          state.tempMarkers[pName][pIndex].m_icon = null;
-          state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
-          temp = null;
-          state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 4;
-          state.tempMarkers[pName][pIndex].m_icon.strokeColor = '#FFFF8D';
-
-          state.curTargetedTempMarkerIndex[pName] = pIndex;
-        }
-      }
-      else {
-        if (state.tempMarkers[pName][pIndex].targeted) {
-          state.tempMarkers[pName][pIndex].targeted = false;
-          state.tempMarkers[pName][pIndex].m_icon = null;
-          state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
-          temp = null;
-          state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 1;
-          state.tempMarkers[pName][pIndex].m_icon.strokeColor = 'grey';
-
-          state.curTargetedTempMarkerIndex[pName] = null;
-        }
-      }
-
-
-    },
-
-    addTempMarker(state, payload) {
-      if (!Object.prototype.hasOwnProperty.call(state.tempMarkers, payload.pName)) {
-        state.tempMarkers[payload.pName] = [];
-      }
-      else {
-        let temp = JSON.parse(JSON.stringify(state.tempMarkers[payload.pName]));
-        state.tempMarkers[payload.pName] = null;
-        state.tempMarkers[payload.pName] = [];
-        state.tempMarkers[payload.pName] = JSON.parse(JSON.stringify(temp));
-        temp = null;
-      }
-
-      let pos = JSON.parse(JSON.stringify(state.defaultPosition));
-      pos.lat = payload.lat;
-      pos.lng = payload.lng;
-      pos.alt = payload.alt;
-      pos.speed = payload.speed;
-      pos.radius = payload.radius;
-      pos.turningSpeed = payload.turningSpeed;
-      pos.m_icon.fillColor = payload.color;
-      pos.m_label.fontSize = '14px';
-      pos.m_label.text = ((payload.pName === 'unknown') ? 'T' : String(state.tempMarkers[payload.pName].length)) + ':' + String(pos.alt);
-
-      state.tempMarkers[payload.pName].push(pos);
-
-      pos = null;
-
-      //console.log('addTempMarker', JSON.stringify(state.tempMarkers));
-    },
-
-    addingTempMarker(state, payload) {
-      state.adding = true;
-      this.commit('addTempMarker', payload);
-
-      payload.pIndex = state.tempMarkers[payload.pName].length-1;
-      state.tempPayload = JSON.parse(JSON.stringify(payload));
-
-      payload = null;
-    },
-
-    cancelTempMarker(state) {
-      if (state.adding) {
-        state.tempMarkers['unknown'].pop();
-        state.tempPayload = {};
-      }
-
-      state.adding = false;
-    },
-
-    confirmAddTempMarker(state) {
-      let payload  = state.tempPayload;
-
-      console.log('confirmAddTempMarker', payload)
-      console.log('confirmAddTempMarker', state.tempMarkers)
-      console.log('confirmAddTempMarker', state.tempMarkers[payload.pName][payload.pIndex].lat)
-
-      state.drone_infos.unknown.goto_positions[payload.pIndex] = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
-
-      console.log('confirmAddTempMarker', payload.pName, payload.pIndex, state.drone_infos.unknown.goto_positions[payload.pIndex]);
-
-      state.unknown_info = null;
-      state.unknown_info = {};
-      state.unknown_info = JSON.parse(JSON.stringify(state.drone_infos.unknown));
-
-      axios({
-        validateStatus: function (status) {
-          // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-          return status < 500;
+        adding: false,
+        gotoMarkers: [],
+        tempMarkers: {
+            unknown: []
         },
-        method: 'post',
-        url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-        headers: {
-          'X-M2M-RI': String(parseInt(Math.random()*10000)),
-          'X-M2M-Origin': 'SVue',
-          'Content-Type': 'application/json;ty=4'
-        },
-        data: {
-          'm2m:cin': {
-            con: state.drone_infos
-          }
-        }
-      }).then(
-          function (res) {
-            console.log('confirmAddTempMarker-axios', res.data);
-          }
-      ).catch(
-          function (err) {
-            console.log(err.message);
-          }
-      );
 
-      state.adding = false;
+        curDronePositions: {},
+        movingMarkers: {},
+
+        tempPayload: {},
+
+        defaultDroneIcon: {
+            path: droneSvgPath,
+            fillColor: "grey",
+            fillOpacity: 0.8,
+            strokeWeight: 0.8,
+            strokeColor: 'white',
+            rotation: 0,
+            scale: 0.1,
+            anchor: {x: 350, y: 351},
+            labelOrigin: {x: 350, y: 370}
+        },
+
+        defaultDroneLabel: {
+            text: 'D',
+            color: 'white',
+            fontSize: '24px',
+            fontWeight: 'bold'
+        },
+
+        defaultDroneInfo: Object.assign({}, _defaultDroneInfo), //JSON.parse(JSON.stringify(_defaultDroneInfo)),
+
+        drone_infos: {},
+
+        //selectedDrone: {},
+
+        unknown_info: {},
+
+        countFlying: 0,
+
+        mode_items: ['STABILIZE', 'ACRO', 'ALT_HOLD', 'AUTO', 'GUIDED', 'LOITER',
+            'RTL', 'CIRCLE', 'POSITION', 'LAND', 'OF_LOITER', 'DRIFT', 'RESERVED_12', 'SPORT',
+            'FLIP', 'AUTOTUNE', 'POS_HOLD', 'BRAKE', 'THROW', 'AVOID_ADSB', 'GUIDED_NOGPS', 'SAFE_RTL'],
+        command_tab_left_x: 0,
+        command_tab_max_height: 640,
+        currentCommandTab: 'virtual',
+        // dronesChecked: {},
+
+        curTargetedTempMarkerIndex: {},
+
+        trackingLines: {},
+        homeCircle: {},
+
+        targetLines: {},
+        missionLines: {},
+
+        targetCircles: {},
+        missionCircles: {},
+
+        distanceTarget: {},
     },
 
-    deleteMarker(state, payload) {
-      console.log('deleteMarker', payload);
-
-      let oldPos = JSON.parse(JSON.stringify(state.tempMarkers[payload.pName][payload.pIndex]));
-
-      state.tempMarkers[payload.pName].splice(payload.pIndex, 1);
-
-      state.tempMarkers[payload.pName].forEach((pos, pIndex) => {
-        pos.m_label.fontSize = '14px';
-        pos.m_label.text = ((payload.pName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
-      });
-
-      oldPos.m_icon.fillColor = 'grey';
-      oldPos.m_label.text = 'T:' + String(oldPos.alt);
-
-      let count = state.tempMarkers['unknown'].push(oldPos);
-
-      oldPos = null;
-
-      let _payload = {};
-      _payload.pOldName = payload.pName;
-      _payload.pOldIndex = payload.pIndex;
-      _payload.pName = 'unknown';
-      _payload.pIndex = count - 1;
-
-      this.commit('deleteMarkerDroneInfo', _payload);
-
-      let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-      state.tempMarkers = null;
-      state.tempMarkers = {};
-      state.tempMarkers = JSON.parse(JSON.stringify(temp));
-      temp = null;
-
-    },
-
-    removeMarker(state, payload) {
-      console.log('removeMarker', payload);
-
-      state.tempMarkers[payload.pName].splice(payload.pIndex, 1);
-
-      let _payload = {};
-      _payload.pOldName = payload.pName;
-      _payload.pOldIndex = payload.pIndex;
-      _payload.pName = payload.pName;
-      _payload.pIndex = payload.pName;
-
-      this.commit('removeMarkerDroneInfo', _payload);
-
-      let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-      state.tempMarkers = null;
-      state.tempMarkers = {};
-      state.tempMarkers = JSON.parse(JSON.stringify(temp));
-      temp = null;
-    },
-
-    removeAllMarker(state, payload) {
-      console.log('removeAllMarker', payload);
-
-      let unknownMarker = JSON.parse(JSON.stringify(state.tempMarkers['unknown']));
-      state.tempMarkers = null;
-      state.tempMarkers = {};
-      state.tempMarkers.unknown = JSON.parse(JSON.stringify(unknownMarker));
-      unknownMarker = null;
-
-      let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-      state.tempMarkers = null;
-      state.tempMarkers = {};
-      state.tempMarkers = JSON.parse(JSON.stringify(temp));
-      temp = null;
-    },
-
-    registerMarker(state, payload) {
-      console.log(payload);
-
-      state.tempMarkers[payload.pOldName][payload.pOldIndex].alt = payload.targetAlt;
-      state.tempMarkers[payload.pOldName][payload.pOldIndex].speed = payload.targetSpeed;
-      state.tempMarkers[payload.pOldName][payload.pOldIndex].radius = payload.targetRadius;
-      state.tempMarkers[payload.pOldName][payload.pOldIndex].turningSpeed = payload.targetTurningSpeed;
-
-      let oldPos = JSON.parse(JSON.stringify(state.tempMarkers[payload.pOldName][payload.pOldIndex]));
-
-
-      if(payload.pOldName !== payload.pName) {
-        state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
-
-        state.tempMarkers[payload.pOldName].forEach((pos, pIndex) => {
-          pos.m_label.fontSize = '14px';
-          pos.m_label.text = ((payload.pOldName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
-        });
-
-        state.drone_infos[payload.pName].color = (payload.pName === 'unknown') ? 'grey' : payload.targetColor;
-        oldPos.m_icon.fillColor = state.drone_infos[payload.pName].color;
-
-        let count = state.tempMarkers[payload.pName].push(oldPos);
-        payload.pIndex = count - 1;
-
-        oldPos.m_label.fontSize = '14px';
-        if(payload.pName === 'unknown') {
-          oldPos.m_label.text = 'T' + ':' + String(oldPos.alt);
-        }
-        else {
-          oldPos.m_label.text = String(count - 1) + ':' + String(oldPos.alt);
-        }
-
-        state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
-        this.commit('regMarkerNameDroneInfo', payload);
-      }
-
-      else if(payload.pOldIndex !== payload.pIndex) {
-        state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
-
-        console.log(state.tempMarkers[payload.pOldName]);
-
-        state.tempMarkers[payload.pOldName].splice(payload.pIndex, 0, oldPos);
-
-        state.tempMarkers[payload.pOldName].forEach((pos, pIndex) => {
-          pos.m_label.fontSize = '14px';
-          pos.m_label.text = ((payload.pOldName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
-        });
-
-        state.drone_infos[payload.pName].goto_positions.splice(payload.pOldIndex, 1);
-        this.commit('regMarkerIndexDroneInfo', payload);
-      }
-
-      else {
-        this.commit('regMarkerDroneInfo', payload);
-      }
-
-      oldPos = null;
-      let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-      state.tempMarkers = null;
-      state.tempMarkers = {};
-      state.tempMarkers = JSON.parse(JSON.stringify(temp));
-      temp = null;
-    },
-
-    removeMarkerDroneInfo(state, payload) {
-      state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
-
-      console.log('removeMarkerDroneInfo', payload);
-
-      state.unknown_info = null;
-      state.unknown_info = {};
-      state.unknown_info = JSON.parse(JSON.stringify(state.drone_infos.unknown));
-
-      let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-      state.drone_infos[payload.pName] = null;
-      state.drone_infos[payload.pName] = {};
-      state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-      temp = null;
-
-      axios({
-        validateStatus: function (status) {
-          // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-          return status < 500;
+    mutations: {
+        initTempMarkers(state, payload) {
+            state.tempMarkers.unknown = null;
+            state.tempMarkers.unknown = [];
+            state.tempMarkers.unknown = JSON.parse(JSON.stringify(payload));
         },
-        method: 'post',
-        url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-        headers: {
-          'X-M2M-RI': String(parseInt(Math.random()*10000)),
-          'X-M2M-Origin': 'SVue',
-          'Content-Type': 'application/json;ty=4'
+
+        setDroneColorMap(state, payload) {
+            state.drone_infos[payload.pName].color = payload.color;
         },
-        data: {
-          'm2m:cin': {
-            con: state.drone_infos
-          }
-        }
-      }).then(
-          function (res) {
-            console.log('removeMarkerDroneInfo-axios', res.data);
-          }
-      ).catch(
-          function (err) {
-            console.log(err.message);
-          }
-      );
-    },
 
-    deleteMarkerDroneInfo(state, payload) {
-      let oldPos = state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
-
-      console.log('deleteMarkerDroneInfo', payload);
-
-      // let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-      //     String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-      //     String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-      //     String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-      //     String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-      //     String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
-
-      state.drone_infos[payload.pName].goto_positions.push(oldPos[0]);
-
-      let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-      state.drone_infos[payload.pName] = null;
-      state.drone_infos[payload.pName] = {};
-      state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-      temp = null;
-
-      axios({
-        validateStatus: function (status) {
-          // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-          return status < 500;
+        updatePosition(state, payload) {
+            console.log(payload);
+            console.log(state.gotoMarkers[payload.mIndex].positions[payload.pIndex].lat);
+            state.gotoMarkers[payload.mIndex].positions[payload.pIndex].lat = payload.lat;
+            state.gotoMarkers[payload.mIndex].positions[payload.pIndex].lng = payload.lng;
         },
-        method: 'post',
-        url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-        headers: {
-          'X-M2M-RI': String(parseInt(Math.random()*10000)),
-          'X-M2M-Origin': 'SVue',
-          'Content-Type': 'application/json;ty=4'
+
+        updateFillColor(state, payload) {
+            console.log(payload);
+            state.gotoMarkers[payload.mIndex].m_icon.fillColor = payload.fillColor;
         },
-        data: {
-          'm2m:cin': {
-            con: state.drone_infos
-          }
-        }
-      }).then(
-          function (res) {
-            console.log('deleteMarkerDroneInfo-axios', res.data);
-          }
-      ).catch(
-          function (err) {
-            console.log(err.message);
-          }
-      );
-    },
 
-    regMarkerNameDroneInfo(state, payload) {
-      console.log('regMarkerNameDroneInfo', payload);
-
-      let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
-
-      state.drone_infos[payload.pName].goto_positions.push(pos_str);
-
-      let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-      state.drone_infos[payload.pName] = null;
-      state.drone_infos[payload.pName] = {};
-      state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-      temp = null;
-
-      // let _selected = [];
-      // for(let dName in state.drone_infos) {
-      //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-      //         if(state.drone_infos[dName].selected) {
-      //             _selected.push(state.drone_infos[dName]);
-      //         }
-      //     }
-      // }
-
-      this.commit('updateDroneInfosSelected');
-
-      // state.dronesChecked[payload.dName] = null;
-      // state.dronesChecked[payload.dName] = state.drone_infos[payload.dName];
-      //
-      // temp = JSON.parse(JSON.stringify(state.dronesChecked));
-      // state.dronesChecked = null;
-      // state.dronesChecked = JSON.parse(JSON.stringify(temp));
-      // temp = null;
-
-      EventBus.$emit('do-targetDroneMarker', payload.pName);
-
-      axios({
-        validateStatus: function (status) {
-          // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-          return status < 500;
+        updateLabelText(state, payload) {
+            console.log(payload);
+            state.gotoMarkers[payload.mIndex].positions[payload.pIndex].m_label.fontSize = '14px';
+            state.gotoMarkers[payload.mIndex].positions[payload.pIndex].m_label.text = String(payload.text) + ':' + String(state.gotoMarkers[payload.mIndex].positions[payload.pIndex].alt);
         },
-        method: 'post',
-        url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-        headers: {
-          'X-M2M-RI': String(parseInt(Math.random()*10000)),
-          'X-M2M-Origin': 'SVue',
-          'Content-Type': 'application/json;ty=4'
-        },
-        data: {
-          'm2m:cin': {
-            con: state.drone_infos
-          }
-        }
-      }).then(
-          function (res) {
-            console.log('regMarkerNameDroneInfo-axios', res.data);
-          }
-      ).catch(
-          function (err) {
-            console.log(err.message);
-          }
-      );
-    },
 
-    regMarkerDroneInfo(state, payload) {
-      console.log('regMarkerDroneInfo', payload);
+        initUnknownInfo(state, unknown) {
+            state.unknown_info = null;
+            state.unknown_info = {};
+            state.unknown_info = JSON.parse(JSON.stringify(unknown));
 
-      let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
+            for (let idx in state.unknown_info.goto_positions) {
+                if (Object.prototype.hasOwnProperty.call(state.unknown_info.goto_positions, idx)) {
+                    let pos_arr = state.unknown_info.goto_positions[idx].split(':');
 
-      state.drone_infos[payload.pName].goto_positions[payload.pIndex] = pos_str;
+                    let pos = JSON.parse(JSON.stringify(state.defaultPosition));
+                    pos.lat = parseFloat(pos_arr[0]);
+                    pos.lng = parseFloat(pos_arr[1]);
+                    pos.alt = parseFloat(pos_arr[2]);
+                    pos.speed = parseFloat(pos_arr[3]);
+                    pos.radius = parseFloat(pos_arr[4]);
+                    pos.turningSpeed = parseFloat(pos_arr[5]);
+                    pos.color = 'grey';
+                    pos.m_icon.fillColor = 'grey';
+                    pos.m_label.fontSize = '14px';
+                    pos.m_label.text = 'T:' + String(pos.alt);
 
-      let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-      state.drone_infos[payload.pName] = null;
-      state.drone_infos[payload.pName] = {};
-      state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-      temp = null;
-
-      // let _selected = [];
-      // for(let dName in state.drone_infos) {
-      //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-      //         if(state.drone_infos[dName].selected) {
-      //             _selected.push(state.drone_infos[dName]);
-      //         }
-      //     }
-      // }
-
-      this.commit('updateDroneInfosSelected');
-
-      // state.dronesChecked[payload.dName] = null;
-      // state.dronesChecked[payload.dName] = state.drone_infos[payload.dName];
-      //
-      // temp = JSON.parse(JSON.stringify(state.dronesChecked));
-      // state.dronesChecked = null;
-      // state.dronesChecked = JSON.parse(JSON.stringify(temp));
-      // temp = null;
-
-      EventBus.$emit('do-targetDroneMarker', payload.pName);
-
-      axios({
-        validateStatus: function (status) {
-          // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-          return status < 500;
-        },
-        method: 'post',
-        url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-        headers: {
-          'X-M2M-RI': String(parseInt(Math.random()*10000)),
-          'X-M2M-Origin': 'SVue',
-          'Content-Type': 'application/json;ty=4'
-        },
-        data: {
-          'm2m:cin': {
-            con: state.drone_infos
-          }
-        }
-      }).then(
-          function (res) {
-            console.log('regMarkerDroneInfo-axios', res.data);
-          }
-      ).catch(
-          function (err) {
-            console.log(err.message);
-          }
-      );
-    },
-
-    regMarkerIndexDroneInfo(state, payload) {
-      console.log('regMarkerIndexDroneInfo', payload);
-
-      let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-          String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
-
-      state.drone_infos[payload.pName].goto_positions.splice(payload.pIndex, 0, pos_str);
-
-      let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-      state.drone_infos[payload.pName] = null;
-      state.drone_infos[payload.pName] = {};
-      state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-      temp = null;
-
-      // let _selected = [];
-      // for(let dName in state.drone_infos) {
-      //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-      //         if(state.drone_infos[dName].selected) {
-      //             _selected.push(state.drone_infos[dName]);
-      //         }
-      //     }
-      // }
-
-      this.commit('updateDroneInfosSelected');
-
-      // state.dronesChecked[payload.dName] = null;
-      // state.dronesChecked[payload.dName] = state.drone_infos[payload.dName];
-      //
-      // temp = JSON.parse(JSON.stringify(state.dronesChecked));
-      // state.dronesChecked = null;
-      // state.dronesChecked = {};
-      // state.dronesChecked = JSON.parse(JSON.stringify(temp));
-      // temp = null;
-
-      EventBus.$emit('do-targetDroneMarker', payload.pName);
-
-      axios({
-        validateStatus: function (status) {
-          // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-          return status < 500;
-        },
-        method: 'post',
-        url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-        headers: {
-          'X-M2M-RI': String(parseInt(Math.random()*10000)),
-          'X-M2M-Origin': 'SVue',
-          'Content-Type': 'application/json;ty=4'
-        },
-        data: {
-          'm2m:cin': {
-            con: state.drone_infos
-          }
-        }
-      }).then(
-          function (res) {
-            console.log('regMarkerIndexDroneInfo-axios', res.data);
-          }
-      ).catch(
-          function (err) {
-            console.log(err.message);
-          }
-      );
-    },
-
-    resetDroneInfos(state, payload) {
-      console.log('resetDroneInfos', payload);
-      state.drone_infos = null;
-      state.drone_infos = {};
-      state.drone_infos = JSON.parse(JSON.stringify(payload));
-
-      if(!Object.hasOwnProperty.call(state.drone_infos.unknown, 'goto_positions')) {
-        state.drone_infos.unknown.goto_positions = [];
-      }
-
-      if(!Array.isArray(state.drone_infos.unknown.goto_positions)) {
-        state.drone_infos.unknown.goto_positions = [];
-      }
-
-      for (let i = 0; i < state.drone_infos.unknown.goto_positions.length; i) {
-        if (state.drone_infos.unknown.goto_positions[i] === null) {
-          state.drone_infos.unknown.goto_positions.splice(i, 1);
-        } else {
-          i++;
-        }
-      }
-
-      console.log('resetDroneInfos', state.drone_infos);
-    },
-
-    updateDroneInfosSelected(state) {
-
-      console.log('updateDroneInfosSelected', state.drone_infos);
-
-      for(let dName in state.drone_infos) {
-        if (Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-
-          if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'color')) {
-            state.drone_infos[dName].color = 'grey';
-          }
-
-          if(!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'goto_positions')) {
-            state.drone_infos[dName].goto_positions = [];
-          }
-
-          if(dName !== 'unknown') {
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
-              state.drone_infos[dName].targeted = false;
-            }
-
-            state.drone_infos[dName].targeted = false;
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'home_position')) {
-              state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'gotoType')) {
-              state.drone_infos[dName].gotoType = 'alt_first';
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'tagetModeSelection')) {
-              state.drone_infos[dName].tagetModeSelection = 'ALT_HOLD';
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetSpeed')) {
-              state.drone_infos[dName].targetSpeed = 5;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTurningSpeed')) {
-              state.drone_infos[dName].targetTurningSpeed = 5;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetRadius')) {
-              state.drone_infos[dName].targetRadius = 50;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTakeoffAlt')) {
-              state.drone_infos[dName].targetTakeoffAlt = 20;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'circleType')) {
-              state.drone_infos[dName].circleType = 'cw';
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetAlt')) {
-              state.drone_infos[dName].targetAlt = 20;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'lastFlightTime')) {
-              state.drone_infos[dName].lastFlightTime = 0;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoStartIndex')) {
-              state.drone_infos[dName].autoStartIndex = '0';
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoEndIndex')) {
-              state.drone_infos[dName].autoEndIndex = '0';
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoDelay')) {
-              state.drone_infos[dName].autoDelay = 1;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoSpeed')) {
-              state.drone_infos[dName].autoSpeed = 5;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'takeoffDelay')) {
-              state.drone_infos[dName].takeoffDelay = 6;
-            }
-
-
-            state.tempMarkers[dName] = null;
-            state.tempMarkers[dName] = [];
-            state.trackingLines[dName] = null;
-            state.trackingLines[dName] = [];
-
-            if (state.drone_infos[dName].selected) {
-              let drone = state.drone_infos[dName];
-
-              for (let idx in drone.goto_positions) {
-                if (Object.prototype.hasOwnProperty.call(drone.goto_positions, idx)) {
-                  let pos_arr = drone.goto_positions[idx].split(':');
-                  let pos = JSON.parse(JSON.stringify(state.defaultPosition));
-                  pos.lat = parseFloat(pos_arr[0]);
-                  pos.lng = parseFloat(pos_arr[1]);
-                  pos.alt = parseFloat(pos_arr[2]);
-                  pos.speed = parseFloat(pos_arr[3]);
-                  pos.radius = parseFloat(pos_arr[4]);
-                  pos.turningSpeed = parseFloat(pos_arr[5]);
-                  pos.color = drone.color;
-                  pos.m_icon.fillColor = drone.color;
-                  pos.m_label.fontSize = '14px';
-                  pos.m_label.text = ((drone.name === 'unknown') ? 'T' : String(state.tempMarkers[drone.name].length)) + ':' + String(pos.alt);
-
-                  state.tempMarkers[drone.name].push(pos);
-                  pos = null;
+                    state.drone_infos['unknown'].color = pos.color;
+                    state.tempMarkers['unknown'].push(pos);
+                    pos = null;
                 }
-              }
+            }
+        },
+
+        updateTempPosition(state, payload) {
+            console.log('updateTempPosition', payload);
+
+            // let self = this;
+            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
+
+            state.tempMarkers = null;
+
+            state.tempMarkers = JSON.parse(JSON.stringify(temp));
+            temp = null;
+
+            state.tempMarkers[payload.pName][payload.pIndex].lat = payload.lat;
+            state.tempMarkers[payload.pName][payload.pIndex].lng = payload.lng;
+            state.tempMarkers[payload.pName][payload.pIndex].targeted = payload.value;
+
+            let drone = state.drone_infos[payload.pName];
+
+            drone.goto_positions[payload.pIndex] = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
+
+            let _temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
+            state.drone_infos[payload.pName] = null;
+            state.drone_infos[payload.pName] = {};
+            state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(_temp));
+            _temp = null;
+
+            if (payload.pName === 'unknown') {
+                state.unknown_info = null;
+                state.unknown_info = {};
+                state.unknown_info = JSON.parse(JSON.stringify(state.drone_infos.unknown));
             }
             else {
-              delete state.tempMarkers[dName];
-              delete state.trackingLines[dName];
+                // let _selected = [];
+                // for (let dName in state.drone_infos) {
+                //     if (Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
+                //         if (state.drone_infos[dName].selected) {
+                //             _selected.push(state.drone_infos[dName]);
+                //         }
+                //     }
+                // }
+
+                this.commit('updateDroneInfosSelected');
             }
-          }
-        }
-      }
 
-      let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-      state.tempMarkers = null;
-      state.tempMarkers = {};
-      state.tempMarkers = JSON.parse(JSON.stringify(temp));
-      temp = null;
-    },
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: state.drone_infos
+                    }
+                }
+            }).then(
+                function (res) {
+                    console.log('updateTempPosition-axios', res.data);
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
+        },
 
-    addDroneInfos(state, payload) {
-      state.drone_infos[payload.name] = payload;
+        selectTempMarker(state, payload) {
+            console.log(payload);
 
-      let temp = JSON.parse(JSON.stringify(state.drone_infos));
-      state.drone_infos = null;
-      state.drone_infos = {};
-      state.drone_infos = JSON.parse(JSON.stringify(temp));
-      temp = null;
-    },
+            state.tempMarkers[payload.pName].forEach((pos) => {
+                pos.selected = false;
+            });
 
-    delDroneInfo(state, name) {
-      delete state.drone_infos[name];
+            state.tempMarkers[payload.pName][payload.pIndex].selected = payload.selected;
+        },
 
-      let temp = JSON.parse(JSON.stringify(state.drone_infos));
-      state.drone_infos = null;
-      state.drone_infos = {};
-      state.drone_infos = JSON.parse(JSON.stringify(temp));
-      temp = null;
+        setSelected(state, payload) {
+            state.tempMarkers[payload.pName][payload.pIndex].selected = payload.value;
+        },
 
-      console.log('delDroneInfo', state.drone_infos);
-    },
+        setAllTempMarker(state, value) {
+            console.log(value);
 
-    updateDroneInfos(state, payload) {
-      state.drone_infos[payload.name] = payload;
-
-      let temp = JSON.parse(JSON.stringify(state.drone_infos));
-      state.drone_infos = null;
-      state.drone_infos = {};
-      state.drone_infos = JSON.parse(JSON.stringify(temp));
-      temp = null;
-    },
-
-    // setSelectedDrone(state, payload) {
-    //
-    //     state.selectedDrone[payload.drone_name] = payload.selected;
-    //     let temp = JSON.parse(JSON.stringify(state.selectedDrone));
-    //     state.selectedDrone = null;
-    //     state.selectedDrone = {};
-    //     state.selectedDrone = JSON.parse(JSON.stringify(temp));
-    //     temp = null;
-    //
-    //     //EventBus.$emit('selected-drone', payload);
-    // },
-
-    setCommandTabLeftX(state, value) {
-      state.command_tab_left_x = value;
-    },
-
-    setCommandTabMaxHeight(state, value) {
-      state.command_tab_max_height = value;
-    },
-
-    // setSelectedDroneInfo(state, payload) {
-    //     state.drone_infos[payload.dName].selected = payload.selected;
-    // },
-
-    setFlyingDroneInfo(state, payload) {
-      state.drone_infos[payload.name].heading = payload.heading;
-      state.drone_infos[payload.name].lat = payload.lat;
-      state.drone_infos[payload.name].lng = payload.lng;
-
-      // let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-      // state.drone_infos[payload.pName] = null;
-      // state.drone_infos[payload.pName] = {};
-      // state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-      // temp = null;
-
-      // state.drone_infos_selected = [];
-      // for(let dName in state.drone_infos) {
-      //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-      //         if(state.drone_infos[dName].selected) {
-      //             state.drone_infos_selected.push(state.drone_infos[dName]);
-      //         }
-      //     }
-      // }
-
-      state.countFlying++;
-      if(state.countFlying >= 30) {
-        state.countFlying = 0;
-
-        // axios({
-        //     validateStatus: function (status) {
-        //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-        //         return status < 500;
-        //     },
-        //     method: 'post',
-        //     url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-        //     headers: {
-        // 'X-M2M-RI': String(parseInt(Math.random()*10000)),
-        //         'X-M2M-Origin': 'SVue',
-        //         'Content-Type': 'application/json;ty=4'
-        //     },
-        //     data: {
-        //         'm2m:cin': {
-        //             con: state.drone_infos
-        //         }
-        //     }
-        // }).then(
-        //     function (res) {
-        //         console.log('setFlyingDroneInfo-axios', res.data);
-        //     }
-        // ).catch(
-        //     function (err) {
-        //         console.log(err.message);
-        //     }
-        // );
-      }
-
-      payload = null;
-    },
-
-    saveCurrentDroneInfos(state) {
-      if(state.MOBIUS_CONNECTION_CONNECTED) {
-        axios({
-          validateStatus: function (status) {
-            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-            return status < 500;
-          },
-          method: 'post',
-          url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-          headers: {
-            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-            'X-M2M-Origin': 'SVue',
-            'Content-Type': 'application/json;ty=4'
-          },
-          data: {
-            'm2m:cin': {
-              con: state.drone_infos
+            if (value) {
+                for (let pName in state.tempMarkers) {
+                    if (Object.prototype.hasOwnProperty.call(state.tempMarkers, pName)) {
+                        state.tempMarkers[pName].forEach((pos) => {
+                            if (!pos.selected) {
+                                pos.selected = true;
+                                let temp = JSON.parse(JSON.stringify(pos.m_icon));
+                                pos.m_icon = null;
+                                pos.m_icon = JSON.parse(JSON.stringify(temp));
+                                temp = null;
+                                pos.m_icon.strokeWeight = 5;
+                                pos.m_icon.strokeColor = 'springgreen';
+                            }
+                        });
+                    }
+                }
             }
-          }
-        }).then(
-            function (res) {
-              console.log('setFlyingDroneInfo-axios', res.data);
+            else {
+                for (let pName in state.tempMarkers) {
+                    if (Object.prototype.hasOwnProperty.call(state.tempMarkers, pName)) {
+                        state.tempMarkers[pName].forEach((pos) => {
+                            if (pos.selected) {
+                                pos.selected = false;
+                                let temp = JSON.parse(JSON.stringify(pos.m_icon));
+                                pos.m_icon = null;
+                                pos.m_icon = JSON.parse(JSON.stringify(temp));
+                                temp = null
+                                pos.m_icon.strokeWeight = 1;
+                                pos.m_icon.strokeColor = 'grey';
+                            }
+                        });
+                    }
+                }
             }
-        ).catch(
-            function (err) {
-              console.log(err.message);
+        },
+
+        setTargetAllTempMarker(state, payload) {
+            console.log(payload);
+
+            if (payload.value) {
+                state.tempMarkers[payload.pName].forEach((pos, pIndex) => {
+                    if (!pos.selected) {
+                        if (!pos.targeted) {
+                            pos.targeted = true;
+                            let temp = JSON.parse(JSON.stringify(pos.m_icon));
+                            pos.m_icon = null;
+                            pos.m_icon = JSON.parse(JSON.stringify(temp));
+                            temp = null;
+                            pos.m_icon.strokeWeight = 4;
+                            pos.m_icon.strokeColor = '#FFFF8D';
+
+                            state.curTargetedTempMarkerIndex[payload.pName] = pIndex;
+                        }
+                    }
+                });
             }
-        );
-      }
+            else {
+                state.tempMarkers[payload.pName].forEach((pos) => {
+                    if (!pos.selected) {
+                        if (pos.targeted) {
+                            pos.targeted = false;
+                            let temp = JSON.parse(JSON.stringify(pos.m_icon));
+                            pos.m_icon = null;
+                            pos.m_icon = JSON.parse(JSON.stringify(temp));
+                            temp = null;
+                            pos.m_icon.strokeWeight = 1;
+                            pos.m_icon.strokeColor = 'grey';
+
+                            state.curTargetedTempMarkerIndex[payload.pName] = null;
+                        }
+                    }
+                });
+            }
+        },
+
+        setTempMarker(state, payload) {
+            console.log(payload);
+
+            let value = payload.value;
+            let pName = payload.pName;
+            let pIndex = payload.pIndex;
+
+            let temp = JSON.parse(JSON.stringify(state.tempMarkers[pName][pIndex].m_icon));
+
+            if (value) {
+                if (!state.tempMarkers[pName][pIndex].selected) {
+                    state.tempMarkers[pName][pIndex].selected = true;
+                    state.tempMarkers[pName][pIndex].m_icon = null;
+                    state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
+                    temp = null;
+                    state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 5;
+                    state.tempMarkers[pName][pIndex].m_icon.strokeColor = 'springgreen';
+                }
+            }
+            else {
+                if (state.tempMarkers[pName][pIndex].selected) {
+                    state.tempMarkers[pName][pIndex].selected = false;
+                    state.tempMarkers[pName][pIndex].m_icon = null;
+                    state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
+                    temp = null;
+                    state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 1;
+                    state.tempMarkers[pName][pIndex].m_icon.strokeColor = 'grey';
+                }
+            }
+        },
+
+        setTargetTempMarker(state, payload) {
+            console.log(payload);
+
+            let value = payload.value;
+            let pName = payload.pName;
+            let pIndex = payload.pIndex;
+
+            let temp = JSON.parse(JSON.stringify(state.tempMarkers[pName][pIndex].m_icon));
+
+            if (value) {
+                if (!state.tempMarkers[pName][pIndex].targeted) {
+                    state.tempMarkers[pName][pIndex].targeted = true;
+                    state.tempMarkers[pName][pIndex].m_icon = null;
+                    state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
+                    temp = null;
+                    state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 4;
+                    state.tempMarkers[pName][pIndex].m_icon.strokeColor = '#FFFF8D';
+
+                    state.curTargetedTempMarkerIndex[pName] = pIndex;
+                }
+            }
+            else {
+                if (state.tempMarkers[pName][pIndex].targeted) {
+                    state.tempMarkers[pName][pIndex].targeted = false;
+                    state.tempMarkers[pName][pIndex].m_icon = null;
+                    state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
+                    temp = null;
+                    state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 1;
+                    state.tempMarkers[pName][pIndex].m_icon.strokeColor = 'grey';
+
+                    state.curTargetedTempMarkerIndex[pName] = null;
+                }
+            }
+
+
+        },
+
+        addTempMarker(state, payload) {
+            if (!Object.prototype.hasOwnProperty.call(state.tempMarkers, payload.pName)) {
+                state.tempMarkers[payload.pName] = [];
+            }
+            else {
+                let temp = JSON.parse(JSON.stringify(state.tempMarkers[payload.pName]));
+                state.tempMarkers[payload.pName] = null;
+                state.tempMarkers[payload.pName] = [];
+                state.tempMarkers[payload.pName] = JSON.parse(JSON.stringify(temp));
+                temp = null;
+            }
+
+            let pos = JSON.parse(JSON.stringify(state.defaultPosition));
+            pos.lat = payload.lat;
+            pos.lng = payload.lng;
+            pos.alt = payload.alt;
+            pos.speed = payload.speed;
+            pos.radius = payload.radius;
+            pos.turningSpeed = payload.turningSpeed;
+            pos.m_icon.fillColor = payload.color;
+            pos.m_label.fontSize = '14px';
+            pos.m_label.text = ((payload.pName === 'unknown') ? 'T' : String(state.tempMarkers[payload.pName].length)) + ':' + String(pos.alt);
+
+            state.tempMarkers[payload.pName].push(pos);
+
+            pos = null;
+
+            //console.log('addTempMarker', JSON.stringify(state.tempMarkers));
+        },
+
+        addingTempMarker(state, payload) {
+            state.adding = true;
+            this.commit('addTempMarker', payload);
+
+            payload.pIndex = state.tempMarkers[payload.pName].length - 1;
+            state.tempPayload = JSON.parse(JSON.stringify(payload));
+
+            payload = null;
+        },
+
+        cancelTempMarker(state) {
+            if (state.adding) {
+                state.tempMarkers['unknown'].pop();
+                state.tempPayload = {};
+            }
+
+            state.adding = false;
+        },
+
+        confirmAddTempMarker(state) {
+            let payload = state.tempPayload;
+
+            console.log('confirmAddTempMarker', payload)
+            console.log('confirmAddTempMarker', state.tempMarkers)
+            console.log('confirmAddTempMarker', state.tempMarkers[payload.pName][payload.pIndex].lat)
+
+            state.drone_infos.unknown.goto_positions[payload.pIndex] = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
+
+            console.log('confirmAddTempMarker', payload.pName, payload.pIndex, state.drone_infos.unknown.goto_positions[payload.pIndex]);
+
+            state.unknown_info = null;
+            state.unknown_info = {};
+            state.unknown_info = JSON.parse(JSON.stringify(state.drone_infos.unknown));
+
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: state.drone_infos
+                    }
+                }
+            }).then(
+                function (res) {
+                    console.log('confirmAddTempMarker-axios', res.data);
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
+
+            state.adding = false;
+        },
+
+        deleteMarker(state, payload) {
+            console.log('deleteMarker', payload);
+
+            let oldPos = JSON.parse(JSON.stringify(state.tempMarkers[payload.pName][payload.pIndex]));
+
+            state.tempMarkers[payload.pName].splice(payload.pIndex, 1);
+
+            state.tempMarkers[payload.pName].forEach((pos, pIndex) => {
+                pos.m_label.fontSize = '14px';
+                pos.m_label.text = ((payload.pName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
+            });
+
+            oldPos.m_icon.fillColor = 'grey';
+            oldPos.m_label.text = 'T:' + String(oldPos.alt);
+
+            let count = state.tempMarkers['unknown'].push(oldPos);
+
+            oldPos = null;
+
+            let _payload = {};
+            _payload.pOldName = payload.pName;
+            _payload.pOldIndex = payload.pIndex;
+            _payload.pName = 'unknown';
+            _payload.pIndex = count - 1;
+
+            this.commit('deleteMarkerDroneInfo', _payload);
+
+            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
+            state.tempMarkers = null;
+            state.tempMarkers = {};
+            state.tempMarkers = JSON.parse(JSON.stringify(temp));
+            temp = null;
+
+        },
+
+        removeMarker(state, payload) {
+            console.log('removeMarker', payload);
+
+            state.tempMarkers[payload.pName].splice(payload.pIndex, 1);
+
+            let _payload = {};
+            _payload.pOldName = payload.pName;
+            _payload.pOldIndex = payload.pIndex;
+            _payload.pName = payload.pName;
+            _payload.pIndex = payload.pName;
+
+            this.commit('removeMarkerDroneInfo', _payload);
+
+            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
+            state.tempMarkers = null;
+            state.tempMarkers = {};
+            state.tempMarkers = JSON.parse(JSON.stringify(temp));
+            temp = null;
+        },
+
+        removeAllMarker(state, payload) {
+            console.log('removeAllMarker', payload);
+
+            let unknownMarker = JSON.parse(JSON.stringify(state.tempMarkers['unknown']));
+            state.tempMarkers = null;
+            state.tempMarkers = {};
+            state.tempMarkers.unknown = JSON.parse(JSON.stringify(unknownMarker));
+            unknownMarker = null;
+
+            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
+            state.tempMarkers = null;
+            state.tempMarkers = {};
+            state.tempMarkers = JSON.parse(JSON.stringify(temp));
+            temp = null;
+        },
+
+        registerMarker(state, payload) {
+            console.log(payload);
+
+            state.tempMarkers[payload.pOldName][payload.pOldIndex].alt = payload.targetAlt;
+            state.tempMarkers[payload.pOldName][payload.pOldIndex].speed = payload.targetSpeed;
+            state.tempMarkers[payload.pOldName][payload.pOldIndex].radius = payload.targetRadius;
+            state.tempMarkers[payload.pOldName][payload.pOldIndex].turningSpeed = payload.targetTurningSpeed;
+
+            let oldPos = JSON.parse(JSON.stringify(state.tempMarkers[payload.pOldName][payload.pOldIndex]));
+
+
+            if (payload.pOldName !== payload.pName) {
+                state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
+
+                state.tempMarkers[payload.pOldName].forEach((pos, pIndex) => {
+                    pos.m_label.fontSize = '14px';
+                    pos.m_label.text = ((payload.pOldName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
+                });
+
+                state.drone_infos[payload.pName].color = (payload.pName === 'unknown') ? 'grey' : payload.targetColor;
+                oldPos.m_icon.fillColor = state.drone_infos[payload.pName].color;
+
+                let count = state.tempMarkers[payload.pName].push(oldPos);
+                payload.pIndex = count - 1;
+
+                oldPos.m_label.fontSize = '14px';
+                if (payload.pName === 'unknown') {
+                    oldPos.m_label.text = 'T' + ':' + String(oldPos.alt);
+                }
+                else {
+                    oldPos.m_label.text = String(count - 1) + ':' + String(oldPos.alt);
+                }
+
+                state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
+                this.commit('regMarkerNameDroneInfo', payload);
+            }
+
+            else if (payload.pOldIndex !== payload.pIndex) {
+                state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
+
+                console.log(state.tempMarkers[payload.pOldName]);
+
+                state.tempMarkers[payload.pOldName].splice(payload.pIndex, 0, oldPos);
+
+                state.tempMarkers[payload.pOldName].forEach((pos, pIndex) => {
+                    pos.m_label.fontSize = '14px';
+                    pos.m_label.text = ((payload.pOldName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
+                });
+
+                state.drone_infos[payload.pName].goto_positions.splice(payload.pOldIndex, 1);
+                this.commit('regMarkerIndexDroneInfo', payload);
+            }
+
+            else {
+                this.commit('regMarkerDroneInfo', payload);
+            }
+
+            oldPos = null;
+            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
+            state.tempMarkers = null;
+            state.tempMarkers = {};
+            state.tempMarkers = JSON.parse(JSON.stringify(temp));
+            temp = null;
+        },
+
+        removeMarkerDroneInfo(state, payload) {
+            state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
+
+            console.log('removeMarkerDroneInfo', payload);
+
+            state.unknown_info = null;
+            state.unknown_info = {};
+            state.unknown_info = JSON.parse(JSON.stringify(state.drone_infos.unknown));
+
+            let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
+            state.drone_infos[payload.pName] = null;
+            state.drone_infos[payload.pName] = {};
+            state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
+            temp = null;
+
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: state.drone_infos
+                    }
+                }
+            }).then(
+                function (res) {
+                    console.log('removeMarkerDroneInfo-axios', res.data);
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
+        },
+
+        deleteMarkerDroneInfo(state, payload) {
+            let oldPos = state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
+
+            console.log('deleteMarkerDroneInfo', payload);
+
+            // let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
+            //     String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
+            //     String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
+            //     String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
+            //     String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
+            //     String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
+
+            state.drone_infos[payload.pName].goto_positions.push(oldPos[0]);
+
+            let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
+            state.drone_infos[payload.pName] = null;
+            state.drone_infos[payload.pName] = {};
+            state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
+            temp = null;
+
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: state.drone_infos
+                    }
+                }
+            }).then(
+                function (res) {
+                    console.log('deleteMarkerDroneInfo-axios', res.data);
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
+        },
+
+        regMarkerNameDroneInfo(state, payload) {
+            console.log('regMarkerNameDroneInfo', payload);
+
+            let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
+
+            state.drone_infos[payload.pName].goto_positions.push(pos_str);
+
+            let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
+            state.drone_infos[payload.pName] = null;
+            state.drone_infos[payload.pName] = {};
+            state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
+            temp = null;
+
+            // let _selected = [];
+            // for(let dName in state.drone_infos) {
+            //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
+            //         if(state.drone_infos[dName].selected) {
+            //             _selected.push(state.drone_infos[dName]);
+            //         }
+            //     }
+            // }
+
+            this.commit('updateDroneInfosSelected');
+
+            // state.dronesChecked[payload.dName] = null;
+            // state.dronesChecked[payload.dName] = state.drone_infos[payload.dName];
+            //
+            // temp = JSON.parse(JSON.stringify(state.dronesChecked));
+            // state.dronesChecked = null;
+            // state.dronesChecked = JSON.parse(JSON.stringify(temp));
+            // temp = null;
+
+            EventBus.$emit('do-targetDroneMarker', payload.pName);
+
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: state.drone_infos
+                    }
+                }
+            }).then(
+                function (res) {
+                    console.log('regMarkerNameDroneInfo-axios', res.data);
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
+        },
+
+        regMarkerDroneInfo(state, payload) {
+            console.log('regMarkerDroneInfo', payload);
+
+            let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
+
+            state.drone_infos[payload.pName].goto_positions[payload.pIndex] = pos_str;
+
+            let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
+            state.drone_infos[payload.pName] = null;
+            state.drone_infos[payload.pName] = {};
+            state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
+            temp = null;
+
+            // let _selected = [];
+            // for(let dName in state.drone_infos) {
+            //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
+            //         if(state.drone_infos[dName].selected) {
+            //             _selected.push(state.drone_infos[dName]);
+            //         }
+            //     }
+            // }
+
+            this.commit('updateDroneInfosSelected');
+
+            // state.dronesChecked[payload.dName] = null;
+            // state.dronesChecked[payload.dName] = state.drone_infos[payload.dName];
+            //
+            // temp = JSON.parse(JSON.stringify(state.dronesChecked));
+            // state.dronesChecked = null;
+            // state.dronesChecked = JSON.parse(JSON.stringify(temp));
+            // temp = null;
+
+            EventBus.$emit('do-targetDroneMarker', payload.pName);
+
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: state.drone_infos
+                    }
+                }
+            }).then(
+                function (res) {
+                    console.log('regMarkerDroneInfo-axios', res.data);
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
+        },
+
+        regMarkerIndexDroneInfo(state, payload) {
+            console.log('regMarkerIndexDroneInfo', payload);
+
+            let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
+
+            state.drone_infos[payload.pName].goto_positions.splice(payload.pIndex, 0, pos_str);
+
+            let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
+            state.drone_infos[payload.pName] = null;
+            state.drone_infos[payload.pName] = {};
+            state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
+            temp = null;
+
+            // let _selected = [];
+            // for(let dName in state.drone_infos) {
+            //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
+            //         if(state.drone_infos[dName].selected) {
+            //             _selected.push(state.drone_infos[dName]);
+            //         }
+            //     }
+            // }
+
+            this.commit('updateDroneInfosSelected');
+
+            // state.dronesChecked[payload.dName] = null;
+            // state.dronesChecked[payload.dName] = state.drone_infos[payload.dName];
+            //
+            // temp = JSON.parse(JSON.stringify(state.dronesChecked));
+            // state.dronesChecked = null;
+            // state.dronesChecked = {};
+            // state.dronesChecked = JSON.parse(JSON.stringify(temp));
+            // temp = null;
+
+            EventBus.$emit('do-targetDroneMarker', payload.pName);
+
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: state.drone_infos
+                    }
+                }
+            }).then(
+                function (res) {
+                    console.log('regMarkerIndexDroneInfo-axios', res.data);
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
+        },
+
+        resetDroneInfos(state, payload) {
+            console.log('resetDroneInfos', payload);
+            state.drone_infos = null;
+            state.drone_infos = {};
+            state.drone_infos = JSON.parse(JSON.stringify(payload));
+
+            if (!Object.hasOwnProperty.call(state.drone_infos.unknown, 'goto_positions')) {
+                state.drone_infos.unknown.goto_positions = [];
+            }
+
+            if (!Array.isArray(state.drone_infos.unknown.goto_positions)) {
+                state.drone_infos.unknown.goto_positions = [];
+            }
+
+            for (let i = 0; i < state.drone_infos.unknown.goto_positions.length; i) {
+                if (state.drone_infos.unknown.goto_positions[i] === null) {
+                    state.drone_infos.unknown.goto_positions.splice(i, 1);
+                }
+                else {
+                    i++;
+                }
+            }
+
+            console.log('resetDroneInfos', state.drone_infos);
+        },
+
+        updateDroneInfosSelected(state) {
+
+            console.log('updateDroneInfosSelected', state.drone_infos);
+
+            for (let dName in state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
+
+                    if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'color')) {
+                        state.drone_infos[dName].color = 'grey';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'goto_positions')) {
+                        state.drone_infos[dName].goto_positions = [];
+                    }
+
+                    if (dName !== 'unknown') {
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
+                            state.drone_infos[dName].targeted = false;
+                        }
+
+                        state.drone_infos[dName].targeted = false;
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'home_position')) {
+                            state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'gotoType')) {
+                            state.drone_infos[dName].gotoType = 'alt_first';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'tagetModeSelection')) {
+                            state.drone_infos[dName].tagetModeSelection = 'ALT_HOLD';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetSpeed')) {
+                            state.drone_infos[dName].targetSpeed = 5;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTurningSpeed')) {
+                            state.drone_infos[dName].targetTurningSpeed = 5;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetRadius')) {
+                            state.drone_infos[dName].targetRadius = 50;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTakeoffAlt')) {
+                            state.drone_infos[dName].targetTakeoffAlt = 20;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'circleType')) {
+                            state.drone_infos[dName].circleType = 'cw';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetAlt')) {
+                            state.drone_infos[dName].targetAlt = 20;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'lastFlightTime')) {
+                            state.drone_infos[dName].lastFlightTime = 0;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoStartIndex')) {
+                            state.drone_infos[dName].autoStartIndex = '0';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoEndIndex')) {
+                            state.drone_infos[dName].autoEndIndex = '0';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoDelay')) {
+                            state.drone_infos[dName].autoDelay = 1;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoSpeed')) {
+                            state.drone_infos[dName].autoSpeed = 5;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'takeoffDelay')) {
+                            state.drone_infos[dName].takeoffDelay = 6;
+                        }
+
+
+                        state.tempMarkers[dName] = null;
+                        state.tempMarkers[dName] = [];
+                        state.trackingLines[dName] = null;
+                        state.trackingLines[dName] = [];
+
+                        if (state.drone_infos[dName].selected) {
+                            let drone = state.drone_infos[dName];
+
+                            for (let idx in drone.goto_positions) {
+                                if (Object.prototype.hasOwnProperty.call(drone.goto_positions, idx)) {
+                                    let pos_arr = drone.goto_positions[idx].split(':');
+                                    let pos = JSON.parse(JSON.stringify(state.defaultPosition));
+                                    pos.lat = parseFloat(pos_arr[0]);
+                                    pos.lng = parseFloat(pos_arr[1]);
+                                    pos.alt = parseFloat(pos_arr[2]);
+                                    pos.speed = parseFloat(pos_arr[3]);
+                                    pos.radius = parseFloat(pos_arr[4]);
+                                    pos.turningSpeed = parseFloat(pos_arr[5]);
+                                    pos.color = drone.color;
+                                    pos.m_icon.fillColor = drone.color;
+                                    pos.m_label.fontSize = '14px';
+                                    pos.m_label.text = ((drone.name === 'unknown') ? 'T' : String(state.tempMarkers[drone.name].length)) + ':' + String(pos.alt);
+
+                                    state.tempMarkers[drone.name].push(pos);
+                                    pos = null;
+                                }
+                            }
+                        }
+                        else {
+                            delete state.tempMarkers[dName];
+                            delete state.trackingLines[dName];
+                        }
+                    }
+                }
+            }
+
+            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
+            state.tempMarkers = null;
+            state.tempMarkers = {};
+            state.tempMarkers = JSON.parse(JSON.stringify(temp));
+            temp = null;
+        },
+
+        addDroneInfos(state, payload) {
+            state.drone_infos[payload.name] = payload;
+
+            let temp = JSON.parse(JSON.stringify(state.drone_infos));
+            state.drone_infos = null;
+            state.drone_infos = {};
+            state.drone_infos = JSON.parse(JSON.stringify(temp));
+            temp = null;
+        },
+
+        delDroneInfo(state, name) {
+            delete state.drone_infos[name];
+
+            let temp = JSON.parse(JSON.stringify(state.drone_infos));
+            state.drone_infos = null;
+            state.drone_infos = {};
+            state.drone_infos = JSON.parse(JSON.stringify(temp));
+            temp = null;
+
+            console.log('delDroneInfo', state.drone_infos);
+        },
+
+        updateDroneInfos(state, payload) {
+            state.drone_infos[payload.name] = payload;
+
+            let temp = JSON.parse(JSON.stringify(state.drone_infos));
+            state.drone_infos = null;
+            state.drone_infos = {};
+            state.drone_infos = JSON.parse(JSON.stringify(temp));
+            temp = null;
+        },
+
+        // setSelectedDrone(state, payload) {
+        //
+        //     state.selectedDrone[payload.drone_name] = payload.selected;
+        //     let temp = JSON.parse(JSON.stringify(state.selectedDrone));
+        //     state.selectedDrone = null;
+        //     state.selectedDrone = {};
+        //     state.selectedDrone = JSON.parse(JSON.stringify(temp));
+        //     temp = null;
+        //
+        //     //EventBus.$emit('selected-drone', payload);
+        // },
+
+        setCommandTabLeftX(state, value) {
+            state.command_tab_left_x = value;
+        },
+
+        setCommandTabMaxHeight(state, value) {
+            state.command_tab_max_height = value;
+        },
+
+        // setSelectedDroneInfo(state, payload) {
+        //     state.drone_infos[payload.dName].selected = payload.selected;
+        // },
+
+        setFlyingDroneInfo(state, payload) {
+            state.drone_infos[payload.name].heading = payload.heading;
+            state.drone_infos[payload.name].lat = payload.lat;
+            state.drone_infos[payload.name].lng = payload.lng;
+
+            // let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
+            // state.drone_infos[payload.pName] = null;
+            // state.drone_infos[payload.pName] = {};
+            // state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
+            // temp = null;
+
+            // state.drone_infos_selected = [];
+            // for(let dName in state.drone_infos) {
+            //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
+            //         if(state.drone_infos[dName].selected) {
+            //             state.drone_infos_selected.push(state.drone_infos[dName]);
+            //         }
+            //     }
+            // }
+
+            state.countFlying++;
+            if (state.countFlying >= 30) {
+                state.countFlying = 0;
+
+                // axios({
+                //     validateStatus: function (status) {
+                //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                //         return status < 500;
+                //     },
+                //     method: 'post',
+                //     url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
+                //     headers: {
+                // 'X-M2M-RI': String(parseInt(Math.random()*10000)),
+                //         'X-M2M-Origin': 'SVue',
+                //         'Content-Type': 'application/json;ty=4'
+                //     },
+                //     data: {
+                //         'm2m:cin': {
+                //             con: state.drone_infos
+                //         }
+                //     }
+                // }).then(
+                //     function (res) {
+                //         console.log('setFlyingDroneInfo-axios', res.data);
+                //     }
+                // ).catch(
+                //     function (err) {
+                //         console.log(err.message);
+                //     }
+                // );
+            }
+
+            payload = null;
+        },
+
+        saveCurrentDroneInfos(state) {
+            if (state.MOBIUS_CONNECTION_CONNECTED) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                    data: {
+                        'm2m:cin': {
+                            con: state.drone_infos
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        console.log('setFlyingDroneInfo-axios', res.data);
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            }
+        },
     },
-  },
-  actions: {},
-  modules: {}
+    actions: {},
+    modules: {}
 })
