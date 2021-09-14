@@ -1018,6 +1018,7 @@ export default {
 
         createConnection(onConnect) {
             if (this.client.connected) {
+                console.log('DroneInfo', this.name, '-', 'destroyConnection')
                 this.destroyConnection();
             }
 
@@ -1025,7 +1026,7 @@ export default {
                 //var self = this;
 
                 this.client.loading = true;
-                this.connection.clientId = this.name + nanoid(15);
+                this.connection.clientId = 'mqttjs_' + this.name + nanoid(15);
                 const {host, port, endpoint, ...options} = this.connection
                 const connectUrl = `ws://${host}:${port}${endpoint}`
                 try {
