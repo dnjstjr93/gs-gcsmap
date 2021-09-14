@@ -1043,6 +1043,8 @@ export default {
 
                         this.client.loading = false;
 
+                        localStorage.setItem('mqttConnection-'+this.name, JSON.stringify(this.client));
+
                         onConnect();
                     });
 
@@ -1241,7 +1243,9 @@ export default {
                     this.client = {
                         connected: false,
                     }
-                    console.log(this.name, 'Successfully disconnected!')
+                    console.log(this.name, 'Successfully disconnected!');
+
+                    localStorage.setItem('mqttConnection-'+this.name, JSON.stringify(this.client));
 
                     // let self = this;
                     // axios({
@@ -4303,6 +4307,22 @@ export default {
 
         let self = this;
         this.connection.host = this.broker;
+
+        if(JSON.parse(localStorage.getItem('mqttConnection-'+this.name)).connected) {
+            this.client = JSON.parse(localStorage.getItem('mqttConnection-'+this.name));
+            console.log('client', this.client);
+
+            // if(this.client.connected) {
+            //     this.client.end()
+            // }
+
+            this.client = {
+                connected: false,
+            }
+
+            localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
+        }
+
         this.createConnection(function () {
             self.doSubscribe(self.drone_topic);
             console.log('createConnection - Subscribe to ', self.drone_topic);
