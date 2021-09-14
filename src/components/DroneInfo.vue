@@ -4308,19 +4308,21 @@ export default {
         let self = this;
         this.connection.host = this.broker;
 
-        if(JSON.parse(localStorage.getItem('mqttConnection-'+this.name)).connected) {
-            this.client = JSON.parse(localStorage.getItem('mqttConnection-'+this.name));
-            console.log('client', this.client);
+        if(localStorage.getItem('mqttConnection-'+this.name)) {
+            if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
+                this.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
+                console.log('client', this.client);
 
-            // if(this.client.connected) {
-            //     this.client.end()
-            // }
+                // if(this.client.connected) {
+                //     this.client.end()
+                // }
 
-            this.client = {
-                connected: false,
+                this.client = {
+                    connected: false,
+                }
+
+                localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
             }
-
-            localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
         }
 
         this.createConnection(function () {
