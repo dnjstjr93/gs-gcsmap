@@ -1026,7 +1026,7 @@ export default {
                 //var self = this;
 
                 this.client.loading = true;
-                this.connection.clientId = 'mqttjs_' + this.name + nanoid(15);
+                this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
                 const {host, port, endpoint, ...options} = this.connection
                 const connectUrl = `ws://${host}:${port}${endpoint}`
                 try {
@@ -1049,13 +1049,13 @@ export default {
                     this.client.on('error', (error) => {
                         console.log('Connection failed', error);
 
-                        this.client.connected = false;
+                        this.destroyConnection();
                     });
 
                     this.client.on('close', () => {
                         console.log('Connection closed');
 
-                        this.client.connected = false;
+                        this.destroyConnection();
                     });
 
                     this.client.on('message', (topic, message) => {
