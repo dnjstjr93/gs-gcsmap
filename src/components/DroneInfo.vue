@@ -8,10 +8,14 @@
                             <v-row no-gutters align="center" justify="center">
                                 <v-col cols="6">
                                     <v-card flat tile :color="$store.state.drone_infos[name].color">
-                                        <v-checkbox dense @change="checkDroneSelected" class="pt-0 pl-2 ma-0 shadow" v-model="targeted" hide-details>
+                                        <v-checkbox dense @change="checkDroneSelected" class="pt-0 pl-2 ma-0 shadow"
+                                                    v-model="targeted"
+                                                    hide-details>
                                             <template v-slot:label>
                                                 <div>
-                                                    <span :class="statusTextColor">{{name+'('+sys_id+')'}}</span>
+                                                    <span :class="statusTextColor">{{
+                                                            name + '(' + sys_id + ')'
+                                                        }}</span>
                                                 </div>
                                             </template>
                                         </v-checkbox>
@@ -40,7 +44,7 @@
                                         >
                                             <v-card>
                                                 <v-card-title class="text-h6">
-                                                    Information of {{name}}
+                                                    Information of {{ name }}
                                                 </v-card-title>
 
                                                 <v-textarea
@@ -218,34 +222,44 @@
                     </v-row>
                     <v-row no-gutters class="d-flex justify-center" align="center">
                         <v-col cols="12" class="text-center align-self-center">
-                            <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0" :class="colorArming" @click="currentPosition">
-            <!--                    <v-icon x-large :class="colorArming">{{ iconArming }}</v-icon>-->
+                            <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0"
+                                    :class="colorArming"
+                                    @click="currentPosition">
+                                <!--                    <v-icon x-large :class="colorArming">{{ iconArming }}</v-icon>-->
 
                                 <div class="py-4">
                                     <Heading :size="heading_size" :heading="heading"/>
                                     <v-fade-transition>
                                         <v-avatar
-                                                v-if="isPlaying"
-                                                :color="color"
-                                                :style="{animationDuration: animationDuration, top: '1px', left: (myWidth/2-12)+'px'}"
-                                                class="mt-1 ml-1 v-avatar--metronome"
-                                                size="14"
+                                            v-if="isPlaying"
+                                            :color="color"
+                                            :style="{animationDuration: animationDuration, top: '1px', left: (myWidth/2-12)+'px'}"
+                                            class="mt-1 ml-1 v-avatar--metronome"
+                                            size="14"
                                         ></v-avatar>
                                     </v-fade-transition>
                                     <Attitude :size="attitude_size" :roll="roll" :pitch="pitch"/>
                                 </div>
                                 <div class="info_position align-self-center" :style="{top: 0, left: 0}">
-                                    <span :style="{'font-size': '22px'}" :class="colorMode" :color="$store.state.drone_infos[name].color" class="shadow_icon px-1">{{ curMode }}</span>
+                  <span :style="{'font-size': '22px'}" :class="colorMode" :color="$store.state.drone_infos[name].color"
+                        class="shadow_icon px-1">{{ curMode }}</span>
                                 </div>
 
                                 <div class="info_position" :style="{top: '36px', left: 0}">
-                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-satellite-variant</v-icon>
-                                    <span class="shadow_icon px-1 text--white" :style="{color: 'white'}">{{ num_satellites }} </span>
+                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-satellite-variant
+                                    </v-icon>
+                                    <span class="shadow_icon px-1 text--white"
+                                          :style="{color: 'white'}">{{ num_satellites }} </span>
                                 </div>
 
                                 <div class="info_position" :style="{top: '62px', left: 0}">
-                                    <v-icon :class="colorLteVal" :style="iconSize" class="shadow_icon pl-1">{{ iconLte }}</v-icon>
-                                    <span :class="colorLteVal" :style="fontSize" class="shadow_icon px-1">{{ curLteVal }}</span>
+                                    <v-icon :class="colorLteVal" :style="iconSize" class="shadow_icon pl-1">{{
+                                            iconLte
+                                        }}
+                                    </v-icon>
+                                    <span :class="colorLteVal" :style="fontSize" class="shadow_icon px-1">{{
+                                            curLteVal
+                                        }}</span>
                                 </div>
 
                                 <div class="info_position" :style="{top: '90px', left: 0}">
@@ -254,22 +268,35 @@
                                 </div>
 
                                 <div class="info_position" :style="{top: '118px', left: 0}">
-                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{ iconFlightElapsed }}</v-icon>
-                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ flightElapsedTime }}</span>
+                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{
+                                            iconFlightElapsed
+                                        }}
+                                    </v-icon>
+                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{
+                                            flightElapsedTime
+                                        }}</span>
                                 </div>
 
-                                <div class="info_position" :style="{top: 0, left: ((curArmStatus==='ARMED')?(myWidth-84):(myWidth-118))+'px'}">
-                                    <span :style="{'font-size': '22px'}" :class="colorArm" :color="$store.state.drone_infos[name].color" class="shadow_icon px-1">{{ curArmStatus }}</span>
+                                <div class="info_position"
+                                     :style="{top: 0, left: ((curArmStatus==='ARMED')?(myWidth-84):(myWidth-118))+'px'}">
+                  <span :style="{'font-size': '22px'}" :class="colorArm" :color="$store.state.drone_infos[name].color"
+                        class="shadow_icon px-1">{{ curArmStatus }}</span>
                                 </div>
 
                                 <div class="info_position" :style="{top: '36px', left: (myWidth-94)+'px'}">
-                                    <v-icon :class="colorBattery" :style="iconSize" class="shadow_icon pl-1">{{ iconBattery }}</v-icon>
-                                    <span class="shadow_icon px-1" :class="colorBattery">{{ (ss.voltage_battery / 1000).toFixed(1) }} V</span>
+                                    <v-icon :class="colorBattery" :style="iconSize" class="shadow_icon pl-1">
+                                        {{ iconBattery }}
+                                    </v-icon>
+                                    <span class="shadow_icon px-1" :class="colorBattery">{{
+                                            (ss.voltage_battery / 1000).toFixed(1)
+                                        }} V</span>
                                 </div>
 
                                 <div class="info_position" :style="{top: '62px', left: (myWidth-100)+'px'}">
                                     <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-altimeter</v-icon>
-                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ (gpi.relative_alt / 1000).toFixed(1) }} m</span>
+                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{
+                                            (gpi.relative_alt / 1000).toFixed(1)
+                                        }} m</span>
                                 </div>
 
                                 <div class="info_position" :style="{top: '90px', left: (myWidth-100)+'px'}">
@@ -278,12 +305,21 @@
                                 </div>
 
                                 <div class="info_position" :style="{top: '118px', left: (myWidth-110)+'px'}">
-                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{ iconDistance }}</v-icon>
-                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ (valueDistance > 1000) ? (valueDistance/1000).toFixed(1) + ' km' : (valueDistance.toFixed(0) + ' m') }}</span>
+                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{
+                                            iconDistance
+                                        }}
+                                    </v-icon>
+                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{
+                                            (valueDistance > 1000) ? (valueDistance / 1000).toFixed(1) + ' km' : (valueDistance.toFixed(0) + ' m')
+                                        }}</span>
                                 </div>
 
                                 <div class="info_position text-center" :style="{top: '144px', left: 0}">
-                                    <span class="shadow_icon px-2" :style="{color: 'white'}">{{ (gpi.lat / 10000000).toFixed(7) }} : {{ (gpi.lon / 10000000).toFixed(7) }} : <span style="font-size: 20px">{{ (gpi.relative_alt / 1000).toFixed(1) }}</span> ({{ (gpi.alt / 1000).toFixed(1) }})</span>
+                  <span class="shadow_icon px-2" :style="{color: 'white'}">{{
+                          (gpi.lat / 10000000).toFixed(7)
+                      }} : {{ (gpi.lon / 10000000).toFixed(7) }} : <span style="font-size: 20px">{{
+                              (gpi.relative_alt / 1000).toFixed(1)
+                          }}</span> ({{ (gpi.alt / 1000).toFixed(1) }})</span>
                                 </div>
 
                                 <!--                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
@@ -294,12 +330,13 @@
                         <v-col cols="12">
                             <v-card class="singleline-ellipsis" outlined tile>
                                 <span style="font-size: 14px">{{ mavStr }}</span>
-                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
+                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity"
+                                           color="#E0E0E0"></v-overlay>
                                 <v-progress-linear
-                                        active absolute top
-                                        :color="$store.state.drone_infos[name].color"
-                                        height="25"
-                                        :value="watchingMissionStatus"
+                                    active absolute top
+                                    :color="$store.state.drone_infos[name].color"
+                                    height="25"
+                                    :value="watchingMissionStatus"
                                 >
                                     <template v-slot:default="{ value }">
                                         <strong>{{ watchingMission + ' - ' + value }}%</strong>
@@ -314,72 +351,73 @@
                         <v-col cols="12">
                             <v-card tile outlined
                                     class="mx-auto overflow-y-auto overflow">
-<!--                                    :class="flagReceiving?'overflow-y-auto':'overflow-y-hidden'"-->
-<!--                                    max-height="135"-->
-<!--                                    min-height="135"-->
+                                <!--                                    :class="flagReceiving?'overflow-y-auto':'overflow-y-hidden'"-->
+                                <!--                                    max-height="135"-->
+                                <!--                                    min-height="135"-->
                                 <v-sheet
-                                        elevation="10"
-                                        class="py-2 px-1"
+                                    elevation="10"
+                                    class="py-2 px-1"
                                 >
                                     <v-chip-group
-                                            v-model="selectedItem"
-                                            active-class="primary--text"
-                                            :center-active="true"
-                                            show-arrows
+                                        v-model="selectedItem"
+                                        active-class="primary--text"
+                                        :center-active="true"
+                                        show-arrows
                                     >
                                         <draggable v-model="positions">
                                             <v-chip
-                                                    v-for="(position, i) in positions"
-                                                    :key="'pos_chip'+i"
-                                                    @click="selectedPosition(i)"
+                                                v-for="(position, i) in positions"
+                                                :key="'pos_chip'+i"
+                                                @click="selectedPosition(i)"
                                             >
                                                 {{ String(i) }}
                                             </v-chip>
                                         </draggable>
                                     </v-chip-group>
                                 </v-sheet>
-<!--                                <v-list dense>-->
-<!--                                    <v-list-item-group-->
-<!--                                        v-model="selectedItem"-->
-<!--                                        color="deep-orange darken-4"-->
-<!--                                    >-->
-<!--                                        <draggable v-model="positions">-->
-<!--                                            <v-list-item v-for="(position, i) in positions" :key="i">-->
-<!--                                                &lt;!&ndash;                                <v-card flat rounded shaped width="25" class="mr-2 text-center" style="{border-radius: 50%; }">{{i}}</v-card>&ndash;&gt;-->
-<!--                                                <v-list-item-avatar class="ma-0 mr-1" size="24" color="grey lighten-4">-->
-<!--                                                    <span>{{ i + 1 }}</span>-->
-<!--                                                </v-list-item-avatar>-->
-<!--                                                <v-list-item-icon>-->
-<!--                                                    <v-icon class="mr-2" v-text="position.icon"></v-icon>-->
-<!--                                                </v-list-item-icon>-->
-<!--                                                <v-hover>-->
-<!--                                                    <template v-slot:default="{ hover }">-->
-<!--                                                        <v-list-item-content>-->
-<!--                                                            <v-list-item-title v-text="position.text"></v-list-item-title>-->
-<!--                                                            <v-overlay-->
-<!--                                                                v-if="hover"-->
-<!--                                                                absolute-->
-<!--                                                                color="transparent"-->
-<!--                                                                style="padding-left: 88%"-->
-<!--                                                            >-->
-<!--                                                                <v-btn-->
-<!--                                                                    class="pa-0 ma-0"-->
-<!--                                                                    fab-->
-<!--                                                                    dark-->
-<!--                                                                    x-small-->
-<!--                                                                    color="grey darken-3"-->
-<!--                                                                >-->
-<!--                                                                    <v-icon dark>mdi-trash-can</v-icon>-->
-<!--                                                                </v-btn>-->
-<!--                                                            </v-overlay>-->
-<!--                                                        </v-list-item-content>-->
-<!--                                                    </template>-->
-<!--                                                </v-hover>-->
-<!--                                            </v-list-item>-->
-<!--                                        </draggable>-->
-<!--                                    </v-list-item-group>-->
-<!--                                </v-list>-->
-                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
+                                <!--                                <v-list dense>-->
+                                <!--                                    <v-list-item-group-->
+                                <!--                                        v-model="selectedItem"-->
+                                <!--                                        color="deep-orange darken-4"-->
+                                <!--                                    >-->
+                                <!--                                        <draggable v-model="positions">-->
+                                <!--                                            <v-list-item v-for="(position, i) in positions" :key="i">-->
+                                <!--                                                &lt;!&ndash;                                <v-card flat rounded shaped width="25" class="mr-2 text-center" style="{border-radius: 50%; }">{{i}}</v-card>&ndash;&gt;-->
+                                <!--                                                <v-list-item-avatar class="ma-0 mr-1" size="24" color="grey lighten-4">-->
+                                <!--                                                    <span>{{ i + 1 }}</span>-->
+                                <!--                                                </v-list-item-avatar>-->
+                                <!--                                                <v-list-item-icon>-->
+                                <!--                                                    <v-icon class="mr-2" v-text="position.icon"></v-icon>-->
+                                <!--                                                </v-list-item-icon>-->
+                                <!--                                                <v-hover>-->
+                                <!--                                                    <template v-slot:default="{ hover }">-->
+                                <!--                                                        <v-list-item-content>-->
+                                <!--                                                            <v-list-item-title v-text="position.text"></v-list-item-title>-->
+                                <!--                                                            <v-overlay-->
+                                <!--                                                                v-if="hover"-->
+                                <!--                                                                absolute-->
+                                <!--                                                                color="transparent"-->
+                                <!--                                                                style="padding-left: 88%"-->
+                                <!--                                                            >-->
+                                <!--                                                                <v-btn-->
+                                <!--                                                                    class="pa-0 ma-0"-->
+                                <!--                                                                    fab-->
+                                <!--                                                                    dark-->
+                                <!--                                                                    x-small-->
+                                <!--                                                                    color="grey darken-3"-->
+                                <!--                                                                >-->
+                                <!--                                                                    <v-icon dark>mdi-trash-can</v-icon>-->
+                                <!--                                                                </v-btn>-->
+                                <!--                                                            </v-overlay>-->
+                                <!--                                                        </v-list-item-content>-->
+                                <!--                                                    </template>-->
+                                <!--                                                </v-hover>-->
+                                <!--                                            </v-list-item>-->
+                                <!--                                        </draggable>-->
+                                <!--                                    </v-list-item-group>-->
+                                <!--                                </v-list>-->
+                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity"
+                                           color="#E0E0E0"></v-overlay>
                             </v-card>
                         </v-col>
                     </v-row>
@@ -457,7 +495,7 @@ function dfs_xy_conv(code, v1, v2) {
         var xn = v1 - XO;
         var yn = ro - v2 + YO;
         ra = Math.sqrt(xn * xn + yn * yn);
-        if (sn < 0.0) - ra;
+        if (sn < 0.0) -ra;
         var alat = Math.pow((re * sf / ra), (1.0 / sn));
         alat = 2.0 * Math.atan(alat) - Math.PI * 0.5;
 
@@ -467,7 +505,7 @@ function dfs_xy_conv(code, v1, v2) {
         else {
             if (Math.abs(yn) <= 0.0) {
                 theta = Math.PI * 0.5;
-                if (xn < 0.0) - theta;
+                if (xn < 0.0) -theta;
             }
             else theta = Math.atan2(xn, yn);
         }
@@ -512,7 +550,7 @@ export default {
             isPlaying: true,
             bpm: 40,
 
-            left_pos: ((this.heading_size*2)-16),
+            left_pos: ((this.heading_size * 2) - 16),
 
             stat_flttime_param: {param_value: 0},
 
@@ -711,6 +749,8 @@ export default {
             pre_relative_alt: 0,
             pre_airspeed: 0,
 
+            result_command_ack: {},
+
             result_mission_ack: {},
             result_check_count: 0,
             mission_request: {},
@@ -737,7 +777,7 @@ export default {
     },
 
     computed: {
-        color () {
+        color() {
             if (this.bpm < 150) return 'grey'
             if (this.bpm < 250) return 'indigo'
             if (this.bpm < 350) return 'teal'
@@ -745,7 +785,7 @@ export default {
             if (this.bpm < 550) return 'orange'
             return 'red'
         },
-        animationDuration () {
+        animationDuration() {
             return `${60 / this.bpm}s`
         },
         mode_items() {
@@ -764,26 +804,38 @@ export default {
         heightInfo() {
             return ('height: ' + (this.airspeed_size / 2) + 'px');
         },
-        fontSize () {
+        fontSize() {
             console.log(this.$vuetify.breakpoint.name);
             switch (this.$vuetify.breakpoint.name) {
-                case 'xs': return ("font-size: 14px");
-                case 'sm': return ("font-size: 15px");
-                case 'md': return ("font-size: 16px");
-                case 'lg': return ("font-size: 17px");
-                case 'xl': return ("font-size: 18px");
-                default: return ("font-size: 16px");
+                case 'xs':
+                    return ("font-size: 14px");
+                case 'sm':
+                    return ("font-size: 15px");
+                case 'md':
+                    return ("font-size: 16px");
+                case 'lg':
+                    return ("font-size: 17px");
+                case 'xl':
+                    return ("font-size: 18px");
+                default:
+                    return ("font-size: 16px");
             }
         },
-        iconSize () {
+        iconSize() {
             console.log(this.$vuetify.breakpoint.name);
             switch (this.$vuetify.breakpoint.name) {
-                case 'xs': return ("font-size: 16px");
-                case 'sm': return ("font-size: 18px");
-                case 'md': return ("font-size: 20px");
-                case 'lg': return ("font-size: 22px");
-                case 'xl': return ("font-size: 24px");
-                default: return ("font-size: 16px");
+                case 'xs':
+                    return ("font-size: 16px");
+                case 'sm':
+                    return ("font-size: 18px");
+                case 'md':
+                    return ("font-size: 20px");
+                case 'lg':
+                    return ("font-size: 22px");
+                case 'xl':
+                    return ("font-size: 24px");
+                default:
+                    return ("font-size: 16px");
             }
         },
     },
@@ -796,8 +848,8 @@ export default {
                 //console.log('DroneInfo-watch-goto_positions', newData);
 
                 this.positions = [];
-                for(let i in newData) {
-                    if(Object.prototype.hasOwnProperty.call(newData, i)) {
+                for (let i in newData) {
+                    if (Object.prototype.hasOwnProperty.call(newData, i)) {
                         let goto_pos = {};
                         goto_pos.type = 'goto';
                         goto_pos.text = newData[i];
@@ -816,7 +868,7 @@ export default {
             this.$store.state.drone_infos[this.name].curMode = newVal;
 
             setTimeout(function () {
-                if(self.flagReceiving) {
+                if (self.flagReceiving) {
                     self.colorMode = 'td-text-black';
                 }
                 else {
@@ -829,7 +881,7 @@ export default {
             console.log(`sortie change ${newData}`);
             console.log(this.missionLteUrl);
 
-            if(newData !== 'disarm') {
+            if (newData !== 'disarm') {
                 var now = moment();
                 this.startFlightTime = moment(newData.replace(/_/g, ''));
                 //let diff = (now.seconds() - this.startFlightTime.seconds());
@@ -843,7 +895,7 @@ export default {
                 this.stopFlightTimer();
             }
 
-            if(this.missionLteUrl === '') {
+            if (this.missionLteUrl === '') {
                 return;
             }
 
@@ -917,7 +969,7 @@ export default {
     },
 
     methods: {
-        selectedPosition: function(i) {
+        selectedPosition: function (i) {
             let payload = {};
             payload.pName = this.name;
             payload.pIndex = i;
@@ -951,7 +1003,7 @@ export default {
 
                 EventBus.$emit('gcs-map-ready');
             }
-            catch(e) {
+            catch (e) {
                 console.log('updateMyDroneInfo-JSON parsing error', e.message);
             }
 
@@ -967,7 +1019,7 @@ export default {
                 method: 'post',
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Info',
                 headers: {
-                    'X-M2M-RI': String(parseInt(Math.random()*10000)),
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
                     'Content-Type': 'application/json;ty=4'
                 },
@@ -1043,7 +1095,7 @@ export default {
 
                         this.client.loading = false;
 
-                        localStorage.setItem('mqttConnection-'+this.name, JSON.stringify(this.client));
+                        localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
 
                         onConnect();
                     });
@@ -1070,13 +1122,13 @@ export default {
 
                         if (chkTopic === "/Mobius") {
                             this.strContentEach += message.toString('hex').toLowerCase();
-                            while(this.strContentEach.length > 12) {
+                            while (this.strContentEach.length > 12) {
                                 if (this.strContentEach.substr(0, 2) === 'fe') {
 
                                     var len = parseInt(this.strContentEach.substr(2, 2), 16);
                                     var contentLenth = (6 * 2) + (len * 2) + (2 * 2);
 
-                                    if(contentLenth > this.strContentEach.length) {
+                                    if (contentLenth > this.strContentEach.length) {
                                         break;
                                     }
                                     else {
@@ -1193,14 +1245,15 @@ export default {
                             }
                         }
                     });
-                } catch (error) {
+                }
+                catch (error) {
                     console.log('mqtt.connect error', error);
                     this.client.connected = false;
                 }
             }
         },
         doSubscribe(topic) {
-            if(this.client.connected) {
+            if (this.client.connected) {
                 const qos = 0;
                 let self = this;
                 this.client.subscribe(topic, {qos}, (error) => {
@@ -1213,7 +1266,7 @@ export default {
             }
         },
         doUnSubscribe(topic) {
-            if(this.client.connected) {
+            if (this.client.connected) {
                 let self = this;
                 this.client.unsubscribe(topic, error => {
                     if (error) {
@@ -1228,7 +1281,7 @@ export default {
             }
         },
         doPublish(topic, payload) {
-            if(this.client.connected) {
+            if (this.client.connected) {
                 this.client.publish(topic, payload, 0, error => {
                     if (error) {
                         console.log('Publish error', error)
@@ -1245,7 +1298,7 @@ export default {
                     }
                     console.log(this.name, 'Successfully disconnected!');
 
-                    localStorage.setItem('mqttConnection-'+this.name, JSON.stringify(this.client));
+                    localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
 
                     // let self = this;
                     // axios({
@@ -1274,7 +1327,8 @@ export default {
                     //         console.log(err.message);
                     //     }
                     // );
-                } catch (error) {
+                }
+                catch (error) {
                     console.log('Disconnect failed', error.toString())
                 }
             }
@@ -1286,16 +1340,16 @@ export default {
             topic = arr_topic.join('/');
 
             // eslint-disable-next-line no-prototype-builtins
-            if(!Object.prototype.hasOwnProperty.call(this.mavStrFromDrone, topic)) {
+            if (!Object.prototype.hasOwnProperty.call(this.mavStrFromDrone, topic)) {
                 this.mavStrFromDrone[topic] = '';
             }
 
             // eslint-disable-next-line no-prototype-builtins
-            if(!Object.prototype.hasOwnProperty.call(this.mavStrFromDroneLength, topic)) {
+            if (!Object.prototype.hasOwnProperty.call(this.mavStrFromDroneLength, topic)) {
                 this.mavStrFromDroneLength[topic] = 0;
             }
 
-            if(this.mavStrFromDroneLength[topic] > 0) {
+            if (this.mavStrFromDroneLength[topic] > 0) {
                 this.mavStrFromDrone[topic] = this.mavStrFromDrone[topic].substr(this.mavStrFromDroneLength[topic]);
                 this.mavStrFromDroneLength[topic] = 0;
             }
@@ -1304,66 +1358,66 @@ export default {
             this.mavStrFromDrone[topic] = hex_content_each;
             //var stx = this.mavStrFromDrone[topic].substr(0, 2);
             //if (stx === 'fe') {
-                var len = parseInt(this.mavStrFromDrone[topic].substr(2, 2), 16);
-                var recv_sys_id = parseInt(this.mavStrFromDrone[topic].substr(6, 2), 16);
-                var mavLength = (6 * 2) + (len * 2) + (2 * 2);
+            var len = parseInt(this.mavStrFromDrone[topic].substr(2, 2), 16);
+            var recv_sys_id = parseInt(this.mavStrFromDrone[topic].substr(6, 2), 16);
+            var mavLength = (6 * 2) + (len * 2) + (2 * 2);
 
-                if(recv_sys_id === parseInt(this.ref_sys_id)) {
-                    // if ((this.mavStrFromDrone[topic].length - this.mavStrFromDroneLength[topic]) >= mavLength) {
-                    //     this.mavStrFromDroneLength[topic] += mavLength;
-                        var mavPacket = this.mavStrFromDrone[topic].substr(0, mavLength);
-                        //this.mavStrFromDrone[topic] = this.mavStrFromDrone[topic].substr(mavLength);
+            if (recv_sys_id === parseInt(this.ref_sys_id)) {
+                // if ((this.mavStrFromDrone[topic].length - this.mavStrFromDroneLength[topic]) >= mavLength) {
+                //     this.mavStrFromDroneLength[topic] += mavLength;
+                var mavPacket = this.mavStrFromDrone[topic].substr(0, mavLength);
+                //this.mavStrFromDrone[topic] = this.mavStrFromDrone[topic].substr(mavLength);
 
-                        // let payload = {};
-                        // payload.sortie = sortie_name;
-                        // payload.data = mavPacket;
+                // let payload = {};
+                // payload.sortie = sortie_name;
+                // payload.data = mavPacket;
 
-                        //EventBus.$emit('push-status-' + arr_topic[4], payload);
+                //EventBus.$emit('push-status-' + arr_topic[4], payload);
 
-                        this.recv_counter++;
+                this.recv_counter++;
 
-                        this.sortie_name = sortie_name;
-                        this.mavStr = mavPacket;
+                this.sortie_name = sortie_name;
+                this.mavStr = mavPacket;
 
-                        this.statusColor = 'indicator-green';
-                        this.statusTextColor = 'indicator-text-black';
-                        this.borderColor = 'indicator-border-green';
-                        this.flagReceiving = true;
+                this.statusColor = 'indicator-green';
+                this.statusTextColor = 'indicator-text-black';
+                this.borderColor = 'indicator-border-green';
+                this.flagReceiving = true;
 
-                        //setTimeout(this.parseMavFromDrone, 0, JSON.parse(JSON.stringify(payload.data)));
-                        this.parseMavFromDrone(mavPacket);
+                //setTimeout(this.parseMavFromDrone, 0, JSON.parse(JSON.stringify(payload.data)));
+                this.parseMavFromDrone(mavPacket);
 
-                        // payload = null;
+                // payload = null;
 
-                        if (this.timeoutObj) {
-                            clearTimeout(this.timeoutObj);
-                            this.timeoutObj = null;
-                        }
-
-                        this.timeoutObj = setTimeout(() => {
-                            this.iconArming = 'mdi-airplane-off';
-                            this.colorArming = 'white';
-                            this.iconDistance = 'mdi-map-marker-distance';
-                            this.iconBattery = 'mdi-battery-off-outline';
-                            this.colorBattery = 'td-text-gray';
-                            this.colorAirspeed = 'td-text-gray';
-
-                            this.statusColor = 'indicator-gray';
-                            this.statusTextColor = 'indicator-text-gray';
-                            this.borderColor = 'indicator-border-gray';
-                            this.mavStr = '...';
-                            this.timeoutObj = null;
-                            this.flagReceiving = false;
-                            this.sys_id = 0;
-
-                            this.colorMode = 'td-text-gray';
-                            this.curMode = 'UNKNOWN';
-                        }, 3000);
-                    // }
-                    // else {
-                    //     //break;
-                    // }
+                if (this.timeoutObj) {
+                    clearTimeout(this.timeoutObj);
+                    this.timeoutObj = null;
                 }
+
+                this.timeoutObj = setTimeout(() => {
+                    this.iconArming = 'mdi-airplane-off';
+                    this.colorArming = 'white';
+                    this.iconDistance = 'mdi-map-marker-distance';
+                    this.iconBattery = 'mdi-battery-off-outline';
+                    this.colorBattery = 'td-text-gray';
+                    this.colorAirspeed = 'td-text-gray';
+
+                    this.statusColor = 'indicator-gray';
+                    this.statusTextColor = 'indicator-text-gray';
+                    this.borderColor = 'indicator-border-gray';
+                    this.mavStr = '...';
+                    this.timeoutObj = null;
+                    this.flagReceiving = false;
+                    this.sys_id = 0;
+
+                    this.colorMode = 'td-text-gray';
+                    this.curMode = 'UNKNOWN';
+                }, 3000);
+                // }
+                // else {
+                //     //break;
+                // }
+            }
             // }
             // else {
             //     this.mavStrFromDrone[topic] = this.mavStrFromDrone[topic].substr(2);
@@ -1875,22 +1929,22 @@ export default {
         },
 
         result_auto_mission_item_complete(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count) {
-            if(this.result_mission_ack[target_sys_id].type == 0) {
-                console.log('Mission Upload Complete to %s', target_name);
+            if (this.result_mission_ack[target_sys_id].type == 0) {
+                console.log('Auto Mission Upload Complete to %s', target_name);
 
                 let custom_mode = this.$store.state.mode_items.indexOf('AUTO'); // AUTO Mode
                 let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
                 base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                setTimeout(this.send_set_mode_command, 100 + parseInt(Math.random()*10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
             }
             else {
                 result_check_count++;
-                if(result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
-                    console.log('Mission Upload Error at %s', target_name);
+                if (result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
+                    console.log('Auto Mission Upload Error at %s', target_name);
                 }
                 else {
-                    console.log(result_check_count + ' - result_mission_item_complete ', target_name);
-                    setTimeout(this.result_mission_item_complete, 50, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
+                    console.log(result_check_count + ' - result_auto_mission_item_complete ', target_name);
+                    setTimeout(this.result_auto_mission_item_complete, parseInt((Math.random()*25))+25, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
                 }
             }
         },
@@ -1898,7 +1952,7 @@ export default {
         send_auto_mission_protocol(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, seq) {
             var btn_params = {};
 
-            if(seq == 0) {
+            if (seq == 0) {
                 btn_params.target_system = target_sys_id;
                 btn_params.target_component = 1;
                 btn_params.seq = 0;
@@ -1916,7 +1970,7 @@ export default {
                 btn_params.mission_type = 0;
             }
             else {
-                let cur_goto_position = goto_each_position[cur_idx++];
+                let cur_goto_position = goto_each_position[cur_idx];
 
                 var arr_cur_goto_position = cur_goto_position.split(':');
                 var latitude = parseFloat(arr_cur_goto_position[0]);
@@ -1947,26 +2001,31 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log(seq + ' Send MISSION_ITEM to %s, ' + 'msg: ' + msg.toString('hex') + ' - ' + cur_idx, target_name);
+                    console.log(seq + ' Send MISSION_ITEM to %s, ' + 'msg: ' + msg.toString('hex') + ' - ' + seq, target_name);
                     this.doPublish(pub_topic, msg);
 
-                    if(cur_idx <= end_idx) {
+                    if(this.mission_request[target_sys_id].seq_sent < this.mission_request[target_sys_id].seq_requested) {
+                        cur_idx++;
+                    }
+
+                    if (cur_idx <= end_idx) {
                         if (!Object.prototype.hasOwnProperty.call(this.mission_request, target_sys_id)) {
                             this.mission_request[target_sys_id] = {};
                         }
-                        this.mission_request[target_sys_id].seq = 255;
+                        this.mission_request[target_sys_id].seq_sent = seq;
+                        this.mission_request[target_sys_id].seq_requested = 255;
 
                         this.result_check_count = 0;
-                        setTimeout(this.result_auto_mission_protocol, 50, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
+                        setTimeout(this.result_auto_mission_protocol, parseInt((Math.random()*25))+25, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
                     }
                     else {
-                        if(!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
+                        if (!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
                             this.result_mission_ack[target_sys_id] = {};
                         }
                         this.result_mission_ack[target_sys_id].type = 255;
 
                         this.result_check_count = 0;
-                        setTimeout(this.result_auto_mission_item_complete, 50, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
+                        setTimeout(this.result_auto_mission_item_complete, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
                     }
                 }
             }
@@ -1976,19 +2035,19 @@ export default {
         },
 
         result_auto_mission_protocol(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count) {
-            if(this.mission_request[target_sys_id].seq != 255) {
-                console.log(this.mission_request[target_sys_id].seq + ' MISSION REQUEST from %s', target_name);
+            if (this.mission_request[target_sys_id].seq_requested != 255) {
+                console.log(this.mission_request[target_sys_id].seq_requested + ' MISSION REQUEST from %s', target_name);
 
-                setTimeout(this.send_auto_mission_protocol, 1, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.mission_request[target_sys_id].seq);
+                this.send_auto_mission_protocol(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.mission_request[target_sys_id].seq_requested);
             }
             else {
                 result_check_count++;
-                if(result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
+                if (result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
                     console.log('Mission Upload Error at %s', target_name);
                 }
                 else {
                     console.log(result_check_count + ' - result_auto_mission_protocol ', target_name);
-                    setTimeout(this.result_auto_mission_protocol, 50, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
+                    setTimeout(this.result_auto_mission_protocol, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
                 }
             }
         },
@@ -2009,13 +2068,14 @@ export default {
                     console.log('Send MISSION_COUNT to %s, msg: ' + msg.toString('hex') + ' - ' + cur_idx, target_name);
                     this.doPublish(pub_topic, msg);
 
-                    if(!Object.prototype.hasOwnProperty.call(this.mission_request, target_sys_id)) {
+                    if (!Object.prototype.hasOwnProperty.call(this.mission_request, target_sys_id)) {
                         this.mission_request[target_sys_id] = {};
                     }
-                    this.mission_request[target_sys_id].seq = 255;
+                    this.mission_request[target_sys_id].seq_sent = 0;
+                    this.mission_request[target_sys_id].seq_requested = 255;
 
                     this.result_check_count = 0;
-                    setTimeout(this.result_auto_mission_protocol, 50, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
+                    setTimeout(this.result_auto_mission_protocol, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
                 }
             }
             catch (ex) {
@@ -2024,18 +2084,18 @@ export default {
         },
 
         result_auto_mission_clear_all(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count) {
-            if(this.result_mission_ack[target_sys_id].type == 0) {
-                console.log('Clear All Mission of %s', target_name);
-                setTimeout(this.send_auto_mission_count, 1, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx);
+            if (this.result_mission_ack[target_sys_id].type == 0) {
+                console.log('Clear All Auto Mission of %s', target_name);
+                this.send_auto_mission_count(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx);
             }
             else {
                 result_check_count++;
-                if(result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
-                    console.log('Auto mission Clear Error at %s', target_name);
+                if (result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
+                    console.log('Auto Mission Clear Error at %s', target_name);
                 }
                 else {
                     console.log(result_check_count + ' - result_auto_mission_clear_all ', target_name);
-                    setTimeout(this.result_auto_mission_clear_all, 50, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
+                    setTimeout(this.result_auto_mission_clear_all, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
                 }
             }
         },
@@ -2052,16 +2112,16 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('Send Mission Clear All command to %s, msg: ' + msg.toString('hex') + ' - ' + cur_idx, target_name);
+                    console.log('Send Auto Mission Clear All command to %s, msg: ' + msg.toString('hex') + ' - ' + cur_idx, target_name);
                     this.doPublish(pub_topic, msg);
 
-                    if(!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
+                    if (!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
                         this.result_mission_ack[target_sys_id] = {};
                     }
                     this.result_mission_ack[target_sys_id].type = 255;
 
                     this.result_check_count = 0;
-                    setTimeout(this.result_auto_mission_clear_all, 50, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
+                    setTimeout(this.result_auto_mission_clear_all, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
                 }
             }
             catch (ex) {
@@ -2197,7 +2257,7 @@ export default {
         send_mission_protocol(target_name, pub_topic, target_sys_id, latitude, longitude, rel_altitude, speed, radius, seq, result_check_count) {
             var btn_params = {};
 
-            if(seq === 0) {
+            if (seq === 0) {
                 btn_params.target_system = target_sys_id;
                 btn_params.target_component = 1;
                 btn_params.seq = 0;
@@ -2241,7 +2301,7 @@ export default {
                     console.log(seq + ' Send MISSION_ITEM to %s, ' + 'msg: ' + msg.toString('hex') + ' - ' + radius, target_name);
                     this.doPublish(pub_topic, msg);
 
-                    if(seq < 1) {
+                    if (seq < 1) {
                         if (!Object.prototype.hasOwnProperty.call(this.mission_request, target_sys_id)) {
                             this.mission_request[target_sys_id] = {};
                         }
@@ -2251,7 +2311,7 @@ export default {
                         setTimeout(this.result_mission_protocol, 55, target_name, pub_topic, target_sys_id, latitude, longitude, rel_altitude, speed, radius, result_check_count);
                     }
                     else {
-                        if(!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
+                        if (!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
                             this.result_mission_ack[target_sys_id] = {};
                         }
                         this.result_mission_ack[target_sys_id].type = 255;
@@ -2267,7 +2327,7 @@ export default {
         },
 
         result_mission_protocol(target_name, pub_topic, target_sys_id, latitude, longitude, rel_altitude, speed, radius, result_check_count) {
-            if(this.mission_request[target_sys_id].seq <= 1) {
+            if (this.mission_request[target_sys_id].seq <= 1) {
                 console.log(this.mission_request[target_sys_id].seq + ' MISSION REQUEST from %s', target_name);
 
                 result_check_count = 0;
@@ -2275,7 +2335,7 @@ export default {
             }
             else {
                 result_check_count++;
-                if(result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
+                if (result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
                     console.log('Mission Upload Error at %s', target_name);
                 }
                 else {
@@ -2300,7 +2360,7 @@ export default {
                 else {
                     this.doPublish(pub_topic, msg);
 
-                    if(!Object.prototype.hasOwnProperty.call(this.mission_request, target_sys_id)) {
+                    if (!Object.prototype.hasOwnProperty.call(this.mission_request, target_sys_id)) {
                         this.mission_request[target_sys_id] = {};
                     }
                     this.mission_request[target_sys_id].seq = 255;
@@ -2345,7 +2405,7 @@ export default {
                 else {
                     this.doPublish(pub_topic, msg);
 
-                    if(!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
+                    if (!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
                         this.result_mission_ack[target_sys_id] = {};
                     }
                     this.result_mission_ack[target_sys_id].type = 255;
@@ -2395,7 +2455,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('send_rtl_speed_param_set_command (', rtl_speed,') ', this.name);
+                    console.log('send_rtl_speed_param_set_command (', rtl_speed, ') ', this.name);
                     this.doPublish(pub_topic, msg);
                 }
             }
@@ -2446,7 +2506,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('send_change_speed_command (', target_speed,') ', this.name);
+                    console.log('send_change_speed_command (', target_speed, ') ', this.name);
                     this.doPublish(pub_topic, msg);
                 }
             }
@@ -2604,7 +2664,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('send_set_mode_command (', this.$store.state.mode_items[custom_mode], ') - ',this.name);
+                    console.log('send_set_mode_command (', this.$store.state.mode_items[custom_mode], ') - ', this.name);
                     this.doPublish(pub_topic, msg);
                 }
             }
@@ -2647,7 +2707,7 @@ export default {
         },
         startFlightTimer: function () {
             this.iconFlightElapsed = 'mdi-timer-outline';
-            if(this.flightTimer) {
+            if (this.flightTimer) {
                 clearInterval(this.flightTimer);
                 this.flightTimer = null;
             }
@@ -2719,7 +2779,7 @@ export default {
                     this.hb.mavlink_version = Buffer.from(mavlink_version, 'hex').readUInt8(0);
 
                     if (this.hb.base_mode & 0x80) {
-                        if(this.curArmStatus === 'DISARMED') {
+                        if (this.curArmStatus === 'DISARMED') {
                             this.$store.state.trackingLines[this.name] = null;
                             delete this.$store.state.trackingLines[this.name];
                             this.$store.state.trackingLines[this.name] = [];
@@ -2740,7 +2800,7 @@ export default {
                     this.curMode = this.mode_items[this.hb.custom_mode];
 
                     //console.log(this.name, ' - bpm - ', this.bpm);
-                    if(this.bpm < 50) {
+                    if (this.bpm < 50) {
                         console.log(this.name + ' - REQUEST_DATA_STREAM - bpm', this.bpm);
                         setTimeout(this.send_request_data_stream_command, 1, this.name, this.target_pub_topic, this.sys_id, mavlink.MAV_DATA_STREAM_RAW_SENSORS, 3, 1);
                         setTimeout(this.send_request_data_stream_command, 3, this.name, this.target_pub_topic, this.sys_id, mavlink.MAV_DATA_STREAM_EXTENDED_STATUS, 3, 1);
@@ -2848,14 +2908,14 @@ export default {
 
                     // console.log('airspeed: ' + this.airspeed, 'heading: ' + this.heading);
 
-                    if(this.flagReceiving) {
-                        if(this.watchingMission === 'takeoff') {
+                    if (this.flagReceiving) {
+                        if (this.watchingMission === 'takeoff') {
                             let cur_alt = this.gpi.relative_alt / 1000;
                             let target_alt = this.$store.state.drone_infos[this.name].targetTakeoffAlt
 
                             this.watchingMissionStatus = Math.ceil((((Math.abs(target_alt - this.watchingInitAlt) + 0.5) - Math.abs(target_alt - cur_alt)) / (Math.abs(target_alt - this.watchingInitAlt) + 0.5)) * 100);
 
-                            if(this.watchingMissionStatus >= 95) {
+                            if (this.watchingMissionStatus >= 95) {
                                 console.log(this.name, ' takeoff complete');
                                 this.watchingMission = 'complete';
                                 this.watchingMissionStatus = 0;
@@ -2865,7 +2925,7 @@ export default {
                             else {
                                 if (Math.abs(this.gpi.relative_alt - this.pre_relative_alt) < 0.05) {
                                     this.watchingCount++;
-                                    if(this.watchingCount > this.watchingMaxCount) {
+                                    if (this.watchingCount > this.watchingMaxCount) {
                                         console.log(this.name, ' takeoff fail');
                                         this.watchingMission = 'fail';
                                         this.watchingMissionStatus = 0;
@@ -2877,13 +2937,13 @@ export default {
                                 }
                             }
                         }
-                        else if(this.watchingMission === 'goto_alt') {
+                        else if (this.watchingMission === 'goto_alt') {
                             let cur_alt = this.gpi.relative_alt / 1000;
                             let target_alt = this.$store.state.drone_infos[this.name].targetAlt
 
                             this.watchingMissionStatus = Math.ceil((((Math.abs(target_alt - this.watchingInitAlt) + 0.5) - Math.abs(target_alt - cur_alt)) / (Math.abs(target_alt - this.watchingInitAlt) + 0.5)) * 100);
 
-                            if(this.watchingMissionStatus >= 95) {
+                            if (this.watchingMissionStatus >= 95) {
                                 console.log(this.name, ' goto_alt complete');
                                 this.watchingMission = 'complete';
                                 this.watchingMissionStatus = 0;
@@ -2893,7 +2953,7 @@ export default {
                             else {
                                 if (Math.abs(this.gpi.relative_alt - this.pre_relative_alt) < 0.05) {
                                     this.watchingCount++;
-                                    if(this.watchingCount > this.watchingMaxCount) {
+                                    if (this.watchingCount > this.watchingMaxCount) {
                                         console.log(this.name, ' goto_alt fail');
                                         this.watchingMission = 'fail';
                                         this.watchingMissionStatus = 0;
@@ -2905,7 +2965,7 @@ export default {
                                 }
                             }
                         }
-                        else if(this.watchingMission === 'goto') {
+                        else if (this.watchingMission === 'goto') {
 
                             this.$store.state.tempMarkers[this.name][this.$store.state.curTargetedTempMarkerIndex[this.name]].lat
 
@@ -2925,7 +2985,7 @@ export default {
 
                             this.watchingMissionStatus = Math.ceil((this.watchingInitDist - cur_dist) / this.watchingInitDist * 100);
 
-                            if(this.watchingMissionStatus >= 99) {
+                            if (this.watchingMissionStatus >= 99) {
                                 console.log(this.name, ' goto complete');
                                 this.watchingMission = 'complete';
                                 this.watchingMissionStatus = 0;
@@ -2935,7 +2995,7 @@ export default {
                             else {
                                 if (Math.abs(this.gpi.lat - this.pre_lat) < 0.1 && Math.abs(this.gpi.lon - this.pre_lng) < 0.1 && Math.abs(this.gpi.relative_alt - this.pre_relative_alt) < 0.1) {
                                     this.watchingCount++;
-                                    if(this.watchingCount > this.watchingMaxCount) {
+                                    if (this.watchingCount > this.watchingMaxCount) {
                                         console.log(this.name, ' goto fail');
                                         this.watchingMission = 'fail';
                                         this.watchingMissionStatus = 0;
@@ -2948,7 +3008,7 @@ export default {
                             }
                         }
 
-                        if(this.pre_lat !== this.gpi.lat || this.pre_lng !== this.gpi.lon || this.pre_heading !== this.heading || this.pre_relative_alt !== this.gpi.relative_alt) {
+                        if (this.pre_lat !== this.gpi.lat || this.pre_lng !== this.gpi.lon || this.pre_heading !== this.heading || this.pre_relative_alt !== this.gpi.relative_alt) {
                             let _payload = {};
                             _payload.name = this.name;
                             _payload.iconArming = this.iconArming;
@@ -2966,7 +3026,7 @@ export default {
                             this.pre_relative_alt = this.gpi.relative_alt;
                             this.pre_airspeed = this.airspeed;
 
-                            if(this.$store.state.trackingLines[this.name].length > 5000) {
+                            if (this.$store.state.trackingLines[this.name].length > 5000) {
                                 this.$store.state.trackingLines[this.name].shift();
                             }
 
@@ -2981,14 +3041,14 @@ export default {
 
                             _payload = null;
 
-                            if(Object.prototype.hasOwnProperty.call(this.$store.state.curDronePositions, this.name)) {
+                            if (Object.prototype.hasOwnProperty.call(this.$store.state.curDronePositions, this.name)) {
                                 this.$store.state.curDronePositions[this.name].lat = this.gpi.lat;
                                 this.$store.state.curDronePositions[this.name].lng = this.gpi.lon;
                                 this.$store.state.curDronePositions[this.name].alt = this.gpi.alt;
                             }
                         }
 
-                        if(this.curArmStatus === 'ARMED') {
+                        if (this.curArmStatus === 'ARMED') {
                             cur_lat = (this.gpi.lat / 10000000);
                             cur_lon = (this.gpi.lon / 10000000);
                             cur_alt = (this.gpi.relative_alt / 1000);
@@ -3007,22 +3067,22 @@ export default {
                             this.valueDistance = 0;
                         }
 
-                        if(this.iconArming === 'mdi-airplane') {
-                            if(!Object.prototype.hasOwnProperty.call(this.$store.state.curDronePositions, this.name)) {
+                        if (this.iconArming === 'mdi-airplane') {
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.curDronePositions, this.name)) {
                                 this.$store.state.curDronePositions[this.name] = {};
                                 this.$store.state.curDronePositions[this.name].brake = false;
                             }
                         }
                         else {
-                            if(Object.prototype.hasOwnProperty.call(this.$store.state.curDronePositions, this.name)) {
+                            if (Object.prototype.hasOwnProperty.call(this.$store.state.curDronePositions, this.name)) {
                                 this.$store.state.curDronePositions[this.name] = null;
                                 delete this.$store.state.curDronePositions[this.name];
                             }
                         }
 
-                        if(this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회') {
-                            if(this.$store.state.drone_infos[this.name].selected && this.$store.state.drone_infos[this.name].targeted) {
-                                if(Object.prototype.hasOwnProperty.call(this.$store.state.curTargetedTempMarkerIndex, this.name)) {
+                        if (this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회') {
+                            if (this.$store.state.drone_infos[this.name].selected && this.$store.state.drone_infos[this.name].targeted) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.curTargetedTempMarkerIndex, this.name)) {
                                     if (this.$store.state.curTargetedTempMarkerIndex[this.name] !== null) {
                                         // console.log(this.$store.state.curTargetedTempMarkerIndex[this.name]);
                                         // console.log(this.$store.state.tempMarkers[this.name][0]);
@@ -3119,7 +3179,7 @@ export default {
                     // console.log('roll: ' + this.roll, 'pitch: ' + this.pitch);
                 }
 
-                else if( msg_id === mavlink.MAVLINK_MSG_ID_GPS_RAW_INT) {
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RAW_INT) {
                     if (ver === 'fd') {
                         base_offset = 20 + (16 + 2 + 8 + 8 + 8 + 4 + 4 + 4 + 4);
                         var satellites = mavPacket.substr(base_offset, 2).toLowerCase();
@@ -3167,205 +3227,205 @@ export default {
                     console.log(this.mission_seq);
                 }
 
-                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
-                //     if (ver === 'fd') {
-                //         base_offset = 20;
-                //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                //         base_offset += (8 + 2 + (4 * 18));
-                //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
-                //     else {
-                //         base_offset = 12;
-                //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                //         base_offset += (8 + 2 + (4 * 18));
-                //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
-                //
-                //     this.rssi = parseInt((Buffer.from(rssi, 'hex').readUInt8(0)) / 255 * 100);
-                // }
+                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
+                    //     if (ver === 'fd') {
+                    //         base_offset = 20;
+                    //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
+                    //         base_offset += (8 + 2 + (4 * 18));
+                    //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     }
+                    //     else {
+                    //         base_offset = 12;
+                    //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
+                    //         base_offset += (8 + 2 + (4 * 18));
+                    //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     }
+                    //
+                    //     this.rssi = parseInt((Buffer.from(rssi, 'hex').readUInt8(0)) / 255 * 100);
+                    // }
 
-                // else if (msg_id === mavlink.MAVLINK_MSG_ID_PARAM_VALUE) {
-                //      if (ver === 'fd') {
-                //         base_offset = 20;
-                //         var param_value = mavPacket.substr(base_offset, 8).toLowerCase();
-                //         base_offset += 8;
-                //         var param_count = mavPacket.substr(base_offset, 4).toLowerCase();
-                //         base_offset += 4;
-                //         var param_index = mavPacket.substr(base_offset, 4).toLowerCase();
-                //         base_offset += 4;
-                //         var param_id = mavPacket.substr(base_offset, 32).toLowerCase();
-                //         base_offset += 32;
-                //         var param_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
-                //     else {
-                //         base_offset = 12;
-                //         param_value = mavPacket.substr(base_offset, 8).toLowerCase();
-                //         base_offset += 8;
-                //         param_count = mavPacket.substr(base_offset, 4).toLowerCase();
-                //         base_offset += 4;
-                //         param_index = mavPacket.substr(base_offset, 4).toLowerCase();
-                //         base_offset += 4;
-                //         param_id = mavPacket.substr(base_offset, 32).toLowerCase();
-                //         base_offset += 32;
-                //         param_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
-                //
-                //     param_id = Buffer.from(param_id, "hex").toString('ASCII');
-                //
-                //     // if (param_id.includes('STAT_FLTTIME')) {
-                //     //
-                //     //     this.stat_flttime_param = {};
-                //     //     this.stat_flttime_param.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //     //     this.stat_flttime_param.param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //     //     this.stat_flttime_param.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //     //     this.stat_flttime_param.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     //
-                //     //     console.log(this.name, 'STAT_FLTTIME', this.stat_flttime_param.param_value);
-                //     //
-                //     //     // if(this.$store.state.drone_infos[this.name].lastFlightTime > this.stat_flttime_param.param_value) {
-                //     //     //     this.$store.state.drone_infos[this.name].lastFlightTime = this.stat_flttime_param.param_value;
-                //     //     //
-                //     //     //     this.postDroneInfos();
-                //     //     // }
-                //     // }
-                //     // else {
-                //     //     if(this.curArmStatus === 'ARMED') {
-                //     //         let curFlightTime = this.stat_flttime_param.param_value - this.$store.state.drone_infos[this.name].lastFlightTime;
-                //     //         console.log(this.name, 'curFlightTime', curFlightTime);
-                //     //     }
-                //     // }
-                //
-                //     // else if (param_id.includes('STAT_RUNTIME')) {
-                //     //
-                //     //     let stat_runtime_param = {};
-                //     //     stat_runtime_param.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //     //     stat_runtime_param.param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //     //     stat_runtime_param.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //     //     stat_runtime_param.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     //
-                //     //     console.log(this.name, 'STAT_RUNTIME', stat_runtime_param);
-                //     // }
-                //
-                //     if (param_id.includes('RC1_MIN')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc1_min, sys_id)) {
-                //             this.rc1_min[sys_id] = {};
-                //         }
-                //
-                //         this.rc1_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc1_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc1_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc1_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC1_MAX')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc1_max, sys_id)) {
-                //             this.rc1_max[sys_id] = {};
-                //         }
-                //
-                //         this.rc1_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc1_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc1_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc1_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC1_TRIM')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc1_trim, sys_id)) {
-                //             this.rc1_trim[sys_id] = {};
-                //         }
-                //
-                //         this.rc1_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc1_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc1_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc1_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC2_MIN')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc2_min, sys_id)) {
-                //             this.rc2_min[sys_id] = {};
-                //         }
-                //
-                //         this.rc2_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc2_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc2_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc2_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC2_MAX')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc2_max, sys_id)) {
-                //             this.rc2_max[sys_id] = {};
-                //         }
-                //
-                //         this.rc2_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc2_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc2_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc2_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC2_TRIM')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc2_trim, sys_id)) {
-                //             this.rc2_trim[sys_id] = {};
-                //         }
-                //
-                //         this.rc2_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc2_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc2_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc2_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC3_MIN')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc3_min, sys_id)) {
-                //             this.rc3_min[sys_id] = {};
-                //         }
-                //
-                //         this.rc3_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc3_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc3_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc3_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC3_MAX')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc3_max, sys_id)) {
-                //             this.rc3_max[sys_id] = {};
-                //         }
-                //
-                //         this.rc3_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc3_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc3_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc3_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC3_TRIM')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc3_trim, sys_id)) {
-                //             this.rc3_trim[sys_id] = {};
-                //         }
-                //
-                //         this.rc3_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc3_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc3_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc3_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC4_MIN')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc4_min, sys_id)) {
-                //             this.rc4_min[sys_id] = {};
-                //         }
-                //
-                //         this.rc4_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc4_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc4_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc4_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC4_MAX')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc4_max, sys_id)) {
-                //             this.rc4_max[sys_id] = {};
-                //         }
-                //
-                //         this.rc4_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc4_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc4_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc4_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
-                //     else if (param_id.includes('RC4_TRIM')) {
-                //         if (!Object.prototype.hasOwnProperty.call(this.rc4_trim, sys_id)) {
-                //             this.rc4_trim[sys_id] = {};
-                //         }
-                //
-                //         this.rc4_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                //         this.rc4_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                //         this.rc4_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                //         this.rc4_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                //     }
+                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_PARAM_VALUE) {
+                    //      if (ver === 'fd') {
+                    //         base_offset = 20;
+                    //         var param_value = mavPacket.substr(base_offset, 8).toLowerCase();
+                    //         base_offset += 8;
+                    //         var param_count = mavPacket.substr(base_offset, 4).toLowerCase();
+                    //         base_offset += 4;
+                    //         var param_index = mavPacket.substr(base_offset, 4).toLowerCase();
+                    //         base_offset += 4;
+                    //         var param_id = mavPacket.substr(base_offset, 32).toLowerCase();
+                    //         base_offset += 32;
+                    //         var param_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     }
+                    //     else {
+                    //         base_offset = 12;
+                    //         param_value = mavPacket.substr(base_offset, 8).toLowerCase();
+                    //         base_offset += 8;
+                    //         param_count = mavPacket.substr(base_offset, 4).toLowerCase();
+                    //         base_offset += 4;
+                    //         param_index = mavPacket.substr(base_offset, 4).toLowerCase();
+                    //         base_offset += 4;
+                    //         param_id = mavPacket.substr(base_offset, 32).toLowerCase();
+                    //         base_offset += 32;
+                    //         param_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     }
+                    //
+                    //     param_id = Buffer.from(param_id, "hex").toString('ASCII');
+                    //
+                    //     // if (param_id.includes('STAT_FLTTIME')) {
+                    //     //
+                    //     //     this.stat_flttime_param = {};
+                    //     //     this.stat_flttime_param.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //     //     this.stat_flttime_param.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //     //     this.stat_flttime_param.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //     //     this.stat_flttime_param.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     //
+                    //     //     console.log(this.name, 'STAT_FLTTIME', this.stat_flttime_param.param_value);
+                    //     //
+                    //     //     // if(this.$store.state.drone_infos[this.name].lastFlightTime > this.stat_flttime_param.param_value) {
+                    //     //     //     this.$store.state.drone_infos[this.name].lastFlightTime = this.stat_flttime_param.param_value;
+                    //     //     //
+                    //     //     //     this.postDroneInfos();
+                    //     //     // }
+                    //     // }
+                    //     // else {
+                    //     //     if(this.curArmStatus === 'ARMED') {
+                    //     //         let curFlightTime = this.stat_flttime_param.param_value - this.$store.state.drone_infos[this.name].lastFlightTime;
+                    //     //         console.log(this.name, 'curFlightTime', curFlightTime);
+                    //     //     }
+                    //     // }
+                    //
+                    //     // else if (param_id.includes('STAT_RUNTIME')) {
+                    //     //
+                    //     //     let stat_runtime_param = {};
+                    //     //     stat_runtime_param.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //     //     stat_runtime_param.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //     //     stat_runtime_param.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //     //     stat_runtime_param.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     //
+                    //     //     console.log(this.name, 'STAT_RUNTIME', stat_runtime_param);
+                    //     // }
+                    //
+                    //     if (param_id.includes('RC1_MIN')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc1_min, sys_id)) {
+                    //             this.rc1_min[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc1_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc1_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc1_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc1_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC1_MAX')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc1_max, sys_id)) {
+                    //             this.rc1_max[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc1_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc1_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc1_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc1_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC1_TRIM')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc1_trim, sys_id)) {
+                    //             this.rc1_trim[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc1_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc1_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc1_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc1_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC2_MIN')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc2_min, sys_id)) {
+                    //             this.rc2_min[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc2_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc2_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc2_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc2_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC2_MAX')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc2_max, sys_id)) {
+                    //             this.rc2_max[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc2_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc2_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc2_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc2_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC2_TRIM')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc2_trim, sys_id)) {
+                    //             this.rc2_trim[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc2_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc2_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc2_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc2_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC3_MIN')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc3_min, sys_id)) {
+                    //             this.rc3_min[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc3_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc3_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc3_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc3_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC3_MAX')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc3_max, sys_id)) {
+                    //             this.rc3_max[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc3_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc3_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc3_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc3_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC3_TRIM')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc3_trim, sys_id)) {
+                    //             this.rc3_trim[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc3_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc3_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc3_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc3_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC4_MIN')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc4_min, sys_id)) {
+                    //             this.rc4_min[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc4_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc4_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc4_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc4_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC4_MAX')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc4_max, sys_id)) {
+                    //             this.rc4_max[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc4_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc4_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc4_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc4_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
+                    //     else if (param_id.includes('RC4_TRIM')) {
+                    //         if (!Object.prototype.hasOwnProperty.call(this.rc4_trim, sys_id)) {
+                    //             this.rc4_trim[sys_id] = {};
+                    //         }
+                    //
+                    //         this.rc4_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //         this.rc4_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //         this.rc4_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //         this.rc4_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //     }
                 // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM) {
@@ -3394,20 +3454,24 @@ export default {
                         //mission_type = mavPacket.substr(base_offset, 2).toLowerCase();
                     }
 
-                    if (Object.prototype.hasOwnProperty.call(this.mission_request, sys_id)) {
-                        var mission_result = Buffer.from(target_system, 'hex').readUInt8(0);
-                        this.mission_request[sys_id].target_system = mission_result;
-                        mission_result = Buffer.from(mission_sequence, 'hex').readUInt16LE(0);
-                        this.mission_request[sys_id].seq = mission_result;
+                    if (!Object.prototype.hasOwnProperty.call(this.mission_request, sys_id)) {
+                        this.mission_request[sys_id] = {};
                     }
+
+                    var mission_result = Buffer.from(target_system, 'hex').readUInt8(0);
+                    this.mission_request[sys_id].target_system = mission_result;
+                    mission_result = Buffer.from(mission_sequence, 'hex').readUInt16LE(0);
+                    this.mission_request[sys_id].seq_requested = mission_result;
+
+                    console.log(this.name, sys_id, 'MAVLINK_MSG_ID_MISSION_REQUEST', '-', this.mission_request[sys_id].target_system, this.mission_request[sys_id].seq_requested);
                 }
                 else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_REQUEST_LIST) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_REQUEST_LIST - ' + mavPacket);
                 }
-                else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_COUNT) { // #33 - global_position_int
+                else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_COUNT) { //
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_COUNT - ' + mavPacket);
                 }
-                else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_ACK) { // #33 - global_position_int
+                else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_ACK) { // #47 - mission_ack
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ACK - ' + mavPacket);
                     if (ver == 'fd') {
                         base_offset = 20;
@@ -3431,19 +3495,48 @@ export default {
                     }
 
                     if (!Object.prototype.hasOwnProperty.call(this.result_mission_ack, sys_id)) {
-                        this.result_mission_ack = {};
                         this.result_mission_ack[sys_id] = {};
                     }
 
                     this.result_mission_ack[sys_id].target_system = Buffer.from(target_system, 'hex').readUInt8(0);
                     this.result_mission_ack[sys_id].type = Buffer.from(mission_result_type, 'hex').readUInt8(0);
+
+                    console.log(this.name, 'MAVLINK_MSG_ID_MISSION_ACK', '-', this.result_mission_ack[sys_id].target_system, this.result_mission_ack[sys_id].type);
                 }
                 else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_ITEM_INT) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ITEM_INT - ' + mavPacket);
                 }
+                else if (msg_id == mavlink.MAVLINK_MSG_ID_COMMAND_ACK) { // #77 command_ack
+                    // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ACK - ' + mavPacket);
+                    if (ver == 'fd') {
+                        base_offset = 20;
+                        var command = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        var command_result = mavPacket.substr(base_offset, 2).toLowerCase();
+                        base_offset += 2;
+                    }
+                    else {
+                        base_offset = 12;
+                        command = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        command_result = mavPacket.substr(base_offset, 2).toLowerCase();
+                        base_offset += 2;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(this.result_command_ack, sys_id)) {
+                        this.result_command_ack = {};
+                        this.result_command_ack[sys_id] = {};
+                    }
+
+                    this.result_command_ack[sys_id].command = Buffer.from(command, 'hex').readUInt16LE(0);
+                    this.result_command_ack[sys_id].command_result = Buffer.from(command_result, 'hex').readUInt8(0);
+
+                    console.log(this.result_command_ack[sys_id].command, '-', this.result_command_ack[sys_id].command_result);
+                }
 
                 mavPacket = null;
-            } catch (e) {
+            }
+            catch (e) {
                 console.log(e.message);
             }
         },
@@ -3457,7 +3550,7 @@ export default {
                 method: 'get',
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie,
                 headers: {
-                    'X-M2M-RI': String(parseInt(Math.random()*10000)),
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue'
                 }
             }).then(
@@ -3481,7 +3574,7 @@ export default {
                 method: 'get',
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie + '/' + subscription_name,
                 headers: {
-                    'X-M2M-RI': String(parseInt(Math.random()*10000)),
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue'
                 }
             }).then(
@@ -3506,7 +3599,7 @@ export default {
                 method: 'delete',
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie + '/' + subscription_name,
                 headers: {
-                    'X-M2M-RI': String(parseInt(Math.random()*10000)),
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'Superman'
                 }
             }).then(
@@ -3532,7 +3625,7 @@ export default {
                 method: 'post',
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie,
                 headers: {
-                    'X-M2M-RI': String(parseInt(Math.random()*10000)),
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
                     'Content-Type': 'application/json;ty=23'
                 },
@@ -3564,7 +3657,7 @@ export default {
                 method: 'get',
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/MUV/approval/' + this.id + '/la',
                 headers: {
-                    'X-M2M-RI': String(parseInt(Math.random()*10000)),
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue'
                 }
             }).then(
@@ -3627,8 +3720,8 @@ export default {
 
     created() {
         this.positions = []
-        for(let idx in this.$store.state.tempMarkers[this.name]) {
-            if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[this.name], idx)) {
+        for (let idx in this.$store.state.tempMarkers[this.name]) {
+            if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[this.name], idx)) {
                 let str = this.$store.state.tempMarkers[this.name][idx].lat + ':' + this.$store.state.tempMarkers[this.name][idx].lng +
                     ':' + this.$store.state.tempMarkers[this.name][idx].alt + ':' + this.$store.state.tempMarkers[this.name][idx].radius +
                     ':' + this.$store.state.tempMarkers[this.name][idx].airspeed;
@@ -3717,7 +3810,7 @@ export default {
         });
 
         EventBus.$on('do-target-selected' + this.name, (payload) => {
-            if(payload.value) {
+            if (payload.value) {
                 this.selectedItem = payload.pIndex;
             }
             else {
@@ -3728,7 +3821,7 @@ export default {
         EventBus.$on('initialize-' + this.name, (payload) => {
             this.flagReceiving = false;
 
-            console.log('DroneInfo-initialize-'+this.name, payload);
+            console.log('DroneInfo-initialize-' + this.name, payload);
 
             let _payload = {};
             _payload.name = this.name;
@@ -3761,8 +3854,8 @@ export default {
         });
 
         EventBus.$on('command-set-params-' + this.name, (params) => {
-            if(Object.prototype.hasOwnProperty.call(params, 'wpYawBehavior')) {
-                if(params.wpYawBehavior[this.name] !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(params, 'wpYawBehavior')) {
+                if (params.wpYawBehavior[this.name] !== undefined) {
                     let param_value = parseInt(params.wpYawBehavior[this.name].charAt(0));
 
 
@@ -3771,7 +3864,7 @@ export default {
                     let custom_mode = this.$store.state.mode_items.indexOf('LOITER');
                     let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
                     base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                    setTimeout(this.send_set_mode_command, parseInt(Math.random()*2), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                    setTimeout(this.send_set_mode_command, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
                         this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
@@ -3779,14 +3872,14 @@ export default {
                         custom_mode = pre_custom_mode;
                         base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
                         base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                        setTimeout(this.send_set_mode_command, parseInt(Math.random()*2), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                        setTimeout(this.send_set_mode_command, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
                     }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
                 }
             }
 
-            if(Object.prototype.hasOwnProperty.call(params, 'atcSlewYaw')) {
-                if(params.atcSlewYaw[this.name] !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(params, 'atcSlewYaw')) {
+                if (params.atcSlewYaw[this.name] !== undefined) {
                     let param_value = parseFloat(params.atcSlewYaw[this.name]);
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
@@ -3796,8 +3889,8 @@ export default {
                 }
             }
 
-            if(Object.prototype.hasOwnProperty.call(params, 'wpnavSpeedUp')) {
-                if(params.wpnavSpeedUp[this.name] !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(params, 'wpnavSpeedUp')) {
+                if (params.wpnavSpeedUp[this.name] !== undefined) {
                     let param_value = parseFloat(params.wpnavSpeedUp[this.name]);
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
@@ -3807,8 +3900,8 @@ export default {
                 }
             }
 
-            if(Object.prototype.hasOwnProperty.call(params, 'wpnavSpeedDn')) {
-                if(params.wpnavSpeedDn[this.name] !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(params, 'wpnavSpeedDn')) {
+                if (params.wpnavSpeedDn[this.name] !== undefined) {
                     let param_value = parseFloat(params.wpnavSpeedDn[this.name]);
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
@@ -3818,8 +3911,8 @@ export default {
                 }
             }
 
-            if(Object.prototype.hasOwnProperty.call(params, 'rtlAlt')) {
-                if(params.rtlAlt[this.name] !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(params, 'rtlAlt')) {
+                if (params.rtlAlt[this.name] !== undefined) {
                     let param_value = parseFloat(params.rtlAlt[this.name]);
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
@@ -3834,7 +3927,7 @@ export default {
 
         EventBus.$on('command-set-disarm-' + this.name, () => {
             console.log('send_disarm_command ', this.name);
-            setTimeout(this.send_arm_command, parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, 0, 0);
+            setTimeout(this.send_arm_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 0, 0);
 
             this.watchingMission = 'disarm';
         });
@@ -3846,21 +3939,21 @@ export default {
 
             let auto_speed = this.$store.state.drone_infos[this.name].autoSpeed;
 
-            setTimeout(this.send_wpnav_speed_param_set_command, 10 + parseInt(Math.random()*10), this.name, this.target_pub_topic, this.sys_id, auto_speed);
+            this.send_wpnav_speed_param_set_command(this.name, this.target_pub_topic, this.sys_id, auto_speed);
 
             let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
             let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
             base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            setTimeout(this.send_set_mode_command, 30 + parseInt(Math.random()*10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
-            setTimeout(this.send_auto_command, 60 + parseInt(Math.random()*10), this.name, this.target_pub_topic, this.sys_id, this.$store.state.drone_infos[this.name].goto_positions, start_idx, end_idx, delay, start_idx);
+            setTimeout(this.send_auto_command, 50, this.name, this.target_pub_topic, this.sys_id, this.$store.state.drone_infos[this.name].goto_positions, start_idx, end_idx, delay, start_idx);
 
             this.watchingMission = 'auto-goto';
         });
 
         EventBus.$on('command-set-pwms-' + this.name, (pwms) => {
-            if(Object.prototype.hasOwnProperty.call(pwms, 'ch9')) {
-                if(pwms.ch9[this.name] !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(pwms, 'ch9')) {
+                if (pwms.ch9[this.name] !== undefined) {
                     let pwm_value = parseInt(pwms.ch9[this.name]);
 
                     setTimeout((name, target_pub_topic, sys_id, pwm_value) => {
@@ -3870,8 +3963,8 @@ export default {
                 }
             }
 
-            if(Object.prototype.hasOwnProperty.call(pwms, 'ch10')) {
-                if(pwms.ch10[this.name] !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(pwms, 'ch10')) {
+                if (pwms.ch10[this.name] !== undefined) {
                     let pwm_value = parseInt(pwms.ch10[this.name]);
 
                     setTimeout((name, target_pub_topic, sys_id, pwm_value) => {
@@ -3881,8 +3974,8 @@ export default {
                 }
             }
 
-            if(Object.prototype.hasOwnProperty.call(pwms, 'ch11')) {
-                if(pwms.ch11[this.name] !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(pwms, 'ch11')) {
+                if (pwms.ch11[this.name] !== undefined) {
                     let pwm_value = parseInt(pwms.ch11[this.name]);
 
                     setTimeout((name, target_pub_topic, sys_id, pwm_value) => {
@@ -3892,8 +3985,8 @@ export default {
                 }
             }
 
-            if(Object.prototype.hasOwnProperty.call(pwms, 'ch12')) {
-                if(pwms.ch12[this.name] !== undefined) {
+            if (Object.prototype.hasOwnProperty.call(pwms, 'ch12')) {
+                if (pwms.ch12[this.name] !== undefined) {
                     let pwm_value = parseInt(pwms.ch12[this.name]);
 
                     setTimeout((name, target_pub_topic, sys_id, pwm_value) => {
@@ -3915,12 +4008,12 @@ export default {
 
                     this.watchingMission = 'rtl';
 
-                }, 5 + parseInt(Math.random()*5), name, target_pub_topic, sys_id);
-            }, 5 + parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, rtl_speed);
+                }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id);
+            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, rtl_speed);
         });
 
         EventBus.$on('command-set-land-' + this.name, () => {
-            setTimeout(this.send_land_command, parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id);
+            setTimeout(this.send_land_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id);
 
             this.watchingMission = 'land';
         });
@@ -3935,7 +4028,7 @@ export default {
         });
 
         EventBus.$on('command-set-change-speed-' + this.name, (target_speed) => {
-            setTimeout(this.send_change_speed_command, parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, target_speed);
+            setTimeout(this.send_change_speed_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_speed);
 
             this.watchingMission = 'change-speed';
         });
@@ -3995,17 +4088,17 @@ export default {
 
                             this.watchingMission = 'goto-circle';
 
-                        }, 5 + parseInt(Math.random()*5), name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed);
-                    }, 5 + parseInt(Math.random()*5), name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed);
-                }, 5 + parseInt(Math.random()*5), name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed);
-            }, 5 + parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, lat, lon, alt, radius, degree_speed);
+                        }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed);
+                    }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed);
+                }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed);
+            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lon, alt, radius, degree_speed);
         });
 
         EventBus.$on('command-set-goto-' + this.name, (position) => {
             let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
             let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
             base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            setTimeout(this.send_set_mode_command, parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
@@ -4028,7 +4121,10 @@ export default {
                 }
             };
 
-            this.$store.state.missionLines[this.name].path.push({lat: this.gpi.lat / 10000000, lng: this.gpi.lon / 10000000});
+            this.$store.state.missionLines[this.name].path.push({
+                lat: this.gpi.lat / 10000000,
+                lng: this.gpi.lon / 10000000
+            });
             this.$store.state.missionLines[this.name].path.push({lat: lat, lng: lon});
 
             delete this.$store.state.targetLines[this.name];
@@ -4037,7 +4133,7 @@ export default {
 
             setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, speed) => {
 
-                if(this.$store.state.drone_infos[name].gotoType === 'alt_first') {
+                if (this.$store.state.drone_infos[name].gotoType === 'alt_first') {
                     this.$store.state.drone_infos[name].targetAlt = alt;
 
                     console.log('send_goto_alt_command - alt: ', alt);
@@ -4052,7 +4148,7 @@ export default {
 
                 const checkMission = (interval, name, target_pub_topic, sys_id, lat, lon, alt, speed) => {
                     setTimeout(() => {
-                        if(this.watchingMission === 'complete') {
+                        if (this.watchingMission === 'complete') {
                             this.send_goto_command(name, target_pub_topic, sys_id, lat, lon, alt);
                             setTimeout((name, target_pub_topic, sys_id, speed) => {
                                 this.send_change_speed_command(name, target_pub_topic, sys_id, speed);
@@ -4068,7 +4164,10 @@ export default {
                                     }
                                 };
 
-                                this.$store.state.missionLines[name].path.push({lat: this.gpi.lat / 10000000, lng: this.gpi.lon / 10000000});
+                                this.$store.state.missionLines[name].path.push({
+                                    lat: this.gpi.lat / 10000000,
+                                    lng: this.gpi.lon / 10000000
+                                });
                                 this.$store.state.missionLines[name].path.push({lat: lat, lng: lon});
 
                                 delete this.$store.state.targetLines[name];
@@ -4091,9 +4190,9 @@ export default {
                                 this.watchingInitDist = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2));
 
 
-                            }, 5 + parseInt(Math.random()*5), name, target_pub_topic, sys_id, speed);
+                            }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, speed);
                         }
-                        else if(this.watchingMission === 'fail') {
+                        else if (this.watchingMission === 'fail') {
                             console.log('command-set-goto-', name, ' fail');
                         }
                         else {
@@ -4103,7 +4202,7 @@ export default {
                 }
 
                 checkMission(5, name, target_pub_topic, sys_id, lat, lon, alt, speed);
-            }, 5 + parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, lat, lon, alt, speed);
+            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lon, alt, speed);
 
         });
 
@@ -4111,7 +4210,7 @@ export default {
             let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
             let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
             base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            setTimeout(this.send_set_mode_command, parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
             let _alt = this.$store.state.drone_infos[this.name].targetAlt;
 
@@ -4119,17 +4218,17 @@ export default {
             this.watchingInitAlt = this.gpi.relative_alt / 1000;
 
             console.log('send_goto_alt_command - alt: ', _alt);
-            setTimeout(this.send_goto_alt_command, 5+ parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, _alt);
+            setTimeout(this.send_goto_alt_command, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, _alt);
         });
 
         EventBus.$on('command-set-takeoff-' + this.name, () => {
             let custom_mode = this.$store.state.mode_items.indexOf('ALT_HOLD'); // ALT_HOLD Mode
             let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
             base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            setTimeout(this.send_set_mode_command, parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
             console.log('send_arm_command ', this.name);
-            setTimeout(this.send_arm_command, parseInt(50 + Math.random()*50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
+            setTimeout(this.send_arm_command, parseInt(50 + Math.random() * 50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
 
             let takeoffDelay = this.$store.state.drone_infos[this.name].takeoffDelay;
             let _alt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
@@ -4144,7 +4243,7 @@ export default {
             // setTimeout(this.send_takeoff_command, parseInt((takeoffDelay * 1000) + Math.random()*100), this.name, this.target_pub_topic, this.sys_id, _alt);
 
             setTimeout((name, target_pub_topic, sys_id, base_mode, custom_mode, takeoff_alt) => {
-                if(this.curArmStatus === 'ARMED') {
+                if (this.curArmStatus === 'ARMED') {
                     this.send_set_mode_command(name, target_pub_topic, sys_id, base_mode, custom_mode);
 
                     setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
@@ -4158,7 +4257,7 @@ export default {
                 else {
                     console.log("시동이 걸리지 않았습니다.");
                 }
-            }, parseInt(((takeoffDelay) * 1000) + Math.random()*10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode, _alt);
+            }, parseInt(((takeoffDelay) * 1000) + Math.random() * 10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode, _alt);
         });
 
         EventBus.$on('command-set-mode-' + this.name, (selected_mode) => {
@@ -4182,8 +4281,8 @@ export default {
                     console.log('send_arm_command ', this.name);
                     this.send_arm_command(name, target_pub_topic, sys_id, 1, 0);
                     this.watchingMission = 'arm';
-                }, parseInt(Math.random()*5), name, target_pub_topic, sys_id);
-            }, parseInt(Math.random()*5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                }, parseInt(Math.random() * 5), name, target_pub_topic, sys_id);
+            }, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
         });
 
         // EventBus.$on('push-status-' + this.name, (payload) => {
@@ -4290,8 +4389,8 @@ export default {
         //     }
         // }
 
-        for(let idx in this.$store.state.tempMarkers[this.name]) {
-            if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[this.name], idx)) {
+        for (let idx in this.$store.state.tempMarkers[this.name]) {
+            if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[this.name], idx)) {
                 let str = this.$store.state.tempMarkers[this.name][idx].lat + ':' + this.$store.state.tempMarkers[this.name][idx].lng +
                     ':' + this.$store.state.tempMarkers[this.name][idx].alt + ':' + this.$store.state.tempMarkers[this.name][idx].radius +
                     ':' + this.$store.state.tempMarkers[this.name][idx].airspeed;
@@ -4308,7 +4407,7 @@ export default {
         let self = this;
         this.connection.host = this.broker;
 
-        if(localStorage.getItem('mqttConnection-'+this.name)) {
+        if (localStorage.getItem('mqttConnection-' + this.name)) {
             if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
                 this.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
                 console.log('client', this.client);
@@ -4337,7 +4436,7 @@ export default {
         let payload = {};
         payload.lat = parseFloat(this.lat);
         payload.lng = parseFloat(this.lng);
-        payload.alt = parseFloat(this.gpi.relative_alt/1000);
+        payload.alt = parseFloat(this.gpi.relative_alt / 1000);
         payload.heading = 0;
         EventBus.$emit('initialize-' + this.name, JSON.parse(JSON.stringify(payload)));
         payload = null;
@@ -4347,7 +4446,7 @@ export default {
     },
 
     beforeDestroy() {
-        if(this.timer_id) {
+        if (this.timer_id) {
             clearInterval(this.timer_id);
         }
 
