@@ -3220,7 +3220,7 @@ export default {
                         mission_seq = mavPacket.substr(base_offset, 4).toLowerCase();
                     }
 
-                    console.log('MAVLINK_MSG_ID_MISSION_ITEM_REACHED', mission_seq);
+                    console.log(this.name, 'MAVLINK_MSG_ID_MISSION_ITEM_REACHED', mission_seq);
 
                     this.mission_seq = Buffer.from(mission_seq, 'hex').readUInt16LE(0);
 

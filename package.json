@@ -65,5 +65,8 @@
         "> 1%",
         "last 2 versions",
         "not dead"
-    ]
+    ],
+    "description": "Drone GCS with Mobius",
+    "author": "Il Yeup Ahn, IoT Platform Center, KETI",
+    "license": "BSD-3-Clause"
 }
