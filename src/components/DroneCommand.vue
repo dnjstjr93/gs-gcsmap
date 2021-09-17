@@ -11,7 +11,7 @@
                 v-model="active_tab"
         >
             <v-tabs-slider></v-tabs-slider>
-            <v-tab class="pa-0 ma-0" style="min-width:0px" href="virtual"></v-tab>
+            <v-tab class="pa-0 ma-0" style="min-width:0" href="virtual"></v-tab>
             <v-tab v-for="(command) in commands" :key="command.title" :href="'#'+command.title" @click="tab_click(command.title)">
                 {{command.title}}
             </v-tab>
@@ -852,20 +852,20 @@
                     <span v-else-if="curTab === commands[1].title">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">시동</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[2].title">
+                    <div v-else-if="curTab === commands[2].title">
                         <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
-                            <div v-if="drone.selected && drone.targeted">
+                            <span v-if="drone.selected && drone.targeted">
                                 {{i}} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{  targetTakeoffAlt[i] }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">이륙</span> 명령 전송.
-                            </div>
+                            </span>
                         </div>
-                    </span>
-                    <span v-else-if="curTab === commands[3].title">
+                    </div>
+                    <div v-else-if="curTab === commands[3].title">
                          <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
-                             <div v-if="drone.selected && drone.targeted">
+                             <span v-if="drone.selected && drone.targeted">
                                  {{i}} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ targetAlt[i] }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">고도 변경</span> 명령 전송.
-                             </div>
+                             </span>
                          </div>
-                    </span>
+                    </div>
                     <span v-else-if="curTab === commands[4].title">
                         비행체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">이동</span> 명령 전송.
                     </span>
@@ -1706,7 +1706,7 @@
                             this.$store.state.drone_infos[name].autoDelay = parseInt(this.autoDelay[name]);
                             this.$store.state.drone_infos[name].autoSpeed = parseInt(this.autoSpeed[name]);
                             console.log('setAutoGoto', parseInt(this.$store.state.drone_infos[name].autoStartIndex), parseInt(this.$store.state.drone_infos[name].autoEndIndex), this.$store.state.drone_infos[name].autoDelay);
-                            if(parseInt(this.$store.state.drone_infos[name].autoStartIndex) < parseInt(this.$store.state.drone_infos[name].autoEndIndex)) {
+                            if(parseInt(this.$store.state.drone_infos[name].autoStartIndex) <= parseInt(this.$store.state.drone_infos[name].autoEndIndex)) {
                                 EventBus.$emit('command-set-auto_goto-' + name);
                             }
                             else {
@@ -1780,11 +1780,11 @@
         }
     }
 
-    .v-avatar--metronome {
-        animation-name: metronome-example;
-        animation-iteration-count: infinite;
-        animation-direction: alternate;
-    }
+    /*.v-avatar--metronome {*/
+    /*    animation-name: metronome-example;*/
+    /*    animation-iteration-count: infinite;*/
+    /*    animation-direction: alternate;*/
+    /*}*/
 
     .tab_position {
         position: absolute;

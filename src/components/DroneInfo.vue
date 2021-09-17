@@ -241,8 +241,8 @@
                                     <Attitude :size="attitude_size" :roll="roll" :pitch="pitch"/>
                                 </div>
                                 <div class="info_position align-self-center" :style="{top: 0, left: 0}">
-                  <span :style="{'font-size': '22px'}" :class="colorMode" :color="$store.state.drone_infos[name].color"
-                        class="shadow_icon px-1">{{ curMode }}</span>
+                                    <span :style="{'font-size': '22px'}" :class="colorMode" :color="$store.state.drone_infos[name].color"
+                                        class="shadow_icon px-1">{{ curMode }}</span>
                                 </div>
 
                                 <div class="info_position" :style="{top: '36px', left: 0}">
@@ -279,8 +279,8 @@
 
                                 <div class="info_position"
                                      :style="{top: 0, left: ((curArmStatus==='ARMED')?(myWidth-84):(myWidth-118))+'px'}">
-                  <span :style="{'font-size': '22px'}" :class="colorArm" :color="$store.state.drone_infos[name].color"
-                        class="shadow_icon px-1">{{ curArmStatus }}</span>
+                                    <span :style="{'font-size': '22px'}" :class="colorArm" :color="$store.state.drone_infos[name].color"
+                                        class="shadow_icon px-1">{{ curArmStatus }}</span>
                                 </div>
 
                                 <div class="info_position" :style="{top: '36px', left: (myWidth-94)+'px'}">
@@ -315,13 +315,12 @@
                                 </div>
 
                                 <div class="info_position text-center" :style="{top: '144px', left: 0}">
-                  <span class="shadow_icon px-2" :style="{color: 'white'}">{{
-                          (gpi.lat / 10000000).toFixed(7)
-                      }} : {{ (gpi.lon / 10000000).toFixed(7) }} : <span style="font-size: 20px">{{
-                              (gpi.relative_alt / 1000).toFixed(1)
-                          }}</span> ({{ (gpi.alt / 1000).toFixed(1) }})</span>
+                                    <span class="shadow_icon px-2" :style="{color: 'white'}">{{
+                                          (gpi.lat / 10000000).toFixed(7)
+                                      }} : {{ (gpi.lon / 10000000).toFixed(7) }} : <span style="font-size: 20px">{{
+                                              (gpi.relative_alt / 1000).toFixed(1)
+                                          }}</span> ({{ (gpi.alt / 1000).toFixed(1) }})</span>
                                 </div>
-
                                 <!--                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
                             </v-card>
                         </v-col>
@@ -544,7 +543,7 @@ export default {
         'myWidth'
     ],
 
-    data: function () {
+    data() {
         return {
             dialog: false,
             isPlaying: true,
@@ -773,6 +772,39 @@ export default {
 
             stxFlag: 0,
             strContentEach: '',
+
+            droneStatus: {},
+
+            MAV_CMD_ACK_CODE: {
+                0: 'MAV_CMD_ACK_OK',
+                1: 'MAV_CMD_ACK_ERR_FAIL',
+                2: 'MAV_CMD_ACK_ERR_ACCESS_DENIED',
+                3: 'MAV_CMD_ACK_ERR_NOT_SUPPORTED',
+                4: 'MAV_CMD_ACK_ERR_COORDINATE_FRAME_NOT_SUPPORTED',
+                5: 'MAV_CMD_ACK_ERR_COORDINATES_OUT_OF_RANGE',
+                6: 'MAV_CMD_ACK_ERR_X_LAT_OUT_OF_RANGE',
+                7: 'MAV_CMD_ACK_ERR_Y_LON_OUT_OF_RANGE',
+                8: 'MAV_CMD_ACK_ERR_Z_ALT_OUT_OF_RANGE',
+            },
+
+            MAV_MISSION_RESULT_CODE: {
+                0: 'MAV_MISSION_ACCEPTED',
+                1: 'MAV_MISSION_ERROR',
+                2: 'MAV_MISSION_UNSUPPORTED_FRAME',
+                3: 'MAV_MISSION_UNSUPPORTED',
+                4: 'MAV_MISSION_NO_SPACE',
+                5: 'MAV_MISSION_INVALID',
+                6: 'MAV_MISSION_INVALID_PARAM1',
+                7: 'MAV_MISSION_INVALID_PARAM2',
+                8: 'MAV_MISSION_INVALID_PARAM3',
+                9: 'MAV_MISSION_INVALID_PARAM4',
+                10: 'MAV_MISSION_INVALID_PARAM5_X',
+                11: 'MAV_MISSION_INVALID_PARAM6_Y',
+                12: 'MAV_MISSION_INVALID_PARAM7',
+                13: 'MAV_MISSION_INVALID_SEQUENCE',
+                14: 'MAV_MISSION_DENIED',
+                15: 'MAV_MISSION_OPERATION_CANCELLED',
+            },
         }
     },
 
@@ -1897,7 +1929,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('Send WPNAV Speed command to %s, ' + 'msg: ' + msg.toString('hex') + '\n', target_name);
+                    console.log('Send WPNAV Speed param set command to %s, ' + 'msg: ' + msg.toString('hex') + '\n', target_name);
                     this.doPublish(pub_topic, msg);
                 }
             }
@@ -1928,72 +1960,66 @@ export default {
             }
         },
 
-        result_auto_mission_item_complete(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count) {
-            if (this.result_mission_ack[target_sys_id].type == 0) {
-                console.log('Auto Mission Upload Complete to %s', target_name);
-
-                let custom_mode = this.$store.state.mode_items.indexOf('AUTO'); // AUTO Mode
-                let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
-            }
-            else {
-                result_check_count++;
-                if (result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
-                    console.log('Auto Mission Upload Error at %s', target_name);
-                }
-                else {
-                    console.log(result_check_count + ' - result_auto_mission_item_complete ', target_name);
-                    setTimeout(this.result_auto_mission_item_complete, parseInt((Math.random()*25))+25, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
-                }
-            }
-        },
+        // result_auto_mission_item_complete(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count) {
+        //     if (this.result_mission_ack[target_sys_id].type === 0) {
+        //         console.log('Auto Mission Upload Complete to %s', target_name);
+        //
+        //         let custom_mode = this.$store.state.mode_items.indexOf('AUTO'); // AUTO Mode
+        //         let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
+        //         base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+        //         this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+        //     }
+        //     else {
+        //         result_check_count++;
+        //         if (result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
+        //             console.log('Auto Mission Upload Error at %s', target_name);
+        //         }
+        //         else {
+        //             console.log(result_check_count + ' - result_auto_mission_item_complete ', target_name);
+        //             setTimeout(this.result_auto_mission_item_complete, 5, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
+        //         }
+        //     }
+        // },
 
         send_auto_mission_protocol(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, seq) {
             var btn_params = {};
 
-            if (seq == 0) {
-                btn_params.target_system = target_sys_id;
-                btn_params.target_component = 1;
+            let cur_goto_position = goto_each_position[seq];
+
+            console.log(seq, cur_goto_position);
+            this.mission_request[target_sys_id].seq_sent = seq;
+
+            var arr_cur_goto_position = cur_goto_position.split(':');
+            var latitude = parseFloat(arr_cur_goto_position[0]);
+            var longitude = parseFloat(arr_cur_goto_position[1]);
+            var rel_altitude = parseFloat(arr_cur_goto_position[2]);
+            //var speed = parseFloat(arr_cur_goto_position[3]);
+
+            btn_params.target_system = target_sys_id;
+            btn_params.target_component = 1;
+
+            if(seq === 0) {
                 btn_params.seq = 0;
                 btn_params.frame = mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT; // 0: MAV_FRAME_GLOBAL, 3: MAV_FRAME_GLOBAL_RELATIVE_ALT
                 btn_params.command = mavlink.MAV_CMD_NAV_WAYPOINT;
                 btn_params.current = 1;
                 btn_params.autocontinue = 0;
-                btn_params.param1 = 0;
-                btn_params.param2 = 0;
-                btn_params.param3 = 0;
-                btn_params.param4 = 0;
-                btn_params.param5 = this.gpi.lat / 10000000;
-                btn_params.param6 = this.gpi.lon / 10000000;
-                btn_params.param7 = this.gpi.relative_alt / 1000;
-                btn_params.mission_type = 0;
             }
             else {
-                let cur_goto_position = goto_each_position[cur_idx];
-
-                var arr_cur_goto_position = cur_goto_position.split(':');
-                var latitude = parseFloat(arr_cur_goto_position[0]);
-                var longitude = parseFloat(arr_cur_goto_position[1]);
-                var rel_altitude = parseFloat(arr_cur_goto_position[2]);
-                //var speed = parseFloat(arr_cur_goto_position[3]);
-
-                btn_params.target_system = target_sys_id;
-                btn_params.target_component = 1;
                 btn_params.seq = seq;
                 btn_params.frame = mavlink.MAV_FRAME_GLOBAL_RELATIVE_ALT; // 0: MAV_FRAME_GLOBAL, 3: MAV_FRAME_GLOBAL_RELATIVE_ALT
                 btn_params.command = mavlink.MAV_CMD_NAV_WAYPOINT;
                 btn_params.current = 0;
                 btn_params.autocontinue = 1;
-                btn_params.param1 = delay;
-                btn_params.param2 = 0;
-                btn_params.param3 = 0;
-                btn_params.param4 = 0;
-                btn_params.param5 = latitude;
-                btn_params.param6 = longitude;
-                btn_params.param7 = rel_altitude;
-                btn_params.mission_type = 0;
             }
+            btn_params.param1 = delay;
+            btn_params.param2 = 0;
+            btn_params.param3 = 0;
+            btn_params.param4 = 0;
+            btn_params.param5 = latitude;
+            btn_params.param6 = longitude;
+            btn_params.param7 = rel_altitude;
+            btn_params.mission_type = 0;
 
             try {
                 var msg = this.mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_MISSION_ITEM, btn_params);
@@ -2001,54 +2027,27 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log(seq + ' Send MISSION_ITEM to %s, ' + 'msg: ' + msg.toString('hex') + ' - ' + seq, target_name);
                     this.doPublish(pub_topic, msg);
+                    //console.log('Send MISSION_ITEM ' + seq + ' to %s, ' + 'msg: ' + msg.toString('hex') + ' - ' + seq, target_name);
 
-                    if(this.mission_request[target_sys_id].seq_sent < this.mission_request[target_sys_id].seq_requested) {
-                        cur_idx++;
-                    }
+                    this.droneStatus.curCommand = 'auto_mission_item';
+                    this.droneStatus.target_name = target_name;
+                    this.droneStatus.pub_topic = pub_topic;
+                    this.droneStatus.target_sys_id = target_sys_id;
+                    this.droneStatus.goto_each_position = goto_each_position;
+                    this.droneStatus.start_idx = start_idx;
+                    this.droneStatus.end_idx = end_idx;
+                    this.droneStatus.delay = delay;
+                    this.droneStatus.cur_idx = cur_idx;
 
-                    if (cur_idx <= end_idx) {
-                        if (!Object.prototype.hasOwnProperty.call(this.mission_request, target_sys_id)) {
-                            this.mission_request[target_sys_id] = {};
-                        }
-                        this.mission_request[target_sys_id].seq_sent = seq;
-                        this.mission_request[target_sys_id].seq_requested = 255;
-
-                        this.result_check_count = 0;
-                        setTimeout(this.result_auto_mission_protocol, parseInt((Math.random()*25))+25, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
-                    }
-                    else {
-                        if (!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
-                            this.result_mission_ack[target_sys_id] = {};
-                        }
-                        this.result_mission_ack[target_sys_id].type = 255;
-
-                        this.result_check_count = 0;
-                        setTimeout(this.result_auto_mission_item_complete, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
-                    }
+                    this.droneStatus.objTimeout = setTimeout(() => {
+                        this.droneStatus.curCommand = '';
+                        console.log('Error Auto Mission Upload at %s', target_name);
+                    }, 2000, target_name);
                 }
             }
             catch (ex) {
                 console.log('[ERROR] ' + ex);
-            }
-        },
-
-        result_auto_mission_protocol(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count) {
-            if (this.mission_request[target_sys_id].seq_requested != 255) {
-                console.log(this.mission_request[target_sys_id].seq_requested + ' MISSION REQUEST from %s', target_name);
-
-                this.send_auto_mission_protocol(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.mission_request[target_sys_id].seq_requested);
-            }
-            else {
-                result_check_count++;
-                if (result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
-                    console.log('Mission Upload Error at %s', target_name);
-                }
-                else {
-                    console.log(result_check_count + ' - result_auto_mission_protocol ', target_name);
-                    setTimeout(this.result_auto_mission_protocol, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
-                }
             }
         },
 
@@ -2065,8 +2064,20 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('Send MISSION_COUNT to %s, msg: ' + msg.toString('hex') + ' - ' + cur_idx, target_name);
                     this.doPublish(pub_topic, msg);
+
+                    this.droneStatus.curCommand = 'auto_mission_count';
+                    this.droneStatus.target_name = target_name;
+                    this.droneStatus.pub_topic = pub_topic;
+                    this.droneStatus.target_sys_id = target_sys_id;
+                    this.droneStatus.goto_each_position = goto_each_position;
+                    this.droneStatus.start_idx = start_idx;
+                    this.droneStatus.end_idx = end_idx;
+                    this.droneStatus.delay = delay;
+                    this.droneStatus.cur_idx = cur_idx;
+                    this.droneStatus.mission_count = btn_params.count;
+
+                    console.log('Send MISSION_COUNT to %s, msg: ' + msg.toString('hex') + ' - ' + cur_idx, target_name);
 
                     if (!Object.prototype.hasOwnProperty.call(this.mission_request, target_sys_id)) {
                         this.mission_request[target_sys_id] = {};
@@ -2075,28 +2086,16 @@ export default {
                     this.mission_request[target_sys_id].seq_requested = 255;
 
                     this.result_check_count = 0;
-                    setTimeout(this.result_auto_mission_protocol, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
+                    //setTimeout(this.result_auto_mission_protocol, 1, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
+
+                    this.droneStatus.objTimeout = setTimeout(() => {
+                        this.droneStatus.curCommand = '';
+                        console.log('Error Auto Mission Upload at %s', target_name);
+                    }, 2000, target_name);
                 }
             }
             catch (ex) {
                 console.log('[ERROR] ' + ex);
-            }
-        },
-
-        result_auto_mission_clear_all(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count) {
-            if (this.result_mission_ack[target_sys_id].type == 0) {
-                console.log('Clear All Auto Mission of %s', target_name);
-                this.send_auto_mission_count(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx);
-            }
-            else {
-                result_check_count++;
-                if (result_check_count > MISSION_ACK_TIMEOUT_COUNT) {
-                    console.log('Auto Mission Clear Error at %s', target_name);
-                }
-                else {
-                    console.log(result_check_count + ' - result_auto_mission_clear_all ', target_name);
-                    setTimeout(this.result_auto_mission_clear_all, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, result_check_count);
-                }
             }
         },
 
@@ -2112,8 +2111,21 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('Send Auto Mission Clear All command to %s, msg: ' + msg.toString('hex') + ' - ' + cur_idx, target_name);
                     this.doPublish(pub_topic, msg);
+
+                    //console.log('send_auto_command', 'goto_each_position', goto_each_position);
+
+                    this.droneStatus.curCommand = 'auto_mission_clear_all';
+                    this.droneStatus.target_name = target_name;
+                    this.droneStatus.pub_topic = pub_topic;
+                    this.droneStatus.target_sys_id = target_sys_id;
+                    this.droneStatus.goto_each_position = goto_each_position;
+                    this.droneStatus.start_idx = start_idx;
+                    this.droneStatus.end_idx = end_idx;
+                    this.droneStatus.delay = delay;
+                    this.droneStatus.cur_idx = cur_idx;
+
+                    console.log('Send Auto Mission Clear All command to %s, msg: ' + msg.toString('hex') + ' - ' + cur_idx, target_name);
 
                     if (!Object.prototype.hasOwnProperty.call(this.result_mission_ack, target_sys_id)) {
                         this.result_mission_ack[target_sys_id] = {};
@@ -2121,7 +2133,11 @@ export default {
                     this.result_mission_ack[target_sys_id].type = 255;
 
                     this.result_check_count = 0;
-                    setTimeout(this.result_auto_mission_clear_all, 40, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
+                    //setTimeout(this.result_auto_mission_clear_all, 1000, target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, this.result_check_count);
+                    this.droneStatus.objTimeout = setTimeout(() => {
+                        this.droneStatus.curCommand = '';
+                        console.log('Error Auto Mission Clear All command at %s', target_name);
+                    }, 2000, target_name);
                 }
             }
             catch (ex) {
@@ -2216,7 +2232,7 @@ export default {
         },
 
         result_mission_item_complete(target_name, pub_topic, target_sys_id, latitude, longitude, rel_altitude, speed, radius, result_check_count) {
-            if (this.result_mission_ack[target_sys_id].type == 0) {
+            if (this.result_mission_ack[target_sys_id].type === 0) {
                 console.log('Mission Upload Complete to %s', target_name);
 
                 delete this.$store.state.missionLines[target_name];
@@ -3220,11 +3236,18 @@ export default {
                         mission_seq = mavPacket.substr(base_offset, 4).toLowerCase();
                     }
 
-                    console.log(this.name, 'MAVLINK_MSG_ID_MISSION_ITEM_REACHED', mission_seq);
-
                     this.mission_seq = Buffer.from(mission_seq, 'hex').readUInt16LE(0);
 
-                    console.log(this.mission_seq);
+                    console.log(this.name, 'MAVLINK_MSG_ID_MISSION_ITEM_REACHED', this.mission_seq);
+
+                    if(this.droneStatus.mission_count === (this.mission_seq+1)) {
+                        console.log('Auto Mission Complete at %s', this.droneStatus.target_name);
+
+                        let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
+                        let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
+                        base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                    }
                 }
 
                     // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
@@ -3464,6 +3487,12 @@ export default {
                     this.mission_request[sys_id].seq_requested = mission_result;
 
                     console.log(this.name, sys_id, 'MAVLINK_MSG_ID_MISSION_REQUEST', '-', this.mission_request[sys_id].target_system, this.mission_request[sys_id].seq_requested);
+
+                    if((this.droneStatus.curCommand === 'auto_mission_count') || (this.droneStatus.curCommand === 'auto_mission_item')) {
+                        clearTimeout(this.droneStatus.objTimeout);
+
+                        this.send_auto_mission_protocol(this.droneStatus.target_name, this.droneStatus.pub_topic, this.droneStatus.target_sys_id, this.droneStatus.goto_each_position, this.droneStatus.start_idx, this.droneStatus.end_idx, this.droneStatus.delay, this.droneStatus.cur_idx, this.mission_request[sys_id].seq_requested);
+                    }
                 }
                 else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_REQUEST_LIST) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_REQUEST_LIST - ' + mavPacket);
@@ -3501,7 +3530,26 @@ export default {
                     this.result_mission_ack[sys_id].target_system = Buffer.from(target_system, 'hex').readUInt8(0);
                     this.result_mission_ack[sys_id].type = Buffer.from(mission_result_type, 'hex').readUInt8(0);
 
-                    console.log(this.name, 'MAVLINK_MSG_ID_MISSION_ACK', '-', this.result_mission_ack[sys_id].target_system, this.result_mission_ack[sys_id].type);
+                    console.log(this.name, 'MAVLINK_MSG_ID_MISSION_ACK', '-', this.result_mission_ack[sys_id].target_system, this.MAV_MISSION_RESULT_CODE[this.result_mission_ack[sys_id].type]);
+
+                    if((this.droneStatus.curCommand === 'auto_mission_clear_all') && (this.result_mission_ack[sys_id].type === 0)) {
+                        clearTimeout(this.droneStatus.objTimeout);
+                        this.droneStatus.curCommand = '';
+
+                        this.send_auto_mission_count(this.droneStatus.target_name, this.droneStatus.pub_topic, this.droneStatus.target_sys_id, this.droneStatus.goto_each_position, this.droneStatus.start_idx, this.droneStatus.end_idx, this.droneStatus.delay, this.droneStatus.cur_idx);
+                    }
+
+                    if((this.droneStatus.curCommand === 'auto_mission_item') && (this.result_mission_ack[sys_id].type === 0)) {
+                        clearTimeout(this.droneStatus.objTimeout);
+                        this.droneStatus.curCommand = '';
+
+                        console.log('Auto Mission Upload Complete to %s', this.droneStatus.target_name);
+
+                        let custom_mode = this.$store.state.mode_items.indexOf('AUTO'); // AUTO Mode
+                        let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
+                        base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                    }
                 }
                 else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_ITEM_INT) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ITEM_INT - ' + mavPacket);
@@ -3531,7 +3579,7 @@ export default {
                     this.result_command_ack[sys_id].command = Buffer.from(command, 'hex').readUInt16LE(0);
                     this.result_command_ack[sys_id].command_result = Buffer.from(command_result, 'hex').readUInt8(0);
 
-                    console.log(this.result_command_ack[sys_id].command, '-', this.result_command_ack[sys_id].command_result);
+                    console.log(this.name, 'MAVLINK_MSG_ID_COMMAND_ACK', '-', this.result_command_ack[sys_id].command, this.MAV_CMD_ACK_CODE[this.result_command_ack[sys_id].command_result]);
                 }
 
                 mavPacket = null;
@@ -3946,7 +3994,13 @@ export default {
             base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
             this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
-            setTimeout(this.send_auto_command, 50, this.name, this.target_pub_topic, this.sys_id, this.$store.state.drone_infos[this.name].goto_positions, start_idx, end_idx, delay, start_idx);
+            var auto_goto_positions = this.$store.state.drone_infos[this.name].goto_positions.slice(start_idx, (end_idx+1));
+            let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10';
+            auto_goto_positions.unshift(ele0);
+
+            //console.log('auto_goto_positions', auto_goto_positions);
+
+            setTimeout(this.send_auto_command, 50, this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, start_idx, end_idx, delay, start_idx);
 
             this.watchingMission = 'auto-goto';
         });
