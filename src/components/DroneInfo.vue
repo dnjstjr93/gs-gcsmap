@@ -13,9 +13,7 @@
                                                     hide-details>
                                             <template v-slot:label>
                                                 <div>
-                                                    <span :class="statusTextColor">{{
-                                                            name + '(' + sys_id + ')'
-                                                        }}</span>
+                                                    <span :class="statusTextColor">{{name + '(' + sys_id + ')' }}</span>
                                                 </div>
                                             </template>
                                         </v-checkbox>
@@ -43,21 +41,42 @@
                                             max-width="640"
                                         >
                                             <v-card>
-                                                <v-card-title class="text-h6">
-                                                    Information of {{ name }}
+                                                <v-card-title class="text-h6">Information of {{ name }}
+                                                    <v-spacer></v-spacer>
+                                                    <v-file-input
+                                                        class="mr-2"
+                                                        accept=".waypoints,.txt" label="Waypoints File input"
+                                                        :color="'#FF5722'"
+                                                        outlined dense hide-details small-chips
+                                                        v-model="chosenWaypointsFile"
+                                                    ></v-file-input>
+                                                    <v-btn
+                                                        dark
+                                                        elevation="5"
+                                                        :color="'#FF5722'"
+                                                        @click.stop="loadUpdateWaypoints"
+                                                        left
+                                                    >
+                                                        <v-icon dark class="mr-2">mdi-map-marker-path</v-icon>
+                                                        Load
+                                                    </v-btn>
                                                 </v-card-title>
-
-                                                <v-textarea
-                                                    outlined
-                                                    name="myDroneInfo"
-                                                    label="drone_info"
+                                                <v-textarea outlined name="myDroneInfo" label="drone_info" class="mx-2" height="480"
                                                     v-model="strMyDroneInfo"
-                                                    class="mx-2"
                                                     hide-details
-                                                    height="480"
                                                 ></v-textarea>
 
                                                 <v-card-actions>
+                                                    <v-btn
+                                                        dark
+                                                        elevation="5"
+                                                        :color="'#795548'"
+                                                        @click.stop="showWaypointsFileDialog=true"
+                                                        left
+                                                    >
+                                                        <v-icon dark class="mr-2">mdi-download</v-icon>
+                                                        Save
+                                                    </v-btn>
                                                     <v-spacer></v-spacer>
 
                                                     <v-btn
@@ -365,8 +384,7 @@
                                     >
                                         <draggable v-model="positions">
                                             <v-chip
-                                                v-for="(position, i) in positions"
-                                                :key="'pos_chip'+i"
+                                                v-for="(position, i) in positions" :key="'pos_chip'+i"
                                                 @click="selectedPosition(i)"
                                             >
                                                 {{ String(i) }}
@@ -450,24 +468,24 @@ for (let n = 0; n <= 0xff; ++n) {
 
 const MISSION_ACK_TIMEOUT_COUNT = 20;
 
-var RE = 6371.00877; // 지구 반경(km)
-var GRID = 0.001; // 격자 간격(km)
-var SLAT1 = 30.0; // 투영 위도1(degree)
-var SLAT2 = 60.0; // 투영 위도2(degree)
-var OLON = 126.0; // 기준점 경도(degree)
-var OLAT = 38.0; // 기준점 위도(degree)
-var XO = 43; // 기준점 X좌표(GRID)
-var YO = 136; // 기1준점 Y좌표(GRID)
+const RE = 6371.00877; // 지구 반경(km)
+const GRID = 0.001; // 격자 간격(km)
+const SLAT1 = 30.0; // 투영 위도1(degree)
+const SLAT2 = 60.0; // 투영 위도2(degree)
+const OLON = 126.0; // 기준점 경도(degree)
+const OLAT = 38.0; // 기준점 위도(degree)
+const XO = 43; // 기준점 X좌표(GRID)
+const YO = 136; // 기1준점 Y좌표(GRID)
 
 function dfs_xy_conv(code, v1, v2) {
-    var DEGRAD = Math.PI / 180.0;
-    var RADDEG = 180.0 / Math.PI;
+    const DEGRAD = Math.PI / 180.0;
+    const RADDEG = 180.0 / Math.PI;
 
-    var re = RE / GRID;
-    var slat1 = SLAT1 * DEGRAD;
-    var slat2 = SLAT2 * DEGRAD;
-    var olon = OLON * DEGRAD;
-    var olat = OLAT * DEGRAD;
+    const re = RE / GRID;
+    const slat1 = SLAT1 * DEGRAD;
+    const slat2 = SLAT2 * DEGRAD;
+    const olon = OLON * DEGRAD;
+    const olat = OLAT * DEGRAD;
 
     var sn = Math.tan(Math.PI * 0.25 + slat2 * 0.5) / Math.tan(Math.PI * 0.25 + slat1 * 0.5);
     sn = Math.log(Math.cos(slat1) / Math.cos(slat2)) / Math.log(sn);
@@ -476,7 +494,7 @@ function dfs_xy_conv(code, v1, v2) {
     var ro = Math.tan(Math.PI * 0.25 + olat * 0.5);
     ro = re * sf / Math.pow(ro, sn);
     var rs = {};
-    if (code == "toXY") {
+    if (code === "toXY") {
         rs['lat'] = v1;
         rs['lng'] = v2;
         var ra = Math.tan(Math.PI * 0.25 + (v1) * DEGRAD * 0.5);
@@ -545,6 +563,8 @@ export default {
 
     data() {
         return {
+            strWaypoints: null,
+            chosenWaypointsFile: null,
             dialog: false,
             isPlaying: true,
             bpm: 40,
@@ -1001,6 +1021,57 @@ export default {
     },
 
     methods: {
+        loadUpdateWaypoints() {
+            console.log('loadUpdateWaypoints', 'chosenWaypointsFile', this.chosenWaypointsFile);
+
+            if (!this.chosenWaypointsFile) {
+                this.strWaypoints = "No File Chosen"
+            }
+
+            var reader = new FileReader();
+
+            // Use the javascript reader object to load the contents
+            // of the file in the v-model prop
+            reader.readAsText(this.chosenWaypointsFile);
+            reader.onload = () => {
+                this.strWaypoints = reader.result;
+
+                console.log(this.strWaypoints);
+
+                let arrWayPoints = this.strWaypoints.split('\r');
+                console.log(arrWayPoints);
+
+                let objMyDroneInfo = JSON.parse(this.strMyDroneInfo);
+                objMyDroneInfo.goto_positions = null;
+                objMyDroneInfo.goto_positions = [];
+
+                arrWayPoints.forEach((waypoint)=>{
+                    waypoint = waypoint.replace(/\n/g, '');
+                    let arrWaypoint = waypoint.split('\t');
+
+                    if(arrWaypoint.length > 1) {
+                        let seq = arrWaypoint[0];
+                        if(seq > 0) {
+                            console.log(arrWaypoint);
+
+                            let strGotoPosition = String(arrWaypoint[8]) + ':' +
+                                String(arrWaypoint[9]) + ':' +
+                                String(arrWaypoint[10]) + ':' +
+                                String(objMyDroneInfo.targetSpeed) + ':' +
+                                String(objMyDroneInfo.targetRadius) + ':' +
+                                String(objMyDroneInfo.targetTurningSpeed);
+
+                            console.log(strGotoPosition);
+
+                            objMyDroneInfo.goto_positions[seq-1] = strGotoPosition;
+
+                            this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                        }
+                    }
+                });
+            }
+        },
+
         selectedPosition: function (i) {
             let payload = {};
             payload.pName = this.name;
@@ -1017,6 +1088,7 @@ export default {
 
         showMyDroneInfoDialog() {
             this.strMyDroneInfo = JSON.stringify(this.$store.state.drone_infos[this.name], null, 4);
+            this.chosenWaypointsFile = null;
             this.dialog = true;
         },
 
@@ -1594,7 +1666,7 @@ export default {
                 var genMsg = null;
                 //var targetSysId = sysId;
                 // eslint-disable-next-line no-unused-vars
-                var targetCompId = (params.targetCompId === undefined) ? 0 : params.targetCompId;
+                //var targetCompId = (params.targetCompId === undefined) ? 0 : params.targetCompId;
 
                 switch (type) {
                     // MESSAGE ////////////////////////////////////
@@ -2794,7 +2866,7 @@ export default {
                     this.hb.system_status = Buffer.from(system_status, 'hex').readUInt8(0);
                     this.hb.mavlink_version = Buffer.from(mavlink_version, 'hex').readUInt8(0);
 
-                    if (this.hb.base_mode & 0x80) {
+                    if ((this.hb.base_mode & 0x80) === 0x80) {
                         if (this.curArmStatus === 'DISARMED') {
                             this.$store.state.trackingLines[this.name] = null;
                             delete this.$store.state.trackingLines[this.name];
@@ -3456,7 +3528,7 @@ export default {
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_REQUEST) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_REQUEST - ' + mavPacket);
-                    if (ver == 'fd') {
+                    if (ver === 'fd') {
                         base_offset = 20;
                         var mission_sequence = mavPacket.substr(base_offset, 4).toLowerCase();
                         base_offset += 4;
@@ -3494,15 +3566,15 @@ export default {
                         this.send_auto_mission_protocol(this.droneStatus.target_name, this.droneStatus.pub_topic, this.droneStatus.target_sys_id, this.droneStatus.goto_each_position, this.droneStatus.start_idx, this.droneStatus.end_idx, this.droneStatus.delay, this.droneStatus.cur_idx, this.mission_request[sys_id].seq_requested);
                     }
                 }
-                else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_REQUEST_LIST) {
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_REQUEST_LIST) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_REQUEST_LIST - ' + mavPacket);
                 }
-                else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_COUNT) { //
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_COUNT) { //
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_COUNT - ' + mavPacket);
                 }
-                else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_ACK) { // #47 - mission_ack
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ACK) { // #47 - mission_ack
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ACK - ' + mavPacket);
-                    if (ver == 'fd') {
+                    if (ver === 'fd') {
                         base_offset = 20;
                         target_system = mavPacket.substr(base_offset, 2).toLowerCase();
                         base_offset += 2;
@@ -3551,12 +3623,12 @@ export default {
                         this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
                     }
                 }
-                else if (msg_id == mavlink.MAVLINK_MSG_ID_MISSION_ITEM_INT) {
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM_INT) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ITEM_INT - ' + mavPacket);
                 }
-                else if (msg_id == mavlink.MAVLINK_MSG_ID_COMMAND_ACK) { // #77 command_ack
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_COMMAND_ACK) { // #77 command_ack
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ACK - ' + mavPacket);
-                    if (ver == 'fd') {
+                    if (ver === 'fd') {
                         base_offset = 20;
                         var command = mavPacket.substr(base_offset, 4).toLowerCase();
                         base_offset += 4;
@@ -4091,18 +4163,18 @@ export default {
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
             var lon = parseFloat(arr_cur_goto_position[1]);
-            var alt = parseFloat(arr_cur_goto_position[2]);
+            //var alt = parseFloat(arr_cur_goto_position[2]);
             //var speed = parseFloat(arr_cur_goto_position[3]);
-            var radius = parseFloat(arr_cur_goto_position[4]);
-            var circle_speed = parseFloat(arr_cur_goto_position[5]);
-            var degree_speed = parseInt((circle_speed / radius) * (180 / 3.14), 10);
+            //var radius = parseFloat(arr_cur_goto_position[4]);
+            //var circle_speed = parseFloat(arr_cur_goto_position[5]);
+            //var degree_speed = parseInt((circle_speed / radius) * (180 / 3.14), 10);
 
             var dir = (this.$store.state.drone_infos[this.name].circleType === 'cw') ? (1) : (-1);
 
-            alt = this.$store.state.drone_infos[this.name].targetAlt;
-            radius = this.$store.state.drone_infos[this.name].targetRadius;
-            circle_speed = this.$store.state.drone_infos[this.name].targetTurningSpeed;
-            degree_speed = dir * parseInt((circle_speed / radius) * (180 / 3.14), 10);
+            var alt = this.$store.state.drone_infos[this.name].targetAlt;
+            var radius = this.$store.state.drone_infos[this.name].targetRadius;
+            var circle_speed = this.$store.state.drone_infos[this.name].targetTurningSpeed;
+            var degree_speed = dir * parseInt((circle_speed / radius) * (180 / 3.14), 10);
 
             setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed) => {
                 this.send_circle_radius_param_set_command(name, target_pub_topic, sys_id, radius);
@@ -4157,12 +4229,12 @@ export default {
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
             var lon = parseFloat(arr_cur_goto_position[1]);
-            var alt = parseFloat(arr_cur_goto_position[2]);
-            var speed = parseFloat(arr_cur_goto_position[3]);
+            //var alt = parseFloat(arr_cur_goto_position[2]);
+            //var speed = parseFloat(arr_cur_goto_position[3]);
 
             //this.$store.state.drone_infos[this.name].targetSpeed = speed;
-            alt = this.$store.state.drone_infos[this.name].targetAlt;
-            speed = this.$store.state.drone_infos[this.name].targetSpeed;
+            var alt = this.$store.state.drone_infos[this.name].targetAlt;
+            var speed = this.$store.state.drone_infos[this.name].targetSpeed;
 
             delete this.$store.state.missionCircles[this.name];
             delete this.$store.state.missionLines[this.name];
@@ -4572,7 +4644,7 @@ export default {
     width: 100%;
     height: 100%;
     position: relative;
-    margin: 0px;
+    margin: 0;
 }
 
 .box {
@@ -4591,7 +4663,7 @@ export default {
 
 .stack-top {
     z-index: 9;
-    margin: 0px; /* for demo purpose  */
+    margin: 0; /* for demo purpose  */
 }
 
 .arm-status-gray {
