@@ -38,7 +38,7 @@
 
                                         <v-dialog
                                             v-model="dialog"
-                                            max-width="640"
+                                            max-width="720"
                                         >
                                             <v-card>
                                                 <v-card-title class="text-h6">Information of {{ name }}
@@ -51,11 +51,12 @@
                                                         v-model="chosenWaypointsFile"
                                                     ></v-file-input>
                                                     <v-btn
-                                                        dark
+                                                        class="ml-5"
                                                         elevation="5"
                                                         :color="'#FF5722'"
                                                         @click.stop="loadUpdateWaypoints"
                                                         left
+                                                        :disabled="showLoadWaypointsBtn"
                                                     >
                                                         <v-icon dark class="mr-2">mdi-map-marker-path</v-icon>
                                                         Load
@@ -563,6 +564,7 @@ export default {
 
     data() {
         return {
+            showLoadWaypointsBtn: true,
             strWaypoints: null,
             chosenWaypointsFile: null,
             dialog: false,
@@ -894,6 +896,15 @@ export default {
 
 
     watch: {
+        chosenWaypointsFile: function (newVal) {
+            if(newVal) {
+                this.showLoadWaypointsBtn = false;
+            }
+            else {
+                this.showLoadWaypointsBtn = true;
+            }
+        },
+
         goto_positions: {
             deep: true,
             handler: function (newData) {
@@ -1164,6 +1175,10 @@ export default {
                 delete this.$store.state.drone_infos[this.name];
                 this.$store.state.drone_infos[this.name] = JSON.parse(JSON.stringify(temp));
                 temp = null;
+
+                this.goto_positions = null;
+                this.goto_positions = [];
+                this.goto_positions = JSON.parse(JSON.stringify(this.$store.state.drone_infos[this.name].goto_positions));
 
                 this.$store.commit('updateDroneInfosSelected');
 
