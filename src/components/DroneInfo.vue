@@ -1064,20 +1064,22 @@ export default {
                     if(arrWaypoint.length > 1) {
                         let seq = arrWaypoint[0];
                         if(seq > 0) {
-                            console.log(arrWaypoint);
+                            if(arrWaypoint[3] === 16 || arrWaypoint[3] === '16') {
+                                console.log(arrWaypoint);
 
-                            let strGotoPosition = String(arrWaypoint[8]) + ':' +
-                                String(arrWaypoint[9]) + ':' +
-                                String(arrWaypoint[10]) + ':' +
-                                (arrWaypoint[12]?String(arrWaypoint[12]):String(objMyDroneInfo.targetSpeed)) + ':' +
-                                String(objMyDroneInfo.targetRadius) + ':' +
-                                String(objMyDroneInfo.targetTurningSpeed);
+                                let strGotoPosition = String(arrWaypoint[8]) + ':' +
+                                    String(arrWaypoint[9]) + ':' +
+                                    String(arrWaypoint[10]) + ':' +
+                                    (arrWaypoint[12] ? String(arrWaypoint[12]) : String(objMyDroneInfo.targetSpeed)) + ':' +
+                                    String(objMyDroneInfo.targetRadius) + ':' +
+                                    String(objMyDroneInfo.targetTurningSpeed);
 
-                            console.log(strGotoPosition);
+                                console.log(strGotoPosition);
 
-                            objMyDroneInfo.goto_positions[seq-1] = strGotoPosition;
+                                objMyDroneInfo.goto_positions[seq - 1] = strGotoPosition;
 
-                            this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                                this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                            }
                         }
                     }
                 });
@@ -1176,9 +1178,17 @@ export default {
                 this.$store.state.drone_infos[this.name] = JSON.parse(JSON.stringify(temp));
                 temp = null;
 
-                this.goto_positions = null;
-                this.goto_positions = [];
-                this.goto_positions = JSON.parse(JSON.stringify(this.$store.state.drone_infos[this.name].goto_positions));
+                this.positions = [];
+                for (let i in this.$store.state.drone_infos[this.name].goto_positions) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[this.name].goto_positions, i)) {
+                        let goto_pos = {};
+                        goto_pos.type = 'goto';
+                        goto_pos.text = this.$store.state.drone_infos[this.name].goto_positions[i];
+                        goto_pos.icon = 'mdi-logout-variant';
+                        this.positions.push(goto_pos);
+                    }
+                }
+                this.$forceUpdate();
 
                 this.$store.commit('updateDroneInfosSelected');
 
