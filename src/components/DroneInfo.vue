@@ -71,7 +71,7 @@
                                                         dark
                                                         elevation="5"
                                                         :color="'#795548'"
-                                                        @click.stop="showWaypointsFileDialog=true"
+                                                        @click.stop="saveWaypoints"
                                                         left
                                                     >
                                                         <v-icon dark class="mr-2">mdi-download</v-icon>
@@ -1038,6 +1038,7 @@ export default {
 
                 console.log(this.strWaypoints);
 
+                this.strWaypoints = this.strWaypoints.replace(/\n/g, '\r');
                 let arrWayPoints = this.strWaypoints.split('\r');
                 console.log(arrWayPoints);
 
@@ -1057,7 +1058,7 @@ export default {
                             let strGotoPosition = String(arrWaypoint[8]) + ':' +
                                 String(arrWaypoint[9]) + ':' +
                                 String(arrWaypoint[10]) + ':' +
-                                String(objMyDroneInfo.targetSpeed) + ':' +
+                                (arrWaypoint[12]?String(arrWaypoint[12]):String(objMyDroneInfo.targetSpeed)) + ':' +
                                 String(objMyDroneInfo.targetRadius) + ':' +
                                 String(objMyDroneInfo.targetTurningSpeed);
 
@@ -1070,6 +1071,67 @@ export default {
                     }
                 });
             }
+        },
+
+        saveWaypoints() {
+            let seq = 0;
+            let arrWaypoints = [];
+            let arrWaypoint = [];
+
+            arrWaypoint[0] = 0;
+            arrWaypoint[1] = 1;
+            arrWaypoint[2] = 0;
+            arrWaypoint[3] = 0;
+            arrWaypoint[4] = 0;
+            arrWaypoint[5] = 0;
+            arrWaypoint[6] = 0;
+            arrWaypoint[7] = 0;
+            arrWaypoint[8] = 0;
+            arrWaypoint[9] = 0;
+            arrWaypoint[10] = 0;
+            arrWaypoint[11] = 1;
+            arrWaypoint[12] = 0;
+
+            arrWaypoints[seq++] = arrWaypoint.join('\t');
+
+            console.log(arrWaypoints);
+
+            let objMyDroneInfo = JSON.parse(this.strMyDroneInfo);
+            objMyDroneInfo.goto_positions.forEach((point)=>{
+                let arrPoint = point.split(':');
+
+                arrWaypoint[0] = seq;
+                arrWaypoint[1] = 0;
+                arrWaypoint[2] = 3;
+                arrWaypoint[3] = 16;
+                arrWaypoint[4] = 0.00000000;
+                arrWaypoint[5] = 0.00000000;
+                arrWaypoint[6] = 0.00000000;
+                arrWaypoint[7] = 0.00000000;
+                arrWaypoint[8] = parseFloat(arrPoint[0]);
+                arrWaypoint[9] = parseFloat(arrPoint[1]);
+                arrWaypoint[10] = parseFloat(arrPoint[2]);
+                arrWaypoint[11] = 1;
+                arrWaypoint[12] = parseFloat(arrPoint[5]);
+
+                arrWaypoints[seq++] = arrWaypoint.join('\t');
+                console.log(arrWaypoints);
+            });
+
+            let strWaypoints = arrWaypoints.join('\n');
+
+            strWaypoints = 'QGC WPL 110\n' + strWaypoints;
+
+            console.log(strWaypoints);
+
+            const blob = new Blob([strWaypoints], {type: 'text/plain'})
+            const e = document.createEvent('MouseEvents'),
+                a = document.createElement('a');
+            a.download = "test.waypoints";
+            a.href = window.URL.createObjectURL(blob);
+            a.dataset.downloadurl = ['text/txt', a.download, a.href].join(':');
+            e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            a.dispatchEvent(e);
         },
 
         selectedPosition: function (i) {
