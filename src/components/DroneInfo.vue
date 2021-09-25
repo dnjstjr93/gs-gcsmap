@@ -3023,12 +3023,14 @@ export default {
                         this.iconArming = 'mdi-airplane';
                         this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
                         this.curArmStatus = 'ARMED';
+                        this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
                         this.colorArm = 'td-text-red';
                     }
                     else {
                         this.iconArming = 'mdi-airplane-off';
                         this.colorArming = 'white';
                         this.curArmStatus = 'DISARMED';
+                        this.$store.state.drone_infos[this.name].curArmStatus = 'DISARMED';
                         this.colorArm = 'td-text-blue';
                     }
 
@@ -4675,57 +4677,62 @@ export default {
         });
 
         EventBus.$on('command-set-takeoff-' + this.name, () => {
-            let custom_mode = this.$store.state.mode_items.indexOf('ALT_HOLD'); // ALT_HOLD Mode
-            let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            if(this.curArmStatus === 'ARMED' && (this.gpi.alt / 1000).toFixed(1) > 1) {
+                console.log("비행체가 이륙된 상태 입니다.");
+            }
+            else {
+                let custom_mode = this.$store.state.mode_items.indexOf('ALT_HOLD'); // ALT_HOLD Mode
+                let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
+                base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+                setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
-            console.log('send_arm_command ', this.name);
-            setTimeout(this.send_arm_command, parseInt(50 + Math.random() * 50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
+                console.log('send_arm_command ', this.name);
+                setTimeout(this.send_arm_command, parseInt(50 + Math.random() * 50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
 
-            let takeoffDelay = this.$store.state.drone_infos[this.name].takeoffDelay;
-            let _alt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
+                let takeoffDelay = this.$store.state.drone_infos[this.name].takeoffDelay;
+                let _alt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
 
-            custom_mode = this.$store.state.mode_items.indexOf('GUIDED'); // GUIDED Mode
-            base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+                custom_mode = this.$store.state.mode_items.indexOf('GUIDED'); // GUIDED Mode
+                base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
+                base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
 
-            // setTimeout(this.send_set_mode_command, parseInt(((takeoffDelay) * 1000) + Math.random()*10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
-            //
-            // console.log('send_takeoff_command - alt - delay: ', _alt, takeoffDelay);
-            // setTimeout(this.send_takeoff_command, parseInt((takeoffDelay * 1000) + Math.random()*100), this.name, this.target_pub_topic, this.sys_id, _alt);
+                // setTimeout(this.send_set_mode_command, parseInt(((takeoffDelay) * 1000) + Math.random()*10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                //
+                // console.log('send_takeoff_command - alt - delay: ', _alt, takeoffDelay);
+                // setTimeout(this.send_takeoff_command, parseInt((takeoffDelay * 1000) + Math.random()*100), this.name, this.target_pub_topic, this.sys_id, _alt);
 
-            //this.send_set_do_set_home(this.name, this.target_pub_topic, this.sys_id);
-            setTimeout((name, target_pub_topic, sys_id, base_mode, custom_mode, takeoff_alt) => {
-                if (this.curArmStatus === 'ARMED') {
-                    this.send_set_mode_command(name, target_pub_topic, sys_id, base_mode, custom_mode);
+                //this.send_set_do_set_home(this.name, this.target_pub_topic, this.sys_id);
+                setTimeout((name, target_pub_topic, sys_id, base_mode, custom_mode, takeoff_alt) => {
+                    if (this.curArmStatus === 'ARMED') {
+                        this.send_set_mode_command(name, target_pub_topic, sys_id, base_mode, custom_mode);
 
-                    setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
-                        console.log('send_takeoff_command - alt - delay: ', _alt, takeoffDelay);
-                        this.send_takeoff_command(name, target_pub_topic, sys_id, takeoff_alt);
+                        setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
+                            console.log('send_takeoff_command - alt - delay: ', _alt, takeoffDelay);
+                            this.send_takeoff_command(name, target_pub_topic, sys_id, takeoff_alt);
 
-                        this.watchingMission = 'takeoff';
-                        this.watchingInitAltDist = Math.abs(takeoff_alt - (this.gpi.relative_alt / 1000));
-                        this.watchingMissionStatus = 0;
-                    }, 100, name, target_pub_topic, sys_id, takeoff_alt);
+                            this.watchingMission = 'takeoff';
+                            this.watchingInitAltDist = Math.abs(takeoff_alt - (this.gpi.relative_alt / 1000));
+                            this.watchingMissionStatus = 0;
+                        }, 100, name, target_pub_topic, sys_id, takeoff_alt);
 
 
-                    // var auto_goto_positions = [];
-                    //
-                    // let ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (takeoff_alt).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_TAKEOFF);
-                    // auto_goto_positions.push(ele);
-                    // ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (takeoff_alt).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_WAYPOINT);
-                    // auto_goto_positions.push(ele);
-                    //
-                    // //console.log('auto_goto_positions', auto_goto_positions);
-                    //
-                    // setTimeout(this.send_auto_command, 50, this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, 0, 0, 0, 0);
-                    // this.watchingMission = 'auto-goto';
-                }
-                else {
-                    console.log("시동이 걸리지 않았습니다.");
-                }
-            }, parseInt(((takeoffDelay) * 1000) + Math.random() * 10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode, _alt);
+                        // var auto_goto_positions = [];
+                        //
+                        // let ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (takeoff_alt).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_TAKEOFF);
+                        // auto_goto_positions.push(ele);
+                        // ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (takeoff_alt).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_WAYPOINT);
+                        // auto_goto_positions.push(ele);
+                        //
+                        // //console.log('auto_goto_positions', auto_goto_positions);
+                        //
+                        // setTimeout(this.send_auto_command, 50, this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, 0, 0, 0, 0);
+                        // this.watchingMission = 'auto-goto';
+                    }
+                    else {
+                        console.log("시동이 걸리지 않았습니다.");
+                    }
+                }, parseInt(((takeoffDelay) * 1000) + Math.random() * 10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode, _alt);
+            }
         });
 
         EventBus.$on('command-set-mode-' + this.name, (selected_mode) => {

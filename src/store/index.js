@@ -1322,7 +1322,6 @@ export default new Vuex.Store({
                         if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
                             state.drone_infos[dName].targeted = false;
                         }
-
                         state.drone_infos[dName].targeted = false;
                         EventBus.$emit('do-drone-selected' + dName, state.drone_infos[dName].targeted);
 
@@ -1382,10 +1381,13 @@ export default new Vuex.Store({
                             state.drone_infos[dName].autoSpeed = 5;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'takeoffDelay')) {
-                            state.drone_infos[dName].takeoffDelay = 6;
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'curArmStatus')) {
+                            state.drone_infos[dName].curArmStatus = 'DISARMED';
                         }
 
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
+                            state.drone_infos[dName].targeted = false;
+                        }
 
                         state.tempMarkers[dName] = null;
                         state.tempMarkers[dName] = [];
