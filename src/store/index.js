@@ -523,12 +523,14 @@ export default new Vuex.Store({
 
             let drone = state.drone_infos[payload.pName];
 
+            let mav_cmd = (drone.goto_positions[payload.pIndex].split(':')[6])?drone.goto_positions[payload.pIndex].split(':')[6]:16;
+
             drone.goto_positions[payload.pIndex] = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-                String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
+                String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' + mav_cmd;
 
             let _temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
             state.drone_infos[payload.pName] = null;
@@ -1322,6 +1324,7 @@ export default new Vuex.Store({
                         }
 
                         state.drone_infos[dName].targeted = false;
+                        EventBus.$emit('do-drone-selected' + dName, state.drone_infos[dName].targeted);
 
                         if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'home_position')) {
                             state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
@@ -1419,6 +1422,9 @@ export default new Vuex.Store({
                     }
                 }
             }
+
+            EventBus.$emit('do-targetDrone');
+
 
             let temp = JSON.parse(JSON.stringify(state.tempMarkers));
             state.tempMarkers = null;
