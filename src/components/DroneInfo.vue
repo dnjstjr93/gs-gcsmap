@@ -4356,16 +4356,38 @@ export default {
             base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
             this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
-            var auto_goto_positions = this.$store.state.drone_infos[this.name].goto_positions.slice(start_idx, (end_idx+1));
+            var auto_goto_positions = this.$store.state.drone_infos[this.name].goto_positions.slice(start_idx, (end_idx + 1));
             let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10';
             auto_goto_positions.unshift(ele0);
 
-            //console.log('auto_goto_positions', auto_goto_positions);
+            setTimeout((name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx) => {
 
-            setTimeout(this.send_auto_command, 50, this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, start_idx, end_idx, delay, start_idx);
+                if (this.curArmStatus === 'DISARMED') {
+                    this.$store.state.drone_infos[name].targetTakeoffAlt = 10;
+                    this.$store.state.drone_infos[name].takeoffDelay = 7;
 
-            this.watchingMission = 'auto-goto';
-            this.watchingMissionStatus = 0;
+                    EventBus.$emit('command-set-takeoff-' + this.name);
+                }
+                else {
+                    this.watchingMission = 'takeoff-complete';
+                }
+
+                const checkMission = (interval, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx) => {
+                    setTimeout(() => {
+                        if (this.watchingMission === 'takeoff-complete') {
+                            setTimeout(this.send_auto_command, 50, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
+
+                            this.watchingMission = 'auto-goto';
+                            this.watchingMissionStatus = 0;
+                        }
+                        else {
+                            checkMission(250, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
+                        }
+                    }, interval, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx)
+                }
+
+                checkMission(10, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
+            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, start_idx, end_idx, delay, start_idx);
         });
 
         EventBus.$on('command-set-pwms-' + this.name, (pwms) => {

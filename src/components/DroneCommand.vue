@@ -407,7 +407,15 @@
                                                 <div v-if="d.selected && d.targeted">
                                                     <v-row no-gutters>
                                                         <v-col cols="12">
-                                                            <v-subheader>{{d.name}} 자동: </v-subheader>
+                                                            <v-subheader>{{d.name}} 자동:
+                                                                <v-spacer></v-spacer>
+                                                                <v-switch
+                                                                    :disabled="d.curArmStatus==='ARMED'"
+                                                                    v-model="takeoffInAuto"
+                                                                    :label="`takeoffInAuto: ${takeoffInAuto.toString()}`"
+                                                                ></v-switch>
+                                                            </v-subheader>
+
                                                         </v-col>
                                                         <v-col cols="3">
                                                             <v-select
@@ -915,6 +923,7 @@
 
         data() {
             return {
+                takeoffInAuto: true,
                 mission_ch_min: 223,
                 mission_ch_max: 1823,
                 channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
@@ -1697,7 +1706,6 @@
             },
 
             setAutoGoto() {
-                let self = this;
                 for(let name in this.$store.state.drone_infos) {
                     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                         if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
@@ -1716,10 +1724,10 @@
                     }
                 }
 
-                setTimeout(function () {
-                    self.mode_sheet = !self.mode_sheet;
-                    self.loading = false;
-                    self.$forceUpdate();
+                setTimeout(() => {
+                    this.mode_sheet = !this.mode_sheet;
+                    this.loading = false;
+                    this.$forceUpdate();
                 }, 100);
             },
 
