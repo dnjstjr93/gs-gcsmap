@@ -242,6 +242,7 @@
                 boundaryCircles: {},
                 curBoundaryRadius: 100,
 
+                tempMarkers: [],
 
                 // missionCirclesOptions: {
                 //     strokeColor: 'amber',
@@ -313,7 +314,8 @@
                     //     }
                     // });
                     //
-                    //this.$forceUpdate();
+
+                    this.$forceUpdate();
                 }
             },
 
@@ -329,9 +331,9 @@
             gotoMarkers() {
                 return (this.$store.state.gotoMarkers);
             },
-            tempMarkers() {
-                return (this.$store.state.tempMarkers);
-            },
+            // tempMarkers() {
+            //     return (this.$store.state.tempMarkers);
+            // },
             defaultDroneIcon() {
                 return (this.$store.state.defaultDroneIcon);
             },
@@ -1168,6 +1170,8 @@
 
                 this.readyFlagGcsMap = true;
 
+                this.tempMarkers = JSON.parse(JSON.stringify(this.$store.state.tempMarkers));
+
                 console.log('GcsMap-mounted-tempMarker', this.tempMarkers);
 
                 for (let pName in this.tempMarkers) {
@@ -1195,6 +1199,21 @@
 
                     console.log('gotoLines', this.gotoLines);
                 }
+            });
+
+            EventBus.$on('do-updateTempMarker', (payload) => {
+                console.log('do-updateTempMarker', this.tempMarkers);
+
+                this.tempMarkers['unknown'][payload.pOldIndex].alt = payload.targetAlt;
+                this.tempMarkers['unknown'][payload.pOldIndex].radius = payload.targetRadius;
+                this.tempMarkers['unknown'][payload.pOldIndex].speed = payload.targetSpeed;
+                this.tempMarkers['unknown'][payload.pOldIndex].truningSpeed = payload.targetTurningSpeed;
+
+                this.tempMarkers['unknown'][payload.pOldIndex].m_label.text = 'T:' + String(this.tempMarkers['unknown'][payload.pOldIndex].alt);
+
+                this.tempMarkers = this.clone(this.tempMarkers);
+
+                payload = null;
             });
 
             EventBus.$on('updateDroneMarker', (payload) => {

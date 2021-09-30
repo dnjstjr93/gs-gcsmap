@@ -670,8 +670,6 @@
                 localStorage.setItem('mobius_host', this.host);
                 localStorage.setItem('mobius_gcs', this.gcs);
 
-
-
                 let self = this;
 
                 axios({

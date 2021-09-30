@@ -915,7 +915,7 @@ export default new Vuex.Store({
         },
 
         registerMarker(state, payload) {
-            console.log(payload);
+            console.log('registerMarker', payload);
 
             state.tempMarkers[payload.pOldName][payload.pOldIndex].alt = payload.targetAlt;
             state.tempMarkers[payload.pOldName][payload.pOldIndex].speed = payload.targetSpeed;
@@ -923,7 +923,6 @@ export default new Vuex.Store({
             state.tempMarkers[payload.pOldName][payload.pOldIndex].turningSpeed = payload.targetTurningSpeed;
 
             let oldPos = JSON.parse(JSON.stringify(state.tempMarkers[payload.pOldName][payload.pOldIndex]));
-
 
             if (payload.pOldName !== payload.pName) {
                 state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
@@ -977,6 +976,8 @@ export default new Vuex.Store({
             state.tempMarkers = {};
             state.tempMarkers = JSON.parse(JSON.stringify(temp));
             temp = null;
+
+            EventBus.$emit('do-updateTempMarker', payload);
         },
 
         removeMarkerDroneInfo(state, payload) {
@@ -1140,14 +1141,12 @@ export default new Vuex.Store({
         regMarkerDroneInfo(state, payload) {
             console.log('regMarkerDroneInfo', payload);
 
-            let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
+            state.drone_infos[payload.pName].goto_positions[payload.pIndex] = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
-
-            state.drone_infos[payload.pName].goto_positions[payload.pIndex] = pos_str;
 
             let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
             state.drone_infos[payload.pName] = null;
@@ -1422,6 +1421,56 @@ export default new Vuex.Store({
                             delete state.trackingLines[dName];
                         }
                     }
+                    // else {
+                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
+                    //         state.drone_infos[dName].targeted = false;
+                    //     }
+                    //     state.drone_infos[dName].targeted = false;
+                    //
+                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetSpeed')) {
+                    //         state.drone_infos[dName].targetSpeed = 5;
+                    //     }
+                    //
+                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTurningSpeed')) {
+                    //         state.drone_infos[dName].targetTurningSpeed = 5;
+                    //     }
+                    //
+                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetRadius')) {
+                    //         state.drone_infos[dName].targetRadius = 50;
+                    //     }
+                    //
+                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetAlt')) {
+                    //         state.drone_infos[dName].targetAlt = 20;
+                    //     }
+                    //
+                    //     delete state.tempMarkers[dName];
+                    //     state.tempMarkers[dName] = [];
+                    //
+                    //     let drone = state.drone_infos[dName];
+                    //
+                    //     console.log('unknown', drone);
+                    //     console.log('tempMarkers[unknown]', state.tempMarkers[dName]);
+                    //
+                    //     for (let idx in drone.goto_positions) {
+                    //         if (Object.prototype.hasOwnProperty.call(drone.goto_positions, idx)) {
+                    //             let pos_arr = drone.goto_positions[idx].split(':');
+                    //             let pos = JSON.parse(JSON.stringify(state.defaultPosition));
+                    //             pos.lat = parseFloat(pos_arr[0]);
+                    //             pos.lng = parseFloat(pos_arr[1]);
+                    //             pos.alt = parseFloat(pos_arr[2]);
+                    //             pos.speed = parseFloat(pos_arr[3]);
+                    //             pos.radius = parseFloat(pos_arr[4]);
+                    //             pos.turningSpeed = parseFloat(pos_arr[5]);
+                    //             pos.color = drone.color;
+                    //             pos.m_icon.fillColor = drone.color;
+                    //             pos.m_label.fontSize = '14px';
+                    //             pos.m_label.text = 'T';
+                    //
+                    //             state.tempMarkers[dName].push(pos);
+                    //             pos = null;
+                    //         }
+                    //     }
+                    // }
                 }
             }
 
