@@ -1282,6 +1282,19 @@ export default new Vuex.Store({
             state.drone_infos = {};
             state.drone_infos = JSON.parse(JSON.stringify(payload));
 
+            for(let name in state.drone_infos) {
+                if(Object.hasOwnProperty.call(state.drone_infos, name)) {
+                    if(name !== 'unknown') {
+                        if(localStorage.getItem(name+'_selected')) {
+                            state.drone_infos[name].selected = (localStorage.getItem(name + '_selected') === 'true');
+                        }
+                        else {
+                            localStorage.setItem(name+'_selected', String(state.drone_infos[name].selected));
+                        }
+                    }
+                }
+            }
+
             if (!Object.hasOwnProperty.call(state.drone_infos.unknown, 'goto_positions')) {
                 state.drone_infos.unknown.goto_positions = [];
             }

@@ -242,8 +242,6 @@
                 boundaryCircles: {},
                 curBoundaryRadius: 100,
 
-                tempMarkers: [],
-
                 // missionCirclesOptions: {
                 //     strokeColor: 'amber',
                 //     strokeOpacity: 0.8,
@@ -331,9 +329,9 @@
             gotoMarkers() {
                 return (this.$store.state.gotoMarkers);
             },
-            // tempMarkers() {
-            //     return (this.$store.state.tempMarkers);
-            // },
+            tempMarkers() {
+                return (this.$store.state.tempMarkers);
+            },
             defaultDroneIcon() {
                 return (this.$store.state.defaultDroneIcon);
             },
@@ -1169,8 +1167,6 @@
             EventBus.$on('gcs-map-ready', () => {
 
                 this.readyFlagGcsMap = true;
-
-                this.tempMarkers = JSON.parse(JSON.stringify(this.$store.state.tempMarkers));
 
                 console.log('GcsMap-mounted-tempMarker', this.tempMarkers);
 

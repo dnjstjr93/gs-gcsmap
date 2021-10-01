@@ -920,6 +920,14 @@
                     }
                 }
 
+                for(let name in this.$store.state.drone_infos) {
+                    if(Object.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                        if(name !== 'unknown') {
+                            localStorage.setItem(name+'_selected', String(this.$store.state.drone_infos[name].selected));
+                        }
+                    }
+                }
+
                 let self = this;
                 this.postDroneInfos(function () {
                     self.$store.commit('updateDroneInfosSelected');
