@@ -186,6 +186,8 @@
 
     import InfoMarker from "./InfoMarker";
     import EventBus from "@/EventBus";
+    import {nanoid} from "nanoid";
+    import mqtt from "mqtt";
 
     export default {
         name: 'GcsMap',
@@ -247,6 +249,23 @@
                 //     strokeOpacity: 0.8,
                 //     strokeWeight: 5
                 // }
+
+                client: {
+                    connected: false,
+                    loading: false
+                },
+                connection: {
+                    host: this.$store.state.VUE_APP_MOBIUS_HOST,
+                    port: 8883,
+                    endpoint: '',
+                    clean: true,
+                    connectTimeout: 4000,
+                    reconnectPeriod: 4000,
+                    clientId: 'GcsMap' + nanoid(15),
+                    username: 'keti_muv',
+                    password: 'keti_muv',
+                },
+                broadcast_gcsmap_topic: '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/GcsMap',
             }
         },
 
@@ -524,6 +543,8 @@
                     this.$store.commit('setSelected', payload);
 
                     this.drawLineTarget(payload);
+
+                    this.doBroadcastTempPosition(payload);
 
                     // this.selectTempMarker(e, pName, pIndex);
 
@@ -950,6 +971,139 @@
                 //this.$store.state.targetLines = this.clone(this.$store.state.targetLines);
                 //this.$forceUpdate();
             },
+
+            createConnection(onConnect) {
+                if (this.client.connected) {
+                    console.log('GcsMap-', 'destroyConnection')
+                    this.destroyConnection();
+                }
+
+                if (!this.client.connected) {
+                    this.client.loading = true;
+                    this.connection.clientId = 'mqttjs_GcsMap_' + nanoid(15);
+                    const {host, port, endpoint, ...options} = this.connection
+                    const connectUrl = `ws://${host}:${port}${endpoint}`
+                    try {
+                        this.client = mqtt.connect(connectUrl, options);
+
+                        this.client.on('connect', () => {
+                            console.log('GcsMap Connection succeeded!');
+
+                            this.client.connected = true;
+                            this.client.loading = false;
+
+                            localStorage.setItem('mqttConnection-GcsMap', JSON.stringify(this.client));
+
+                            onConnect();
+                        });
+
+                        this.client.on('error', (error) => {
+                            console.log('Connection failed', error);
+
+                            this.destroyConnection();
+                        });
+
+                        this.client.on('close', () => {
+                            console.log('Connection closed');
+
+                            this.destroyConnection();
+                        });
+
+                        this.client.on('message', (topic, message) => {
+                            let watchingMissionTopic = topic.substr(7+(this.$store.state.VUE_APP_MOBIUS_GCS.length)+1, 16);
+
+                            console.log(watchingMissionTopic);
+
+                            if(watchingMissionTopic === '/watchingMission') {
+                                this.onMessageBroadcast(message);
+                            }
+                        });
+                    }
+                    catch (error) {
+                        console.log('mqtt.connect error', error);
+                        this.client.connected = false;
+                    }
+                }
+            },
+            doSubscribe(topic) {
+                if (this.client.connected) {
+                    const qos = 0;
+                    let self = this;
+                    this.client.subscribe(topic, {qos}, (error) => {
+                        if (error) {
+                            console.log('Subscribe to topics error', error)
+                            return
+                        }
+
+                        console.log('Subscribe to topics (', topic, ')');
+                    });
+                }
+            },
+            doUnSubscribe(topic) {
+                if (this.client.connected) {
+                    let self = this;
+                    this.client.unsubscribe(topic, error => {
+                        if (error) {
+                            console.log('Unsubscribe error', error)
+                        }
+
+                        console.log('Unsubscribe to topics (', topic, ')');
+                    });
+                }
+            },
+            doPublish(topic, payload) {
+                if (this.client.connected) {
+                    this.client.publish(topic, payload, 0, error => {
+                        if (error) {
+                            console.log('Publish error', error)
+                        }
+                    });
+                }
+            },
+            destroyConnection() {
+                if (this.client.connected) {
+                    try {
+                        this.client.end()
+                        this.client = {
+                            connected: false,
+                        }
+                        console.log(this.name, 'Successfully disconnected!');
+
+                        localStorage.setItem('mqttConnection-GcsMap', JSON.stringify(this.client));
+                    }
+                    catch (error) {
+                        console.log('Disconnect failed', error.toString())
+                    }
+                }
+            },
+
+            onMessageBroadcast(message) {
+                try {
+                    let watchingPayload = JSON.parse(message.toString());
+                    if(watchingPayload.broadcastMission === 'updateTempPosition') {
+                        let payload = watchingPayload.payload;
+
+                        this.$store.commit('updateTempPosition', payload);
+
+                        payload.value = false;
+                        this.$store.commit('setSelected', payload);
+
+                        this.drawLineTarget(payload);
+                    }
+                }
+                catch (e) {
+                    console.log('GcsMap-onMessageBroadcast-watchingMission', e.message);
+                }
+            },
+
+            doBroadcastTempPosition(payload) {
+                let watchingPayload = {};
+                watchingPayload.broadcastMission = 'updateTempPosition';
+                watchingPayload.payload = payload;
+
+                console.log('broadcast_gcsmap_topic', this.broadcast_gcsmap_topic, '-', JSON.stringify(watchingPayload));
+                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+            }
         },
 
         created() {
@@ -1165,6 +1319,12 @@
             });
 
             EventBus.$on('gcs-map-ready', () => {
+
+                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/GcsMap';
+                this.createConnection(() => {
+                    this.doSubscribe(this.broadcast_gcsmap_topic);
+                    console.log('createConnection - Subscribe to ', this.broadcast_gcsmap_topic);
+                });
 
                 this.readyFlagGcsMap = true;
 

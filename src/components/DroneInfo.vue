@@ -1260,6 +1260,49 @@ export default {
             //EventBus.$emit('do-targetDrone');
         },
 
+        onMessageBroadcast(message) {
+            try {
+                let watchingPayload = JSON.parse(message.toString());
+                this.watchingMission = watchingPayload.watchingMission;
+                this.watchingInitDist = watchingPayload.watchingInitDist;
+                this.watchingMissionStatus = watchingPayload.watchingMissionStatus;
+
+                if(watchingPayload.watchingMission === 'goto') {
+                    this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
+                    this.$store.state.drone_infos[this.name].targetLng = watchingPayload.targetLng;
+                    this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
+                }
+                else if(watchingPayload.watchingMission === 'goto-circle') {
+                    this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
+                    this.$store.state.drone_infos[this.name].targetLng = watchingPayload.targetLng;
+                    this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
+
+                    this.droneStatus.radius = watchingPayload.targetRadius;
+                    this.droneStatus.initHeading = watchingPayload.targetHeading;
+                }
+                else if(watchingPayload.watchingMission === 'goto-alt') {
+                    this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
+                }
+                else if(watchingPayload.watchingMission === 'takeoff') {
+                    this.$store.state.drone_infos[this.name].home_position = watchingPayload.homePosition;
+                }
+
+                else if(watchingPayload.broadcastMission === 'updateTempPosition') {
+                    let payload = watchingPayload.payload;
+
+                    this.$store.commit('updateTempPosition', payload);
+
+                    payload.value = false;
+                    this.$store.commit('setSelected', payload);
+
+                    this.drawLineTarget(payload);
+                }
+            }
+            catch (e) {
+                console.log('broadcast-watchingMission', e.message);
+            }
+        },
+
         createConnection(onConnect) {
             if (this.client.connected) {
                 console.log('DroneInfo', this.name, '-', 'destroyConnection')
@@ -1316,44 +1359,7 @@ export default {
                             let watchingMissionTopic = topic.substr(7+(this.gcs.length)+1, 16);
 
                             if(watchingMissionTopic === '/watchingMission') {
-                                try {
-                                    let watchingPayload = JSON.parse(message.toString());
-                                    this.watchingMission = watchingPayload.watchingMission;
-                                    this.watchingInitDist = watchingPayload.watchingInitDist;
-                                    this.watchingMissionStatus = watchingPayload.watchingMissionStatus;
-
-                                    if(watchingPayload.watchingMission === 'goto') {
-                                        this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
-                                        this.$store.state.drone_infos[this.name].targetLng = watchingPayload.targetLng;
-                                        this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
-                                    }
-                                    else if(watchingPayload.watchingMission === 'goto-circle') {
-                                        this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
-                                        this.$store.state.drone_infos[this.name].targetLng = watchingPayload.targetLng;
-                                        this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
-
-                                        this.droneStatus.radius = watchingPayload.targetRadius;
-                                        this.droneStatus.initHeading = watchingPayload.targetHeading;
-                                    }
-                                    else if(watchingPayload.watchingMission === 'goto-alt') {
-                                        this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
-                                    }
-
-                                    // console.log(watchingPayload);
-                                    // if(watchingPayload.watchingMission === 'takeoff') {
-                                    //     this.watchingMission = watchingPayload.watchingMission;
-                                    //     this.watchingInitDist = watchingPayload.watchingInitDist;
-                                    //     this.watchingMissionStatus = 0;
-                                    // }
-                                    // else if(watchingPayload.watchingMission === 'land') {
-                                    //     this.watchingMission = watchingPayload.watchingMission;
-                                    //     this.watchingInitDist = watchingPayload.watchingInitDist;
-                                    //     this.watchingMissionStatus = 0;
-                                    // }
-                                }
-                                catch (e) {
-                                    console.log('broadcast-watchingMission', e.message);
-                                }
+                                this.onMessageBroadcast(message);
                             }
                             else {
                                 this.strContentEach += message.toString('hex').toLowerCase();
@@ -4164,10 +4170,13 @@ export default {
             else if(watchingPayload.watchingMission === 'goto-alt') {
                 watchingPayload.targetAlt = this.$store.state.drone_infos[this.name].targetAlt;
             }
+            else if(watchingPayload.watchingMission === 'takeoff') {
+                watchingPayload.homePosition = this.$store.state.drone_infos[this.name].home_position;
+            }
 
             console.log('broadcast_topic', this.broadcast_topic, '-', JSON.stringify(watchingPayload));
             this.doPublish(this.broadcast_topic, JSON.stringify(watchingPayload));
-        }
+        },
     },
 
     created() {
@@ -5039,7 +5048,7 @@ export default {
             console.log('createConnection - Subscribe to ', self.drone_topic);
 
             self.doSubscribe(self.broadcast_topic);
-            console.log('createConnection - Subscribe to ', self.drone_topic);
+            console.log('createConnection - Subscribe to ', self.broadcast_topic);
         });
 
         this.getDroneMissionInfo();
