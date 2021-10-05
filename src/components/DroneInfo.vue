@@ -1345,6 +1345,8 @@ export default {
                         console.log('Connection closed');
 
                         this.destroyConnection();
+
+                        this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
                     });
 
                     this.client.on('message', (topic, message) => {
