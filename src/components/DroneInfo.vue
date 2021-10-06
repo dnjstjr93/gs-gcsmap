@@ -457,7 +457,7 @@ import moment from 'moment'
 import axios from "axios";
 
 import draggable from 'vuedraggable';
-import mqtt from "mqtt";
+//import mqtt from "mqtt";
 import {nanoid} from "nanoid";
 
 const byteToHex = [];
@@ -1296,221 +1296,212 @@ export default {
                 else if(watchingPayload.watchingMission === 'takeoff') {
                     this.$store.state.drone_infos[this.name].home_position = watchingPayload.homePosition;
                 }
-
-                else if(watchingPayload.broadcastMission === 'updateTempPosition') {
-                    let payload = watchingPayload.payload;
-
-                    this.$store.commit('updateTempPosition', payload);
-
-                    payload.value = false;
-                    this.$store.commit('setSelected', payload);
-
-                    this.drawLineTarget(payload);
-                }
             }
             catch (e) {
                 console.log('broadcast-watchingMission', e.message);
             }
         },
 
-        createConnection(onConnect) {
-            if (this.client.connected) {
-                console.log('DroneInfo', this.name, '-', 'destroyConnection')
-                this.destroyConnection();
-            }
+        onMessageHandler(topic, message) {
+            let chkTopic = topic.substr(0, 7);
 
-            if (!this.client.connected) {
-                //var self = this;
+            if (chkTopic === "/Mobius") {
+                let watchingMissionTopic = topic.substr(7+(this.gcs.length)+1, 16);
 
-                this.client.loading = true;
-                this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
-                const {host, port, endpoint, ...options} = this.connection
-                const connectUrl = `ws://${host}:${port}${endpoint}`
-                try {
-                    this.client = mqtt.connect(connectUrl, options);
+                if(watchingMissionTopic === '/watchingMission') {
+                    this.onMessageBroadcast(message);
+                }
+                else {
+                    this.strContentEach += message.toString('hex').toLowerCase();
+                    while (this.strContentEach.length > 12) {
+                        if (this.strContentEach.substr(0, 2) === 'fe') {
 
-                    this.client.on('connect', () => {
-                        console.log(this.name, 'Connection succeeded!');
+                            var len = parseInt(this.strContentEach.substr(2, 2), 16);
+                            var contentLenth = (6 * 2) + (len * 2) + (2 * 2);
 
-                        this.client.connected = true;
-
-                        // if(this.subscribeSuccess) {
-                        //     this.doUnSubscribe()
-                        // }
-
-                        this.client.loading = false;
-
-                        localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
-
-                        onConnect();
-                    });
-
-                    this.client.on('error', (error) => {
-                        console.log('Connection failed', error);
-
-                        this.destroyConnection();
-                    });
-
-                    this.client.on('close', () => {
-                        console.log('Connection closed');
-
-                        this.destroyConnection();
-
-                        this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
-                    });
-
-                    this.client.on('message', (topic, message) => {
-                        // this.receiveNews = this.receiveNews.concat(message)
-                        // console.log(`Received message ${message} from topic ${topic}`);
-
-                        // this.onMessageHandler(topic, message);
-
-                        let chkTopic = topic.substr(0, 7);
-
-                        if (chkTopic === "/Mobius") {
-                            let watchingMissionTopic = topic.substr(7+(this.gcs.length)+1, 16);
-
-                            if(watchingMissionTopic === '/watchingMission') {
-                                this.onMessageBroadcast(message);
+                            if (contentLenth > this.strContentEach.length) {
+                                break;
                             }
                             else {
-                                this.strContentEach += message.toString('hex').toLowerCase();
-                                while (this.strContentEach.length > 12) {
-                                    if (this.strContentEach.substr(0, 2) === 'fe') {
+                                // var mavLength = (6 * 2) + (contentLenth * 2) + (2 * 2);
+                                //console.log(this.name, this.strContentEach.substr(0, mavLength));
 
-                                        var len = parseInt(this.strContentEach.substr(2, 2), 16);
-                                        var contentLenth = (6 * 2) + (len * 2) + (2 * 2);
+                                this.receiveFromDrone(topic, this.strContentEach.substr(0, contentLenth));
 
-                                        if (contentLenth > this.strContentEach.length) {
-                                            break;
-                                        }
-                                        else {
-                                            // var mavLength = (6 * 2) + (contentLenth * 2) + (2 * 2);
-                                            //console.log(this.name, this.strContentEach.substr(0, mavLength));
-
-                                            this.receiveFromDrone(topic, this.strContentEach.substr(0, contentLenth));
-
-                                            this.strContentEach = this.strContentEach.substr(contentLenth);
-                                            //console.log(this.strContentEach);
-                                        }
-                                    }
-                                    else {
-                                        this.strContentEach = this.strContentEach.substr(2);
-                                    }
-                                }
+                                this.strContentEach = this.strContentEach.substr(contentLenth);
+                                //console.log(this.strContentEach);
                             }
                         }
-                        else if (chkTopic === '/oneM2M') {
-                            var jsonObj = JSON.parse(message.toString());
-
-                            if (jsonObj['m2m:rqp'] == null) {
-                                jsonObj['m2m:rqp'] = jsonObj;
-                            }
-
-                            if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'], 'pc')) {
-
-                                // console.log(Object.keys(jsonObj['m2m:rqp'].pc)[0]);
-                                // console.log(jsonObj['m2m:rqp'].pc);
-
-                                let arr_topic = topic.split('/');
-                                let resp_topic = topic.replace('/req/', '/resp/');
-                                let rsp_message = {};
-                                rsp_message['m2m:rsp'] = {};
-                                rsp_message['m2m:rsp'].rsc = 2001;
-                                rsp_message['m2m:rsp'].to = '';
-                                rsp_message['m2m:rsp'].fr = arr_topic[4];
-                                rsp_message['m2m:rsp'].rqi = '12345';
-                                rsp_message['m2m:rsp'].pc = '';
-
-                                //console.log(resp_topic);
-
-                                this.doPublish(resp_topic, JSON.stringify(rsp_message['m2m:rsp']));
-
-                                rsp_message = null;
-
-                                if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'].pc, 'm2m:sgn')) {
-                                    if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'].pc['m2m:sgn'], 'nev')) {
-                                        if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'].pc['m2m:sgn'].nev, 'rep')) {
-                                            if (Object.keys(jsonObj['m2m:rqp'].pc['m2m:sgn'].nev.rep)[0] === 'm2m:cin') {
-                                                let mission_payload = {};
-
-                                                mission_payload.drone_name = arr_topic[4];
-                                                mission_payload.payload = {}
-                                                mission_payload.payload.sur = jsonObj['m2m:rqp'].pc['m2m:sgn'].sur;
-                                                mission_payload.payload.con = jsonObj['m2m:rqp'].pc['m2m:sgn'].nev.rep['m2m:cin'].con;
-
-                                                //this.$store.commit('setMissionPayload', mission_payload);
-
-                                                //EventBus.$emit('push-mission-' + mission_payload.drone_name, mission_payload.payload);
-
-                                                let payload = JSON.parse(JSON.stringify(mission_payload.payload));
-                                                mission_payload = null;
-                                                let arr_sur = payload.sur.split('/');
-                                                arr_sur.pop();
-                                                payload.sur = '/' + arr_sur.join('/');
-
-                                                if ((this.missionLteUrl + '/' + this.sortie_name) === payload.sur) {
-                                                    // console.log(payload.sur);
-
-                                                    if (Object.prototype.hasOwnProperty.call(payload.con, 'rsrp')) {
-                                                        this.colorLteVal = 'td-text-gray';
-
-                                                        // setTimeout(() => {
-                                                        //
-                                                        // }, 200);
-
-                                                        this.curLteVal = payload.con.rsrp;
-                                                        //console.log(this.curLteVal);
-
-                                                        payload = null;
-
-                                                        if (0 > this.curLteVal && this.curLteVal >= -80) {
-                                                            this.iconLte = 'mdi-network-strength-4';
-                                                            this.colorLteVal = 'td-text-blue';
-                                                        }
-                                                        else if (-80 > this.curLteVal && this.curLteVal >= -90) {
-                                                            this.iconLte = 'mdi-network-strength-3';
-                                                            this.colorLteVal = 'td-text-green';
-                                                        }
-                                                        else if (-90 > this.curLteVal && this.curLteVal >= -100) {
-                                                            this.iconLte = 'mdi-network-strength-2';
-                                                            this.colorLteVal = 'td-text-yellow';
-                                                        }
-                                                        else {
-                                                            this.iconLte = 'mdi-network-strength-1';
-                                                            this.colorLteVal = 'td-text-red';
-                                                        }
-
-                                                        if (this.lteTimeoutObj) {
-                                                            clearTimeout(this.lteTimeoutObj);
-                                                        }
-
-                                                        this.lteTimeoutObj = setTimeout(() => {
-                                                            this.lteTimeoutObj = null;
-                                                            this.colorLteVal = 'td-text-gray';
-                                                            this.iconLte = 'mdi-network-strength-off-outline';
-                                                        }, 5500);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                        else {
+                            this.strContentEach = this.strContentEach.substr(2);
                         }
-                    });
+                    }
                 }
-                catch (error) {
-                    console.log('mqtt.connect error', error);
-                    this.client.connected = false;
+            }
+            else if (chkTopic === '/oneM2M') {
+                var jsonObj = JSON.parse(message.toString());
+
+                if (jsonObj['m2m:rqp'] == null) {
+                    jsonObj['m2m:rqp'] = jsonObj;
+                }
+
+                if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'], 'pc')) {
+
+                    // console.log(Object.keys(jsonObj['m2m:rqp'].pc)[0]);
+                    // console.log(jsonObj['m2m:rqp'].pc);
+
+                    let arr_topic = topic.split('/');
+                    let resp_topic = topic.replace('/req/', '/resp/');
+                    let rsp_message = {};
+                    rsp_message['m2m:rsp'] = {};
+                    rsp_message['m2m:rsp'].rsc = 2001;
+                    rsp_message['m2m:rsp'].to = '';
+                    rsp_message['m2m:rsp'].fr = arr_topic[4];
+                    rsp_message['m2m:rsp'].rqi = '12345';
+                    rsp_message['m2m:rsp'].pc = '';
+
+                    //console.log(resp_topic);
+
+                    this.doPublish(resp_topic, JSON.stringify(rsp_message['m2m:rsp']));
+
+                    rsp_message = null;
+
+                    if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'].pc, 'm2m:sgn')) {
+                        if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'].pc['m2m:sgn'], 'nev')) {
+                            if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'].pc['m2m:sgn'].nev, 'rep')) {
+                                if (Object.keys(jsonObj['m2m:rqp'].pc['m2m:sgn'].nev.rep)[0] === 'm2m:cin') {
+                                    let mission_payload = {};
+
+                                    mission_payload.drone_name = arr_topic[4];
+                                    mission_payload.payload = {}
+                                    mission_payload.payload.sur = jsonObj['m2m:rqp'].pc['m2m:sgn'].sur;
+                                    mission_payload.payload.con = jsonObj['m2m:rqp'].pc['m2m:sgn'].nev.rep['m2m:cin'].con;
+
+                                    //this.$store.commit('setMissionPayload', mission_payload);
+
+                                    //EventBus.$emit('push-mission-' + mission_payload.drone_name, mission_payload.payload);
+
+                                    let payload = JSON.parse(JSON.stringify(mission_payload.payload));
+                                    mission_payload = null;
+                                    let arr_sur = payload.sur.split('/');
+                                    arr_sur.pop();
+                                    payload.sur = '/' + arr_sur.join('/');
+
+                                    if ((this.missionLteUrl + '/' + this.sortie_name) === payload.sur) {
+                                        // console.log(payload.sur);
+
+                                        if (Object.prototype.hasOwnProperty.call(payload.con, 'rsrp')) {
+                                            this.colorLteVal = 'td-text-gray';
+
+                                            // setTimeout(() => {
+                                            //
+                                            // }, 200);
+
+                                            this.curLteVal = payload.con.rsrp;
+                                            //console.log(this.curLteVal);
+
+                                            payload = null;
+
+                                            if (0 > this.curLteVal && this.curLteVal >= -80) {
+                                                this.iconLte = 'mdi-network-strength-4';
+                                                this.colorLteVal = 'td-text-blue';
+                                            }
+                                            else if (-80 > this.curLteVal && this.curLteVal >= -90) {
+                                                this.iconLte = 'mdi-network-strength-3';
+                                                this.colorLteVal = 'td-text-green';
+                                            }
+                                            else if (-90 > this.curLteVal && this.curLteVal >= -100) {
+                                                this.iconLte = 'mdi-network-strength-2';
+                                                this.colorLteVal = 'td-text-yellow';
+                                            }
+                                            else {
+                                                this.iconLte = 'mdi-network-strength-1';
+                                                this.colorLteVal = 'td-text-red';
+                                            }
+
+                                            if (this.lteTimeoutObj) {
+                                                clearTimeout(this.lteTimeoutObj);
+                                            }
+
+                                            this.lteTimeoutObj = setTimeout(() => {
+                                                this.lteTimeoutObj = null;
+                                                this.colorLteVal = 'td-text-gray';
+                                                this.iconLte = 'mdi-network-strength-off-outline';
+                                            }, 5500);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
+        //
+        // createConnection(onConnect) {
+        //     if (this.$store.state.client.connected) {
+        //         console.log('DroneInfo', this.name, '-', 'destroyConnection')
+        //         this.destroyConnection();
+        //     }
+        //
+        //     if (!this.$store.state.client.connected) {
+        //         //var self = this;
+        //
+        //         this.$store.state.client.loading = true;
+        //         this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
+        //         const {host, port, endpoint, ...options} = this.connection
+        //         const connectUrl = `ws://${host}:${port}${endpoint}`
+        //         try {
+        //             this.$store.state.client = mqtt.connect(connectUrl, options);
+        //
+        //             this.$store.state.client.on('connect', () => {
+        //                 console.log(this.name, 'Connection succeeded!');
+        //
+        //                 this.$store.state.client.connected = true;
+        //
+        //                 // if(this.subscribeSuccess) {
+        //                 //     this.doUnSubscribe()
+        //                 // }
+        //
+        //                 this.$store.state.client.loading = false;
+        //
+        //                 localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+        //
+        //                 onConnect();
+        //             });
+        //
+        //             this.$store.state.client.on('error', (error) => {
+        //                 console.log('Connection failed', error);
+        //
+        //                 this.destroyConnection();
+        //             });
+        //
+        //             this.$store.state.client.on('close', () => {
+        //                 console.log('Connection closed');
+        //
+        //                 this.destroyConnection();
+        //
+        //                 this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
+        //             });
+        //
+        //             this.$store.state.client.on('message', (topic, message) => {
+        //                 // this.receiveNews = this.receiveNews.concat(message)
+        //                 // console.log(`Received message ${message} from topic ${topic}`);
+        //
+        //                 this.onMessageHandler(topic, message);
+        //             });
+        //         }
+        //         catch (error) {
+        //             console.log('mqtt.connect error', error);
+        //             this.$store.state.client.connected = false;
+        //         }
+        //     }
+        // },
         doSubscribe(topic) {
-            if (this.client.connected) {
+            if (this.$store.state.client.connected) {
                 const qos = 0;
                 let self = this;
-                this.client.subscribe(topic, {qos}, (error) => {
+                this.$store.state.client.subscribe(topic, {qos}, (error) => {
                     if (error) {
                         console.log('Subscribe to topics error', error)
                         return
@@ -1519,74 +1510,74 @@ export default {
                 });
             }
         },
-        doUnSubscribe(topic) {
-            if (this.client.connected) {
-                let self = this;
-                this.client.unsubscribe(topic, error => {
-                    if (error) {
-                        console.log('Unsubscribe error', error)
-                    }
-
-                    self.droneSubscribeSuccess[topic] = false;
-                    console.log('Unsubscribe to topics (', topic, ')');
-
-                    self.receiveNews = '';
-                });
-            }
-        },
+        // doUnSubscribe(topic) {
+        //     if (this.$store.state.client.connected) {
+        //         let self = this;
+        //         this.$store.state.client.unsubscribe(topic, error => {
+        //             if (error) {
+        //                 console.log('Unsubscribe error', error)
+        //             }
+        //
+        //             self.droneSubscribeSuccess[topic] = false;
+        //             console.log('Unsubscribe to topics (', topic, ')');
+        //
+        //             self.receiveNews = '';
+        //         });
+        //     }
+        // },
         doPublish(topic, payload) {
-            if (this.client.connected) {
-                this.client.publish(topic, payload, 0, error => {
+            if (this.$store.state.client.connected) {
+                this.$store.state.client.publish(topic, payload, 0, error => {
                     if (error) {
                         console.log('Publish error', error)
                     }
                 });
             }
         },
-        destroyConnection() {
-            if (this.client.connected) {
-                try {
-                    this.client.end()
-                    this.client = {
-                        connected: false,
-                    }
-                    console.log(this.name, 'Successfully disconnected!');
-
-                    localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
-
-                    // let self = this;
-                    // axios({
-                    //     validateStatus: function (status) {
-                    //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    //         return status < 500;
-                    //     },
-                    //     method: 'post',
-                    //     url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Info',
-                    //     headers: {
-                    // 'X-M2M-RI': String(parseInt(Math.random()*10000)),
-                    //         'X-M2M-Origin': 'SVue',
-                    //         'Content-Type': 'application/json;ty=4'
-                    //     },
-                    //     data: {
-                    //         'm2m:cin': {
-                    //             con: self.$store.state.drone_infos
-                    //         }
-                    //     }
-                    // }).then(
-                    //     function (res) {
-                    //         console.log('setFlyingDroneInfo-axios', res.data);
-                    //     }
-                    // ).catch(
-                    //     function (err) {
-                    //         console.log(err.message);
-                    //     }
-                    // );
-                }
-                catch (error) {
-                    console.log('Disconnect failed', error.toString())
-                }
-            }
-        },
+        // destroyConnection() {
+        //     if (this.$store.state.client.connected) {
+        //         try {
+        //             this.$store.state.client.end()
+        //             this.$store.state.client = {
+        //                 connected: false,
+        //             }
+        //             console.log(this.name, 'Successfully disconnected!');
+        //
+        //             localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+        //
+        //             // let self = this;
+        //             // axios({
+        //             //     validateStatus: function (status) {
+        //             //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+        //             //         return status < 500;
+        //             //     },
+        //             //     method: 'post',
+        //             //     url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Info',
+        //             //     headers: {
+        //             // 'X-M2M-RI': String(parseInt(Math.random()*10000)),
+        //             //         'X-M2M-Origin': 'SVue',
+        //             //         'Content-Type': 'application/json;ty=4'
+        //             //     },
+        //             //     data: {
+        //             //         'm2m:cin': {
+        //             //             con: self.$store.state.drone_infos
+        //             //         }
+        //             //     }
+        //             // }).then(
+        //             //     function (res) {
+        //             //         console.log('setFlyingDroneInfo-axios', res.data);
+        //             //     }
+        //             // ).catch(
+        //             //     function (err) {
+        //             //         console.log(err.message);
+        //             //     }
+        //             // );
+        //         }
+        //         catch (error) {
+        //             console.log('Disconnect failed', error.toString())
+        //         }
+        //     }
+        // },
 
         receiveFromDrone(topic, hex_content_each) {
             var arr_topic = topic.split('/');
@@ -4922,6 +4913,10 @@ export default {
             }, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
         });
 
+        EventBus.$on('on-message-handler-' + this.name, (payload) => {
+            this.onMessageHandler(payload.topic, payload.message);
+        });
+
         // EventBus.$on('push-status-' + this.name, (payload) => {
         //     //console.log(payload);
         //
@@ -5041,33 +5036,33 @@ export default {
             }
         }
 
-        let self = this;
+        //let self = this;
         this.connection.host = this.broker;
 
         if (localStorage.getItem('mqttConnection-' + this.name)) {
             if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
-                this.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
-                console.log('client', this.client);
+                this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
+                console.log('client', this.$store.state.client);
 
-                // if(this.client.connected) {
-                //     this.client.end()
+                // if(this.$store.state.client.connected) {
+                //     this.$store.state.client.end()
                 // }
 
-                this.client = {
+                this.$store.state.client = {
                     connected: false,
                 }
 
-                localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
+                localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
             }
         }
 
-        this.createConnection(function () {
-            self.doSubscribe(self.drone_topic);
-            console.log('createConnection - Subscribe to ', self.drone_topic);
-
-            self.doSubscribe(self.broadcast_topic);
-            console.log('createConnection - Subscribe to ', self.broadcast_topic);
-        });
+        // this.createConnection(function () {
+        //     self.doSubscribe(self.drone_topic);
+        //     console.log('createConnection - Subscribe to ', self.drone_topic);
+        //
+        //     self.doSubscribe(self.broadcast_topic);
+        //     console.log('createConnection - Subscribe to ', self.broadcast_topic);
+        // });
 
         this.getDroneMissionInfo();
 
@@ -5089,8 +5084,6 @@ export default {
         if (this.timer_id) {
             clearInterval(this.timer_id);
         }
-
-        this.destroyConnection();
     }
 }
 </script>

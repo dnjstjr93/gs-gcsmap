@@ -447,6 +447,11 @@ export default new Vuex.Store({
         missionCircles: {},
 
         distanceTarget: {},
+
+        client: {
+            connected: false,
+            loading: false
+        },
     },
 
     mutations: {

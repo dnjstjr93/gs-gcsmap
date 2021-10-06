@@ -50,6 +50,8 @@
     import DroneInfo from "./DroneInfo";
     import DroneCommand from "./DroneCommand";
     import EventBus from "@/EventBus";
+    import {nanoid} from "nanoid";
+    import mqtt from "mqtt";
     // import axios from "axios";
 
     //
@@ -137,6 +139,20 @@
                 candidate: {},
                 distanceMonitor: false,
                 myMinWidth: 360,
+                connection: {
+                    host: this.$store.state.VUE_APP_MOBIUS_HOST,
+                    port: 8883,
+                    endpoint: '',
+                    clean: true,
+                    connectTimeout: 4000,
+                    reconnectPeriod: 4000,
+                    clientId: this.name + nanoid(15),
+                    username: 'keti_muv',
+                    password: 'keti_muv',
+                },
+                drone_topic: {},
+                broadcast_topic: {},
+                droneSubscribeSuccess: {},
             };
         },
 
@@ -162,11 +178,131 @@
 
                 console.log('DroneInfoList-onResize', this.myWidth, this.myHeight);
             },
+
+            createConnection(onConnect) {
+                if (this.$store.state.client.connected) {
+                    console.log('DroneInfoList - destroyConnection')
+                    this.destroyConnection();
+                }
+
+                if (!this.$store.state.client.connected) {
+                    //var self = this;
+
+                    this.$store.state.client.loading = true;
+                    this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
+                    const {host, port, endpoint, ...options} = this.connection
+                    const connectUrl = `ws://${host}:${port}${endpoint}`
+                    try {
+                        this.$store.state.client = mqtt.connect(connectUrl, options);
+
+                        this.$store.state.client.on('connect', () => {
+                            console.log('DroneInfoList Connection succeeded!');
+
+                            this.$store.state.client.connected = true;
+
+                            // if(this.subscribeSuccess) {
+                            //     this.doUnSubscribe()
+                            // }
+
+                            this.$store.state.client.loading = false;
+
+                            localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+
+                            onConnect();
+                        });
+
+                        this.$store.state.client.on('error', (error) => {
+                            console.log('Connection failed', error);
+
+                            this.destroyConnection();
+                        });
+
+                        this.$store.state.client.on('close', () => {
+                            console.log('Connection closed');
+
+                            this.destroyConnection();
+
+                            this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
+                        });
+
+                        this.$store.state.client.on('message', (topic, message) => {
+                            // this.receiveNews = this.receiveNews.concat(message)
+                            //console.log(`Received message ${message} from topic ${topic}`);
+
+                            //console.log(topic.split('/')[4], message.toString());
+
+                            let payload = {};
+                            payload.topic = topic;
+                            payload.message = message;
+
+                            EventBus.$emit('on-message-handler-' + topic.split('/')[4], payload);
+                        });
+                    }
+                    catch (error) {
+                        console.log('mqtt.connect error', error);
+                        this.$store.state.client.connected = false;
+                    }
+                }
+            },
+            doSubscribe(topic) {
+                if (this.$store.state.client.connected) {
+                    const qos = 0;
+                    this.$store.state.client.subscribe(topic, {qos}, (error) => {
+                        if (error) {
+                            console.log('Subscribe to topics error', error)
+                            return;
+                        }
+
+                        console.log('Subscribe to topics (', topic, ')');
+                        this.droneSubscribeSuccess[topic] = true;
+                    });
+                }
+            },
+            doUnSubscribe(topic) {
+                if (this.$store.state.client.connected) {
+                    if(Object.hasOwnProperty.call(this.droneSubscribeSuccess, topic)) {
+                        if(this.droneSubscribeSuccess[topic]) {
+                            this.$store.state.client.unsubscribe(topic, error => {
+                                if (error) {
+                                    console.log('Unsubscribe error', error)
+                                }
+
+                                console.log('Unsubscribe to topics (', topic, ')');
+                                this.droneSubscribeSuccess[topic] = false;
+                            });
+                        }
+                    }
+                }
+            },
+            doPublish(topic, payload) {
+                if (this.$store.state.client.connected) {
+                    this.$store.state.client.publish(topic, payload, 0, error => {
+                        if (error) {
+                            console.log('Publish error', error)
+                        }
+                    });
+                }
+            },
+            destroyConnection() {
+                if (this.$store.state.client.connected) {
+                    try {
+                        this.$store.state.client.end()
+                        this.$store.state.client = {
+                            connected: false,
+                        }
+                        console.log(this.name, 'Successfully disconnected!');
+
+                        localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+                    }
+                    catch (error) {
+                        console.log('Disconnect failed', error.toString())
+                    }
+                }
+            },
         },
 
         mounted() {
             window.addEventListener('resize', this.onResize);
-
 
             setTimeout(this.onResize, 3000);
 
@@ -276,6 +412,50 @@
                         }
                     }
                 }
+
+                if (localStorage.getItem('mqttConnection-' + this.name)) {
+                    if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
+                        this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
+                        console.log('client', this.$store.state.client);
+
+                        // if(this.$store.state.client.connected) {
+                        //     this.$store.state.client.end()
+                        // }
+
+                        this.$store.state.client = {
+                            connected: false,
+                        }
+
+                        localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+                    }
+                }
+
+                this.createConnection(() => {
+                    for(let dName in this.$store.state.drone_infos) {
+                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if(dName === 'unknown') {
+                                continue;
+                            }
+
+                            this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
+                            this.doUnSubscribe(this.drone_topic[dName]);
+                            this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
+                            this.doUnSubscribe(this.broadcast_topic[dName]);
+
+                            if(this.$store.state.drone_infos[dName].selected) {
+                                this.doSubscribe(this.drone_topic[dName]);
+                                console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic[dName]);
+
+                                this.doSubscribe(this.broadcast_topic[dName]);
+                                console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
+                            }
+                        }
+                    }
+
+                    let broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                    this.doSubscribe(broadcast_gcsmap_topic);
+                    console.log('DroneInfoList-gcsmap_topic - Subscribe to ', broadcast_gcsmap_topic);
+                });
             });
 
             EventBus.$on('confirm_selected', (selected) => {
@@ -289,7 +469,6 @@
                         this.drones_selected.push(this.$store.state.drone_infos[selected[idx].name]);
 
                         console.log('confirm_selected', this.$store.state.drone_infos[selected[idx].name].home_position);
-
                         // console.log('droneColorMap', this.$store.state.droneColorMap);
                         //console.log('confirm-selected', this.$store.state.droneColorMap[selected[idx].name]);
 
@@ -311,8 +490,33 @@
                 }
                 selected = null;
 
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if(dName === 'unknown') {
+                            continue;
+                        }
+
+                        this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
+                        this.doUnSubscribe(this.drone_topic[dName]);
+                        this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
+                        this.doUnSubscribe(this.broadcast_topic[dName]);
+
+                        if(this.$store.state.drone_infos[dName].selected) {
+                            this.doSubscribe(this.drone_topic[dName]);
+                            console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.drone_topic[dName]);
+
+                            this.doSubscribe(this.broadcast_topic[dName]);
+                            console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
+                        }
+                    }
+                }
+
                 setTimeout(this.onResize, 500);
             });
+        },
+
+        beforeDestroy() {
+            this.destroyConnection();
         }
     }
 </script>
