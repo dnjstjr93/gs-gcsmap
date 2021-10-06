@@ -158,16 +158,24 @@
                                 :options="line.options"
                             ></GmapPolyline>
 
-                            <GmapPolyline v-for="(line, dName) in $store.state.missionLines" :key="'missionLines_'+dName"
-                                :path.sync="line.path"
-                                :options="line.options"
-                            ></GmapPolyline>
+                            <div v-for="(line, dName) in $store.state.missionLines" :key="'missionLines_'+dName">
+                                <div v-if="$store.state.drone_infos[dName].selected">
+                                    <GmapPolyline
+                                        :path.sync="line.path"
+                                        :options="line.options"
+                                    ></GmapPolyline>
+                                </div>
+                            </div>
 
-                            <GmapCircle v-for="(circle, dName) in $store.state.targetCircles" :key="'targetCircles_'+dName"
-                                :center="circle"
-                                :radius="circle.radius"
-                                :options="circle.options"
-                            ></GmapCircle>
+                            <div v-for="(circle, dName) in $store.state.targetCircles" :key="'targetCircles_'+dName">
+                                <div v-if="$store.state.drone_infos[dName].selected">
+                                    <GmapCircle
+                                                :center="circle"
+                                                :radius="circle.radius"
+                                                :options="circle.options"
+                                    ></GmapCircle>
+                                </div>
+                            </div>
 
                             <GmapCircle v-for="(circle, dName) in $store.state.missionCircles" :key="'missionCircles_'+dName"
                                 :center="circle"

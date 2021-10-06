@@ -1262,7 +1262,11 @@ export default {
 
         onMessageBroadcast(message) {
             try {
+
                 let watchingPayload = JSON.parse(message.toString());
+
+                console.log('onMessageBroadcast-', watchingPayload);
+
                 this.watchingMission = watchingPayload.watchingMission;
                 this.watchingInitDist = watchingPayload.watchingInitDist;
                 this.watchingMissionStatus = watchingPayload.watchingMissionStatus;
@@ -1271,6 +1275,9 @@ export default {
                     this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
                     this.$store.state.drone_infos[this.name].targetLng = watchingPayload.targetLng;
                     this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
+
+                    this.$store.state.missionLines = this.clone(watchingPayload.missionLines);
+                    this.$store.state.missionCircles = this.clone(watchingPayload.missionCircles);
                 }
                 else if(watchingPayload.watchingMission === 'goto-circle') {
                     this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
@@ -1279,6 +1286,9 @@ export default {
 
                     this.droneStatus.radius = watchingPayload.targetRadius;
                     this.droneStatus.initHeading = watchingPayload.targetHeading;
+
+                    this.$store.state.missionCircles = this.clone(watchingPayload.missionCircles);
+                    this.$store.state.missionLines = this.clone(watchingPayload.missionLines);
                 }
                 else if(watchingPayload.watchingMission === 'goto-alt') {
                     this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
@@ -4160,6 +4170,9 @@ export default {
                 watchingPayload.targetLat = this.$store.state.drone_infos[this.name].targetLat;
                 watchingPayload.targetLng = this.$store.state.drone_infos[this.name].targetLng;
                 watchingPayload.targetAlt = this.$store.state.drone_infos[this.name].targetAlt;
+
+                watchingPayload.missionLines = this.$store.state.missionLines;
+                watchingPayload.missionCircles = this.$store.state.missionCircles;
             }
             else if(watchingPayload.watchingMission === 'goto-circle') {
                 watchingPayload.targetLat = this.$store.state.drone_infos[this.name].targetLat;
@@ -4168,6 +4181,9 @@ export default {
 
                 watchingPayload.targetRadius = this.droneStatus.radius;
                 watchingPayload.targetHeading = this.droneStatus.initHeading;
+
+                watchingPayload.missionCircles = this.$store.state.missionCircles;
+                watchingPayload.missionLines = this.$store.state.missionLines;
             }
             else if(watchingPayload.watchingMission === 'goto-alt') {
                 watchingPayload.targetAlt = this.$store.state.drone_infos[this.name].targetAlt;
@@ -4589,7 +4605,7 @@ export default {
                             radius: radius,
                             options: {
                                 strokeColor: this.$store.state.drone_infos[this.name].color,
-                                strokeOpacity: 0.4,
+                                strokeOpacity: 1,
                                 strokeWeight: 5,
                                 fillOpacity: 0.1
                             }
@@ -4682,7 +4698,7 @@ export default {
                 path: [],
                 options: {
                     strokeColor: this.$store.state.drone_infos[this.name].color,
-                    strokeOpacity: 0.4,
+                    strokeOpacity: 1,
                     strokeWeight: 5
                 }
             };
@@ -4733,7 +4749,7 @@ export default {
                                     path: [],
                                     options: {
                                         strokeColor: this.$store.state.drone_infos[name].color,
-                                        strokeOpacity: 0.3,
+                                        strokeOpacity: 1,
                                         strokeWeight: 5
                                     }
                                 };
@@ -4859,7 +4875,7 @@ export default {
 
                             this.doPublishBroadcast();
 
-                        }, 100, name, target_pub_topic, sys_id, takeoff_alt);
+                        }, parseInt(Math.random() * 10), name, target_pub_topic, sys_id, takeoff_alt);
 
 
                         // var auto_goto_positions = [];
