@@ -179,7 +179,7 @@
                 console.log('DroneInfoList-onResize', this.myWidth, this.myHeight);
             },
 
-            createConnection(onConnect) {
+            createConnection() {
                 if (this.$store.state.client.connected) {
                     console.log('DroneInfoList - destroyConnection')
                     this.destroyConnection();
@@ -208,7 +208,30 @@
 
                             localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
 
-                            onConnect();
+                            for(let dName in this.$store.state.drone_infos) {
+                                if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                                    if(dName === 'unknown') {
+                                        continue;
+                                    }
+
+                                    this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
+                                    this.doUnSubscribe(this.drone_topic[dName]);
+                                    this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
+                                    this.doUnSubscribe(this.broadcast_topic[dName]);
+
+                                    if(this.$store.state.drone_infos[dName].selected) {
+                                        this.doSubscribe(this.drone_topic[dName]);
+                                        console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic[dName]);
+
+                                        this.doSubscribe(this.broadcast_topic[dName]);
+                                        console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
+                                    }
+                                }
+                            }
+
+                            let broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                            this.doSubscribe(broadcast_gcsmap_topic);
+                            console.log('DroneInfoList-gcsmap_topic - Subscribe to ', broadcast_gcsmap_topic);
                         });
 
                         this.$store.state.client.on('error', (error) => {
@@ -430,32 +453,7 @@
                     }
                 }
 
-                this.createConnection(() => {
-                    for(let dName in this.$store.state.drone_infos) {
-                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                            if(dName === 'unknown') {
-                                continue;
-                            }
-
-                            this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
-                            this.doUnSubscribe(this.drone_topic[dName]);
-                            this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
-                            this.doUnSubscribe(this.broadcast_topic[dName]);
-
-                            if(this.$store.state.drone_infos[dName].selected) {
-                                this.doSubscribe(this.drone_topic[dName]);
-                                console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic[dName]);
-
-                                this.doSubscribe(this.broadcast_topic[dName]);
-                                console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
-                            }
-                        }
-                    }
-
-                    let broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
-                    this.doSubscribe(broadcast_gcsmap_topic);
-                    console.log('DroneInfoList-gcsmap_topic - Subscribe to ', broadcast_gcsmap_topic);
-                });
+                this.createConnection();
             });
 
             EventBus.$on('confirm_selected', (selected) => {

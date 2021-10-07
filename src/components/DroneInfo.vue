@@ -1261,45 +1261,49 @@ export default {
         },
 
         onMessageBroadcast(message) {
-            try {
+            if(!this.$store.state.didIPublish) {
+                try {
 
-                let watchingPayload = JSON.parse(message.toString());
+                    let watchingPayload = JSON.parse(message.toString());
 
-                console.log('onMessageBroadcast-', watchingPayload);
+                    console.log('onMessageBroadcast-', watchingPayload);
 
-                this.watchingMission = watchingPayload.watchingMission;
-                this.watchingInitDist = watchingPayload.watchingInitDist;
-                this.watchingMissionStatus = watchingPayload.watchingMissionStatus;
+                    this.watchingMission = watchingPayload.watchingMission;
+                    this.watchingInitDist = watchingPayload.watchingInitDist;
+                    this.watchingMissionStatus = watchingPayload.watchingMissionStatus;
 
-                if(watchingPayload.watchingMission === 'goto') {
-                    this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
-                    this.$store.state.drone_infos[this.name].targetLng = watchingPayload.targetLng;
-                    this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
+                    if (watchingPayload.watchingMission === 'goto') {
+                        this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
+                        this.$store.state.drone_infos[this.name].targetLng = watchingPayload.targetLng;
+                        this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
 
-                    this.$store.state.missionLines = this.clone(watchingPayload.missionLines);
-                    this.$store.state.missionCircles = this.clone(watchingPayload.missionCircles);
+                        this.$store.state.missionLines = this.clone(watchingPayload.missionLines);
+                        this.$store.state.missionCircles = this.clone(watchingPayload.missionCircles);
+                    }
+                    else if (watchingPayload.watchingMission === 'goto-circle') {
+                        this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
+                        this.$store.state.drone_infos[this.name].targetLng = watchingPayload.targetLng;
+                        this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
+
+                        this.droneStatus.radius = watchingPayload.targetRadius;
+                        this.droneStatus.initHeading = watchingPayload.targetHeading;
+
+                        this.$store.state.missionCircles = this.clone(watchingPayload.missionCircles);
+                        this.$store.state.missionLines = this.clone(watchingPayload.missionLines);
+                    }
+                    else if (watchingPayload.watchingMission === 'goto-alt') {
+                        this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
+                    }
+                    else if (watchingPayload.watchingMission === 'takeoff') {
+                        this.$store.state.drone_infos[this.name].home_position = watchingPayload.homePosition;
+                    }
                 }
-                else if(watchingPayload.watchingMission === 'goto-circle') {
-                    this.$store.state.drone_infos[this.name].targetLat = watchingPayload.targetLat;
-                    this.$store.state.drone_infos[this.name].targetLng = watchingPayload.targetLng;
-                    this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
-
-                    this.droneStatus.radius = watchingPayload.targetRadius;
-                    this.droneStatus.initHeading = watchingPayload.targetHeading;
-
-                    this.$store.state.missionCircles = this.clone(watchingPayload.missionCircles);
-                    this.$store.state.missionLines = this.clone(watchingPayload.missionLines);
-                }
-                else if(watchingPayload.watchingMission === 'goto-alt') {
-                    this.$store.state.drone_infos[this.name].targetAlt = watchingPayload.targetAlt;
-                }
-                else if(watchingPayload.watchingMission === 'takeoff') {
-                    this.$store.state.drone_infos[this.name].home_position = watchingPayload.homePosition;
+                catch (e) {
+                    console.log('broadcast-watchingMission', e.message);
                 }
             }
-            catch (e) {
-                console.log('broadcast-watchingMission', e.message);
-            }
+
+            this.$store.state.didIPublish = false;
         },
 
         onMessageHandler(topic, message) {
@@ -4185,6 +4189,8 @@ export default {
 
             console.log('broadcast_topic', this.broadcast_topic, '-', JSON.stringify(watchingPayload));
             this.doPublish(this.broadcast_topic, JSON.stringify(watchingPayload));
+
+            this.$store.state.didIPublish = true;
         },
     },
 
@@ -5037,24 +5043,24 @@ export default {
         }
 
         //let self = this;
-        this.connection.host = this.broker;
-
-        if (localStorage.getItem('mqttConnection-' + this.name)) {
-            if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
-                this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
-                console.log('client', this.$store.state.client);
-
-                // if(this.$store.state.client.connected) {
-                //     this.$store.state.client.end()
-                // }
-
-                this.$store.state.client = {
-                    connected: false,
-                }
-
-                localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
-            }
-        }
+        // this.connection.host = this.broker;
+        //
+        // if (localStorage.getItem('mqttConnection-' + this.name)) {
+        //     if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
+        //         this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
+        //         console.log('client', this.$store.state.client);
+        //
+        //         // if(this.$store.state.client.connected) {
+        //         //     this.$store.state.client.end()
+        //         // }
+        //
+        //         this.$store.state.client = {
+        //             connected: false,
+        //         }
+        //
+        //         localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+        //     }
+        // }
 
         // this.createConnection(function () {
         //     self.doSubscribe(self.drone_topic);

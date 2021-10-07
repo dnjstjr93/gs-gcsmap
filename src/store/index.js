@@ -452,6 +452,8 @@ export default new Vuex.Store({
             connected: false,
             loading: false
         },
+
+        didIPublish: false,
     },
 
     mutations: {
@@ -982,7 +984,9 @@ export default new Vuex.Store({
             state.tempMarkers = JSON.parse(JSON.stringify(temp));
             temp = null;
 
-            EventBus.$emit('do-updateTempMarker', payload);
+            if(payload.pOldName === payload.pName && payload.pOldName === 'unknown') {
+                state.tempMarkers[payload.pOldName][payload.pOldIndex].m_label.text = 'T:' + String(state.tempMarkers[payload.pOldName][payload.pOldIndex].alt);
+            }
         },
 
         removeMarkerDroneInfo(state, payload) {

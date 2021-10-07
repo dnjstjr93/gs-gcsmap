@@ -408,6 +408,8 @@
                 this.context_flag = false;
 
                 this.$store.commit('confirmAddTempMarker', false);
+
+                this.doBroadcastAddMarker(this.$store.state.tempPayload);
             },
 
             cancelTempMarker() {
@@ -991,22 +993,34 @@
             },
 
             onMessageBroadcast(topic, message) {
-                try {
-                    let watchingPayload = JSON.parse(message.toString());
-                    if(watchingPayload.broadcastMission === 'updateTempPosition') {
-                        let payload = watchingPayload.payload;
+                if(!this.$store.state.didIPublish) {
+                    try {
+                        let watchingPayload = JSON.parse(message.toString());
+                        if (watchingPayload.broadcastMission === 'updateTempPosition') {
+                            let payload = watchingPayload.payload;
 
-                        this.$store.commit('updateTempPosition', payload);
+                            this.$store.commit('updateTempPosition', payload);
 
-                        payload.value = false;
-                        this.$store.commit('setSelected', payload);
+                            payload.value = false;
+                            this.$store.commit('setSelected', payload);
 
-                        this.drawLineTarget(payload);
+                            this.drawLineTarget(payload);
+                        }
+                        else if (watchingPayload.broadcastMission === 'confirmAddTempMarker') {
+                            //this.$store.state.tempPayload = JSON.parse(JSON.stringify(watchingPayload.payload));
+
+                            this.$store.commit('addingTempMarker', watchingPayload.payload);
+                            this.context_flag = false;
+
+                            this.$store.commit('confirmAddTempMarker', false);
+                        }
+                    }
+                    catch (e) {
+                        console.log('GcsMap-onMessageBroadcast-watchingMission', e.message);
                     }
                 }
-                catch (e) {
-                    console.log('GcsMap-onMessageBroadcast-watchingMission', e.message);
-                }
+
+                this.$store.state.didIPublish = false;
             },
 
             doBroadcastTempPosition(payload) {
@@ -1017,6 +1031,20 @@
                 this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
                 console.log('broadcast_gcsmap_topic', this.broadcast_gcsmap_topic, '-', JSON.stringify(watchingPayload));
                 this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+
+                this.$store.state.didIPublish = true;
+            },
+
+            doBroadcastAddMarker(payload) {
+                let watchingPayload = {};
+                watchingPayload.broadcastMission = 'confirmAddTempMarker';
+                watchingPayload.payload = payload;
+
+                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                console.log('broadcast_gcsmap_topic', this.broadcast_gcsmap_topic, '-', JSON.stringify(watchingPayload));
+                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+
+                this.$store.state.didIPublish = true;
             }
         },
 
@@ -1262,21 +1290,6 @@
 
                     console.log('gotoLines', this.gotoLines);
                 }
-            });
-
-            EventBus.$on('do-updateTempMarker', (payload) => {
-                console.log('do-updateTempMarker', this.tempMarkers);
-
-                this.tempMarkers['unknown'][payload.pOldIndex].alt = payload.targetAlt;
-                this.tempMarkers['unknown'][payload.pOldIndex].radius = payload.targetRadius;
-                this.tempMarkers['unknown'][payload.pOldIndex].speed = payload.targetSpeed;
-                this.tempMarkers['unknown'][payload.pOldIndex].truningSpeed = payload.targetTurningSpeed;
-
-                this.tempMarkers['unknown'][payload.pOldIndex].m_label.text = 'T:' + String(this.tempMarkers['unknown'][payload.pOldIndex].alt);
-
-                this.tempMarkers = this.clone(this.tempMarkers);
-
-                payload = null;
             });
 
             EventBus.$on('updateDroneMarker', (payload) => {
