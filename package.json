@@ -15,6 +15,8 @@
     "dependencies": {
         "axios": "^0.21.4",
         "core-js": "^3.6.5",
+        "electron-log": "^4.4.1",
+        "electron-updater": "^4.3.9",
         "jspack": "^0.0.4",
         "moment": "^2.29.1",
         "mqtt": "^4.2.8",
@@ -68,5 +70,9 @@
     ],
     "description": "Drone GCS with Mobius",
     "author": "Il Yeup Ahn, IoT Platform Center, KETI",
-    "license": "BSD-3-Clause"
+    "license": "BSD-3-Clause",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/IoTKETI/ve-gcsmap.git"
+    }
 }

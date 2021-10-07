@@ -27,16 +27,17 @@ module.exports = {
                     perMachine: true,
                     allowToChangeInstallationDirectory: true
                 },
-                // publish: [
-                //     {
-                //         provider: "github",
-                //         owner: "ChrisMichaelPerezSantiago",
-                //         repo: "cinecoqui",
-                //         releaseType: "draft",
-                //         channel: "latest",
-                //         url: "cinecoqui.chrismichael.now.sh"
-                //     }
-                // ]
+                publish: [
+                    {
+                        provider: "github",
+                        owner: "IoTKETI",
+                        releaseType: "release",
+                        channel: "latest",
+                        url: "https://github.com/IoTKETI/ve-gcsmap.git",
+                        private: true,
+                        token: process.env.GH_TOKEN
+                    }
+                ]
             }
         }
     }
