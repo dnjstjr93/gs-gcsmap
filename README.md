@@ -1,5 +1,4 @@
 # ve-gcsmap
----
 
 ## Project setup
 ```
