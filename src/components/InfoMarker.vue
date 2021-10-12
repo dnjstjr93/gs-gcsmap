@@ -685,6 +685,8 @@
                     this.$store.commit('deleteMarker', payload);
                 }
 
+                EventBus.$emit('doBroadcastDeleteMaker', payload);
+
                 this.snackbar = true;
 
                 setTimeout(() => {

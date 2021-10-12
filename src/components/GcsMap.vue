@@ -1081,9 +1081,16 @@
                             this.$store.commit('confirmAddTempMarker', false);
                         }
                         else if (watchingPayload.broadcastMission === 'registerMarker') {
-                            //this.$store.state.tempPayload = JSON.parse(JSON.stringify(watchingPayload.payload));
-
                             this.$store.commit('registerMarker', watchingPayload.payload);
+                        }
+
+                        else if (watchingPayload.broadcastMission === 'deleteMarker') {
+                            if(watchingPayload.payload.pName === 'unknown') {
+                                this.$store.commit('removeMarker', watchingPayload.payload);
+                            }
+                            else {
+                                this.$store.commit('deleteMarker', watchingPayload.payload);
+                            }
                         }
                     }
                     catch (e) {
@@ -1467,6 +1474,18 @@
             EventBus.$on('doBroadcastRegisterMaker', (payload)=>{
                 let watchingPayload = {};
                 watchingPayload.broadcastMission = 'registerMarker';
+                watchingPayload.payload = payload;
+
+                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                console.log('broadcast_gcsmap_topic', this.broadcast_gcsmap_topic, '-', JSON.stringify(watchingPayload));
+                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+
+                this.$store.state.didIPublish = true;
+            });
+
+            EventBus.$on('doBroadcastDeleteMaker', (payload)=>{
+                let watchingPayload = {};
+                watchingPayload.broadcastMission = 'deleteMarker';
                 watchingPayload.payload = payload;
 
                 this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
