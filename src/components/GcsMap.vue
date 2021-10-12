@@ -140,6 +140,7 @@
                                             :radius="500"
                                             :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"
                                             @dblclick="addingTempMarker"
+                                            @click="printPosClick"
                                     ></GmapCircle>
 
                                 </div>
@@ -150,6 +151,7 @@
                                         :radius="circle.radius"
                                         :options="circle.options"
                                         @dblclick="addingTempMarker"
+                                        @click="printPosClick"
                             ></GmapCircle>
 
                             <GmapPolyline
@@ -195,7 +197,9 @@
     import InfoMarker from "./InfoMarker";
     import EventBus from "@/EventBus";
     import {nanoid} from "nanoid";
-    import mqtt from "mqtt";
+    import {gmapApi} from 'vue2-google-maps'
+
+    var curElevationVal = 0;
 
     export default {
         name: 'GcsMap',
@@ -210,6 +214,7 @@
 
         data () {
             return {
+                curElevation: 0,
                 zoom: 18,
                 curFlagMarker: false,
                 curSelectedMarker: {},
@@ -368,9 +373,37 @@
             myGcsStyle() {
                 return ("width: " + window.innerWidth + "px'" + "; height: " + (this.myHeight) + 'px')
             },
+
+            google: gmapApi,
         },
 
         methods: {
+            displayLocationElevation(location, elevator, onResult) {
+                // Initiate the location request
+                elevator
+                    .getElevationForLocations({
+                        locations: [location],
+                    })
+                    .then(({ results }) => {
+                        if (results[0]) {
+                            // Open the infowindow indicating the elevation at the clicked position.
+                            console.log(
+                                "The elevation at this point is " +
+                                results[0].elevation +
+                                " meters."
+                            );
+
+                            onResult(results[0].elevation);
+                        }
+                        else {
+                            console.log("No results found");
+                        }
+                    })
+                    .catch((e) =>
+                        console.log("Elevation service failed due to: " + e)
+                    );
+            },
+
             onResize() {
                 this.myWidth = this.$refs.mapRef.clientWidth;
                 this.myHeight = window.innerHeight-50;
@@ -419,7 +452,6 @@
             },
 
             addingTempMarker(e) {
-
                 this.drawBoundaryCircles(100);
 
                 //this.curBoundaryRadius = 1;
@@ -447,6 +479,8 @@
                 payload.speed = 5;
                 payload.radius = 250;
                 payload.turningSpeed = 10;
+                payload.targetMavCmd = 16;
+                payload.targetStayTime = 1;
                 payload.color = 'grey';
                 this.$store.commit('setDroneColorMap', payload); //JSON.parse(JSON.stringify(payload)));
 
@@ -488,6 +522,7 @@
             printPosClick(e) {
                 console.log(e);
                 console.log('click-pos', e.latLng.lat(), e.latLng.lng());
+
                 //this.center = {lat: e.latLng.lat(), lng: e.latLng.lng()};
 
                 this.click_x = e.domEvent.clientX;
@@ -586,6 +621,7 @@
                     console.log('selectTempMarker - pName', pName);
                     console.log('selectTempMarker - pIndex', pIndex);
 
+
                     let selected = !this.$store.state.tempMarkers[pName][pIndex].selected;
 
                     this.$store.commit('setAllTempMarker', false);
@@ -593,17 +629,46 @@
                     let payload = {};
 
                     if (selected) {
-                        payload.pName = pName;
+                                          payload.pName = pName;
                         payload.pIndex = pIndex;
                         payload.value = selected;
                         this.$store.commit('setTempMarker', payload);
 
-                        this.curFlagMarker = true;
-                        this.curSelectedMarker = this.$store.state.tempMarkers[pName][pIndex];
-                        this.curIndexMarker = pIndex;
-                        this.curNameMarker = pName;
+                        if(!Object.hasOwnProperty.call(this.$store.state.tempMarkers[pName][pIndex], 'elevation')) {
+                            this.$store.state.tempMarkers[pName][pIndex].elevation = 0;
+                        }
 
-                        console.log('curSelectedMarker', pName, pIndex, this.$store.state.tempMarkers[pName][pIndex]);
+                        const elevator = new this.google.maps.ElevationService();
+
+                        console.log('selected-tempMarkers', this.$store.state.tempMarkers[pName][pIndex]);
+                        let lat = this.$store.state.tempMarkers[pName][pIndex].lat;
+                        let lng = this.$store.state.tempMarkers[pName][pIndex].lng;
+
+                        this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
+                            console.log('curElevation', val);
+
+                            this.$store.state.tempMarkers[pName][pIndex].elevation = val;
+
+                            this.curFlagMarker = true;
+                            if (!Object.hasOwnProperty.call(this.$store.state.tempMarkers[pName][pIndex], 'targetStayTime')) {
+                                this.$store.state.tempMarkers[pName][pIndex].targetStayTime = 1;
+                            }
+                            else {
+                                if(isNaN(this.$store.state.tempMarkers[pName][pIndex].targetStayTime)) {
+                                    this.$store.state.tempMarkers[pName][pIndex].targetStayTime = 1;
+                                }
+                            }
+
+                            if (!Object.hasOwnProperty.call(this.$store.state.tempMarkers[pName][pIndex], 'targetMavCmd')) {
+                                this.$store.state.tempMarkers[pName][pIndex].targetMavCmd = 16;
+                            }
+
+                            this.curSelectedMarker = this.$store.state.tempMarkers[pName][pIndex];
+                            this.curIndexMarker = pIndex;
+                            this.curNameMarker = pName;
+
+                            console.log('curSelectedMarker', pName, pIndex, this.$store.state.tempMarkers[pName][pIndex]);
+                        });
                     }
                     else {
                         this.curFlagMarker = false;
@@ -1262,6 +1327,10 @@
 
             EventBus.$on('gcs-map-ready', () => {
                 this.readyFlagGcsMap = true;
+
+                this.$refs.mapRef.$mapPromise.then((map) => {
+                    map.setTilt(45);
+                });
 
                 console.log('GcsMap-mounted-tempMarker', this.tempMarkers);
 

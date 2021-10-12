@@ -1073,7 +1073,8 @@ export default {
                                     (arrWaypoint[12] ? String(arrWaypoint[12]) : String(objMyDroneInfo.targetSpeed)) + ':' +
                                     String(objMyDroneInfo.targetRadius) + ':' +
                                     String(objMyDroneInfo.targetTurningSpeed) + ':' +
-                                    String(arrWaypoint[3]);
+                                    String(arrWaypoint[3])  + ':' +
+                                    String(arrWaypoint[4]);
 
                                 console.log(strGotoPosition);
 
@@ -1117,8 +1118,8 @@ export default {
                 arrWaypoint[0] = seq;
                 arrWaypoint[1] = 0;
                 arrWaypoint[2] = 3;
-                arrWaypoint[3] = 16;
-                arrWaypoint[4] = 0.00000000;
+                arrWaypoint[3] = parseFloat(arrPoint[6]);
+                arrWaypoint[4] = parseFloat(arrPoint[7]);
                 arrWaypoint[5] = 0.00000000;
                 arrWaypoint[6] = 0.00000000;
                 arrWaypoint[7] = 0.00000000;
@@ -2233,6 +2234,10 @@ export default {
             }
             else {
                 radius = 0;
+            }
+
+            if(arr_cur_goto_position.length > 7) {
+                delay = parseInt(arr_cur_goto_position[7]);
             }
 
             console.log('send_auto_mission_protocol', seq, mav_cmd, latitude, longitude, rel_altitude, radius);
@@ -4198,9 +4203,14 @@ export default {
         this.positions = []
         for (let idx in this.$store.state.tempMarkers[this.name]) {
             if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[this.name], idx)) {
-                let str = this.$store.state.tempMarkers[this.name][idx].lat + ':' + this.$store.state.tempMarkers[this.name][idx].lng +
-                    ':' + this.$store.state.tempMarkers[this.name][idx].alt + ':' + this.$store.state.tempMarkers[this.name][idx].radius +
-                    ':' + this.$store.state.tempMarkers[this.name][idx].airspeed;
+                let str = this.$store.state.tempMarkers[this.name][idx].lat + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].lng + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].alt + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].speed + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].radius + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].turningSpeed + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].targetMavCmd + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].targetStayTime;
                 this.positions.push(str);
             }
         }
@@ -4423,7 +4433,7 @@ export default {
             this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
 
             var auto_goto_positions = this.$store.state.drone_infos[this.name].goto_positions.slice(start_idx, (end_idx + 1));
-            let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10';
+            let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:16:1';
             auto_goto_positions.unshift(ele0);
 
             setTimeout((name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx) => {
@@ -4583,7 +4593,7 @@ export default {
 
                         var auto_goto_positions = [];
 
-                        let ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_WAYPOINT)
+                        let ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_WAYPOINT) + ':1';
                         auto_goto_positions.push(ele);
 
                         ele = lat.toString() + ':' + lon.toString() + ':' + alt.toString() + ':' + degree_speed + ':' + radius + ':10:' + String(mavlink.MAV_CMD_NAV_LOITER_TURNS)
@@ -5029,9 +5039,14 @@ export default {
 
         for (let idx in this.$store.state.tempMarkers[this.name]) {
             if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[this.name], idx)) {
-                let str = this.$store.state.tempMarkers[this.name][idx].lat + ':' + this.$store.state.tempMarkers[this.name][idx].lng +
-                    ':' + this.$store.state.tempMarkers[this.name][idx].alt + ':' + this.$store.state.tempMarkers[this.name][idx].radius +
-                    ':' + this.$store.state.tempMarkers[this.name][idx].airspeed;
+                let str = this.$store.state.tempMarkers[this.name][idx].lat + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].lng + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].alt + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].speed + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].radius + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].turningSpeed + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].targetMavCmd + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].targetStayTime;
 
                 let goto_pos = {};
                 goto_pos.type = 'goto';

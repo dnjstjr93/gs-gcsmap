@@ -18,10 +18,10 @@
         >
             <v-card tile flat>
                 <v-row align="center" justify="center" style="height: 260px">
-                    <v-col cols="12" sm="3">
+                    <v-col cols="4">
                         <v-card flat tile>
                             <v-row align="center" justify="center">
-                                <v-col cols="12" sm="8">
+                                <v-col cols="5">
                                     <v-combobox
                                             v-model="targetSelect"
                                             :items="targets"
@@ -50,8 +50,8 @@
                                         </template>
                                     </v-combobox>
                                 </v-col>
-                                <v-col cols="12" sm="4">
-                                    <v-select class="py-3"
+                                <v-col cols="3">
+                                    <v-select class="py-3 pr-2"
                                               v-model="targetSelectIndex"
                                               :items="targetIndexList"
                                               color="black"
@@ -64,237 +64,293 @@
                                     >
                                     </v-select>
                                 </v-col>
+                                <v-col cols="3">
+                                    <v-text-field
+                                        label="stayTime"
+                                        v-model="targetStayTime"
+                                        class="mt-0 pt-0"
+                                        hide-details
+                                        type="number"
+                                        outlined dense
+                                        color="amber"
+                                    ></v-text-field>
+                                </v-col>
                             </v-row>
-                            <v-text-field class="py-3"
-                                          v-model.number="targetLat"
-                                          color="purple darken-2"
-                                          label="Latitude"
-                                          readonly
-                                          filled
-                                          dense
-                                          hide-details
-                                          outlined
-                            ></v-text-field>
-                            <v-text-field class="py-3"
-                                          v-model.number="targetLng"
-                                          color="blue darken-2"
-                                          label="Longitude"
-                                          readonly
-                                          filled
-                                          dense
-                                          hide-details
-                                          outlined
-                            ></v-text-field>
+                            <v-row align="center" justify="center">
+                                <v-col cols="4">
+                                    <v-text-field class="py-1 pl-4"
+                                                  v-model.number="targetLat"
+                                                  color="purple darken-2"
+                                                  label="Latitude"
+                                                  readonly
+                                                  filled
+                                                  dense
+                                                  hide-details
+                                                  outlined
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="4">
+                                    <v-text-field class="py-1 px-0"
+                                                  v-model.number="targetLng"
+                                                  color="blue darken-2"
+                                                  label="Longitude"
+                                                  readonly
+                                                  filled
+                                                  dense
+                                                  hide-details
+                                                  outlined
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="4">
+                                    <v-text-field class="py-1 pr-4"
+                                                  v-model.number="elevation"
+                                                  color="blue darken-2"
+                                                  label="Elevation"
+                                                  readonly
+                                                  filled
+                                                  dense
+                                                  hide-details
+                                                  outlined
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="12" sm="2" class="text-center">
+                    <v-col cols="2" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">비행고도</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetAlt}}</span>
                             <span class="subheading font-weight-light mx-1">m</span>
                         </v-card>
-                        <v-card flat tile class="px-2 pt-12">
-                            <v-slider
-                                    v-model="targetAlt"
-                                    color="amber"
-                                    hint="Altitude"
-                                    min="3"
-                                    max="500"
-                                    thumb-label="always"
-                                    track-fill-color="orange"
-                                    dense
-                                    ticks
-                                    hide-details
-                            >
-                                <template v-slot:prepend>
-                                    <v-icon
-                                            color="primary"
-                                            @click="decrementAlt"
-                                    >
-                                        mdi-minus
-                                    </v-icon>
-                                </template>
-
-                                <template v-slot:append>
-                                    <v-icon
-                                            color="secondary"
-                                            @click="incrementAlt"
-                                    >
-                                        mdi-plus
-                                    </v-icon>
-                                </template>
-
-                                <template v-slot:append>
-                                    <v-text-field
+                        <v-card flat tile class="pl-2 pt-12">
+                            <v-row align="center" justify="center">
+                                <v-col cols="8">
+                                    <v-slider
                                             v-model="targetAlt"
-                                            class="mt-0 pt-0"
-                                            hide-details
-                                            single-line
-                                            type="number"
-                                            style="width: 80px"
-                                            outlined dense
                                             color="amber"
+                                            hint="Altitude"
+                                            min="3"
+                                            max="500"
+                                            thumb-label="always"
+                                            track-fill-color="orange"
+                                            dense
+                                            ticks
+                                            hide-details
+                                    >
+                                        <template v-slot:prepend>
+                                            <v-icon
+                                                    color="primary"
+                                                    @click="decrementAlt"
+                                            >
+                                                mdi-minus
+                                            </v-icon>
+                                        </template>
+
+                                        <template v-slot:append>
+                                            <v-icon
+                                                    color="secondary"
+                                                    @click="incrementAlt"
+                                            >
+                                                mdi-plus
+                                            </v-icon>
+                                        </template>
+                                    </v-slider>
+                                </v-col>
+                                <v-col cols="4">
+                                    <v-text-field
+                                        v-model="targetAlt"
+                                        class="mt-0 pt-0"
+                                        hide-details
+                                        single-line
+                                        type="number"
+                                        outlined dense
+                                        color="amber"
                                     ></v-text-field>
-                                </template>
-                            </v-slider>
+                                </v-col>
+                            </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="12" sm="2" class="text-center">
+                    <v-col cols="2" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">비행속도</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetSpeed}}</span>
                             <span class="subheading font-weight-light mx-1">m/s</span>
                         </v-card>
-                        <v-card flat tile class="px-2 pt-12">
-                            <v-slider
-                                    v-model="targetSpeed"
-                                    color="teal"
-                                    hint="Speed"
-                                    min="1"
-                                    max="20"
-                                    thumb-label="always"
-                                    track-fill-color="orange"
-                                    dense
-                                    ticks
-                                    hide-details
-                            >
-                                <template v-slot:prepend>
-                                    <v-icon
-                                            color="primary"
-                                            @click="decrementSpeed"
-                                    >
-                                        mdi-minus
-                                    </v-icon>
-                                </template>
+                        <v-card flat tile class="pl-2 pt-12">
+                            <v-row align="center" justify="center">
+                                <v-col cols="8">
+                                <v-slider
+                                        v-model="targetSpeed"
+                                        color="teal"
+                                        hint="Speed"
+                                        min="1"
+                                        max="20"
+                                        thumb-label="always"
+                                        track-fill-color="orange"
+                                        dense
+                                        ticks
+                                        hide-details
+                                >
+                                    <template v-slot:prepend>
+                                        <v-icon
+                                                color="primary"
+                                                @click="decrementSpeed"
+                                        >
+                                            mdi-minus
+                                        </v-icon>
+                                    </template>
 
-                                <template v-slot:append>
-                                    <v-icon
-                                            color="secondary"
-                                            @click="incrementSpeed"
-                                    >
-                                        mdi-plus
-                                    </v-icon>
-                                </template>
-
-                                <template v-slot:append>
+                                    <template v-slot:append>
+                                        <v-icon
+                                                color="secondary"
+                                                @click="incrementSpeed"
+                                        >
+                                            mdi-plus
+                                        </v-icon>
+                                    </template>
+                                </v-slider>
+                                </v-col>
+                                <v-col cols="4">
                                     <v-text-field
-                                            v-model="targetSpeed"
-                                            class="mt-0 pt-0"
-                                            hide-details
-                                            single-line
-                                            type="number"
-                                            style="width: 70px"
-                                            outlined dense
-                                            color="teal"
+                                        v-model="targetSpeed"
+                                        class="mt-0 pt-0"
+                                        hide-details
+                                        single-line
+                                        type="number"
+                                        outlined dense
+                                        color="teal"
                                     ></v-text-field>
-                                </template>
-                            </v-slider>
+                                </v-col>
+                            </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="12" sm="2" class="text-center">
+                    <v-col cols="2" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">선회반지름</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetRadius}}</span>
                             <span class="subheading font-weight-light mx-1">m</span>
                         </v-card>
-                        <v-card flat tile class="px-2 pt-12">
-                            <v-slider
-                                    v-model="targetRadius"
-                                    color="blue"
-                                    hint="Speed"
-                                    min="5"
-                                    max="255"
-                                    thumb-label="always"
-                                    track-fill-color="orange"
-                                    dense
-                                    ticks
-                                    hide-details
-                            >
-                                <template v-slot:prepend>
-                                    <v-icon
-                                            color="primary"
-                                            @click="decrementRadius"
+                        <v-card flat tile class="pl-2 pt-12">
+                            <v-row align="center" justify="center">
+                                <v-col cols="8">
+                                    <v-slider
+                                        v-model="targetRadius"
+                                        color="blue"
+                                        hint="Speed"
+                                        min="5"
+                                        max="255"
+                                        thumb-label="always"
+                                        track-fill-color="orange"
+                                        dense
+                                        ticks
+                                        hide-details
                                     >
-                                        mdi-minus
-                                    </v-icon>
-                                </template>
+                                        <template v-slot:prepend>
+                                            <v-icon
+                                                color="primary"
+                                                @click="decrementRadius"
+                                            >
+                                                mdi-minus
+                                            </v-icon>
+                                        </template>
 
-                                <template v-slot:append>
-                                    <v-icon
-                                            color="secondary"
-                                            @click="incrementRadius"
-                                    >
-                                        mdi-plus
-                                    </v-icon>
-                                </template>
-
-                                <template v-slot:append>
+                                        <template v-slot:append>
+                                            <v-icon
+                                                color="secondary"
+                                                @click="incrementRadius"
+                                            >
+                                                mdi-plus
+                                            </v-icon>
+                                        </template>
+                                    </v-slider>
+                                </v-col>
+                                <v-col cols="4">
                                     <v-text-field
-                                            v-model="targetRadius"
-                                            class="mt-0 pt-0"
-                                            hide-details
-                                            single-line
-                                            type="number"
-                                            style="width: 80px"
-                                            outlined dense
-                                            color="blue"
+                                        v-model="targetRadius"
+                                        class="mt-0 pt-0"
+                                        hide-details
+                                        single-line
+                                        type="number"
+                                        outlined dense
+                                        color="blue"
                                     ></v-text-field>
-                                </template>
-                            </v-slider>
+                                </v-col>
+                            </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="12" sm="2" class="text-center">
+                    <v-col cols="2" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">선회속도</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetTurningSpeed}}</span>
                             <span class="subheading font-weight-light mx-1">m/rad</span>
                         </v-card>
-                        <v-card flat tile class="px-2 pt-12">
-                            <v-slider
-                                    v-model="targetTurningSpeed"
-                                    color="purple"
-                                    hint="Speed"
-                                    min="5"
-                                    max="20"
-                                    thumb-label="always"
-                                    track-fill-color="orange"
-                                    dense
-                                    ticks
-                                    hide-details
-                            >
-                                <template v-slot:prepend>
-                                    <v-icon
-                                            color="primary"
-                                            @click="decrementTurningSpeed"
-                                    >
-                                        mdi-minus
-                                    </v-icon>
-                                </template>
-
-                                <template v-slot:append>
-                                    <v-icon
-                                            color="secondary"
-                                            @click="incrementTurningSpeed"
-                                    >
-                                        mdi-plus
-                                    </v-icon>
-                                </template>
-
-                                <template v-slot:append>
-                                    <v-text-field
+                        <v-card flat tile class="pl-2 pt-12">
+                            <v-row align="center" justify="center">
+                                <v-col cols="8">
+                                    <v-slider
                                             v-model="targetTurningSpeed"
-                                            class="mt-0 pt-0"
-                                            hide-details
-                                            single-line
-                                            type="number"
-                                            style="width: 70px"
-                                            outlined dense
                                             color="purple"
+                                            hint="Speed"
+                                            min="5"
+                                            max="20"
+                                            thumb-label="always"
+                                            track-fill-color="orange"
+                                            dense
+                                            ticks
+                                            hide-details
+                                    >
+                                        <template v-slot:prepend>
+                                            <v-icon
+                                                    color="primary"
+                                                    @click="decrementTurningSpeed"
+                                            >
+                                                mdi-minus
+                                            </v-icon>
+                                        </template>
+
+                                        <template v-slot:append>
+                                            <v-icon
+                                                    color="secondary"
+                                                    @click="incrementTurningSpeed"
+                                            >
+                                                mdi-plus
+                                            </v-icon>
+                                        </template>
+                                    </v-slider>
+                                </v-col>
+                                <v-col cols="4">
+                                    <v-text-field
+                                        v-model="targetTurningSpeed"
+                                        class="mt-0 pr-2"
+                                        hide-details
+                                        single-line
+                                        type="number"
+                                        outlined dense
+                                        color="purple"
                                     ></v-text-field>
-                                </template>
-                            </v-slider>
+                                </v-col>
+                            </v-row>
                         </v-card>
                     </v-col>
+<!--                    <v-col cols="12" sm="1" class="text-center">-->
+<!--                        <v-card flat tile>-->
+<!--                            <span class="display-0 font-weight-bold">대기시간</span>-->
+<!--                            <span class="pl-6 display-1 font-weight-light">{{targetStayTime}}</span>-->
+<!--                            <span class="subheading font-weight-light mx-1">sec</span>-->
+<!--                        </v-card>-->
+<!--                        <v-card flat tile class="px-2 pt-12">-->
+<!--                            <v-text-field-->
+<!--                                v-model="targetStayTime"-->
+<!--                                class="mt-0 pt-0"-->
+<!--                                hide-details-->
+<!--                                single-line-->
+<!--                                type="number"-->
+<!--                                style="width: 80px"-->
+<!--                                outlined dense-->
+<!--                                color="amber"-->
+<!--                            ></v-text-field>-->
+<!--                        </v-card>-->
+<!--                    </v-col>-->
                 </v-row>
             </v-card>
             <v-card-actions>
@@ -375,6 +431,8 @@
                 targetSpeed: 5,
                 targetRadius: 10,
                 targetTurningSpeed: 10,
+                targetStayTime: 1,
+                elevation: 0,
                 //form: Object.assign({}, defaultForm),
                 rules: {
                     age: [
@@ -523,6 +581,22 @@
                     this.targetSpeed = newVal.speed;
                     this.targetRadius = newVal.radius;
                     this.targetTurningSpeed = newVal.turningSpeed;
+
+                    if(Object.hasOwnProperty.call(newVal, 'targetMavCmd')) {
+                        this.targetMavCmd = newVal.targetMavCmd;
+                    }
+                    else {
+                        this.targetMavCmd = 16;
+                    }
+
+                    if(Object.hasOwnProperty.call(newVal, 'targetStayTime')) {
+                        this.targetStayTime = newVal.targetStayTime;
+                    }
+                    else {
+                        this.targetStayTime = 1;
+                    }
+
+                    this.elevation = newVal.elevation;
                 }
             },
 
@@ -572,14 +646,11 @@
             },
 
             conditions() {
-                if((this.markerName !== this.targetSelect) || (this.marker.alt !== this.targetAlt) ||
+                return !((this.markerName !== this.targetSelect) || (this.marker.alt !== this.targetAlt) ||
                     (this.marker.speed !== this.targetSpeed) || (this.marker.radius !== this.targetRadius) ||
-                    (this.marker.turningSpeed !== this.targetTurningSpeed) || (String(this.markerIndex) !== this.targetSelectIndex)) {
-                    return false;
-                }
-                else {
-                    return true;
-                }
+                    (this.marker.turningSpeed !== this.targetTurningSpeed) ||
+                    (this.marker.targetStayTime !== this.targetStayTime) ||
+                    (String(this.markerIndex) !== this.targetSelectIndex));
             },
 
             curDroneColorMap() {
@@ -634,6 +705,8 @@
                 payload.targetSpeed = this.targetSpeed;
                 payload.targetRadius = this.targetRadius;
                 payload.targetTurningSpeed = this.targetTurningSpeed;
+                payload.targetMavCmd = 16;
+                payload.targetStayTime = this.targetStayTime;
                 payload.pOldIndex = this.markerIndex;
                 payload.targetColor = this.curDroneColorMap;
 
@@ -685,8 +758,16 @@
             this.targetSpeed = this.marker.speed;
             this.targetRadius = this.marker.radius;
             this.targetTurningSpeed = this.marker.turningSpeed;
-        }
 
+            if(Object.hasOwnProperty.call(this.marker, 'targetStayTime')) {
+                this.targetStayTime = this.marker.targetStayTime;
+            }
+            else {
+                this.targetStayTime = 1;
+            }
+
+            this.elevation = this.marker.elevation;
+        }
     }
 </script>
 

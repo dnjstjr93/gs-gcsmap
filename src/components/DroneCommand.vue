@@ -410,7 +410,7 @@
                                                             <v-subheader>{{d.name}} 자동:
                                                                 <v-spacer></v-spacer>
                                                                 <v-switch
-                                                                    :disabled="d.curArmStatus==='ARMED'"
+                                                                    v-show="d.curArmStatus==='DISARMED'"
                                                                     v-model="takeoffInAuto"
                                                                     :label="`takeoffInAuto: ${takeoffInAuto.toString()}`"
                                                                 ></v-switch>
