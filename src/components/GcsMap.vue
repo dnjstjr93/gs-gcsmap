@@ -1059,6 +1059,7 @@
 
             onMessageBroadcast(topic, message) {
                 if(!this.$store.state.didIPublish) {
+                    console.log(topic, message.toString());
                     try {
                         let watchingPayload = JSON.parse(message.toString());
                         if (watchingPayload.broadcastMission === 'updateTempPosition') {
@@ -1078,6 +1079,11 @@
                             this.context_flag = false;
 
                             this.$store.commit('confirmAddTempMarker', false);
+                        }
+                        else if (watchingPayload.broadcastMission === 'registerMarker') {
+                            //this.$store.state.tempPayload = JSON.parse(JSON.stringify(watchingPayload.payload));
+
+                            this.$store.commit('registerMarker', watchingPayload.payload);
                         }
                     }
                     catch (e) {
@@ -1456,6 +1462,18 @@
 
             EventBus.$on('on-message-handler-gcsmap', (payload) => {
                 this.onMessageBroadcast(payload.topic, payload.message);
+            });
+
+            EventBus.$on('doBroadcastRegisterMaker', (payload)=>{
+                let watchingPayload = {};
+                watchingPayload.broadcastMission = 'registerMarker';
+                watchingPayload.payload = payload;
+
+                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                console.log('broadcast_gcsmap_topic', this.broadcast_gcsmap_topic, '-', JSON.stringify(watchingPayload));
+                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+
+                this.$store.state.didIPublish = true;
             });
         }
 

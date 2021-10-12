@@ -73,6 +73,7 @@
                                         type="number"
                                         outlined dense
                                         color="amber"
+                                        min="0"
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
@@ -390,6 +391,8 @@
 </template>
 
 <script>
+    import EventBus from "@/EventBus";
+
     export default {
         name: "InfoMarker",
 
@@ -712,6 +715,8 @@
 
                 this.$store.commit('registerMarker', payload);
 
+                EventBus.$emit('doBroadcastRegisterMaker', payload);
+
                 payload = null;
 
                 this.snackbar = true;
@@ -719,6 +724,7 @@
                 setTimeout(() => {
                     this.resetForm();
                 }, 100);
+
             },
             decrementAlt () {
                 this.targetAlt--;
