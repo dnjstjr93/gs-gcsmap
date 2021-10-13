@@ -1074,7 +1074,7 @@ export default {
                                     String(objMyDroneInfo.targetRadius) + ':' +
                                     String(objMyDroneInfo.targetTurningSpeed) + ':' +
                                     String(arrWaypoint[3])  + ':' +
-                                    String(arrWaypoint[4]);
+                                    String(arrWaypoint[4])  + ':0';
 
                                 console.log(strGotoPosition);
 
@@ -3200,6 +3200,8 @@ export default {
                     this.gpi.vz = Buffer.from(vz, 'hex').readInt16LE(0);
                     this.gpi.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
+                    this.$store.state.drone_infos[this.name].offset_alt = (parseFloat(this.gpi.alt) - parseFloat(this.gpi.relative_alt)) * 1000;
+
                     this.airspeed = Math.sqrt(Math.pow(this.gpi.vx, 2) + Math.pow(this.gpi.vy, 2) + Math.pow(this.gpi.vz, 2)) / 100;
                     this.colorAirspeed = 'td-text-green';
 
@@ -5046,7 +5048,8 @@ export default {
                     this.$store.state.tempMarkers[this.name][idx].radius + ':' +
                     this.$store.state.tempMarkers[this.name][idx].turningSpeed + ':' +
                     this.$store.state.tempMarkers[this.name][idx].targetMavCmd + ':' +
-                    this.$store.state.tempMarkers[this.name][idx].targetStayTime;
+                    this.$store.state.tempMarkers[this.name][idx].targetStayTime + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].elevation;
 
                 let goto_pos = {};
                 goto_pos.type = 'goto';

@@ -61,6 +61,9 @@ const _defaultPosition = Object(
         speed: 5,
         radius: 10,
         turningSpeed: 10,
+        elevation: 0,
+        targetMavCmd: 16,
+        targetStayTime: 1
     }
 );
 
@@ -503,6 +506,7 @@ export default new Vuex.Store({
                     pos.turningSpeed = parseFloat(pos_arr[5]);
                     pos.targetMavCmd = parseInt(pos_arr[6]);
                     pos.targetStayTime = parseInt(pos_arr[7]);
+                    pos.elevation = parseInt(pos_arr[8]);
                     pos.color = 'grey';
                     pos.m_icon.fillColor = 'grey';
                     pos.m_label.fontSize = '14px';
@@ -541,7 +545,8 @@ export default new Vuex.Store({
                 String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-                String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' + mav_cmd + ':' + targetStayTime;
+                String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' + mav_cmd + ':' + targetStayTime + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].elevation);
 
             let _temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
             state.drone_infos[payload.pName] = null;
@@ -767,23 +772,23 @@ export default new Vuex.Store({
                 temp = null;
             }
 
-            let pos = JSON.parse(JSON.stringify(state.defaultPosition));
-            pos.lat = payload.lat;
-            pos.lng = payload.lng;
-            pos.alt = payload.alt;
-            pos.speed = payload.speed;
-            pos.radius = payload.radius;
-            pos.turningSpeed = payload.turningSpeed;
-            pos.targetMavCmd = payload.targetMavCmd;
-            pos.targetStayTime = payload.targetStayTime;
-            pos.elevation = payload.elevation;
-            pos.m_icon.fillColor = payload.color;
-            pos.m_label.fontSize = '14px';
-            pos.m_label.text = ((payload.pName === 'unknown') ? 'T' : String(state.tempMarkers[payload.pName].length)) + ':' + String(pos.alt);
+            let marker = JSON.parse(JSON.stringify(state.defaultPosition));
+            marker.lat = payload.lat;
+            marker.lng = payload.lng;
+            marker.alt = payload.alt;
+            marker.speed = payload.speed;
+            marker.radius = payload.radius;
+            marker.turningSpeed = payload.turningSpeed;
+            marker.elevation = payload.elevation;
+            marker.targetMavCmd = payload.targetMavCmd;
+            marker.targetStayTime = payload.targetStayTime;
+            marker.m_icon.fillColor = payload.color;
+            marker.m_label.fontSize = '14px';
+            marker.m_label.text = ((payload.pName === 'unknown') ? 'T' : String(state.tempMarkers[payload.pName].length)) + ':' + String(marker.alt);
 
-            state.tempMarkers[payload.pName].push(pos);
+            state.tempMarkers[payload.pName].push(marker);
 
-            pos = null;
+            marker = null;
 
             //console.log('addTempMarker', JSON.stringify(state.tempMarkers));
         },
@@ -821,7 +826,8 @@ export default new Vuex.Store({
                 String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd) + ':' +
-                String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime);
+                String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].elevation);
 
             console.log('confirmAddTempMarker', payload.pName, payload.pIndex, state.drone_infos.unknown.goto_positions[payload.pIndex]);
 
@@ -1101,7 +1107,8 @@ export default new Vuex.Store({
                 String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd) + ':' +
-                String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime);
+                String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].elevation);
 
             state.drone_infos[payload.pName].goto_positions.push(pos_str);
 
@@ -1170,7 +1177,8 @@ export default new Vuex.Store({
                 String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd) + ':' +
-                String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime);
+                String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].elevation);
 
             let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
             state.drone_infos[payload.pName] = null;
@@ -1237,7 +1245,8 @@ export default new Vuex.Store({
                 String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' +
                 String(state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd) + ':' +
-                String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime);
+                String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime) + ':' +
+                String(state.tempMarkers[payload.pName][payload.pIndex].elevation);
 
             state.drone_infos[payload.pName].goto_positions.splice(payload.pIndex, 0, pos_str);
 
@@ -1447,6 +1456,7 @@ export default new Vuex.Store({
                                     pos.turningSpeed = parseFloat(pos_arr[5]);
                                     pos.targetMavCmd = parseFloat(pos_arr[6]);
                                     pos.targetStayTime = parseFloat(pos_arr[7]);
+                                    pos.elevation = parseFloat(pos_arr[8]);
                                     pos.color = drone.color;
                                     pos.m_icon.fillColor = drone.color;
                                     pos.m_label.fontSize = '14px';

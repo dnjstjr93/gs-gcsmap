@@ -440,9 +440,22 @@
             confirmAddTempMarker() {
                 this.context_flag = false;
 
-                this.$store.commit('confirmAddTempMarker', false);
+                const elevator = new this.google.maps.ElevationService();
 
-                this.doBroadcastAddMarker(this.$store.state.tempPayload);
+                console.log('elevation-confirmAddTempMarker', this.$store.state.tempPayload);
+                let lat = this.$store.state.tempPayload.lat;
+                let lng = this.$store.state.tempPayload.lng;
+
+                this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
+                    console.log('curElevation', val);
+
+                    this.$store.state.tempPayload.elevation = val;
+
+
+                    this.$store.commit('confirmAddTempMarker', false);
+
+                    this.doBroadcastAddMarker(this.$store.state.tempPayload);
+                });
             },
 
             cancelTempMarker() {
@@ -482,6 +495,7 @@
                 payload.targetMavCmd = 16;
                 payload.targetStayTime = 1;
                 payload.color = 'grey';
+                payload.elevation = 0;
                 this.$store.commit('setDroneColorMap', payload); //JSON.parse(JSON.stringify(payload)));
 
                 this.$store.commit('addingTempMarker', payload);
@@ -582,18 +596,31 @@
                     payload.lat = e.latLng.lat();
                     payload.lng = e.latLng.lng();
 
-                    this.$store.commit('updateTempPosition', payload);
+                    if(!Object.hasOwnProperty.call(this.$store.state.tempMarkers[pName][pIndex], 'elevation')) {
+                        console.log('elevation-updateTempPosition---------------------------------------------------------------------------');
+                        this.$store.state.tempMarkers[pName][pIndex].elevation = 0;
+                    }
 
-                    payload.value = false;
-                    this.$store.commit('setSelected', payload);
+                    const elevator = new this.google.maps.ElevationService();
+                    console.log('elevation-updateTempPosition', this.$store.state.tempMarkers[pName][pIndex]);
+                    this.displayLocationElevation({lat:payload.lat, lng:payload.lng}, elevator, (val) => {
+                        console.log('curElevation', val);
 
-                    this.drawLineTarget(payload);
+                        this.$store.state.tempMarkers[pName][pIndex].elevation = val;
 
-                    this.doBroadcastTempPosition(payload);
+                        this.$store.commit('updateTempPosition', payload);
 
-                    // this.selectTempMarker(e, pName, pIndex);
+                        payload.value = false;
+                        this.$store.commit('setSelected', payload);
 
-                    // this.$store.commit('saveCurrentDroneInfos');
+                        this.drawLineTarget(payload);
+
+                        this.doBroadcastTempPosition(payload);
+
+                        // this.selectTempMarker(e, pName, pIndex);
+
+                        // this.$store.commit('saveCurrentDroneInfos');
+                    });
                 }
 
                 // this.gotoLines = {};

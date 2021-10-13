@@ -186,7 +186,7 @@
                                                                 value="alt_with"
                                                         ></v-radio>
                                                         <v-row>
-                                                            <v-col cols="6">
+                                                            <v-col cols="4">
                                                                 <v-select
                                                                         dense outlined hide-details
                                                                         :items="d.goto_positions" label="Goto positions"
@@ -194,6 +194,15 @@
                                                                         @change="selectedPosition($event, d)"
                                                                         class="mt-4"
                                                                 ></v-select>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="지형높이(m)"
+                                                                    class="mt-4 text-right"
+                                                                    outlined dense hide-details
+                                                                    :value="position_selections_elevation[d.name]"
+                                                                    readonly
+                                                                ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
@@ -218,7 +227,7 @@
                                                                         label="지점거리(m)"
                                                                         class="mt-4 mr-2 text-right"
                                                                         outlined dense hide-details
-                                                                        :value="Math.ceil($store.state.distanceTarget[d.name])"
+                                                                        :value="isNaN(Math.ceil($store.state.distanceTarget[d.name]))?0:Math.ceil($store.state.distanceTarget[d.name])"
                                                                         type="number"
                                                                         readonly
                                                                 ></v-text-field>
@@ -247,7 +256,7 @@
                                                                 value="ccw"
                                                         ></v-radio>
                                                         <v-row>
-                                                            <v-col cols="6">
+                                                            <v-col cols="4">
                                                                 <v-select
                                                                         dense outlined hide-details
                                                                         :items="d.goto_positions" label="Center positions"
@@ -255,6 +264,24 @@
                                                                         @change="selectedPosition($event, d)"
                                                                         class="ml-1 mt-4 mr-1"
                                                                 ></v-select>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="지형높이(m)"
+                                                                    class="mt-4 text-right"
+                                                                    outlined dense hide-details
+                                                                    :value="position_selections_elevation[d.name]"
+                                                                    readonly
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="선회고도(m)"
+                                                                    class="mt-4 text-right"
+                                                                    outlined dense hide-details
+                                                                    v-model="targetAlt[d.name]"
+                                                                    type="number"
+                                                                ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
@@ -266,15 +293,6 @@
                                                                         min="10" max="255"
                                                                         hint="10 ~ 255"
                                                                         @change="drawRadius(d.name)"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col cols="2">
-                                                                <v-text-field
-                                                                        label="선회고도(m)"
-                                                                        class="mt-4 text-right"
-                                                                        outlined dense hide-details
-                                                                        v-model="targetAlt[d.name]"
-                                                                        type="number"
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
@@ -1061,6 +1079,7 @@
 
                 position_selections: {},
                 position_selections_index: {},
+                position_selections_elevation: {},
 
                 targetModeSelection: {},
                 takeoffDelay: {},
@@ -1256,12 +1275,14 @@
                 console.log('do-selected-position', payload);
 
                 if(payload.value) {
-                    //this.position_selections_index[payload.pName] = payload.pIndex;
+                    this.position_selections_index[payload.pName] = payload.pIndex;
                     this.position_selections[payload.pName] = this.$store.state.drone_infos[payload.pName].goto_positions[payload.pIndex];
+                    this.position_selections_elevation[payload.pName] = parseFloat(this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation).toFixed(1);
                 }
                 else {
-                    //this.position_selections_index[payload.pName] = 0;
+                    this.position_selections_index[payload.pName] = 0;
                     this.position_selections[payload.pName] = '';
+                    this.position_selections_elevation[payload.pName]= 0;
                 }
 
                 this.$forceUpdate();
@@ -1391,6 +1412,10 @@
 
             selectedPosition: function(event, d) {
                 this.position_selections_index[d.name] = d.goto_positions.indexOf(event);
+
+                let pIndex = this.position_selections_index[d.name];
+                let pName = d.name;
+                this.position_selections_elevation[payload.pName] = parseFloat(this.$store.state.tempMarkers[pName][pIndex].elevation).toFixed(1);
 
                 let payload = {};
                 payload.pName = d.name;

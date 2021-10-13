@@ -233,7 +233,7 @@
                                 <v-col cols="12" sm="6">
                                     <v-select
                                             v-model="type_selected"
-                                            :items="['pixhawk', 'dji', 'etc']"
+                                            :items="['ardupilot', 'px4', 'dji', 'etc']"
                                             label="Type*"
                                             hint="Type of FC"
                                             required
@@ -328,7 +328,7 @@
                                 <v-col cols="12" sm="6">
                                     <v-select
                                         v-model="type_selected"
-                                        :items="['pixhawk', 'dji', 'etc']"
+                                        :items="['ardupilot', 'px4', 'dji', 'etc']"
                                         label="Type*"
                                         hint="Type of FC"
                                         required
@@ -497,7 +497,7 @@
                 //     v => !!v || 'GCS 이름은 필수 입력사항입니다.',
                 //     v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || 'GCS 이름에는 특수문자를 사용할 수 없습니다.'
                 // ],
-                type_selected: 'pixhawk',
+                type_selected: 'ardupilot',
                 color_selected: 'teal',
                 selected: [],
                 drone_infos: [],
