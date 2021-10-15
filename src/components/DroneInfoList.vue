@@ -190,13 +190,14 @@
 
                     this.$store.state.client.loading = true;
                     this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
-                    const {host, port, endpoint, ...options} = this.connection
+                    this.connection.host = this.$store.state.VUE_APP_MOBIUS_HOST;
+                    const {host, port, endpoint, ...options} = this.connection;
                     const connectUrl = `ws://${host}:${port}${endpoint}`
                     try {
                         this.$store.state.client = mqtt.connect(connectUrl, options);
 
                         this.$store.state.client.on('connect', () => {
-                            console.log('DroneInfoList Connection succeeded!');
+                            console.log(host, 'DroneInfoList Connection succeeded!');
 
                             this.$store.state.client.connected = true;
 

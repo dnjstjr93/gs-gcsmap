@@ -71,7 +71,7 @@
                             <div v-for="(pName, mIndex) in tempMarkers" :key="'targetTempMarker_'+mIndex">
                                 <GmapMarker
                                         v-for="(pos, pIndex) in pName" :key="pIndex"
-                                        :position="pos"
+                                        :position="{lat:pos.lat, lng:pos.lng}"
                                         :clickable="true"
                                         :draggable="true"
                                         @dblclick="selectTempMarker($event, mIndex, pIndex)"

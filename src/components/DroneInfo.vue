@@ -1059,6 +1059,7 @@ export default {
 
                 arrWayPoints.forEach((waypoint)=>{
                     waypoint = waypoint.replace(/\n/g, '');
+                    waypoint = waypoint.replace(/\t\t/g, '\t');
                     let arrWaypoint = waypoint.split('\t');
 
                     if(arrWaypoint.length > 1) {
@@ -1154,11 +1155,13 @@ export default {
             payload.pName = this.name;
             payload.pIndex = i;
 
-            console.log(this.selectedItem);
+            console.log('selectedPosition', this.selectedItem);
 
             //this.selectedItem = -1;
 
             //(this.selectedItem === i) ? (this.selectedItem = -1) : (this.selectedItem);
+
+            EventBus.$emit('do-centerCurrentPosition', {lat: this.$store.state.tempMarkers[this.name][i].lat, lng: this.$store.state.tempMarkers[this.name][i].lng});
 
             EventBus.$emit('do-targetTempMarker', payload);
         },
@@ -3200,7 +3203,7 @@ export default {
                     this.gpi.vz = Buffer.from(vz, 'hex').readInt16LE(0);
                     this.gpi.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
-                    this.$store.state.drone_infos[this.name].offset_alt = (parseFloat(this.gpi.alt) - parseFloat(this.gpi.relative_alt)) * 1000;
+                    //this.$store.state.drone_infos[this.name].offset_alt = (parseFloat(this.gpi.alt) - parseFloat(this.gpi.relative_alt)) * 1000;
 
                     this.airspeed = Math.sqrt(Math.pow(this.gpi.vx, 2) + Math.pow(this.gpi.vy, 2) + Math.pow(this.gpi.vz, 2)) / 100;
                     this.colorAirspeed = 'td-text-green';
@@ -4212,7 +4215,8 @@ export default {
                     this.$store.state.tempMarkers[this.name][idx].radius + ':' +
                     this.$store.state.tempMarkers[this.name][idx].turningSpeed + ':' +
                     this.$store.state.tempMarkers[this.name][idx].targetMavCmd + ':' +
-                    this.$store.state.tempMarkers[this.name][idx].targetStayTime;
+                    this.$store.state.tempMarkers[this.name][idx].targetStayTime + ':' +
+                    this.$store.state.tempMarkers[this.name][idx].elevation;
                 this.positions.push(str);
             }
         }
@@ -5088,7 +5092,7 @@ export default {
         //     console.log('createConnection - Subscribe to ', self.broadcast_topic);
         // });
 
-        this.getDroneMissionInfo();
+        //this.getDroneMissionInfo();
 
         console.log('DroneInfo-mounted', this.lat, this.lng);
 

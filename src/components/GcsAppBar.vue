@@ -217,9 +217,9 @@
                     <v-card-text>
                         <v-container>
                             <v-row>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_rule" label="Drone Host*" required></v-text-field>
-                                </v-col>
+<!--                                <v-col cols="12" sm="6">-->
+<!--                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_rule" label="Drone Host*" required></v-text-field>-->
+<!--                                </v-col>-->
                                 <v-col cols="12" sm="6">
                                     <v-text-field ref="drone_name" v-model="drone_name" :rules="drone_name_rule" label="Drone Name*" required></v-text-field>
                                 </v-col>
@@ -312,9 +312,9 @@
                     <v-card-text>
                         <v-container>
                             <v-row>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_update_rule" label="Drone Host*" required></v-text-field>
-                                </v-col>
+<!--                                <v-col cols="12" sm="6">-->
+<!--                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_update_rule" label="Drone Host*" required></v-text-field>-->
+<!--                                </v-col>-->
                                 <v-col cols="12" sm="6">
                                     <v-text-field disabled ref="drone_name" v-model="drone_name" :rules="drone_name_update_rule" label="Drone Name*" required></v-text-field>
                                 </v-col>
@@ -436,14 +436,14 @@
                 formHasErrors: false,
                 errorMessages: [],
                 drone_host: null,
-                drone_host_rule: [
-                    v => !!v || '드론 호스트는 필수 입력사항입니다.',
-                    v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.'
-                ],
-                drone_host_update_rule: [
-                    v => !!v || '드론 호스트은 필수 입력사항입니다.',
-                    v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.'
-                ],
+                // drone_host_rule: [
+                //     v => !!v || '드론 호스트는 필수 입력사항입니다.',
+                //     v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.'
+                // ],
+                // drone_host_update_rule: [
+                //     v => !!v || '드론 호스트은 필수 입력사항입니다.',
+                //     v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.'
+                // ],
                 drone_name: null,
                 drone_name_rule: [
                     v => !!v || '드론 이름은 필수 입력사항입니다.',
@@ -645,7 +645,7 @@
 
             form () {
                 return {
-                    drone_host: this.drone_host,
+                    //drone_host: this.drone_host,
                     drone_name: this.drone_name,
                     drone_id: this.drone_id,
                     bat_cell: this.bat_cell,
