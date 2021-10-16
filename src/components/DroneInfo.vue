@@ -832,11 +832,11 @@ export default {
 
     computed: {
         color() {
-            if (this.bpm < 150) return 'grey'
-            if (this.bpm < 250) return 'indigo'
-            if (this.bpm < 350) return 'teal'
-            if (this.bpm < 450) return 'green'
-            if (this.bpm < 550) return 'orange'
+            if (this.bpm < 100) return 'grey'
+            if (this.bpm < 200) return 'indigo'
+            if (this.bpm < 300) return 'teal'
+            if (this.bpm < 400) return 'green'
+            if (this.bpm < 500) return 'orange'
             return 'red'
         },
         animationDuration() {

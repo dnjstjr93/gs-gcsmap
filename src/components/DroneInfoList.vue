@@ -12,6 +12,9 @@
                                     class="ma-0 pa-0 pl-2 py-2"
                                     hide-details
                             ></v-switch>
+                            <v-card v-if=!$store.state.client.connected class="py-3 px-2" color="orange">
+                                <span class="text-h5 font-weight-bold">Connection Failed!!!</span>
+                            </v-card>
                         </v-card>
                         <v-card flat tile v-for="drone in $store.state.drone_infos" :key="drone.id">
                             <div v-if="drone.selected">
@@ -219,30 +222,43 @@
                                     this.doUnSubscribe(this.drone_topic[dName]);
                                     this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
                                     this.doUnSubscribe(this.broadcast_topic[dName]);
-
-                                    if(this.$store.state.drone_infos[dName].selected) {
-                                        this.doSubscribe(this.drone_topic[dName]);
-                                        console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic[dName]);
-
-                                        this.doSubscribe(this.broadcast_topic[dName]);
-                                        console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
-                                    }
                                 }
                             }
 
                             let broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
-                            this.doSubscribe(broadcast_gcsmap_topic);
-                            console.log('DroneInfoList-gcsmap_topic - Subscribe to ', broadcast_gcsmap_topic);
+                            this.doUnSubscribe(broadcast_gcsmap_topic);
+
+                            setTimeout(() => {
+                                for(let dName in this.$store.state.drone_infos) {
+                                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                                        if(dName === 'unknown') {
+                                            continue;
+                                        }
+
+                                        if(this.$store.state.drone_infos[dName].selected) {
+                                            this.doSubscribe(this.drone_topic[dName]);
+                                            console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic[dName]);
+
+                                            this.doSubscribe(this.broadcast_topic[dName]);
+                                            console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
+                                        }
+                                    }
+                                }
+
+                                let broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                                this.doSubscribe(broadcast_gcsmap_topic);
+                                console.log('DroneInfoList-gcsmap_topic - Subscribe to ', broadcast_gcsmap_topic);
+                            }, 200);
                         });
 
                         this.$store.state.client.on('error', (error) => {
-                            console.log('Connection failed', error);
+                            console.log('Drone Connection failed', error);
 
                             this.destroyConnection();
                         });
 
                         this.$store.state.client.on('close', () => {
-                            console.log('Connection closed');
+                            console.log('Drone Connection closed');
 
                             this.destroyConnection();
 
