@@ -1,0 +1,24 @@
+#bottomWrapper {
+  position: absolute;
+  bottom: 3%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  z-index: 1;
+
+  div {
+    span {
+      font-size: 80%;
+    }
+  }
+
+  &.fsBottom {
+    bottom: 6%;
+
+    div {
+      span {
+        font-size: 160%;
+      }
+    }
+  }
+}

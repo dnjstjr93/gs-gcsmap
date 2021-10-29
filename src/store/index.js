@@ -457,6 +457,7 @@ export default new Vuex.Store({
         },
 
         didIPublish: false,
+        fs: false
     },
 
     mutations: {

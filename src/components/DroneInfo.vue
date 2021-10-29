@@ -20,7 +20,17 @@
                                         <!--                            :disabled="!flagReceiving"-->
                                     </v-card>
                                 </v-col>
-                                <v-col cols="6">
+                                <v-col cols="3">
+                                    <v-switch
+                                        v-model="enableVideo"
+                                        label="video"
+                                        color="warning"
+                                        class="ma-0 pa-0 pl-2 py-2"
+                                        hide-details
+                                        @click="clickVideo"
+                                    ></v-switch>
+                                </v-col>
+                                <v-col cols="3">
                                     <div class="text-right">
                                         <v-btn
                                             class="mr-2"
@@ -441,6 +451,15 @@
                     </v-row>
                 </v-col>
             </v-row>
+            <v-row no-gutters class="mt-0">
+                <v-col cols="12">
+                    <DroneInfoHUD
+                        :drone_name="name"
+                        :bitrate="0"
+                        :info="info"
+                    ></DroneInfoHUD>
+                </v-col>
+            </v-row>
         </v-card>
     </v-container>
 </template>
@@ -459,6 +478,7 @@ import axios from "axios";
 import draggable from 'vuedraggable';
 //import mqtt from "mqtt";
 import {nanoid} from "nanoid";
+import DroneInfoHUD from "./DroneInfoHUD";
 
 const byteToHex = [];
 
@@ -542,7 +562,8 @@ export default {
         Airspeed,
         Attitude,
         Heading,
-        draggable
+        draggable,
+        DroneInfoHUD
     },
 
     props: [
@@ -827,6 +848,29 @@ export default {
                 14: 'MAV_MISSION_DENIED',
                 15: 'MAV_MISSION_OPERATION_CANCELLED',
             },
+            enableVideo: false,
+            info: {
+                no: this.name,
+                headingDirection: 210,
+                airSpeed: 15,
+                altitude: 60,
+                cetr: 2,
+                linkQuality: 35,
+                gpsTime: '03:15:31',
+                batState: {
+                    volt: 100,
+                    per: 25
+                },
+                flightMode: 'Stabilize',
+                wayPoint: {
+                    distance: 0,
+                    number: 0
+                },
+                gpsState: 'No Fix',
+                bankAngle: 0,
+                anglePitch: 0,
+                flightTime: '12 : 03'
+            }
         }
     },
 
@@ -897,12 +941,7 @@ export default {
 
     watch: {
         chosenWaypointsFile: function (newVal) {
-            if(newVal) {
-                this.showLoadWaypointsBtn = false;
-            }
-            else {
-                this.showLoadWaypointsBtn = true;
-            }
+            this.showLoadWaypointsBtn = !newVal;
         },
 
         goto_positions: {
@@ -1032,6 +1071,16 @@ export default {
     },
 
     methods: {
+        clickVideo() {
+            console.log('clickVideo', this.enableVideo);
+
+            if(this.enableVideo) {
+                EventBus.$emit('do-video-on-' + this.name, {});
+            }
+            else {
+                EventBus.$emit('do-video-close-'+this.name, {});
+            }
+        },
         loadUpdateWaypoints() {
             console.log('loadUpdateWaypoints', 'chosenWaypointsFile', this.chosenWaypointsFile);
 
@@ -4271,6 +4320,13 @@ export default {
         this.timer_id = setInterval(() => {
             this.bpm = this.recv_counter;
             this.recv_counter = 1;
+
+            this.info.headingDirection = parseInt(Math.random() * 359);
+            this.info.airSpeed = parseInt(Math.random() * 20);
+            this.info.altitude = parseInt(Math.random() * 150);
+            this.info.anglePitch = -90 + parseInt(Math.random() * 180);
+            this.info.bankAngle = -90 + parseInt(Math.random() * 180);
+
         }, 3000);
 
 

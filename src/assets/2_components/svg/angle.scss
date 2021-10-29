@@ -1,0 +1,36 @@
+#angle {
+  transform: translateY(-30px);
+
+  .num {
+    fill: #ffffff;
+    font-size: 1.5em
+  }
+
+  .st16{
+    fill-rule:evenodd;
+    clip-rule:evenodd;
+    fill:#ffffff;
+
+    &.pointer {
+      fill: red;
+      transform-origin: 50% 66%;
+      transition: all 0.3s;
+      z-index: 50;
+    }
+  }
+
+  .st17{
+    fill:none;
+    stroke:#ffffff;
+    stroke-width:1.441;
+    stroke-miterlimit:11.3386;
+  }
+
+  /* fullscreen css */
+  &.fsAngle {
+    //
+  }
+}
+
+
+

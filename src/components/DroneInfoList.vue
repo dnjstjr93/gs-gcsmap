@@ -26,9 +26,9 @@
                                     :sortie="'unknown'"
                                     :bat_cell="drone.bat_cell"
                                     :goto_positions="drone.goto_positions"
-                                    v-bind:airspeed_size="myWidth*0.4"
-                                    v-bind:heading_size="myWidth*0.4"
-                                    v-bind:attitude_size="myWidth*0.4"
+                                    v-bind:airspeed_size="myWidth*0.46"
+                                    v-bind:heading_size="myWidth*0.46"
+                                    v-bind:attitude_size="myWidth*0.46"
                                     :lng="drone.lng"
                                     :lat="drone.lat"
                                     :ref_sys_id="drone.system_id"
@@ -137,7 +137,7 @@
         data: function() {
             return {
                 myHeight: window.innerHeight-50,
-                myWidth: 400,
+                myWidth: 480,
                 drones_selected: [],
                 candidate: {},
                 distanceMonitor: false,
@@ -156,6 +156,8 @@
                 drone_topic: {},
                 broadcast_topic: {},
                 droneSubscribeSuccess: {},
+                wsUrl: 'wss://' + 'webrtc.intellicode.info:443' + '/webRTC',
+                ws: null,
             };
         },
 
@@ -180,6 +182,19 @@
                 this.$store.state.command_tab_max_height = this.myHeight-50;
 
                 console.log('DroneInfoList-onResize', this.myWidth, this.myHeight);
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if(this.$store.state.drone_infos[dName].selected) {
+                            let payload = {};
+                            payload.width = this.myWidth;
+                            //payload.height = parseInt((this.myWidth*9)/16);
+                            payload.height = parseInt((payload.width*3)/4);
+
+                            EventBus.$emit('do-video-size-' + dName, payload);
+                        }
+                    }
+                }
             },
 
             createConnection() {
@@ -344,7 +359,7 @@
         mounted() {
             window.addEventListener('resize', this.onResize);
 
-            setTimeout(this.onResize, 3000);
+            setTimeout(this.onResize, 2000);
 
             EventBus.$on('onResize-DroneInfoList', () => {
                 this.onResize();
@@ -528,10 +543,35 @@
 
                 setTimeout(this.onResize, 500);
             });
+
+            this.ws = new WebSocket(this.wsUrl);
+
+            this.ws.onclose = function () {
+                alert("Server is already in CLOSING or CLOSED state.\nPlease refresh the page after running the server.");
+            };
+
+            EventBus.$on('ws-send-message', (message) => {
+                let jsonMessage = JSON.stringify(message);
+                if (this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(jsonMessage);
+                }
+            });
+
+            this.ws.onmessage = function (message) {
+                let parsedMessage = JSON.parse(message.data);
+                let droneName = parsedMessage.droneName;
+
+                EventBus.$emit('ws-on-message-' + droneName, parsedMessage);
+            }
         },
 
         beforeDestroy() {
             this.destroyConnection();
+            EventBus.$off('onResize-DroneInfoList');
+            EventBus.$off('gcs-map-ready');
+            EventBus.$off('confirm_selected');
+
+            EventBus.$off('ws-send-message');
         }
     }
 </script>

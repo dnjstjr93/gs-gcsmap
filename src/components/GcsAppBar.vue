@@ -1348,6 +1348,10 @@
             if(this.MOBIUS_CONNECTION_CONNECTED) {
                 this.GcsAppBarCreated();
             }
+        },
+
+        beforeDestroy() {
+            EventBus.$off('do-selected-drone-profiles');
         }
     }
 </script>

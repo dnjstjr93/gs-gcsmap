@@ -1521,8 +1521,22 @@
 
                 this.$store.state.didIPublish = true;
             });
-        }
+        },
 
+        beforeDestroy() {
+            EventBus.$off('do-centerCurrentPosition');
+            EventBus.$off('do-deleteLineAllTarget');
+            EventBus.$off('do-drawLineAllTarget');
+            EventBus.$off('do-drawMovingLines');
+            EventBus.$off('do-targetTempMarker');
+            EventBus.$off('do-targetDroneMarker');
+            EventBus.$off('gcs-map-ready');
+            EventBus.$off('updateDroneMarker');
+            EventBus.$off('clearDroneMarker');
+            EventBus.$off('on-message-handler-gcsmap');
+            EventBus.$off('doBroadcastRegisterMaker');
+            EventBus.$off('doBroadcastDeleteMaker');
+        }
     }
 </script>
 

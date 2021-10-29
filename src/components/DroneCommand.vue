@@ -1798,6 +1798,11 @@
 
                 }, 100);
             },
+        },
+        beforeDestroy() {
+            EventBus.$off('do-targetDrone');
+            EventBus.$off('do-selected-position');
+            EventBus.$off('update-goto-positions');
         }
     }
 </script>
