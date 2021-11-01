@@ -9,7 +9,7 @@
 @import "1_layout/vuetifyReset";
 
 /* 2_components */
-@import '~swiper/swiper.scss';
+@import './node_modules/swiper/swiper.scss';
 
 @import "2_components/table";
 @import "2_components/hud/headingDirection";
