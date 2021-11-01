@@ -1,5 +1,5 @@
 <template>
-  <div id="airspeed" class="ruler" :class="{ 'fsAirSpeed': $store.state.fs }">
+  <div id="airspeed" class="ruler" :class="{ 'fsAirSpeed': data.fs }">
     <div class="vright">
       <div class="r0"></div>
     </div>
@@ -9,7 +9,7 @@
       </span>
       <div class="swiper-wrapper airspd">
         <div v-for="n in 100" :key="n" class="as-item swiper-slide">
-          <span class="pl-1" :class="{ 'pl-4': $store.state.fs }">{{ n % 5 === 0 ? n : null }}</span>
+          <span class="pl-1" :class="{ 'pl-4': data.fs }">{{ n % 5 === 0 ? n : null }}</span>
         </div>
       </div>
     </div>

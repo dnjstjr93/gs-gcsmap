@@ -1,5 +1,5 @@
 <template>
-  <div id="altitude" class="ruler" :class="{ 'fsAltitude': $store.state.fs }">
+  <div id="altitude" class="ruler" :class="{ 'fsAltitude': data.fs }">
     <div class="vertical">
       <div class="r0"></div>
     </div>
@@ -9,7 +9,7 @@
       </span>
       <div class="swiper-wrapper alt">
         <div v-for="n in 100" :key="n" class="alt-item swiper-slide">
-          <span class="pr-1" :class="{ 'pr-4': $store.state.fs }">{{ n % 5 === 0 ? n : null }}</span>
+          <span class="pr-1" :class="{ 'pr-4': data.fs }">{{ n % 5 === 0 ? n : null }}</span>
         </div>
       </div>
     </div>

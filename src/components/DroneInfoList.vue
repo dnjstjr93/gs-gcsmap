@@ -26,9 +26,9 @@
                                     :sortie="'unknown'"
                                     :bat_cell="drone.bat_cell"
                                     :goto_positions="drone.goto_positions"
-                                    v-bind:airspeed_size="myWidth*0.46"
-                                    v-bind:heading_size="myWidth*0.46"
-                                    v-bind:attitude_size="myWidth*0.46"
+                                    v-bind:airspeed_size="myWidth*0.45"
+                                    v-bind:heading_size="myWidth*0.45"
+                                    v-bind:attitude_size="myWidth*0.45"
                                     :lng="drone.lng"
                                     :lat="drone.lat"
                                     :ref_sys_id="drone.system_id"
@@ -86,7 +86,7 @@
         var ro = Math.tan(Math.PI * 0.25 + olat * 0.5);
         ro = re * sf / Math.pow(ro, sn);
         var rs = {};
-        if (code == "toXY") {
+        if (code === "toXY") {
             rs['lat'] = v1;
             rs['lng'] = v2;
             var ra = Math.tan(Math.PI * 0.25 + (v1) * DEGRAD * 0.5);
@@ -141,7 +141,7 @@
                 drones_selected: [],
                 candidate: {},
                 distanceMonitor: false,
-                myMinWidth: 360,
+                myMinWidth: 480,
                 connection: {
                     host: this.$store.state.VUE_APP_MOBIUS_HOST,
                     port: 8883,
@@ -547,7 +547,7 @@
             this.ws = new WebSocket(this.wsUrl);
 
             this.ws.onclose = function () {
-                alert("Server is already in CLOSING or CLOSED state.\nPlease refresh the page after running the server.");
+                console.log("Server is already in CLOSING or CLOSED state.\nPlease refresh the page after running the server.");
             };
 
             EventBus.$on('ws-send-message', (message) => {

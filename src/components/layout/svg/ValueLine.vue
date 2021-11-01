@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ lineWrap: true, fsLineWrap: $store.state.fs }" :style="setRoll">
+  <div :class="{ lineWrap: true, fsLineWrap: data.fs }" :style="setRoll">
     <div v-for="n in 10" :key="n" class="lines d-flex justify-center align-center">
       <span class="number">{{ n % 2 !== 0 ? 20 - ((n - 1) * 5) : null }}</span>
       <div class="line"></div>

@@ -1,5 +1,5 @@
 <template>
-  <div id="bottomWrapper" class="px-2" :class="{ 'px-4': $store.state.fs, 'fsBottom': $store.state.fs }">
+  <div id="bottomWrapper" class="px-2" :class="{ 'px-4': data.fs, 'fsBottom': data.fs }">
     <div id="speeds">
       <span>{{ this.data.wayPoint.distance }} {{ this.compare }} {{ this.data.wayPoint.number }}</span>
     </div>

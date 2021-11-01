@@ -256,8 +256,7 @@
                                     :class="colorArming"
                                     @click="currentPosition">
                                 <!--                    <v-icon x-large :class="colorArming">{{ iconArming }}</v-icon>-->
-
-                                <div class="py-4">
+                                <div class="py-0">
                                     <Heading :size="heading_size" :heading="heading"/>
                                     <v-fade-transition>
                                         <v-avatar
@@ -270,19 +269,20 @@
                                     </v-fade-transition>
                                     <Attitude :size="attitude_size" :roll="roll" :pitch="pitch"/>
                                 </div>
+
                                 <div class="info_position align-self-center" :style="{top: 0, left: 0}">
-                                    <span :style="{'font-size': '22px'}" :class="colorMode" :color="$store.state.drone_infos[name].color"
-                                        class="shadow_icon px-1">{{ curMode }}</span>
+                                    <v-input :style="{'font-size': '26px'}" :class="colorMode" :color="$store.state.drone_infos[name].color"
+                                        class="shadow_icon px-1">{{ curMode }}</v-input>
                                 </div>
 
-                                <div class="info_position" :style="{top: '36px', left: 0}">
+                                <div class="info_position" :style="{top: (hud_gap*2)+'px', left: 0}">
                                     <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-satellite-variant
                                     </v-icon>
                                     <span class="shadow_icon px-1 text--white"
                                           :style="{color: 'white'}">{{ num_satellites }} </span>
                                 </div>
 
-                                <div class="info_position" :style="{top: '62px', left: 0}">
+                                <div class="info_position" :style="{top: (hud_gap*3)+'px', left: 0}">
                                     <v-icon :class="colorLteVal" :style="iconSize" class="shadow_icon pl-1">{{
                                             iconLte
                                         }}
@@ -292,12 +292,12 @@
                                         }}</span>
                                 </div>
 
-                                <div class="info_position" :style="{top: '90px', left: 0}">
+                                <div class="info_position" :style="{top: (hud_gap*4)+'px', left: 0}">
                                     <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-access-point</v-icon>
                                     <span class="shadow_icon px-1" :style="{color: 'white'}">{{ rssi }}</span>
                                 </div>
 
-                                <div class="info_position" :style="{top: '118px', left: 0}">
+                                <div class="info_position" :style="{top: (hud_gap*5)+'px', left: 0}">
                                     <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{
                                             iconFlightElapsed
                                         }}
@@ -307,13 +307,21 @@
                                         }}</span>
                                 </div>
 
-                                <div class="info_position"
-                                     :style="{top: 0, left: ((curArmStatus==='ARMED')?(myWidth-84):(myWidth-118))+'px'}">
-                                    <span :style="{'font-size': '22px'}" :class="colorArm" :color="$store.state.drone_infos[name].color"
-                                        class="shadow_icon px-1">{{ curArmStatus }}</span>
+                                <div class="info_position text-center" :style="{top: (hud_gap*6)+'px', left: 0}">
+                                    <span class="shadow_icon px-2" :style="{color: 'white'}">{{
+                                            (gpi.lat / 10000000).toFixed(7)
+                                        }} : {{ (gpi.lon / 10000000).toFixed(7) }} : <span style="font-size: 20px">{{
+                                                (gpi.relative_alt / 1000).toFixed(1)
+                                            }}</span> ({{ (gpi.alt / 1000).toFixed(1) }})</span>
                                 </div>
 
-                                <div class="info_position" :style="{top: '36px', left: (myWidth-94)+'px'}">
+                                <div class="info_position"
+                                     :style="{top: 0, left: ((curArmStatus==='ARMED')?(myWidth-110):(myWidth-138))+'px'}">
+                                    <v-input :style="{'font-size': '26px'}" :class="colorArm" :color="$store.state.drone_infos[name].color"
+                                        class="shadow_icon px-1">{{ curArmStatus }}</v-input>
+                                </div>
+
+                                <div class="info_position" :style="{top: (hud_gap*2)+'px', left: (myWidth-110)+'px'}">
                                     <v-icon :class="colorBattery" :style="iconSize" class="shadow_icon pl-1">
                                         {{ iconBattery }}
                                     </v-icon>
@@ -322,19 +330,19 @@
                                         }} V</span>
                                 </div>
 
-                                <div class="info_position" :style="{top: '62px', left: (myWidth-100)+'px'}">
+                                <div class="info_position" :style="{top: (hud_gap*3)+'px', left: (myWidth-110)+'px'}">
                                     <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-altimeter</v-icon>
                                     <span class="shadow_icon px-1" :style="{color: 'white'}">{{
                                             (gpi.relative_alt / 1000).toFixed(1)
                                         }} m</span>
                                 </div>
 
-                                <div class="info_position" :style="{top: '90px', left: (myWidth-100)+'px'}">
+                                <div class="info_position" :style="{top: (hud_gap*4)+'px', left: (myWidth-110)+'px'}">
                                     <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-speedometer</v-icon>
                                     <span class="shadow_icon px-1" :style="{color: 'white'}">{{ airspeed.toFixed(1) }} m/s</span>
                                 </div>
 
-                                <div class="info_position" :style="{top: '118px', left: (myWidth-110)+'px'}">
+                                <div class="info_position" :style="{top: (hud_gap*5)+'px', left: (myWidth-110)+'px'}">
                                     <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{
                                             iconDistance
                                         }}
@@ -344,13 +352,6 @@
                                         }}</span>
                                 </div>
 
-                                <div class="info_position text-center" :style="{top: '144px', left: 0}">
-                                    <span class="shadow_icon px-2" :style="{color: 'white'}">{{
-                                          (gpi.lat / 10000000).toFixed(7)
-                                      }} : {{ (gpi.lon / 10000000).toFixed(7) }} : <span style="font-size: 20px">{{
-                                              (gpi.relative_alt / 1000).toFixed(1)
-                                          }}</span> ({{ (gpi.alt / 1000).toFixed(1) }})</span>
-                                </div>
                                 <!--                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
                             </v-card>
                         </v-col>
@@ -385,7 +386,7 @@
                                 <!--                                    min-height="135"-->
                                 <v-sheet
                                     elevation="10"
-                                    class="py-2 px-1"
+                                    class="px-1"
                                 >
                                     <v-chip-group
                                         v-model="selectedItem"
@@ -585,6 +586,7 @@ export default {
 
     data() {
         return {
+            hud_gap: 31,
             showLoadWaypointsBtn: true,
             strWaypoints: null,
             chosenWaypointsFile: null,
@@ -869,7 +871,8 @@ export default {
                 gpsState: 'No Fix',
                 bankAngle: 0,
                 anglePitch: 0,
-                flightTime: '12 : 03'
+                flightTime: '12 : 03',
+                fs: false
             }
         }
     },
@@ -3252,12 +3255,18 @@ export default {
                     this.gpi.vz = Buffer.from(vz, 'hex').readInt16LE(0);
                     this.gpi.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
+                    this.info.altitude = this.gpi.relative_alt / 1000;
+
                     //this.$store.state.drone_infos[this.name].offset_alt = (parseFloat(this.gpi.alt) - parseFloat(this.gpi.relative_alt)) * 1000;
 
                     this.airspeed = Math.sqrt(Math.pow(this.gpi.vx, 2) + Math.pow(this.gpi.vy, 2) + Math.pow(this.gpi.vz, 2)) / 100;
                     this.colorAirspeed = 'td-text-green';
 
+                    this.info.airSpeed = this.airspeed;
+
                     this.heading = (this.gpi.hdg / 100);
+
+                    this.info.headingDirection = this.heading;
 
                     // console.log('airspeed: ' + this.airspeed, 'heading: ' + this.heading);
 
@@ -3586,6 +3595,9 @@ export default {
 
                     this.roll = this.att.roll * 100;
                     this.pitch = this.att.pitch * 100;
+
+                    this.info.anglePitch = this.pitch;
+                    this.info.bankAngle = this.roll;
 
                     // console.log('roll: ' + this.roll, 'pitch: ' + this.pitch);
                 }
@@ -4321,11 +4333,11 @@ export default {
             this.bpm = this.recv_counter;
             this.recv_counter = 1;
 
-            this.info.headingDirection = parseInt(Math.random() * 359);
-            this.info.airSpeed = parseInt(Math.random() * 20);
-            this.info.altitude = parseInt(Math.random() * 150);
-            this.info.anglePitch = -90 + parseInt(Math.random() * 180);
-            this.info.bankAngle = -90 + parseInt(Math.random() * 180);
+            //this.info.headingDirection = parseInt(Math.random() * 359);
+            //this.info.airSpeed = parseInt(Math.random() * 20);
+            //this.info.altitude = parseInt(Math.random() * 150);
+            //this.info.anglePitch = -90 + parseInt(Math.random() * 180);
+            //this.info.bankAngle = -90 + parseInt(Math.random() * 180);
 
         }, 3000);
 

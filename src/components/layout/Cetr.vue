@@ -1,5 +1,5 @@
 <template>
-  <div id="cetr" :class="{ 'fsCetr': $store.state.fs }">
+  <div id="cetr" :class="{ 'fsCetr': data.fs }">
     <div class="ticks">
       <div></div>
       <div></div>

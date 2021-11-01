@@ -1,5 +1,5 @@
 <template>
-    <div id="view-port" :class="{ 'fsView': $store.state.fs }">
+    <div id="view-port" :class="{ 'fsView': data.fs }">
         <div class="mainSvg">
             <svg version="1.1"
                  id="SVGRoot"

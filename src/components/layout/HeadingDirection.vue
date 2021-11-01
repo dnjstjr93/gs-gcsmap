@@ -1,5 +1,5 @@
 <template>
-    <div id="hd" :class="{ ruler: true, fsHdIndi: $store.state.fs }">
+    <div id="hd" :class="{ ruler: true, fsHdIndi: data.fs }">
         <div class="horizontal">
             <div class="mm"></div>
         </div>

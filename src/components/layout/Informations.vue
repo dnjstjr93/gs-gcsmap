@@ -1,5 +1,5 @@
 <template>
-  <div id="infos" class="d-flex flex-column" :class="{ fsInfos: $store.state.fs }">
+  <div id="infos" class="d-flex flex-column" :class="{ fsInfos: data.fs }">
     <div id="bat" class="text-right">
       <span >Bat {{ data.batState.volt }}v {{ data.batState.per }}%</span>
       <span class="flightTime ml-1">{{ data.flightTime }}</span>

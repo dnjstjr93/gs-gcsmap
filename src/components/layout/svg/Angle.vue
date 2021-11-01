@@ -1,5 +1,5 @@
 <template>
-    <g id="angle" :class="{ fsAngle: $store.state.fs }">
+    <g id="angle" :class="{ fsAngle: data.fs }">
         <path id="path3195_1_" class="st17"
               d="M35.4,222.1C77.6,147.2,157.9,96.6,250,96.6 c91.9,0,172.1,50.4,214.3,125.1"/>
         <path id="path3050" class="st16 pointer" d="M250.1,99.1l-14.4,26.3h28.8L250.1,99.1z" :style="setStyle"/>

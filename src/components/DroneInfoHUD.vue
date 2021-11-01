@@ -245,7 +245,7 @@ export default {
         },
 
         isFs() {
-            this.$store.state.fs = !!document.fullscreenElement;
+            this.info.fs = !!document.fullscreenElement;
         }
     },
     beforeDestroy() {
