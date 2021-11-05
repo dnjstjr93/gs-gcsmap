@@ -1,12 +1,11 @@
 <template>
     <v-container id="hud-container" class="d-flex flex-column pa-0" fluid>
         <heading-direction :data="data"/>
-        <cetr :data="data"/>
+<!--        <cetr :data="data"/>-->
         <infos :data="data"/>
         <air-speed :data="data"/>
         <altitude :data="data"/>
         <bottom-data :data="data"/>
-
         <flight-indicator :data="data"/>
     </v-container>
 </template>
@@ -18,14 +17,17 @@ export default {
         HeadingDirection: () => import('./HeadingDirection'),
         AirSpeed: () => import('./AirSpeed'),
         Altitude: () => import('./Altitude'),
-        Cetr: () => import('./Cetr'),
+        // Cetr: () => import('./Cetr'),
         Infos: () => import('./Informations'),
         BottomData: () => import('./BottomData'),
         FlightIndicator: () => import('./FlightIndicator')
     }
 }
 </script>
-<style>
+<style lang="scss">
+@import '../../assets/index';
+@import './node_modules/swiper/swiper.scss';
+
 #hud-container {
     position: absolute;
     left: 0;

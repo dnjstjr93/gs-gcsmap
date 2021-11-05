@@ -72,3 +72,41 @@ export default {
     }
 }
 </script>
+
+<style lang="scss">
+
+#angle {
+    transform: translateY(-1px);
+
+    .num {
+        fill: #ffffff;
+        font-size: 1.8em
+    }
+
+    .st16 {
+        fill-rule: evenodd;
+        clip-rule: evenodd;
+        fill: #ffffff;
+
+        &.pointer {
+            fill: red;
+            transform-origin: 50% 50%;
+            transition: all 0.3s;
+            z-index: 50;
+        }
+    }
+
+    .st17 {
+        fill: none;
+        stroke: #ffffff;
+        stroke-width: 1.541;
+        stroke-miterlimit: 11.3386;
+    }
+
+    /* fullscreen css */
+    &.fsAngle {
+        //
+    }
+}
+
+</style>

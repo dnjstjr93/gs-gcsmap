@@ -7,7 +7,7 @@
         <div class="videoContainer d-flex justify-content-center">
             <div class="webRtcVideo" ref="videoContainer">
                 <video v-show="isVideo" autoplay class="video" ref="videoPlayer"></video>
-                <HudContainer :data="info" />
+                <HudContainer :data="info"/>
             </div>
         </div>
     </v-card>
@@ -17,7 +17,7 @@
 import HudContainer from '@/components/layout/HudContainer'
 
 import EventBus from '../EventBus';
-import kurentoUtils from "kurento-utils";
+import kurentoUtils from 'kurento-utils';
 
 function Drone(name, bitrate) {
     this.name = name;
@@ -92,6 +92,8 @@ function Drone(name, bitrate) {
         }
         video.poster = './img/webrtc.png';
         video.style.background = '';
+
+        this.viewer_stop();
     }
 
     this.dispose = function () {
@@ -109,21 +111,27 @@ export default {
         HudContainer
     },
     props: ['drone_name', 'bitrate', 'info'],
+    data: () => ({
+        isVideo: true,
+        width: 450,
+        height: 300,
+        drone: null,
+    }),
     mounted() {
         this.shaka();
 
-        if(!this.drone) {
+        if (!this.drone) {
             this.drone = new Drone(this.drone_name, 0);
             this.isVideo = false;
-            this.videoOn();
-            setTimeout(()=>{
-                this.videoOn();
-            }, 100);
+            // this.videoOn();
+            // setTimeout(()=>{
+            //     this.videoOn();
+            // }, 100);
         }
 
-        EventBus.$on('do-video-size-'+this.drone_name, (payload) => {
+        EventBus.$on('do-video-size-' + this.drone_name, (payload) => {
 
-            console.log('do-video-size-'+this.drone_name, payload);
+            console.log('do-video-size-' + this.drone_name, payload);
 
             this.width = payload.width;
             this.height = payload.height;
@@ -131,25 +139,25 @@ export default {
             this.$forceUpdate();
         });
 
-        EventBus.$on('do-video-close-'+this.drone_name, () => {
+        EventBus.$on('do-video-close-' + this.drone_name, () => {
 
-            console.log('do-video-close-'+this.drone_name);
+            console.log('do-video-close-' + this.drone_name);
 
             this.viewer_stop();
         });
 
-        EventBus.$on('do-video-on-'+this.drone_name, () => {
+        EventBus.$on('do-video-on-' + this.drone_name, () => {
 
-            console.log('do-video-on-'+this.drone_name);
+            console.log('do-video-on-' + this.drone_name);
 
             this.videoOn();
         });
 
-        EventBus.$on('ws-on-message-'+this.drone_name, (parsedMessage) => {
+        EventBus.$on('ws-on-message-' + this.drone_name, (parsedMessage) => {
 
-            console.log('ws-on-message-'+this.drone_name);
+            console.log('ws-on-message-' + this.drone_name);
 
-            if(this.drone) {
+            if (this.drone) {
                 let drone = this.drone;
 
                 switch (parsedMessage.id) {
@@ -159,7 +167,7 @@ export default {
                             //console.warn('Call not accepted for the following reason: ' + errorMsg);
                             drone.dispose();
                             //alert(errorMsg);
-                            console.log('viewMessage', errorMsg)
+                            console.log('viewMessage', errorMsg);
 
                             this.isVideo = false;
                         }
@@ -179,17 +187,10 @@ export default {
             }
         });
     },
-
-    data: () => ({
-        isVideo: true,
-        width: 450,
-        height: 300,
-        drone: null,
-    }),
     computed: {},
     methods: {
         viewer_start(droneName, initbitrate) {
-            if(!this.drone) {
+            if (!this.drone) {
                 this.drone = new Drone(droneName, initbitrate);
             }
 
@@ -198,26 +199,15 @@ export default {
         },
 
         viewer_stop() {
-            if(this.drone) {
+            if (this.drone) {
                 this.drone.stop();
+                this.isVideo = false;
             }
         },
 
-        /**
-         * @WebRTC Event Handlers
-         */
-        open() {
-            this.shaka();
-            //this.$emit('onStart', this.itemIndex)
-        },
-
-        stop() {
-            this.viewer_stop();
-            //this.$emit('onStop', this.itemIndex)
-        },
-
         videoOn() {
-            this.isVideo = !this.isVideo
+            this.isVideo = !this.isVideo;
+
             if (this.isVideo) {
                 this.viewer_start(this.drone_name, this.bitrate);
             }
@@ -241,7 +231,22 @@ export default {
             };
             ui.configure(config);
 
-            document.addEventListener("fullscreenchange", this.isFs)
+            document.addEventListener("fullscreenchange", this.isFs);
+
+            var element = document.querySelector('#' +this.drone_name + '_wrapper .shaka-video-container');
+            element.getElementsByClassName('shaka-controls-container')[0].removeAttribute('shown');
+
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === "attributes" && element.getAttribute('style') === "cursor: none;") {
+                        element.getElementsByClassName('shaka-controls-container')[0].removeAttribute('shown');
+                    }
+                });
+            });
+
+            observer.observe(element, {
+                attributes: true //configure it to listen to attribute changes
+            });
         },
 
         isFs() {
@@ -252,17 +257,16 @@ export default {
         this.drone.stop();
         this.drone = null;
 
-        EventBus.$off('do-video-size-'+this.drone_name);
-        EventBus.$off('do-video-close-'+this.drone_name);
-        EventBus.$off('do-video-on-'+this.drone_name);
-        EventBus.$off('ws-on-message-'+this.drone_name);
+        EventBus.$off('do-video-size-' + this.drone_name);
+        EventBus.$off('do-video-close-' + this.drone_name);
+        EventBus.$off('do-video-on-' + this.drone_name);
+        EventBus.$off('ws-on-message-' + this.drone_name);
     }
 }
 </script>
 
-<style lang="scss">
+<style>
 @import '../../node_modules/shaka-player/dist/controls.css'; /* Shaka player CSS import */
-@import '../assets/_index.scss';
 
 .hudCard {
     min-width: 120px;
