@@ -1437,6 +1437,10 @@ export default new Vuex.Store({
                             state.drone_infos[dName].targeted = false;
                         }
 
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'headingLine')) {
+                            state.drone_infos[dName].headingLine = [];
+                        }
+
                         state.tempMarkers[dName] = null;
                         state.tempMarkers[dName] = [];
                         state.trackingLines[dName] = null;

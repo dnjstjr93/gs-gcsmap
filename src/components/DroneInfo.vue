@@ -555,6 +555,24 @@ function dfs_xy_conv(code, v1, v2) {
     return rs;
 }
 
+const get_point_dist = (latitude, longitude, distanceInKm, bearingInDegrees) => {
+    const R = 6378.1;
+    const dr = Math.PI / 180;
+    const bearing = bearingInDegrees * dr;
+    let lat = latitude * dr;
+    let lon = longitude * dr;
+
+    lat = Math.asin(Math.sin(lat) * Math.cos(distanceInKm / R) + Math.cos(lat) * Math.sin(distanceInKm / R) * Math.cos(bearing));
+    lon += Math.atan2(
+        Math.sin(bearing) * Math.sin(distanceInKm / R) * Math.cos(lat),
+        Math.cos(distanceInKm / R) - Math.sin(lat) * Math.sin(lat)
+    );
+    lat /= dr;
+    lon /= dr;
+    return {lat, lon};
+}
+
+
 export default {
     name: "DroneInfo",
 
@@ -3265,6 +3283,11 @@ export default {
                     this.info.airSpeed = this.airspeed;
 
                     this.heading = (this.gpi.hdg / 100);
+
+                    let h_pos = get_point_dist((this.gpi.lat / 10000000), (this.gpi.lon / 10000000), 1, this.heading);
+                    this.$store.state.drone_infos[this.name].headingLine = [];
+                    this.$store.state.drone_infos[this.name].headingLine.push({lat: (this.gpi.lat / 10000000), lng: (this.gpi.lon / 10000000)});
+                    this.$store.state.drone_infos[this.name].headingLine.push({lat: h_pos.lat, lng: h_pos.lon});
 
                     this.info.headingDirection = this.heading;
 

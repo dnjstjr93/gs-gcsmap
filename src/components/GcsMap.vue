@@ -143,6 +143,10 @@
                                             @click="printPosClick"
                                     ></GmapCircle>
 
+                                    <GmapPolyline
+                                        :path.sync="drone.headingLine"
+                                        :options="{strokeColor: drone.color, strokeOpacity: 0.9, strokeWeight: 2, zIndex: 5}"
+                                    ></GmapPolyline>
                                 </div>
                             </div>
 
