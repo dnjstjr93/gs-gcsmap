@@ -21,32 +21,24 @@ import Swiper from 'swiper'
 
 export default {
     name: 'Altitude',
-    props: ['data'],
+    props: [ 'data' ],
     data: () => ({
         swiper: undefined
     }),
-    mounted() {
+    mounted () {
         this.newInit()
     },
     watch: {
         ['data.altitude']: function (newVal) {
             let newValue = Math.floor(newVal)
-            let slides = this.swiper.$el[0].querySelectorAll('.alt-item span')
 
-            for (let i = 0; i < slides.length; i++) {
-                let nextValue = newValue - i + 49
-                if (nextValue % 5 === 0) {
-                    slides[i].innerHTML = JSON.stringify(nextValue)
-                }
-                else {
-                    slides[i].innerHTML = ''
-                }
-            }
+            this.setSlides(newValue)
         }
     },
-    computed: {},
+    computed: {
+    },
     methods: {
-        newInit() {
+        newInit () {
             let name = `#number_alt_${this.data.no}`
             this.swiper = new Swiper(name, {
                 loop: false,
@@ -61,11 +53,26 @@ export default {
                     momentumVelocityRatio: 0
                 },
                 breakpoints: {
-                    400: {
+                    400:{
                         slidesPerView: 20,
                     },
                 }
             });
+
+            this.setSlides(this.data.altitude)
+        },
+
+        setSlides (datas) {
+            let slides = this.swiper.$el[0].querySelectorAll('.alt-item span')
+
+            for (let i = 0; i < slides.length; i++) {
+                let nextValue = datas - i + 49
+                if (nextValue % 5 === 0) {
+                    slides[i].innerHTML = JSON.stringify(nextValue)
+                } else {
+                    slides[i].innerHTML = ''
+                }
+            }
         }
     }
 }
@@ -76,21 +83,22 @@ export default {
 #altitude {
     position: absolute;
     right: 5px;
-    top: 28%;
+    top: 50%;
+    transform: translateY(-50%);
     width: 8%;
-    height: 60%;
-    background-color: rgba(0, 0, 0, 0.3);
-    overflow: hidden;
+    height: 65%;
+    background-color:rgba(0,0,0,0.3);
+    overflow:hidden;
     z-index: 1;
 
     &.ruler {
-        background-repeat: repeat;
-        transition: all 0.3s ease-in;
+        background-repeat:repeat;
+        transition:all 0.3s ease-in;
 
         .vertical {
-            position: absolute;
-            top: 0;
-            left: 0;
+            position:absolute;
+            top:0;
+            left:0;
             width: 20%;
 
             .r0 {
@@ -98,39 +106,39 @@ export default {
                 max-height: 764px;
                 height: 100vh;
                 background-repeat: repeat;
-                background-image: -webkit-linear-gradient(top, #ffffff 1px, transparent 0px);
-                background-size: 100% 2.32%
+                background-image:-webkit-linear-gradient(top, #ffffff 1px, transparent 0px);
+                background-size:100% 2.32%
             }
         }
     }
 
     .alt-wrapper {
-        position: relative;
-        width: 100%;
-        margin: 0 auto;
-        height: 100%;
+        position:relative;
+        width:100%;
+        margin:0 auto;
+        height:100%;
 
         &:before,
         &:after {
-            content: "";
-            display: block;
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 4%;
+            content:"";
+            display:block;
+            position:absolute;
+            left:0;
+            width:100%;
+            height:4%;
             z-index: 2
         }
 
         .alt-indicator {
             position: absolute;
             left: 0;
-            width: 100%;
-            height: 15%;
+            width:100%;
+            height:15%;
             top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-            background-color: rgba(0, 0, 0, 0.6);
-            box-sizing: border-box;
+            transform:translateY(-50%);
+            pointer-events:none;
+            background-color:rgba(0,0,0,0.6);
+            box-sizing:border-box;
             z-index: 3;
             font-size: 85%;
         }
@@ -139,11 +147,11 @@ export default {
             height: 100%;
 
             .alt-item {
-                position: relative;
-                width: 100%;
-                display: flex;
+                position:relative;
+                width:100%;
+                display:flex;
                 align-items: center;
-                text-align: right;
+                text-align:right;
 
                 span {
                     display: block;
@@ -158,9 +166,6 @@ export default {
 
     /* fullscreen css */
     &.fsAltitude {
-        top: 23%;
-        height: 65%;
-
         .alt-wrapper {
             .alt-indicator {
                 font-size: 180%;

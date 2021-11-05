@@ -16,8 +16,9 @@
 <script>
 export default {
     name: 'Cetr',
-    props: ['data'],
-    computed: {},
+    props: [ 'data' ],
+    computed: {
+    },
 }
 </script>
 
@@ -26,17 +27,17 @@ export default {
 #cetr {
     position: absolute;
     left: 5px;
-    top: 15%;
+    top: 5%;
     width: 10%;
     height: 5%;
     z-index: 1;
 
     .ticks {
-        display: flex;
-        justify-content: space-between;
+        display:flex;
+        justify-content:space-between;
         width: 100%;
         height: 100%;
-        counter-reset: count -1;
+        counter-reset:count -1;
 
         div {
             width: 5%;
@@ -47,56 +48,51 @@ export default {
     }
 
     .slider-container {
-        width: 100%;
+        width:100%;
         margin-top: -10px;
 
         .slider {
-            -webkit-appearance: none;
-            -moz-appearance: none;
+            -webkit-appearance:none;
+            -moz-appearance:none;
             width: 100%;
-            height: .3vw;
-            background: #fff;
-            outline: none;
-            -webkit-transition: 0.2s;
-            transition: opacity 0.2s;
+            height: .2vw;
+            background:#fff;
+            outline:none;
+            -webkit-transition:0.2s;
+            transition:opacity 0.2s;
             pointer-events: none;
         }
 
         input[type="range"],
         input[type="range"]::-moz-range-track {
-            -webkit-appearance: none;
-            -moz-appearance: none;
+            -webkit-appearance:none;
+            -moz-appearance:none;
             width: 20px;
             background: #00e300;
-            outline: none;
-            transition: opacity 0.2s
+            outline:none;
+            transition:opacity 0.2s
         }
-
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
+            -webkit-appearance:none;
+            appearance:none;
             width: 3px;
             height: 30px;
             background: #00e300;
-            cursor: pointer;
-            outline: none;
+            cursor:pointer;
+            outline:none;
             margin-bottom: 15px;
         }
-
         input[type="range"]::-moz-range-thumb {
-            -moz-appearance: none;
-            appearance: none;
+            -moz-appearance:none;
+            appearance:none;
             width: 3px;
             height: 30px;
             background: #00e300;
-            cursor: pointer;
-            outline: none;
-            z-index: 10
+            cursor:pointer;
+            outline:none;
+            z-index:10
         }
-
-        input[type="range"]:focus {
-            outline: none;
-        }
+        input[type="range"]:focus { outline:none; }
     }
 
     // fullscreen css
@@ -107,19 +103,18 @@ export default {
             margin-top: 0;
 
             input[type="range"]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                appearance: none;
+                -webkit-appearance:none;
+                appearance:none;
                 width: 9px;
                 height: 80px;
                 background: #00e300;
-                cursor: pointer;
-                outline: none;
+                cursor:pointer;
+                outline:none;
                 margin-bottom: 50px;
             }
-
             input[type="range"]::-moz-range-thumb {
-                -moz-appearance: none;
-                appearance: none;
+                -moz-appearance:none;
+                appearance:none;
                 width: 9px;
                 height: 80px;
                 background: #00e300;

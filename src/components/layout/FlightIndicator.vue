@@ -1,23 +1,21 @@
 <template>
     <div id="view-port" :class="{ 'fsView': data.fs }">
-        <div class="mainSvg">
-            <svg version="1.1"
-                 id="SVGRoot"
-                 xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 500 500"
-                 style="enable-background:new 0 0 500 500; width: 100%; height: 75%" xml:space="preserve"
-                 class="svgImg">
-                <angle :data="data.bankAngle"/>
-            </svg>
-            <value-line :data="data"/>
+        <svg
+            version="1.1"
+            id="SVGRoot"
+            xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 500 500"
+            style="enable-background:new 0 0 500 500; width: 100%; height: 100%; position: relative; z-index: 1"
+            xml:space="preserve">
+      <path id="path3050" class="st16 pointer" d="M250.1,99.1l-14.4,26.3h28.8L250.1,99.1z" />
+    </svg>
+        <div class="mainSvg" :style="{ transform: setRoll }">
+            <angle :data="data.bankAngle" />
+            <value-line :data="data" />
         </div>
-        <div class="arrowWrap d-flex justify-space-between align-center" :style="setPitch">
+        <div class="arrowWrap d-flex justify-space-between align-center">
             <p class="left"></p>
             <p class="center"></p>
             <p class="right"></p>
-        </div>
-<!--        <div class="bg" style="display: none">-->
-        <div class="bg">
-            <img src="@/assets/background.jpg" alt="배경"/>
         </div>
     </div>
 </template>
@@ -26,7 +24,7 @@
 
 export default {
     name: 'BankAngle',
-    props: ['data'],
+    props: [ 'data' ],
     components: {
         Angle: () => import('./svg/Angle'),
         ValueLine: () => import('./svg/ValueLine')
@@ -37,7 +35,26 @@ export default {
             let pitch = Math.floor(this.data.anglePitch)
             let plus = pitch % 10
 
-            return `transform: translate(-50%, -50%) rotateX(${plus * 5}deg)`
+            return `transform: translateY(${plus * -5}px) scale(1.5)`
+        },
+
+        setRoll () {
+            let value = Math.floor(this.data.bankAngle)
+            if (value < 0) {
+                if (value > -60) {
+                    return `rotate(${value}deg)`
+                } else {
+                    return 'rotate(60deg)'
+                }
+            } else if (value > 0) {
+                if (value < 60) {
+                    return `rotate(-${value}deg)`
+                } else {
+                    return 'rotate(-60deg)'
+                }
+            } else {
+                return 'rotate(0deg)'
+            }
         }
     }
 }
@@ -46,28 +63,45 @@ export default {
 <style lang="scss">
 
 #view-port {
-    position: absolute;
+    position:absolute;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
+    overflow: hidden;
+
+    .pointer {
+        fill-rule:evenodd;
+        clip-rule:evenodd;
+        fill: red;
+        transform: translateY(-45px);
+    }
 
     .mainSvg {
         position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        top: 0;
         width: 100%;
         height: 100%;
-        padding-top: 10%;
-        z-index: 1;
+        transition: all 0.3s;
+        transform-origin: 50% center;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: -50%;
+            top: -50%;
+            width: 200%;
+            height: 200%;
+            background:var(--ms-background, skyblue);
+            transform: scaleX(2);
+        }
     }
 
     .arrowWrap {
         position: absolute;
         left: 50%;
-        top: 59%;
+        top: 50%;
         transform: translate(-50%, -50%);
         width: 70%;
         transition: all 0.3s;
@@ -75,42 +109,25 @@ export default {
 
         p {
             width: 20%;
-            height: 2px;
+            height: 3px;
             background-color: red;
 
             &.center {
                 width: 35px;
                 height: 35px;
                 border: solid red;
-                border-width: 0 3px 3px 0;
+                border-width: 4px 0 0 4px;
                 display: inline-block;
                 background-color: transparent;
-                transform: rotate(-135deg);
-                -webkit-transform: rotate(-135deg);
+                transform: rotateX(45deg) rotateZ(45deg);
+                margin-top: 45px;
             }
-        }
-    }
-
-    .bg {
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-
-        img {
-            width: 130%;
-            height: 130%;
         }
     }
 
     /* fullscreen css */
     &.fsView {
-        .mainSvg {
-            padding-top: 4%;
-        }
-
         .arrowWrap {
-            top: 56%;
-
             p {
                 height: 5px;
                 background-color: red;
@@ -125,13 +142,6 @@ export default {
                     transform: rotate(-135deg);
                     -webkit-transform: rotate(-135deg);
                 }
-            }
-        }
-
-        .bg {
-            img {
-                width: 150%;
-                height: 120%;
             }
         }
     }

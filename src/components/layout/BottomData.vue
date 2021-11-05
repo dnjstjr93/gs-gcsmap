@@ -12,9 +12,9 @@
 <script>
 export default {
     name: 'BottomData',
-    props: ['data'],
+    props: [ 'data' ],
     computed: {
-        compare() {
+        compare () {
             return this.data.wayPoint.distance >= this.data.wayPoint.number ? '>' : '<'
         }
     }

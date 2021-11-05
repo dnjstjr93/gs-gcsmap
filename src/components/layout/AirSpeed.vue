@@ -21,32 +21,24 @@ import Swiper from 'swiper'
 
 export default {
     name: 'AirSpeed',
-    props: ['data'],
+    props: [ 'data'],
     data: () => ({
         swiper: undefined
     }),
-    mounted() {
+    mounted () {
         this.newInit()
     },
     watch: {
         ['data.airSpeed']: function (newVal) {
             let newValue = Math.floor(newVal)
-            let slides = this.swiper.$el[0].querySelectorAll('.as-item span')
 
-            for (let i = 0; i < slides.length; i++) {
-                let nextValue = newValue - i + 49
-                if (nextValue % 5 === 0) {
-                    slides[i].innerHTML = JSON.stringify(nextValue)
-                }
-                else {
-                    slides[i].innerHTML = ''
-                }
-            }
+            this.setSlides(newValue)
         }
     },
-    computed: {},
+    computed: {
+    },
     methods: {
-        newInit() {
+        newInit () {
             let name = `#number_as_${this.data.no}`
             this.swiper = new Swiper(name, {
                 loop: false,
@@ -61,11 +53,26 @@ export default {
                     momentumVelocityRatio: 0
                 },
                 breakpoints: {
-                    400: {
+                    400:{
                         slidesPerView: 20
                     },
                 }
             });
+
+            this.setSlides(this.data.airSpeed)
+        },
+
+        setSlides (datas) {
+            let slides = this.swiper.$el[0].querySelectorAll('.as-item span')
+
+            for (let i = 0; i < slides.length; i++) {
+                let nextValue = datas - i + 49
+                if (nextValue % 5 === 0) {
+                    slides[i].innerHTML = JSON.stringify(nextValue)
+                } else {
+                    slides[i].innerHTML = ''
+                }
+            }
         }
     },
 }
@@ -76,11 +83,12 @@ export default {
 #airspeed {
     position: absolute;
     left: 5px;
-    top: 28%;
+    top: 50%;
+    transform: translateY(-50%);
     width: 8%;
-    height: 60%;
-    background-color: rgba(0, 0, 0, 0.3);
-    overflow: hidden;
+    height: 65%;
+    background-color:rgba(0,0,0,0.3);
+    overflow:hidden;
     z-index: 1;
 
     &.ruler {
@@ -88,9 +96,9 @@ export default {
         transition: all 0.3s ease-in;
 
         .vright {
-            position: absolute;
-            top: 0;
-            right: 0;
+            position:absolute;
+            top:0;
+            right:0;
             width: 20%;
 
             .r0 {
@@ -98,37 +106,37 @@ export default {
                 max-height: 764px;
                 height: 100vh;
                 background-repeat: repeat;
-                background-image: -webkit-linear-gradient(top, #ffffff 1px, transparent 0px);
-                background-size: 100% 2.32%
+                background-image:-webkit-linear-gradient(top, #ffffff 1px, transparent 0px);
+                background-size:100% 2.32%
             }
         }
 
         .as-wrapper {
-            position: relative;
-            width: 100%;
-            margin: 0 auto;
-            height: 100%;
+            position:relative;
+            width:100%;
+            margin:0 auto;
+            height:100%;
 
             &:before {
-                content: "";
-                display: block;
-                position: absolute;
-                left: 0;
-                width: 100%;
-                height: 10%;
+                content:"";
+                display:block;
+                position:absolute;
+                left:0;
+                width:100%;
+                height:10%;
                 z-index: 2
             }
 
             .as-indicator {
-                position: absolute;
-                left: 0;
-                width: 100%;
-                height: 15%;
-                top: 50%;
-                transform: translateY(-50%);
-                pointer-events: none;
-                background-color: rgba(0, 0, 0, 0.6);
-                box-sizing: border-box;
+                position:absolute;
+                left:0;
+                width:100%;
+                height:15%;
+                top:50%;
+                transform:translateY(-50%);
+                pointer-events:none;
+                background-color:rgba(0,0,0,0.6);
+                box-sizing:border-box;
                 z-index: 3;
                 font-size: 85%
             }
@@ -137,15 +145,15 @@ export default {
                 height: 100%;
 
                 .as-item {
-                    position: relative;
-                    width: 100%;
-                    display: flex;
-                    align-items: center;
+                    position:relative;
+                    width:100%;
+                    display:flex;
+                    align-items:center;
                     text-align: left;
 
                     span {
-                        display: block;
-                        width: 100%;
+                        display:block;
+                        width:100%;
                         transition: all 0.3s ease-out;
                         font-size: 70%;
                     }
@@ -156,9 +164,6 @@ export default {
 
     /* fullscreen css */
     &.fsAirSpeed {
-        top: 23%;
-        height: 65%;
-
         .as-wrapper {
             .as-indicator {
                 font-size: 180%
@@ -174,4 +179,5 @@ export default {
         }
     }
 }
+
 </style>
