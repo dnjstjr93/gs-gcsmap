@@ -255,104 +255,160 @@
                             <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0"
                                     :class="colorArming"
                                     @click="currentPosition">
-                                <!--                    <v-icon x-large :class="colorArming">{{ iconArming }}</v-icon>-->
-                                <div class="py-0">
-                                    <Heading :size="heading_size" :heading="heading"/>
-                                    <v-fade-transition>
-                                        <v-avatar
-                                            v-if="isPlaying"
-                                            :color="color"
-                                            :style="{animationDuration: animationDuration, top: '1px', left: (myWidth/2-12)+'px'}"
-                                            class="mt-1 ml-1 v-avatar--metronome"
-                                            size="14"
-                                        ></v-avatar>
-                                    </v-fade-transition>
-                                    <Attitude :size="attitude_size" :roll="roll" :pitch="pitch"/>
-                                </div>
+                                <DroneInfoBox
+                                    :name="name"
+                                    :heading="heading"
+                                    :heading_size="heading_size"
+                                    :myWidth="myWidth"
+                                    :attitude_size="attitude_size"
+                                    :curMode="curMode"
+                                    :colorMode="colorMode"
+                                    :num_satellites="num_satellites"
+                                    :iconSize="iconSize"
+                                    :roll="roll"
+                                    :pitch="pitch"
+                                    :iconLte="iconLte"
+                                    :fontSize="fontSize"
+                                    :colorLteVal="colorLteVal"
+                                    :curLteVal="curLteVal"
+                                    :rssi="rssi"
+                                    :iconFlightElapsed="iconFlightElapsed"
+                                    :curLat="(gpi.lat / 10000000).toFixed(7)"
+                                    :curLng="(gpi.lon / 10000000).toFixed(7)"
+                                    :curRelativeAlt="(gpi.relative_alt / 1000).toFixed(1)"
+                                    :curAlt="(gpi.alt / 1000).toFixed(1)"
+                                    :curArmStatus="curArmStatus"
+                                    :colorArm="colorArm"
+                                    :colorBattery="colorBattery"
+                                    :iconBattery="iconBattery"
+                                    :voltageBattery="(ss.voltage_battery / 1000).toFixed(1)"
+                                    :airspeed="airspeed.toFixed(1)"
+                                    :iconDistance="iconDistance"
+                                    :flightElapsedTime="flightElapsedTime"
+                                    :valueDistance="(valueDistance > 1000) ? (valueDistance / 1000).toFixed(1) + ' km' : (valueDistance.toFixed(0) + ' m')"
+                                    :bpm_color="bpm_color"
+                                    :animationDuration="animationDuration"
+                                ></DroneInfoBox>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+<!--                    <v-row no-gutters class="d-flex justify-center" align="center">-->
+<!--                        <v-col cols="12" class="text-center align-self-center">-->
+<!--                            <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0"-->
+<!--                                    :class="colorArming"-->
+<!--                                    @click="currentPosition">-->
+<!--                                &lt;!&ndash;                    <v-icon x-large :class="colorArming">{{ iconArming }}</v-icon>&ndash;&gt;-->
+<!--                                <div class="py-0">-->
+<!--                                    <Heading :size="heading_size" :heading="heading"/>-->
+<!--                                    <v-fade-transition>-->
+<!--                                        <v-avatar-->
+<!--                                            v-if="isPlaying"-->
+<!--                                            :color="color"-->
+<!--                                            :style="{animationDuration: animationDuration, top: '1px', left: (myWidth/2-12)+'px'}"-->
+<!--                                            class="mt-1 ml-1 v-avatar&#45;&#45;metronome"-->
+<!--                                            size="14"-->
+<!--                                        ></v-avatar>-->
+<!--                                    </v-fade-transition>-->
+<!--                                    <Attitude :size="attitude_size" :roll="roll" :pitch="pitch"/>-->
+<!--                                </div>-->
 
-                                <div class="info_position align-self-center" :style="{top: 0, left: 0}">
-                                    <v-input :style="{'font-size': '26px'}" :class="colorMode" :color="$store.state.drone_infos[name].color"
-                                        class="shadow_icon px-1">{{ curMode }}</v-input>
-                                </div>
+<!--                                <div class="info_position align-self-center" :style="{top: 0, left: 0}">-->
+<!--                                    <v-input :style="{'font-size': '26px'}" :class="colorMode" :color="$store.state.drone_infos[name].color"-->
+<!--                                        class="shadow_icon px-1">{{ curMode }}</v-input>-->
+<!--                                </div>-->
 
-                                <div class="info_position" :style="{top: (hud_gap*2)+'px', left: 0}">
-                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-satellite-variant
-                                    </v-icon>
-                                    <span class="shadow_icon px-1 text--white"
-                                          :style="{color: 'white'}">{{ num_satellites }} </span>
-                                </div>
+<!--                                <div class="info_position" :style="{top: (hud_gap*2)+'px', left: 0}">-->
+<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-satellite-variant-->
+<!--                                    </v-icon>-->
+<!--                                    <span class="shadow_icon px-1 text&#45;&#45;white"-->
+<!--                                          :style="{color: 'white'}">{{ num_satellites }} </span>-->
+<!--                                </div>-->
 
-                                <div class="info_position" :style="{top: (hud_gap*3)+'px', left: 0}">
-                                    <v-icon :class="colorLteVal" :style="iconSize" class="shadow_icon pl-1">{{
-                                            iconLte
-                                        }}
-                                    </v-icon>
-                                    <span :class="colorLteVal" :style="fontSize" class="shadow_icon px-1">{{
-                                            curLteVal
-                                        }}</span>
-                                </div>
+<!--                                <div class="info_position" :style="{top: (hud_gap*3)+'px', left: 0}">-->
+<!--                                    <v-icon :class="colorLteVal" :style="iconSize" class="shadow_icon pl-1">{{-->
+<!--                                            iconLte-->
+<!--                                        }}-->
+<!--                                    </v-icon>-->
+<!--                                    <span :class="colorLteVal" :style="fontSize" class="shadow_icon px-1">{{-->
+<!--                                            curLteVal-->
+<!--                                        }}</span>-->
+<!--                                </div>-->
 
-                                <div class="info_position" :style="{top: (hud_gap*4)+'px', left: 0}">
-                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-access-point</v-icon>
-                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ rssi }}</span>
-                                </div>
+<!--                                <div class="info_position" :style="{top: (hud_gap*4)+'px', left: 0}">-->
+<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-access-point</v-icon>-->
+<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ rssi }}</span>-->
+<!--                                </div>-->
 
-                                <div class="info_position" :style="{top: (hud_gap*5)+'px', left: 0}">
-                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{
-                                            iconFlightElapsed
-                                        }}
-                                    </v-icon>
-                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{
-                                            flightElapsedTime
-                                        }}</span>
-                                </div>
+<!--                                <div class="info_position" :style="{top: (hud_gap*5)+'px', left: 0}">-->
+<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{-->
+<!--                                            iconFlightElapsed-->
+<!--                                        }}-->
+<!--                                    </v-icon>-->
+<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{-->
+<!--                                            flightElapsedTime-->
+<!--                                        }}</span>-->
+<!--                                </div>-->
 
-                                <div class="info_position text-center" :style="{top: (hud_gap*6)+'px', left: 0}">
-                                    <span class="shadow_icon px-2" :style="{color: 'white'}">{{
-                                            (gpi.lat / 10000000).toFixed(7)
-                                        }} : {{ (gpi.lon / 10000000).toFixed(7) }} : <span style="font-size: 20px">{{
-                                                (gpi.relative_alt / 1000).toFixed(1)
-                                            }}</span> ({{ (gpi.alt / 1000).toFixed(1) }})</span>
-                                </div>
+<!--                                <div class="info_position text-center" :style="{top: (hud_gap*6)+'px', left: 0}">-->
+<!--                                    <span class="shadow_icon px-2" :style="{color: 'white'}">{{-->
+<!--                                            (gpi.lat / 10000000).toFixed(7)-->
+<!--                                        }} : {{ (gpi.lon / 10000000).toFixed(7) }} : <span style="font-size: 20px">{{-->
+<!--                                                (gpi.relative_alt / 1000).toFixed(1)-->
+<!--                                            }}</span> ({{ (gpi.alt / 1000).toFixed(1) }})</span>-->
+<!--                                </div>-->
 
-                                <div class="info_position"
-                                     :style="{top: 0, left: ((curArmStatus==='ARMED')?(myWidth-110):(myWidth-138))+'px'}">
-                                    <v-input :style="{'font-size': '26px'}" :class="colorArm" :color="$store.state.drone_infos[name].color"
-                                        class="shadow_icon px-1">{{ curArmStatus }}</v-input>
-                                </div>
+<!--                                <div class="info_position"-->
+<!--                                     :style="{top: 0, left: ((curArmStatus==='ARMED')?(myWidth-110):(myWidth-138))+'px'}">-->
+<!--                                    <v-input :style="{'font-size': '26px'}" :class="colorArm" :color="$store.state.drone_infos[name].color"-->
+<!--                                        class="shadow_icon px-1">{{ curArmStatus }}</v-input>-->
+<!--                                </div>-->
 
-                                <div class="info_position" :style="{top: (hud_gap*2)+'px', left: (myWidth-110)+'px'}">
-                                    <v-icon :class="colorBattery" :style="iconSize" class="shadow_icon pl-1">
-                                        {{ iconBattery }}
-                                    </v-icon>
-                                    <span class="shadow_icon px-1" :class="colorBattery">{{
-                                            (ss.voltage_battery / 1000).toFixed(1)
-                                        }} V</span>
-                                </div>
+<!--                                <div class="info_position" :style="{top: (hud_gap*2)+'px', left: (myWidth-110)+'px'}">-->
+<!--                                    <v-icon :class="colorBattery" :style="iconSize" class="shadow_icon pl-1">-->
+<!--                                        {{ iconBattery }}-->
+<!--                                    </v-icon>-->
+<!--                                    <span class="shadow_icon px-1" :class="colorBattery">{{-->
+<!--                                            (ss.voltage_battery / 1000).toFixed(1)-->
+<!--                                        }} V</span>-->
+<!--                                </div>-->
 
-                                <div class="info_position" :style="{top: (hud_gap*3)+'px', left: (myWidth-110)+'px'}">
-                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-altimeter</v-icon>
-                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{
-                                            (gpi.relative_alt / 1000).toFixed(1)
-                                        }} m</span>
-                                </div>
+<!--                                <div class="info_position" :style="{top: (hud_gap*3)+'px', left: (myWidth-110)+'px'}">-->
+<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-altimeter</v-icon>-->
+<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{-->
+<!--                                            (gpi.relative_alt / 1000).toFixed(1)-->
+<!--                                        }} m</span>-->
+<!--                                </div>-->
 
-                                <div class="info_position" :style="{top: (hud_gap*4)+'px', left: (myWidth-110)+'px'}">
-                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-speedometer</v-icon>
-                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ airspeed.toFixed(1) }} m/s</span>
-                                </div>
+<!--                                <div class="info_position" :style="{top: (hud_gap*4)+'px', left: (myWidth-110)+'px'}">-->
+<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-speedometer</v-icon>-->
+<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ airspeed.toFixed(1) }} m/s</span>-->
+<!--                                </div>-->
 
-                                <div class="info_position" :style="{top: (hud_gap*5)+'px', left: (myWidth-110)+'px'}">
-                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{
-                                            iconDistance
-                                        }}
-                                    </v-icon>
-                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{
-                                            (valueDistance > 1000) ? (valueDistance / 1000).toFixed(1) + ' km' : (valueDistance.toFixed(0) + ' m')
-                                        }}</span>
-                                </div>
+<!--                                <div class="info_position" :style="{top: (hud_gap*5)+'px', left: (myWidth-110)+'px'}">-->
+<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{-->
+<!--                                            iconDistance-->
+<!--                                        }}-->
+<!--                                    </v-icon>-->
+<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{-->
+<!--                                            (valueDistance > 1000) ? (valueDistance / 1000).toFixed(1) + ' km' : (valueDistance.toFixed(0) + ' m')-->
+<!--                                        }}</span>-->
+<!--                                </div>-->
 
-                                <!--                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
+<!--                                &lt;!&ndash;                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>&ndash;&gt;-->
+<!--                            </v-card>-->
+<!--                        </v-col>-->
+<!--                    </v-row>-->
+                    <v-row no-gutters class="d-flex justify-center" align="center">
+                        <v-col cols="12" class="align-self-center">
+                            <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0"
+                                    :class="colorArming"
+                                    @click="currentPosition">
+                                <DroneInfoHUD
+                                    :drone_name="name"
+                                    :bitrate="0"
+                                    :info="info"
+                                    @mounted="onVideoHandler"
+                                ></DroneInfoHUD>
                             </v-card>
                         </v-col>
                     </v-row>
@@ -452,23 +508,13 @@
                     </v-row>
                 </v-col>
             </v-row>
-            <v-row no-gutters class="mt-0">
-                <v-col cols="12">
-                    <DroneInfoHUD
-                        :drone_name="name"
-                        :bitrate="0"
-                        :info="info"
-                        @mounted="onVideoHandler"
-                    ></DroneInfoHUD>
-                </v-col>
-            </v-row>
         </v-card>
     </v-container>
 </template>
 
 <script>
 
-import {Airspeed, Attitude, Heading} from 'vue-flight-indicators'
+// import {Airspeed, Attitude, Heading} from 'vue-flight-indicators'
 import EventBus from '../EventBus';
 import mavlink, {MAVLink} from '../js/mavlink'
 import moment from 'moment'
@@ -481,6 +527,7 @@ import draggable from 'vuedraggable';
 //import mqtt from "mqtt";
 import {nanoid} from "nanoid";
 import DroneInfoHUD from "./DroneInfoHUD";
+import DroneInfoBox from "@/components/DroneInfoBox";
 
 const byteToHex = [];
 
@@ -578,10 +625,8 @@ export default {
     name: "DroneInfo",
 
     components: {
+        DroneInfoBox,
         // eslint-disable-next-line vue/no-unused-components
-        Airspeed,
-        Attitude,
-        Heading,
         draggable,
         DroneInfoHUD
     },
@@ -898,7 +943,7 @@ export default {
     },
 
     computed: {
-        color() {
+        bpm_color() {
             if (this.bpm < 100) return 'grey'
             if (this.bpm < 200) return 'indigo'
             if (this.bpm < 300) return 'teal'

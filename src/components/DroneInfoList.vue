@@ -581,7 +581,7 @@
         position: absolute;
         left: 0;
         top: 0;
-        opacity: 0.85;
+        opacity: 1;
         z-index: 2;
         width: 100%;
     }
