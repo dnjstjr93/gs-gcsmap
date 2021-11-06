@@ -22,12 +22,12 @@
                                 </v-col>
                                 <v-col cols="3">
                                     <v-switch
-                                        v-model="enableVideo"
                                         label="video"
                                         color="warning"
                                         class="ma-0 pa-0 pl-2 py-2"
                                         hide-details
-                                        @click="clickVideo"
+                                        v-model="info.isVideo"
+                                        @change="onVideoHandler(name)"
                                     ></v-switch>
                                 </v-col>
                                 <v-col cols="3">
@@ -458,6 +458,7 @@
                         :drone_name="name"
                         :bitrate="0"
                         :info="info"
+                        @mounted="onVideoHandler"
                     ></DroneInfoHUD>
                 </v-col>
             </v-row>
@@ -870,7 +871,7 @@ export default {
             },
             enableVideo: false,
             info: {
-                no: this.name,
+                no: 1,
                 headingDirection: 210,
                 airSpeed: 15,
                 altitude: 60,
@@ -890,7 +891,8 @@ export default {
                 bankAngle: 0,
                 anglePitch: 0,
                 flightTime: '12 : 03',
-                fs: false
+                fs: false,
+                isVideo: false
             }
         }
     },
@@ -958,7 +960,6 @@ export default {
             }
         },
     },
-
 
     watch: {
         chosenWaypointsFile: function (newVal) {
@@ -1092,16 +1093,11 @@ export default {
     },
 
     methods: {
-        clickVideo() {
-            console.log('clickVideo', this.enableVideo);
-
-            if(this.enableVideo) {
-                EventBus.$emit('do-video-on-' + this.name, {});
-            }
-            else {
-                EventBus.$emit('do-video-close-'+this.name, {});
-            }
+        onVideoHandler(drone_name) {
+            EventBus.$emit('do-video-on-' + drone_name, {});
+            EventBus.$emit('hud-data-' + drone_name, this.info);
         },
+
         loadUpdateWaypoints() {
             console.log('loadUpdateWaypoints', 'chosenWaypointsFile', this.chosenWaypointsFile);
 

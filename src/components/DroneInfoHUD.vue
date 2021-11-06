@@ -6,8 +6,12 @@
     >
         <div class="videoContainer d-flex justify-content-center">
             <div class="webRtcVideo" ref="videoContainer">
-                <video v-show="isVideo" autoplay class="video" ref="videoPlayer"></video>
-                <HudContainer :data="info"/>
+                <video v-show="info.isVideo" autoplay class="video" :class="{ fsVideo: info.fs }"
+                       ref="videoPlayer"></video>
+                <HudContainer
+                    v-if="info"
+                    :data="info"
+                    ref="hudContainer"/>
             </div>
         </div>
     </v-card>
@@ -79,21 +83,28 @@ function Drone(name, bitrate) {
     }
 
     function showSpinner(video) {
-        if (document.querySelector('#' + name + '_wrapper .bg')) {
-            document.querySelector('#' + name + '_wrapper .bg').style.display = "none"
+        if (document.querySelector('#' + name + '_wrapper .mainSvg') && document.querySelector('#' + name + '_wrapper .zeroWrap')) {
+            document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', 'none');
+            document.querySelectorAll('#' + name + '_wrapper .zeroWrap').forEach(el => {
+                el.style.setProperty('--background', 'none');
+                el.style.setProperty('--background-color', 'none')
+            });
         }
         video.poster = './img/transparent-1px.png';
         video.style.background = 'center transparent url("./img/spinner.gif") no-repeat';
     }
 
     function hideSpinner(video) {
-        if (document.querySelector('#' + name + '_wrapper .bg')) {
-            document.querySelector('#' + name + '_wrapper .bg').style.display = "block"
+        if (document.querySelector('#' + name + '_wrapper .mainSvg') && document.querySelector('#' + name + '_wrapper .zeroWrap')) {
+            document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', 'skyblue');
+            document.querySelectorAll('#' + name + '_wrapper .zeroWrap').forEach(el => {
+                el.style.setProperty('--background', 'green');
+                el.style.setProperty('--background-color', 'white')
+            });
         }
         video.poster = './img/webrtc.png';
         video.style.background = '';
-
-        this.viewer_stop();
+        EventBus.$emit('do-video-close-' + name, {});
     }
 
     this.dispose = function () {
@@ -112,51 +123,33 @@ export default {
     },
     props: ['drone_name', 'bitrate', 'info'],
     data: () => ({
-        isVideo: true,
-        width: 450,
-        height: 300,
-        drone: null,
+        fullScreen: false,
+        width: 640,
+        height: 480,
     }),
     mounted() {
         this.shaka();
 
-        if (!this.drone) {
-            this.drone = new Drone(this.drone_name, 0);
-            this.isVideo = false;
-            // this.videoOn();
-            // setTimeout(()=>{
-            //     this.videoOn();
-            // }, 100);
-        }
+        this.viewer_start(this.drone_name, 0);
+        setTimeout(() => {
+            this.viewer_stop();
+        }, 1000);
 
         EventBus.$on('do-video-size-' + this.drone_name, (payload) => {
-
-            console.log('do-video-size-' + this.drone_name, payload);
-
             this.width = payload.width;
             this.height = payload.height;
-
-            this.$forceUpdate();
         });
 
         EventBus.$on('do-video-close-' + this.drone_name, () => {
-
-            console.log('do-video-close-' + this.drone_name);
-
+            this.info.isVideo = false;
             this.viewer_stop();
         });
 
         EventBus.$on('do-video-on-' + this.drone_name, () => {
-
-            console.log('do-video-on-' + this.drone_name);
-
             this.videoOn();
         });
 
         EventBus.$on('ws-on-message-' + this.drone_name, (parsedMessage) => {
-
-            console.log('ws-on-message-' + this.drone_name);
-
             if (this.drone) {
                 let drone = this.drone;
 
@@ -166,10 +159,9 @@ export default {
                             var errorMsg = parsedMessage.message ? parsedMessage.message : 'Unknow error';
                             //console.warn('Call not accepted for the following reason: ' + errorMsg);
                             drone.dispose();
-                            //alert(errorMsg);
-                            console.log('viewMessage', errorMsg);
+                            alert(errorMsg);
 
-                            this.isVideo = false;
+                            this.info.isVideo = false;
                         }
                         else {
                             drone.webRtcPeer.processAnswer(parsedMessage.sdpAnswer);
@@ -186,13 +178,27 @@ export default {
                 }
             }
         });
+
+        // EventBus.$on('hud-data-' + this.drone_name, (hudData) => {
+        //     if (hudData) {
+        //         this.info = hudData;
+        //
+        //         if (hudData.isMounted) {
+        //             this.$refs.hudContainer.newInit();
+        //         }
+        //     }
+        // })
+
+        this.$emit('mounted', this.drone_name)
     },
     computed: {},
     methods: {
         viewer_start(droneName, initbitrate) {
-            if (!this.drone) {
-                this.drone = new Drone(droneName, initbitrate);
+            if (this.drone) {
+                this.drone = null;
             }
+
+            this.drone = new Drone(droneName, initbitrate);
 
             this.bitrate = initbitrate;
             this.drone.viewer();
@@ -201,15 +207,26 @@ export default {
         viewer_stop() {
             if (this.drone) {
                 this.drone.stop();
-                this.isVideo = false;
+                this.drone = null;
             }
         },
 
-        videoOn() {
-            this.isVideo = !this.isVideo;
+        /**
+         * @WebRTC Event Handlers
+         */
+        open() {
+            this.shaka();
+            //this.$emit('onStart', this.itemIndex)
+        },
 
-            if (this.isVideo) {
-                this.viewer_start(this.drone_name, this.bitrate);
+        stop() {
+            this.viewer_stop();
+            //this.$emit('onStop', this.itemIndex)
+        },
+
+        videoOn() {
+            if (this.info.isVideo) {
+                this.viewer_start(this.drone_name, this.bitrate)
             }
             else {
                 this.viewer_stop();
@@ -231,13 +248,17 @@ export default {
             };
             ui.configure(config);
 
-            document.addEventListener("fullscreenchange", this.isFs);
+            document.addEventListener("fullscreenchange", this.isFs)
 
-            var element = document.querySelector('#' +this.drone_name + '_wrapper .shaka-video-container');
+            this.hideControls();
+        },
+
+        hideControls() {
+            var element = document.querySelector('#' + this.drone_name + '_wrapper .shaka-video-container');
             element.getElementsByClassName('shaka-controls-container')[0].removeAttribute('shown');
 
-            var observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
+            var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
                     if (mutation.type === "attributes" && element.getAttribute('style') === "cursor: none;") {
                         element.getElementsByClassName('shaka-controls-container')[0].removeAttribute('shown');
                     }
@@ -254,13 +275,11 @@ export default {
         }
     },
     beforeDestroy() {
-        this.drone.stop();
-        this.drone = null;
-
         EventBus.$off('do-video-size-' + this.drone_name);
         EventBus.$off('do-video-close-' + this.drone_name);
         EventBus.$off('do-video-on-' + this.drone_name);
         EventBus.$off('ws-on-message-' + this.drone_name);
+        EventBus.$off('hud-data-' + this.drone_name);
     }
 }
 </script>
@@ -269,8 +288,7 @@ export default {
 @import '../../node_modules/shaka-player/dist/controls.css'; /* Shaka player CSS import */
 
 .hudCard {
-    min-width: 120px;
-    min-height: 120px;
+
 }
 
 .vdr {
@@ -290,9 +308,12 @@ export default {
 
 .video {
     width: 100%;
-    height: 100%;
     object-fit: fill;
     background-color: whitesmoke;
+}
+
+.fsVideo {
+    object-fit: contain !important;
 }
 
 </style>
