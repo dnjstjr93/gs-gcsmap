@@ -25,6 +25,7 @@ import kurentoUtils from 'kurento-utils';
 
 function Drone(name, bitrate) {
     this.name = name;
+    this.webRtcPeer = null;
 
     // Card Wrapper
     let wrapper = document.getElementById(`${this.name}_wrapper`)
@@ -68,9 +69,20 @@ function Drone(name, bitrate) {
                 id: 'stop',
                 droneName: this.name
             }
+            this.webRtcPeer.dispose();
+            this.webRtcPeer = null;
+
+            hideSpinner(this.video);
             EventBus.$emit('ws-send-message', message);
-            this.dispose();
         }
+    }
+
+    this.dispose = function () {
+        if (this.webRtcPeer) {
+            this.webRtcPeer.dispose();
+            this.webRtcPeer = null;
+        }
+        hideSpinner(this.video);
     }
 
     function onIceCandidate(candidate) {
@@ -104,46 +116,32 @@ function Drone(name, bitrate) {
         }
         video.poster = './img/webrtc.png';
         video.style.background = '';
-        EventBus.$emit('do-video-close-' + name, {});
-    }
-
-    this.dispose = function () {
-        if (this.webRtcPeer) {
-            this.webRtcPeer.dispose();
-            this.webRtcPeer = null;
-        }
-        hideSpinner(this.video);
+        // EventBus.$emit('do-video-close-' + name, {});
     }
 }
 
 export default {
-    name: 'Drone',
+    name: 'DroneInfoHUD',
     components: {
         HudContainer
     },
     props: ['drone_name', 'bitrate', 'info'],
     data: () => ({
         fullScreen: false,
-        width: 640,
-        height: 480,
+        width: 480,
+        height: 320,
+        drone: null,
     }),
     mounted() {
-        this.shaka();
-
-        this.viewer_start(this.drone_name, 0);
-        setTimeout(() => {
-            this.viewer_stop();
-        }, 1000);
-
         EventBus.$on('do-video-size-' + this.drone_name, (payload) => {
             this.width = payload.width;
             this.height = payload.height;
         });
 
-        EventBus.$on('do-video-close-' + this.drone_name, () => {
-            this.info.isVideo = false;
-            this.viewer_stop();
-        });
+        // EventBus.$on('do-video-close-' + this.drone_name, () => {
+        //     this.info.isVideo = false;
+        //     this.viewer_stop();
+        // });
 
         EventBus.$on('do-video-on-' + this.drone_name, () => {
             this.videoOn();
@@ -189,16 +187,21 @@ export default {
         //     }
         // })
 
-        this.$emit('mounted', this.drone_name)
+        //this.$emit('mounted', this.drone_name)
+
+        this.shaka();
+
+        this.viewer_start(this.drone_name, 0);
+        setTimeout(() => {
+            this.viewer_stop();
+        }, 1000);
     },
     computed: {},
     methods: {
         viewer_start(droneName, initbitrate) {
-            if (this.drone) {
-                this.drone = null;
+            if (!this.drone) {
+                this.drone = new Drone(droneName, initbitrate);
             }
-
-            this.drone = new Drone(droneName, initbitrate);
 
             this.bitrate = initbitrate;
             this.drone.viewer();
@@ -207,7 +210,6 @@ export default {
         viewer_stop() {
             if (this.drone) {
                 this.drone.stop();
-                this.drone = null;
             }
         },
 
@@ -226,7 +228,7 @@ export default {
 
         videoOn() {
             if (this.info.isVideo) {
-                this.viewer_start(this.drone_name, this.bitrate)
+                this.viewer_start(this.drone_name, this.bitrate);
             }
             else {
                 this.viewer_stop();
@@ -236,16 +238,8 @@ export default {
         shaka() {
             const shaka = require('shaka-player/dist/shaka-player.ui.js');
             const player = new shaka.Player(this.$refs.videoPlayer);
-
-            const ui = new shaka.ui.Overlay(
-                player,
-                this.$refs.videoContainer,
-                this.$refs.videoPlayer
-            );
-            const config = {
-                addSeekBar: false,
-                'controlPanelElements': ['fullscreen']
-            };
+            const ui = new shaka.ui.Overlay(player, this.$refs.videoContainer, this.$refs.videoPlayer);
+            const config = {addSeekBar: false, 'controlPanelElements': ['fullscreen']};
             ui.configure(config);
 
             document.addEventListener("fullscreenchange", this.isFs)
@@ -275,11 +269,15 @@ export default {
         }
     },
     beforeDestroy() {
+        if(this.drone) {
+            this.viewer_stop();
+            this.drone = null;
+        }
+
         EventBus.$off('do-video-size-' + this.drone_name);
-        EventBus.$off('do-video-close-' + this.drone_name);
+//        EventBus.$off('do-video-close-' + this.drone_name);
         EventBus.$off('do-video-on-' + this.drone_name);
         EventBus.$off('ws-on-message-' + this.drone_name);
-        EventBus.$off('hud-data-' + this.drone_name);
     }
 }
 </script>

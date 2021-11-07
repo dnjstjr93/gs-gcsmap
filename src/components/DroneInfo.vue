@@ -255,7 +255,7 @@
                             <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0"
                                     :class="colorArming"
                                     @click="currentPosition">
-                                <DroneInfoBox
+                                <DroneInfoBox v-show="false"
                                     :name="name"
                                     :heading="heading"
                                     :heading_size="heading_size"
@@ -407,7 +407,6 @@
                                     :drone_name="name"
                                     :bitrate="0"
                                     :info="info"
-                                    @mounted="onVideoHandler"
                                 ></DroneInfoHUD>
                             </v-card>
                         </v-col>
@@ -1140,7 +1139,7 @@ export default {
     methods: {
         onVideoHandler(drone_name) {
             EventBus.$emit('do-video-on-' + drone_name, {});
-            EventBus.$emit('hud-data-' + drone_name, this.info);
+            //EventBus.$emit('hud-data-' + drone_name, this.info);
         },
 
         loadUpdateWaypoints() {

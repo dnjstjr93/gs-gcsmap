@@ -870,7 +870,7 @@
                 this.open = !this.open;
                 console.log(this.open);
 
-                window.open("https://13.209.34.14", "_blank");
+                window.open("http://webrtc.intellicode.info:8080/", "_blank");
             },
 
             postDroneInfos(callback) {
