@@ -936,7 +936,17 @@ export default {
                 anglePitch: 0,
                 flightTime: '12 : 03',
                 fs: false,
-                isVideo: false
+                isVideo: false,
+                num_satellites: 0,
+                rssi: 0,
+                colorLteVal: 'td-text-gray',
+                curLteVal: 0,
+                iconLte: 'mdi-network-strength-off-outline',
+                colorBattery: 'td-text-gray',
+                iconBattery: 'mdi-battery-off-outline',
+                voltageBattery: 0,
+                iconFlightElapsed: 'mdi-timer-off-outline',
+                flightElapsedTime: '00:00',
             }
         }
     },
@@ -1511,10 +1521,6 @@ export default {
                                         if (Object.prototype.hasOwnProperty.call(payload.con, 'rsrp')) {
                                             this.colorLteVal = 'td-text-gray';
 
-                                            // setTimeout(() => {
-                                            //
-                                            // }, 200);
-
                                             this.curLteVal = payload.con.rsrp;
                                             //console.log(this.curLteVal);
 
@@ -1536,6 +1542,10 @@ export default {
                                                 this.iconLte = 'mdi-network-strength-1';
                                                 this.colorLteVal = 'td-text-red';
                                             }
+
+                                            this.info.colorLteVal = this.colorLteVal;
+                                            this.info.curLteVal = this.curLteVal;
+                                            this.info.iconLte = this.iconLte;
 
                                             if (this.lteTimeoutObj) {
                                                 clearTimeout(this.lteTimeoutObj);
@@ -1761,8 +1771,13 @@ export default {
                     this.iconArming = 'mdi-airplane-off';
                     this.colorArming = 'white';
                     this.iconDistance = 'mdi-map-marker-distance';
+
                     this.iconBattery = 'mdi-battery-off-outline';
                     this.colorBattery = 'td-text-gray';
+
+                    this.info.iconBattery = this.iconBattery;
+                    this.info.colorBattery = this.colorBattery;
+
                     this.colorAirspeed = 'td-text-gray';
 
                     this.statusColor = 'indicator-gray';
@@ -3124,11 +3139,15 @@ export default {
 
             this.flightTimer = setInterval(() => this.flightTimeCount += 1, 1000);
 
+            this.info.iconFlightElapsed = this.iconFlightElapsed;
+            this.info.flightElapsedTime = this.flightElapsedTime;
         },
         stopFlightTimer: function () {
             clearInterval(this.flightTimer);
             this.iconFlightElapsed = 'mdi-timer-off-outline';
             this.flightTimer = null;
+
+            this.info.iconFlightElapsed = this.iconFlightElapsed;
         },
 
         parseMavFromDrone(mavPacket) {
@@ -3252,6 +3271,10 @@ export default {
                         this.iconBattery = 'mdi-battery-low';
                         this.colorBattery = 'td-text-red';
                     }
+
+                    this.info.colorBattery = this.colorBattery;
+                    this.info.iconBattery = this.iconBattery;
+                    this.info.voltageBattery = this.ss.voltage_battery;
 
                     // this.$store.commit('set_ss_voltage_battery', (Buffer.from(voltage_battery, 'hex').readUInt16LE(0)));
                 }
@@ -3676,6 +3699,7 @@ export default {
                     }
 
                     this.num_satellites = Buffer.from(satellites, 'hex').readUInt8(0);
+                    this.info.num_satellites = this.num_satellites;
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_RADIO_STATUS) {
@@ -3689,6 +3713,7 @@ export default {
                     }
 
                     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
+                    this.info.rssi = this.rssi;
                     console.log('MAVLINK_MSG_ID_RADIO_STATUS', this.rssi);
                 }
 

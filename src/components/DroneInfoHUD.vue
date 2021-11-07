@@ -154,12 +154,14 @@ export default {
                 switch (parsedMessage.id) {
                     case 'viewerResponse':
                         if (parsedMessage.response !== 'accepted') {
-                            var errorMsg = parsedMessage.message ? parsedMessage.message : 'Unknow error';
-                            //console.warn('Call not accepted for the following reason: ' + errorMsg);
-                            drone.dispose();
-                            alert(errorMsg);
+                            setTimeout(() => {
+                                var errorMsg = parsedMessage.message ? parsedMessage.message : 'Unknow error';
+                                //console.warn('Call not accepted for the following reason: ' + errorMsg);
+                                drone.dispose();
+                                console.log(errorMsg);
 
-                            this.info.isVideo = false;
+                                this.info.isVideo = false;
+                            }, 1000);
                         }
                         else {
                             drone.webRtcPeer.processAnswer(parsedMessage.sdpAnswer);

@@ -296,4 +296,5 @@ export default {
     text-shadow: 0.5px 0.5px 5px #000000;
 }
 
+
 </style>
