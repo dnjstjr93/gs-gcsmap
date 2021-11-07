@@ -264,11 +264,9 @@
                                     :curMode="curMode"
                                     :colorMode="colorMode"
                                     :num_satellites="num_satellites"
-                                    :iconSize="iconSize"
                                     :roll="roll"
                                     :pitch="pitch"
                                     :iconLte="iconLte"
-                                    :fontSize="fontSize"
                                     :colorLteVal="colorLteVal"
                                     :curLteVal="curLteVal"
                                     :rssi="rssi"
@@ -978,40 +976,6 @@ export default {
         },
         heightInfo() {
             return ('height: ' + (this.airspeed_size / 2) + 'px');
-        },
-        fontSize() {
-            console.log(this.$vuetify.breakpoint.name);
-            switch (this.$vuetify.breakpoint.name) {
-                case 'xs':
-                    return ("font-size: 14px");
-                case 'sm':
-                    return ("font-size: 15px");
-                case 'md':
-                    return ("font-size: 16px");
-                case 'lg':
-                    return ("font-size: 17px");
-                case 'xl':
-                    return ("font-size: 18px");
-                default:
-                    return ("font-size: 16px");
-            }
-        },
-        iconSize() {
-            console.log(this.$vuetify.breakpoint.name);
-            switch (this.$vuetify.breakpoint.name) {
-                case 'xs':
-                    return ("font-size: 16px");
-                case 'sm':
-                    return ("font-size: 18px");
-                case 'md':
-                    return ("font-size: 20px");
-                case 'lg':
-                    return ("font-size: 22px");
-                case 'xl':
-                    return ("font-size: 24px");
-                default:
-                    return ("font-size: 16px");
-            }
         },
     },
 

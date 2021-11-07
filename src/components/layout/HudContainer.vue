@@ -1,13 +1,13 @@
 <template>
     <v-container fluid id="hud-container" class="d-flex flex-column pa-0" :class="{ fsContainer: data.fs }">
-        <div class="top">
+        <div :style="topStyle">
             <infos :data="data"/>
         </div>
-        <div class="header">
+        <div :style="headerStyle">
             <heading-direction :data="data" ref="hd"/>
         </div>
         <div class="contents">
-            <cetr v-if="false" :data="data"/>
+            <cetr :data="data"/>
             <air-speed :data="data" ref="as"/>
             <altitude :data="data" ref="alt"/>
             <bottom-data :data="data"/>
@@ -35,6 +35,26 @@ export default {
             this.$refs.as.newInit()
             this.$refs.alt.newInit()
         }
+    },
+    computed: {
+        topStyle() {
+            if(this.data.isVideo) {
+                return ({height: '8%'});
+            }
+            else {
+                return ({height: '8%', background: 'skyblue'});
+
+            }
+        },
+        headerStyle() {
+            if(this.data.isVideo) {
+                return ({height: '10%'});
+            }
+            else {
+                return ({height: '10%', background: 'skyblue', 'border-top': '1px solid #ffffff'});
+            }
+        }
+
     }
 }
 </script>
@@ -54,7 +74,8 @@ export default {
 
 .top {
     height: 8%;
-    background: skyblue;
+    //background: skyblue;
+    //opacity: 0.8;
 }
 
 .header {

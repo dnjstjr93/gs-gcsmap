@@ -1,16 +1,32 @@
 <template>
-    <div id="cetr" :class="{ 'fsCetr': data.fs }">
-        <div class="ticks">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
-        </div>
-        <div class="slider-container">
-            <input type="range" class="slider" min="1" max="5" :value="this.data.cetr">
-        </div>
-    </div>
+    <v-container id="cetr" fill-height class="pa-0 ma-0" :class="{ fsInfos: data.fs }">
+        <v-row no-gutters align="center">
+            <v-col cols="6" class="td-text-white text-left">
+                <span class="shadow_icon pl-1 text--white" :style="fontSize">
+                    <v-icon class="shadow_icon pr-0" :style="iconSize">mdi-speedometer</v-icon>
+                    {{ data.airSpeed }} m/s
+                </span>
+            </v-col>
+            <v-col cols="6" class="td-text-white text-right">
+                <span class="shadow_icon pr-3 text--white" :style="fontSize">
+                    <v-icon class="shadow_icon pr-0" :style="iconSize">mdi-altimeter</v-icon>
+                    {{ data.altitude }} m
+                </span>
+            </v-col>
+        </v-row>
+    </v-container>
+<!--    <div id="cetr" :class="{ 'fsCetr': data.fs }">-->
+<!--        <div class="ticks">-->
+<!--            <div></div>-->
+<!--            <div></div>-->
+<!--            <div></div>-->
+<!--            <div></div>-->
+<!--            <div></div>-->
+<!--        </div>-->
+<!--        <div class="slider-container">-->
+<!--            <input type="range" class="slider" min="1" max="5" :value="this.data.cetr">-->
+<!--        </div>-->
+<!--    </div>-->
 </template>
 
 <script>
@@ -18,6 +34,23 @@ export default {
     name: 'Cetr',
     props: [ 'data' ],
     computed: {
+        fontSize() {
+            if(this.data.fs) {
+                return {'font-size': '200%', color: 'white'};
+            }
+            else {
+                return {'font-size': '100%', color: 'white'};
+            }
+        },
+
+        iconSize() {
+            if(this.data.fs) {
+                return {'font-size': '130%', color: 'white'};
+            }
+            else {
+                return {'font-size': '130%', color: 'white'};
+            }
+        },
     },
 }
 </script>
@@ -28,7 +61,7 @@ export default {
     position: absolute;
     left: 5px;
     top: 5%;
-    width: 10%;
+    width: 100%;
     height: 5%;
     z-index: 1;
 

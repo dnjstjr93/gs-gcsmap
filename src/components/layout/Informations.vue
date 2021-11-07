@@ -1,29 +1,43 @@
 <template>
-    <div id="infos" class="d-flex flex-column" :class="{ fsInfos: data.fs }">
-        <div id="bat" class="text-center">
-            <v-row no-gutters>
-                <v-col cols="2" class="text-left">
-                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-satellite-variant</v-icon>
-                    <span class="shadow_icon px-1 text--white" :style="{color: 'white'}">{{ data.num_satellites }} </span>                </v-col>
-                <v-col cols="2" class="text-left">
-                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-access-point</v-icon>
-                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ data.rssi }}</span>
+    <v-container id="infos" fill-height class="pa-0 ma-0" :class="{ fsInfos: data.fs }">
+<!--    <div id="infos" class="d-flex flex-column" :class="{ fsInfos: data.fs }">-->
+<!--        <div id="bat" class="text-center">-->
+            <v-row no-gutters align="center">
+                <v-col cols="2" class="td-text-white text-left">
+                    <span class="shadow_icon pl-1 text--white" :style="fontSize">
+                        <v-icon class="shadow_icon pr-1" :style="iconSize">mdi-satellite-variant</v-icon>
+                        {{ data.num_satellites }}
+                    </span>
                 </v-col>
-                <v-col cols="2" class="text-center">
-                    <v-icon :class="data.colorLteVal" class="shadow_icon pl-1">{{ data.iconLte }}</v-icon>
-                    <span :class="data.colorLteVal" class="shadow_icon px-1">{{ data.curLteVal }}</span>
+                <v-col cols="2" class="text-left">
+                    <span class="shadow_icon pl-1" :style="fontSize">
+                        <v-icon class="shadow_icon pr-1" :style="iconSize">mdi-access-point</v-icon>
+                        {{ data.rssi }}
+                    </span>
                 </v-col>
                 <v-spacer></v-spacer>
-                <v-col cols="3" class="text-right">
-                    <v-icon :class="data.colorBattery" class="shadow_icon pl-1">{{ data.iconBattery }}</v-icon>
-                    <span :class="data.colorBattery" class="shadow_icon px-1" >{{ data.voltageBattery }} V</span>
+                <v-col cols="2" class="text-center">
+                    <span class="shadow_icon px-1" :style="lteFontSize">
+                        <v-icon class="shadow_icon pr-1" :style="lteIconSize">{{ data.iconLte }}</v-icon>
+                        {{ data.curLteVal }}
+                    </span>
                 </v-col>
                 <v-col cols="3" class="text-right">
-                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{ data.iconFlightElapsed }}</v-icon>
-                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ data.flightElapsedTime }}</span>                </v-col>
+                    <span class="shadow_icon pr-1" :style="batFontSize">
+                        <v-icon class="shadow_icon pr-1" :style="batIconSize">{{ data.iconBattery }}</v-icon>
+                        {{ data.voltageBattery }} V
+                    </span>
+                </v-col>
+                <v-col cols="3" class="text-right">
+                    <span class="shadow_icon pr-1" :style="fontSize">
+                        <v-icon class="shadow_icon pr-1" :style="iconSize">{{ data.iconFlightElapsed }}</v-icon>
+                        {{ data.flightElapsedTime }}
+                    </span>
+                </v-col>
             </v-row>
-        </div>
-    </div>
+<!--        </div>-->
+<!--    </div>-->
+    </v-container>
 
 <!--    <div id="infos" class="d-flex justify-end align-center" :class="{ fsInfos: data.fs }">-->
 <!--        <div :id="`info_1_${this.data.no}`" class="info_1 d-flex">-->
@@ -45,7 +59,62 @@
 export default {
     name: 'Infos',
     props: ['data'],
-    computed: {}
+    computed: {
+        fontSize() {
+            if(this.data.fs) {
+                return {'font-size': '250%', color: 'white'};
+            }
+            else {
+                return {'font-size': '100%', color: 'white'};
+            }
+        },
+
+        lteFontSize() {
+            if(this.data.fs) {
+                return {'font-size': '250%', color: this.data.colorLteVal};
+            }
+            else {
+                return {'font-size': '100%', color: this.data.colorLteVal};
+            }
+        },
+
+        batFontSize() {
+            if(this.data.fs) {
+                return {'font-size': '250%', color: this.data.colorBattery};
+            }
+            else {
+                return {'font-size': '100%', color: this.data.colorBattery};
+            }
+        },
+
+        iconSize() {
+            if(this.data.fs) {
+                return {'font-size': '150%', color: 'white'};
+            }
+            else {
+                return {'font-size': '130%', color: 'white'};
+            }
+        },
+
+        lteIconSize() {
+            if(this.data.fs) {
+                return {'font-size': '150%', color: this.data.colorLteVal};
+            }
+            else {
+                return {'font-size': '130%', color: this.data.colorLteVal};
+            }
+        },
+
+        batIconSize() {
+            if(this.data.fs) {
+                return {'font-size': '150%', color: this.data.colorBattery};
+            }
+            else {
+                return {'font-size': '130%', color: this.data.colorBattery};
+            }
+        },
+
+    }
 }
 </script>
 
@@ -79,8 +148,8 @@ export default {
 
     /* fullscreen css */
     &.fsInfos {
-        p {
-            font-size: 140%
+        p, span{
+            font-size: 200%
         }
     }
 }
@@ -107,6 +176,10 @@ export default {
 
 .td-text-gray {
     color: lightgray;
+}
+
+.td-text-white {
+    color: white;
 }
 
 </style>

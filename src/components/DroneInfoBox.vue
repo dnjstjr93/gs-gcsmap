@@ -112,11 +112,9 @@ export default {
         'colorMode',
         'num_satellites',
         'colorLteVal',
-        'iconSize',
         'roll',
         'pitch',
         'iconLte',
-        'fontSize',
         'curLteVal',
         'rssi',
         'iconFlightElapsed',
@@ -145,6 +143,40 @@ export default {
     },
 
     computed: {
+        iconSize() {
+            console.log(this.$vuetify.breakpoint.name);
+            switch (this.$vuetify.breakpoint.name) {
+                case 'xs':
+                    return ("font-size: 16px");
+                case 'sm':
+                    return ("font-size: 18px");
+                case 'md':
+                    return ("font-size: 20px");
+                case 'lg':
+                    return ("font-size: 22px");
+                case 'xl':
+                    return ("font-size: 24px");
+                default:
+                    return ("font-size: 16px");
+            }
+        },
+        fontSize() {
+            console.log(this.$vuetify.breakpoint.name);
+            switch (this.$vuetify.breakpoint.name) {
+                case 'xs':
+                    return ("font-size: 14px");
+                case 'sm':
+                    return ("font-size: 15px");
+                case 'md':
+                    return ("font-size: 16px");
+                case 'lg':
+                    return ("font-size: 17px");
+                case 'xl':
+                    return ("font-size: 18px");
+                default:
+                    return ("font-size: 16px");
+            }
+        },
     },
 
     watch: {
