@@ -39,22 +39,25 @@ export default {
         },
 
         setRoll () {
-            let value = Math.floor(this.data.bankAngle)
-            if (value < 0) {
-                if (value > -60) {
-                    return `rotate(${value}deg)`
-                } else {
-                    return 'rotate(60deg)'
-                }
-            } else if (value > 0) {
-                if (value < 60) {
-                    return `rotate(-${value}deg)`
-                } else {
-                    return 'rotate(-60deg)'
-                }
-            } else {
-                return 'rotate(0deg)'
-            }
+            let value = Math.floor(this.data.bankAngle);
+
+            return `rotate(${value}deg)`;
+
+            // if (value < 0) {
+            //     if (value > -60) {
+            //         return `rotate(${value}deg)`
+            //     } else {
+            //         return 'rotate(60deg)'
+            //     }
+            // } else if (value > 0) {
+            //     if (value < 60) {
+            //         return `rotate(-${value}deg)`
+            //     } else {
+            //         return 'rotate(-60deg)'
+            //     }
+            // } else {
+            //     return 'rotate(0deg)'
+            // }
         }
     }
 }

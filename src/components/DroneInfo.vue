@@ -685,6 +685,7 @@ export default {
             flightTimeCount: 0,
             flightTimer: null,
             iconFlightElapsed: 'mdi-timer-off-outline',
+            flightElapsedTime: '00:00',
             iconBattery: 'mdi-battery-off-outline',
             colorBattery: 'td-text-gray',
             infos1: [
@@ -970,13 +971,13 @@ export default {
         iconFontSize() {
             return ("font-size: " + (this.airspeed_size / 6) + 'px');
         },
-        flightElapsedTime() {
-            var min = parseInt(this.flightTimeCount / 60).toString().padStart(2, '0');
-            let sec = (this.flightTimeCount % 60).toString().padStart(2, '0');
-            // let min = parseInt(this.stat_flttime_param.param_value / 60).toString().padStart(2, '0');
-            // let sec = (this.stat_flttime_param.param_value % 60).toString().padStart(2, '0');
-            return (min + ':' + sec);
-        },
+        // flightElapsedTime() {
+        //     var min = parseInt(this.flightTimeCount / 60).toString().padStart(2, '0');
+        //     let sec = (this.flightTimeCount % 60).toString().padStart(2, '0');
+        //     // let min = parseInt(this.stat_flttime_param.param_value / 60).toString().padStart(2, '0');
+        //     // let sec = (this.stat_flttime_param.param_value % 60).toString().padStart(2, '0');
+        //     return (min + ':' + sec);
+        // },
         heightInfo() {
             return ('height: ' + (this.airspeed_size / 2) + 'px');
         },
@@ -1027,7 +1028,7 @@ export default {
             setTimeout(() => {
                 if (this.flagReceiving) {
                     this.colorMode = 'td-text-black';
-                    this.info.colorMode = 'black';
+                    this.info.colorMode = 'white';
                 }
                 else {
                     this.colorMode = 'td-text-gray';
@@ -3119,10 +3120,19 @@ export default {
                 this.flightTimer = null;
             }
 
-            this.flightTimer = setInterval(() => this.flightTimeCount += 1, 1000);
+            this.flightTimer = setInterval(() => {
+                this.flightTimeCount += 1;
+
+                var min = parseInt(this.flightTimeCount / 60).toString().padStart(2, '0');
+                let sec = (this.flightTimeCount % 60).toString().padStart(2, '0');
+                // let min = parseInt(this.stat_flttime_param.param_value / 60).toString().padStart(2, '0');
+                // let sec = (this.stat_flttime_param.param_value % 60).toString().padStart(2, '0');
+                this.flightElapsedTime = min + ':' + sec;
+
+                this.info.flightElapsedTime = this.flightElapsedTime;
+            }, 1000);
 
             this.info.iconFlightElapsed = this.iconFlightElapsed;
-            this.info.flightElapsedTime = this.flightElapsedTime;
         },
         stopFlightTimer: function () {
             clearInterval(this.flightTimer);
@@ -3256,7 +3266,7 @@ export default {
 
                     this.info.colorBattery = this.colorBattery;
                     this.info.iconBattery = this.iconBattery;
-                    this.info.voltageBattery = this.ss.voltage_battery;
+                    this.info.voltageBattery = (this.ss.voltage_battery / 1000).toFixed(1);
 
                     // this.$store.commit('set_ss_voltage_battery', (Buffer.from(voltage_battery, 'hex').readUInt16LE(0)));
                 }
@@ -3318,14 +3328,14 @@ export default {
                     this.gpi.vz = Buffer.from(vz, 'hex').readInt16LE(0);
                     this.gpi.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
-                    this.info.altitude = this.gpi.relative_alt / 1000;
+                    this.info.altitude = (this.gpi.relative_alt / 1000).toFixed(1);
 
                     //this.$store.state.drone_infos[this.name].offset_alt = (parseFloat(this.gpi.alt) - parseFloat(this.gpi.relative_alt)) * 1000;
 
                     this.airspeed = Math.sqrt(Math.pow(this.gpi.vx, 2) + Math.pow(this.gpi.vy, 2) + Math.pow(this.gpi.vz, 2)) / 100;
                     this.colorAirspeed = 'td-text-green';
 
-                    this.info.airSpeed = this.airspeed;
+                    this.info.airSpeed = this.airspeed.toFixed(1);
 
                     this.heading = (this.gpi.hdg / 100);
 

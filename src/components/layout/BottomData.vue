@@ -8,7 +8,7 @@
                 </span>
             </v-col>
             <v-col cols="6" class="td-text-white text-right">
-                <span class="shadow_icon pr-3 text--white" :style="modeFontSize">
+                <span class="shadow_icon pr-2 text--white" :style="modeFontSize">
                     {{ data.curMode }}
                 </span>
             </v-col>
