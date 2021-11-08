@@ -1,5 +1,5 @@
 <template>
-    <v-container id="cetr" fill-height class="pa-0 ma-0" :class="{ fsInfos: data.fs }">
+    <v-container id="cetr" fill-height class="pa-0 ma-n1">
         <v-row no-gutters align="center">
             <v-col cols="6" class="td-text-white text-left">
                 <span class="shadow_icon pl-1 text--white" :style="fontSize">
@@ -8,7 +8,7 @@
                 </span>
             </v-col>
             <v-col cols="6" class="td-text-white text-right">
-                <span class="shadow_icon pr-3 text--white" :style="fontSize">
+                <span class="shadow_icon pr-2 text--white" :style="fontSize">
                     <v-icon class="shadow_icon pr-0" :style="iconSize">mdi-altimeter</v-icon>
                     {{ data.altitude }} m
                 </span>
@@ -36,7 +36,7 @@ export default {
     computed: {
         fontSize() {
             if(this.data.fs) {
-                return {'font-size': '200%', color: 'white'};
+                return {'font-size': '270%', color: 'white'};
             }
             else {
                 return {'font-size': '100%', color: 'white'};
@@ -45,7 +45,7 @@ export default {
 
         iconSize() {
             if(this.data.fs) {
-                return {'font-size': '130%', color: 'white'};
+                return {'font-size': '140%', color: 'white'};
             }
             else {
                 return {'font-size': '130%', color: 'white'};

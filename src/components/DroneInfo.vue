@@ -945,6 +945,9 @@ export default {
                 voltageBattery: 0,
                 iconFlightElapsed: 'mdi-timer-off-outline',
                 flightElapsedTime: '00:00',
+                valueDistance: '0 m',
+                colorMode: 'gray',
+                curMode: 'UNKNOWN'
             }
         }
     },
@@ -1006,8 +1009,10 @@ export default {
         curMode: function (newVal) {
             let self = this;
             this.colorMode = 'td-text-blue';
+            this.info.colorMode = 'blue';
 
             this.$store.state.drone_infos[this.name].curMode = newVal;
+            this.info.curMode = newVal;
 
             setTimeout(function () {
                 if (self.flagReceiving) {
@@ -1016,7 +1021,20 @@ export default {
                 else {
                     self.colorMode = 'td-text-gray';
                 }
+
             }, 1500);
+
+            setTimeout(() => {
+                if (this.flagReceiving) {
+                    this.colorMode = 'td-text-black';
+                    this.info.colorMode = 'black';
+                }
+                else {
+                    this.colorMode = 'td-text-gray';
+                    this.info.colorMode = 'gray';
+                }
+
+            }, 2000);
         },
 
         sortie_name: function (newData) {
@@ -3529,9 +3547,11 @@ export default {
                             let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
                             this.valueDistance = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2));
+                            this.info.valueDistance = (this.valueDistance > 1000) ? (this.valueDistance / 1000).toFixed(1) + ' km' : (this.valueDistance.toFixed(0) + ' m')
                         }
                         else {
                             this.valueDistance = 0;
+                            this.info.valueDistance = (this.valueDistance > 1000) ? (this.valueDistance / 1000).toFixed(1) + ' km' : (this.valueDistance.toFixed(0) + ' m')
                         }
 
                         if (this.iconArming === 'mdi-airplane') {

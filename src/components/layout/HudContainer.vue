@@ -21,11 +21,11 @@ export default {
     name: 'HudContainer',
     props: ['data'],
     components: {
+        Infos: () => import('./Informations'),
         HeadingDirection: () => import('./HeadingDirection'),
+        Cetr: () => import('./Cetr'),
         AirSpeed: () => import('./AirSpeed'),
         Altitude: () => import('./Altitude'),
-        Cetr: () => import('./Cetr'),
-        Infos: () => import('./Informations'),
         BottomData: () => import('./BottomData'),
         FlightIndicator: () => import('./FlightIndicator')
     },
@@ -50,6 +50,7 @@ export default {
             if(this.data.isVideo) {
                 return ({height: '10%'});
             }
+
             else {
                 return ({height: '10%', background: 'skyblue', 'border-top': '1px solid #ffffff'});
             }

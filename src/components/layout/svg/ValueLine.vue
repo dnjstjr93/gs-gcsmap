@@ -101,7 +101,7 @@ export default {
                 left: -50%;
                 top: 0;
                 width: 1000%;
-                height: 25000%;
+                height: 33000%;
                 background-color:var(--background, green) ;
                 z-index: -1;
             }
@@ -149,7 +149,7 @@ export default {
             }
 
             .number {
-                font-size: 180%;
+                font-size: 160%;
             }
 
             .line {

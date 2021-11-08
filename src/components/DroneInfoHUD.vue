@@ -6,8 +6,7 @@
     >
         <div class="videoContainer d-flex justify-content-center">
             <div class="webRtcVideo" ref="videoContainer">
-                <video v-show="info.isVideo" autoplay class="video" :class="{ fsVideo: info.fs }"
-                       ref="videoPlayer"></video>
+                <video v-show="info.isVideo" autoplay class="video" :class="{ fsVideo: info.fs }" ref="videoPlayer"></video>
                 <HudContainer
                     v-if="info"
                     :data="info"
