@@ -914,7 +914,7 @@ export default {
             },
             enableVideo: false,
             info: {
-                no: 1,
+                no: this.name,
                 headingDirection: 210,
                 airSpeed: 15,
                 altitude: 60,

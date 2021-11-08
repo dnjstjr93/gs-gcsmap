@@ -50,7 +50,6 @@ export default {
             if(this.data.isVideo) {
                 return ({height: '10%'});
             }
-
             else {
                 return ({height: '10%', background: 'skyblue', 'border-top': '1px solid #ffffff'});
             }
