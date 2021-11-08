@@ -96,7 +96,7 @@ export default {
             top: -50%;
             width: 200%;
             height: 200%;
-            background:var(--ms-background, skyblue);
+            background:var(--ms-background, #40C4FF);
             transform: scaleX(2);
         }
     }

@@ -107,9 +107,9 @@ function Drone(name, bitrate) {
 
     function hideSpinner(video) {
         if (document.querySelector('#' + name + '_wrapper .mainSvg') && document.querySelector('#' + name + '_wrapper .zeroWrap')) {
-            document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', 'skyblue');
+            document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', '#40C4FF');
             document.querySelectorAll('#' + name + '_wrapper .zeroWrap').forEach(el => {
-                el.style.setProperty('--background', 'green');
+                el.style.setProperty('--background', '#2E7D32');
                 el.style.setProperty('--background-color', 'white')
             });
         }

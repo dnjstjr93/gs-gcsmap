@@ -948,7 +948,8 @@ export default {
                 flightElapsedTime: '00:00',
                 valueDistance: '0 m',
                 colorMode: 'gray',
-                curMode: 'UNKNOWN'
+                curMode: 'UNKNOWN',
+                curArmStatus: 'DISARMED'
             }
         }
     },
@@ -3219,6 +3220,8 @@ export default {
                         this.$store.state.drone_infos[this.name].curArmStatus = 'DISARMED';
                         this.colorArm = 'td-text-blue';
                     }
+
+                    this.info.curArmStatus = this.curArmStatus;
 
                     this.curMode = this.mode_items[this.hb.custom_mode];
 

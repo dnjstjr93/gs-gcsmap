@@ -8,6 +8,7 @@
         </div>
         <div class="contents">
             <cetr :data="data"/>
+            <arm-status :data="data"/>
             <air-speed :data="data" ref="as"/>
             <altitude :data="data" ref="alt"/>
             <bottom-data :data="data"/>
@@ -24,6 +25,7 @@ export default {
         Infos: () => import('./Informations'),
         HeadingDirection: () => import('./HeadingDirection'),
         Cetr: () => import('./Cetr'),
+        ArmStatus: () => import('./ArmStatus'),
         AirSpeed: () => import('./AirSpeed'),
         Altitude: () => import('./Altitude'),
         BottomData: () => import('./BottomData'),
@@ -42,7 +44,7 @@ export default {
                 return ({height: '8%'});
             }
             else {
-                return ({height: '8%', background: 'skyblue'});
+                return ({height: '8%', background: '#40C4FF'});
 
             }
         },
@@ -51,7 +53,7 @@ export default {
                 return ({height: '10%'});
             }
             else {
-                return ({height: '10%', background: 'skyblue', 'border-top': '1px solid #ffffff'});
+                return ({height: '10%', background: '#40C4FF', 'border-top': '1px solid #ffffff'});
             }
         }
 
@@ -74,14 +76,14 @@ export default {
 
 .top {
     height: 8%;
-    //background: skyblue;
+    //background: #40C4FF;
     //opacity: 0.8;
 }
 
 .header {
     height: 10%;
     border-top: 1px solid #ffffff;
-    background: skyblue;
+    background: #40C4FF;
 }
 
 .contents {

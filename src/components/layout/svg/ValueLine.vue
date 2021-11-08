@@ -25,9 +25,9 @@ export default {
             this.spans.forEach((el, index) => {
                 if(index === 0 && el.closest('.mainSvg').style.getPropertyValue('--ms-background') !== 'none') {
                     if(newVal <= -30) {
-                        el.closest('.mainSvg').style.setProperty('--ms-background', 'green');
+                        el.closest('.mainSvg').style.setProperty('--ms-background', '#2E7D32');
                     } else {
-                        el.closest('.mainSvg').style.setProperty('--ms-background', 'skyblue');
+                        el.closest('.mainSvg').style.setProperty('--ms-background', '#40C4FF');
                     }
                 }
 
@@ -102,7 +102,7 @@ export default {
                 top: 0;
                 width: 1000%;
                 height: 33000%;
-                background-color:var(--background, green) ;
+                background-color:var(--background, #2E7D32) ;
                 z-index: -1;
             }
 
