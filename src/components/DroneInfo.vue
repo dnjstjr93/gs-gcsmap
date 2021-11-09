@@ -20,6 +20,21 @@
                                         <!--                            :disabled="!flagReceiving"-->
                                     </v-card>
                                 </v-col>
+                                <v-col cols="1">
+                                    <v-fade-transition>
+                                        <v-avatar
+                                            v-if="isPlaying"
+                                            :color="bpm_color"
+                                            :style="{animationDuration: animationDuration}"
+                                            class="v-avatar--metronome"
+                                            size="24"
+                                        >
+                                            <v-icon dark>
+                                                mdi-heart-circle
+                                            </v-icon>
+                                        </v-avatar>
+                                    </v-fade-transition>
+                                </v-col>
                                 <v-col cols="3">
                                     <v-switch
                                         label="video"
@@ -28,9 +43,10 @@
                                         hide-details
                                         v-model="info.isVideo"
                                         @change="onVideoHandler(name)"
+                                        :disabled="!flagReceiving"
                                     ></v-switch>
                                 </v-col>
-                                <v-col cols="3">
+                                <v-col cols="2">
                                     <div class="text-right">
                                         <v-btn
                                             class="mr-2"
@@ -287,6 +303,7 @@
                                     :bpm_color="bpm_color"
                                     :animationDuration="animationDuration"
                                 ></DroneInfoBox>
+                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
                             </v-card>
                         </v-col>
                     </v-row>
@@ -406,6 +423,7 @@
                                     :bitrate="0"
                                     :info="info"
                                 ></DroneInfoHUD>
+                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
                             </v-card>
                         </v-col>
                     </v-row>
@@ -413,8 +431,7 @@
                         <v-col cols="12">
                             <v-card class="singleline-ellipsis" outlined tile>
                                 <span style="font-size: 14px">{{ mavStr }}</span>
-                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity"
-                                           color="#E0E0E0"></v-overlay>
+                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
                                 <v-progress-linear
                                     active absolute top
                                     :color="$store.state.drone_infos[name].color"
@@ -5401,8 +5418,8 @@ export default {
     animation-name: metronome-example;
     animation-iteration-count: infinite;
     animation-direction: alternate;
-    position: absolute;
-    opacity: 0.9; /* for demo purpose  */
+    position: relative;
+    opacity: 1; /* for demo purpose  */
 }
 
 .info_position {

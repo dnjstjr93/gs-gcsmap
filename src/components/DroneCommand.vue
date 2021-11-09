@@ -1,5 +1,5 @@
 <template>
-    <v-card flat tile class="mx-1 tab_position" :style="{top:context_top + 'px',left:context_left+'px'}">
+    <v-container fluid class="mx-1 tab_position" :style="{top:context_top + 'px',left:(context_left+8)+'px'}">
         <v-tabs v-if="prepared"
                 background-color="deep-blue accent-4"
                 center-active
@@ -925,7 +925,7 @@
                 </div>
             </v-sheet>
         </v-bottom-sheet>
-    </v-card>
+    </v-container>
 </template>
 
 <script>
@@ -1826,8 +1826,9 @@
 
     .tab_position {
         position: absolute;
-        opacity: 0.85; /* for demo purpose  */
+        opacity: 0.9; /* for demo purpose  */
         z-index: 2;
+        width:90%;
     }
 
 

@@ -56,7 +56,6 @@ export default {
                 return ({height: '10%', background: '#40C4FF', 'border-top': '1px solid #ffffff'});
             }
         }
-
     }
 }
 </script>
