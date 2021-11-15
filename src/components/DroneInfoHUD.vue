@@ -6,11 +6,16 @@
     >
         <div class="videoContainer d-flex justify-content-center">
             <div class="webRtcVideo" ref="videoContainer">
-                <video v-show="info.isVideo" autoplay class="video" :class="{ fsVideo: info.fs }" ref="videoPlayer"></video>
+                <video v-show="info.isVideo" autoplay class="video" :class="{ fsVideo: this.info.fs }"
+                       ref="videoPlayer"></video>
                 <HudContainer
                     v-if="info"
                     :data="info"
-                    ref="hudContainer"/>
+                    :width="width"
+                    :isVideo="info.isVideo"
+                    :drone_name="drone_name"
+                    ref="hudContainer"
+                />
             </div>
         </div>
     </v-card>
@@ -24,7 +29,6 @@ import kurentoUtils from 'kurento-utils';
 
 function Drone(name, bitrate) {
     this.name = name;
-    this.webRtcPeer = null;
 
     // Card Wrapper
     let wrapper = document.getElementById(`${this.name}_wrapper`)
@@ -68,20 +72,9 @@ function Drone(name, bitrate) {
                 id: 'stop',
                 droneName: this.name
             }
-            this.webRtcPeer.dispose();
-            this.webRtcPeer = null;
-
-            hideSpinner(this.video);
             EventBus.$emit('ws-send-message', message);
+            this.dispose();
         }
-    }
-
-    this.dispose = function () {
-        if (this.webRtcPeer) {
-            this.webRtcPeer.dispose();
-            this.webRtcPeer = null;
-        }
-        hideSpinner(this.video);
     }
 
     function onIceCandidate(candidate) {
@@ -94,53 +87,65 @@ function Drone(name, bitrate) {
     }
 
     function showSpinner(video) {
-        if (document.querySelector('#' + name + '_wrapper .mainSvg') && document.querySelector('#' + name + '_wrapper .zeroWrap')) {
-            document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', 'none');
-            document.querySelectorAll('#' + name + '_wrapper .zeroWrap').forEach(el => {
-                el.style.setProperty('--background', 'none');
-                el.style.setProperty('--background-color', 'none')
-            });
-        }
+        EventBus.$emit('hud-on-' + name)
+        // if (document.querySelector('#' + name + '_wrapper .mainSvg') && document.querySelector('#' + name + '_wrapper .zeroWrap')) {
+        //   document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', 'none');
+        //   document.querySelectorAll('#' + name + '_wrapper .zeroWrap').forEach(el => {
+        //     el.style.setProperty('--background', 'none');
+        //     el.style.setProperty('--background-color', 'none')
+        //   });
+        // }
         video.poster = './img/transparent-1px.png';
         video.style.background = 'center transparent url("./img/spinner.gif") no-repeat';
     }
 
     function hideSpinner(video) {
-        if (document.querySelector('#' + name + '_wrapper .mainSvg') && document.querySelector('#' + name + '_wrapper .zeroWrap')) {
-            document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', '#40C4FF');
-            document.querySelectorAll('#' + name + '_wrapper .zeroWrap').forEach(el => {
-                el.style.setProperty('--background', '#2E7D32');
-                el.style.setProperty('--background-color', 'white')
-            });
-        }
+        EventBus.$emit('hud-off-' + name)
+        // if (document.querySelector('#' + name + '_wrapper .mainSvg') && document.querySelector('#' + name + '_wrapper .zeroWrap')) {
+        //   document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', 'skyblue');
+        //   document.querySelectorAll('#' + name + '_wrapper .zeroWrap').forEach(el => {
+        //     el.style.setProperty('--background', 'green');
+        //     el.style.setProperty('--background-color', 'white')
+        //   });
+        // }
         video.poster = './img/webrtc.png';
         video.style.background = '';
-        // EventBus.$emit('do-video-close-' + name, {});
+        EventBus.$emit('do-video-close-' + name, {});
+    }
+
+    this.dispose = function () {
+        if (this.webRtcPeer) {
+            this.webRtcPeer.dispose();
+            this.webRtcPeer = null;
+        }
+
+        hideSpinner(this.video);
     }
 }
 
 export default {
-    name: 'DroneInfoHUD',
+    name: 'Drone',
     components: {
         HudContainer
     },
     props: ['drone_name', 'bitrate', 'info'],
     data: () => ({
         fullScreen: false,
-        width: 480,
-        height: 320,
-        drone: null,
+        width: 640,
+        height: 480,
     }),
     mounted() {
+        this.shaka();
+
         EventBus.$on('do-video-size-' + this.drone_name, (payload) => {
             this.width = payload.width;
             this.height = payload.height;
         });
 
-        // EventBus.$on('do-video-close-' + this.drone_name, () => {
-        //     this.info.isVideo = false;
-        //     this.viewer_stop();
-        // });
+        EventBus.$on('do-video-close-' + this.drone_name, () => {
+            this.info.isVideo = false;
+            this.viewer_stop();
+        });
 
         EventBus.$on('do-video-on-' + this.drone_name, () => {
             this.videoOn();
@@ -153,14 +158,12 @@ export default {
                 switch (parsedMessage.id) {
                     case 'viewerResponse':
                         if (parsedMessage.response !== 'accepted') {
-                            setTimeout(() => {
-                                var errorMsg = parsedMessage.message ? parsedMessage.message : 'Unknow error';
-                                //console.warn('Call not accepted for the following reason: ' + errorMsg);
-                                drone.dispose();
-                                console.log(errorMsg);
+                            var errorMsg = parsedMessage.message ? parsedMessage.message : 'Unknow error';
+                            //console.warn('Call not accepted for the following reason: ' + errorMsg);
+                            drone.dispose();
+                            alert(errorMsg);
 
-                                this.info.isVideo = false;
-                            }, 1000);
+                            this.info.isVideo = false;
                         }
                         else {
                             drone.webRtcPeer.processAnswer(parsedMessage.sdpAnswer);
@@ -178,31 +181,38 @@ export default {
             }
         });
 
-        // EventBus.$on('hud-data-' + this.drone_name, (hudData) => {
-        //     if (hudData) {
-        //         this.info = hudData;
-        //
-        //         if (hudData.isMounted) {
-        //             this.$refs.hudContainer.newInit();
-        //         }
-        //     }
-        // })
+        EventBus.$on('hud-data-' + this.drone_name, (hudData) => {
+            if (hudData) {
+                this.info = hudData;
+            }
+        })
 
-        //this.$emit('mounted', this.drone_name)
+        EventBus.$on('hud-on-' + this.drone_name, () => {
+            let droneWrapper = document.querySelector(`#${this.drone_name}_wrapper`)
+            let hudContainer = droneWrapper.querySelector('#hud-container')
+            let mainSvg = droneWrapper.querySelector('.mainSvg')
 
-        this.shaka();
+            hudContainer.style.background = 'transparent'
+            mainSvg.style.removeProperty('background')
+        })
 
-        this.viewer_start(this.drone_name, 0);
-        setTimeout(() => {
-            this.viewer_stop();
-        }, 1000);
+        EventBus.$on('hud-off-' + this.drone_name, () => {
+            let droneWrapper = document.querySelector(`#${this.drone_name}_wrapper`)
+            let hudContainer = droneWrapper.querySelector('#hud-container')
+
+            hudContainer.style.background = 'skyblue'
+        })
+
+        this.$emit('mounted', this.drone_name)
     },
-    computed: {},
+
     methods: {
         viewer_start(droneName, initbitrate) {
-            if (!this.drone) {
-                this.drone = new Drone(droneName, initbitrate);
+            if (this.drone) {
+                this.drone = null;
             }
+
+            this.drone = new Drone(droneName, initbitrate);
 
             this.bitrate = initbitrate;
             this.drone.viewer();
@@ -211,6 +221,7 @@ export default {
         viewer_stop() {
             if (this.drone) {
                 this.drone.stop();
+                this.drone = null;
             }
         },
 
@@ -229,7 +240,7 @@ export default {
 
         videoOn() {
             if (this.info.isVideo) {
-                this.viewer_start(this.drone_name, this.bitrate);
+                this.viewer_start(this.drone_name, this.bitrate)
             }
             else {
                 this.viewer_stop();
@@ -239,8 +250,16 @@ export default {
         shaka() {
             const shaka = require('shaka-player/dist/shaka-player.ui.js');
             const player = new shaka.Player(this.$refs.videoPlayer);
-            const ui = new shaka.ui.Overlay(player, this.$refs.videoContainer, this.$refs.videoPlayer);
-            const config = {addSeekBar: false, 'controlPanelElements': ['fullscreen']};
+
+            const ui = new shaka.ui.Overlay(
+                player,
+                this.$refs.videoContainer,
+                this.$refs.videoPlayer
+            );
+            const config = {
+                addSeekBar: false,
+                'controlPanelElements': ['fullscreen']
+            };
             ui.configure(config);
 
             document.addEventListener("fullscreenchange", this.isFs)
@@ -270,15 +289,13 @@ export default {
         }
     },
     beforeDestroy() {
-        if(this.drone) {
-            this.viewer_stop();
-            this.drone = null;
-        }
-
         EventBus.$off('do-video-size-' + this.drone_name);
-//        EventBus.$off('do-video-close-' + this.drone_name);
+        EventBus.$off('do-video-close-' + this.drone_name);
         EventBus.$off('do-video-on-' + this.drone_name);
         EventBus.$off('ws-on-message-' + this.drone_name);
+        EventBus.$off('hud-data-' + this.drone_name);
+        EventBus.$off('hud-on-' + this.drone_name);
+        EventBus.$off('hud-off-' + this.drone_name);
     }
 }
 </script>
@@ -312,7 +329,7 @@ export default {
 }
 
 .fsVideo {
-    object-fit: contain !important;
+    /*object-fit: contain !important;*/
 }
 
 </style>

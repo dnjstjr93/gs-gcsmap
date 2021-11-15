@@ -31,13 +31,6 @@ export default {
         BottomData: () => import('./BottomData'),
         FlightIndicator: () => import('./FlightIndicator')
     },
-    methods: {
-        newInit() {
-            this.$refs.hd.newInit()
-            this.$refs.as.newInit()
-            this.$refs.alt.newInit()
-        }
-    },
     computed: {
         topStyle() {
             if(this.data.isVideo) {
@@ -71,29 +64,30 @@ export default {
     width: 100%;
     height: 100%;
     color: white;
+    z-index: 0;
+    overflow: hidden;
 }
 
 .top {
     height: 8%;
-    //background: #40C4FF;
-    //opacity: 0.8;
 }
 
 .header {
     height: 10%;
     border-top: 1px solid #ffffff;
-    background: #40C4FF;
 }
 
 .contents {
     position: relative;
     height: 82%;
+    z-index: 10;
 }
 
 .fsContainer {
+    width: 100%;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    width: 1536px !important;
     color: yellow;
 }
+
 </style>

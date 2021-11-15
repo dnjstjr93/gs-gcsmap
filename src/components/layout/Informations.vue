@@ -155,7 +155,7 @@ export default {
 }
 
 .shadow_icon {
-    text-shadow: 0.5px 0.5px 5px #000000;
+    text-shadow: 2px 2px 8px #000000;
 }
 
 .td-text-blue {

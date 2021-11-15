@@ -6,8 +6,8 @@
             xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 500 500"
             style="enable-background:new 0 0 500 500; width: 100%; height: 100%; position: relative; z-index: 1"
             xml:space="preserve">
-      <path id="path3050" class="st16 pointer" d="M250.1,99.1l-14.4,26.3h28.8L250.1,99.1z" />
-    </svg>
+          <path id="path3050" class="st16 pointer" d="M250.1,99.1l-14.4,26.3h28.8L250.1,99.1z" />
+        </svg>
         <div class="mainSvg" :style="{ transform: setRoll }">
             <angle :data="data.bankAngle" />
             <value-line :data="data" />
@@ -30,34 +30,10 @@ export default {
         ValueLine: () => import('./svg/ValueLine')
     },
     computed: {
-
-        setPitch: function () {
-            let pitch = Math.floor(this.data.anglePitch)
-            let plus = pitch % 10
-
-            return `transform: translateY(${plus * -5}px) scale(1.5)`
-        },
-
         setRoll () {
             let value = Math.floor(this.data.bankAngle);
 
             return `rotate(${value}deg)`;
-
-            // if (value < 0) {
-            //     if (value > -60) {
-            //         return `rotate(${value}deg)`
-            //     } else {
-            //         return 'rotate(60deg)'
-            //     }
-            // } else if (value > 0) {
-            //     if (value < 60) {
-            //         return `rotate(-${value}deg)`
-            //     } else {
-            //         return 'rotate(-60deg)'
-            //     }
-            // } else {
-            //     return 'rotate(0deg)'
-            // }
         }
     }
 }
@@ -66,7 +42,7 @@ export default {
 <style lang="scss">
 
 #view-port {
-    position:absolute;
+    position: absolute;
     left: 0;
     top: 0;
     width: 100%;
@@ -74,8 +50,8 @@ export default {
     overflow: hidden;
 
     .pointer {
-        fill-rule:evenodd;
-        clip-rule:evenodd;
+        fill-rule: evenodd;
+        clip-rule: evenodd;
         fill: red;
         transform: translateY(-45px);
     }
@@ -86,19 +62,7 @@ export default {
         top: 0;
         width: 100%;
         height: 100%;
-        transition: all 0.3s;
         transform-origin: 50% center;
-
-        &::before {
-            content: '';
-            position: absolute;
-            left: -50%;
-            top: -50%;
-            width: 200%;
-            height: 200%;
-            background:var(--ms-background, #40C4FF);
-            transform: scaleX(2);
-        }
     }
 
     .arrowWrap {
