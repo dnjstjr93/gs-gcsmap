@@ -27,113 +27,162 @@ import HudContainer from '@/components/layout/HudContainer'
 import EventBus from '../EventBus';
 import kurentoUtils from 'kurento-utils';
 
-function Drone(name, bitrate) {
+function Drone(name, bitrate, wrapper, video) {
     this.name = name;
-
-    // Card Wrapper
-    let wrapper = document.getElementById(`${this.name}_wrapper`)
-
-    let video = wrapper.querySelector('.video')
-    video.id = 'video-' + name;
-
     this.video = video;
 
     this.viewer = function () {
         if (!this.webRtcPeer) {
-            showSpinner(this.video);
+            //showSpinner(this.video);
+
+            // video.poster = './img/transparent-1px.png';
+            // video.style.background = 'center transparent url("./img/spinner.gif") no-repeat';
 
             let options = {
                 remoteVideo: this.video,
-                onicecandidate: onIceCandidate
+                onicecandidate: function (candidate) {
+                    var message = {
+                        id: 'onIceCandidate',
+                        droneName: name,
+                        candidate: candidate
+                    }
+                    EventBus.$emit('ws-send-message', message);
+                }
             };
 
             this.webRtcPeer = kurentoUtils.WebRtcPeer.WebRtcPeerRecvonly(options, function (error) {
                 if (error) return error;
 
-                this.generateOffer(onOfferViewer);
+                this.generateOffer((error, offerSdp) => {
+                    if (error) return error;
+                    let message = {
+                        id: 'viewer',
+                        droneName: name,
+                        bitrate: bitrate,
+                        sdpOffer: offerSdp
+                    }
+                    EventBus.$emit('ws-send-message', message);
+                });
             });
         }
-    }
-
-    function onOfferViewer(error, offerSdp) {
-        if (error) return error;
-        let message = {
-            id: 'viewer',
-            droneName: name,
-            bitrate: bitrate,
-            sdpOffer: offerSdp
-        }
-        EventBus.$emit('ws-send-message', message);
     }
 
     this.stop = function () {
         if (this.webRtcPeer) {
             let message = {
                 id: 'stop',
-                droneName: this.name
+                droneName: name
             }
             EventBus.$emit('ws-send-message', message);
-            this.dispose();
-        }
-    }
 
-    function onIceCandidate(candidate) {
-        var message = {
-            id: 'onIceCandidate',
-            droneName: name,
-            candidate: candidate
-        }
-        EventBus.$emit('ws-send-message', message);
-    }
-
-    function showSpinner(video) {
-        EventBus.$emit('hud-on-' + name)
-        // if (document.querySelector('#' + name + '_wrapper .mainSvg') && document.querySelector('#' + name + '_wrapper .zeroWrap')) {
-        //   document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', 'none');
-        //   document.querySelectorAll('#' + name + '_wrapper .zeroWrap').forEach(el => {
-        //     el.style.setProperty('--background', 'none');
-        //     el.style.setProperty('--background-color', 'none')
-        //   });
-        // }
-        video.poster = './img/transparent-1px.png';
-        video.style.background = 'center transparent url("./img/spinner.gif") no-repeat';
-    }
-
-    function hideSpinner(video) {
-        EventBus.$emit('hud-off-' + name)
-        // if (document.querySelector('#' + name + '_wrapper .mainSvg') && document.querySelector('#' + name + '_wrapper .zeroWrap')) {
-        //   document.querySelector('#' + name + '_wrapper .mainSvg').style.setProperty('--ms-background', 'skyblue');
-        //   document.querySelectorAll('#' + name + '_wrapper .zeroWrap').forEach(el => {
-        //     el.style.setProperty('--background', 'green');
-        //     el.style.setProperty('--background-color', 'white')
-        //   });
-        // }
-        video.poster = './img/webrtc.png';
-        video.style.background = '';
-        EventBus.$emit('do-video-close-' + name, {});
-    }
-
-    this.dispose = function () {
-        if (this.webRtcPeer) {
             this.webRtcPeer.dispose();
             this.webRtcPeer = null;
         }
-
-        hideSpinner(this.video);
     }
 }
 
 export default {
-    name: 'Drone',
+    name: 'DroneInfoHUD',
+
     components: {
         HudContainer
     },
+
     props: ['drone_name', 'bitrate', 'info'],
+
     data: () => ({
         fullScreen: false,
         width: 640,
         height: 480,
+        droneWrapper: null,
+        droneVideo: null,
+        droneHudContainer: null,
+        webRtcPeer: null,
     }),
+
+    methods: {
+        viewer_start(droneName, initbitrate) {
+            if (this.drone) {
+                this.drone.stop();
+                this.drone = null;
+            }
+
+            this.drone = new Drone(droneName, initbitrate, this.droneWrapper, this.droneVideo);
+
+            this.bitrate = initbitrate;
+
+            this.droneVideo.poster = './img/transparent-1px.png';
+            this.droneVideo.style.background = 'center transparent url("./img/spinner.gif") no-repeat';
+
+            this.droneHudContainer.style.background = 'transparent';
+
+            let mainSvg = this.droneWrapper.querySelector('.mainSvg');
+            mainSvg.style.removeProperty('background');
+
+            this.drone.viewer();
+        },
+
+        viewer_stop() {
+            this.droneVideo.poster = './img/webrtc.png';
+            this.droneVideo.style.background = '';
+
+            this.droneHudContainer.style.background = 'skyblue'
+
+            if (this.drone) {
+                this.drone.stop();
+                this.drone = null;
+            }
+        },
+
+        videoOn() {
+            if (this.info.isVideo) {
+                this.viewer_start(this.drone_name, this.bitrate)
+            }
+            else {
+                this.viewer_stop();
+            }
+        },
+
+        shaka() {
+            const shaka = require('shaka-player/dist/shaka-player.ui.js');
+            const player = new shaka.Player(this.$refs.videoPlayer);
+
+            const ui = new shaka.ui.Overlay(
+                player,
+                this.$refs.videoContainer,
+                this.$refs.videoPlayer
+            );
+
+            const config = {
+                addSeekBar: false,
+                'controlPanelElements': ['fullscreen']
+            };
+            ui.configure(config);
+
+            document.addEventListener("fullscreenchange", this.isFs)
+
+            // hideControls
+            var element = document.querySelector('#' + this.drone_name + '_wrapper .shaka-video-container');
+            element.getElementsByClassName('shaka-controls-container')[0].removeAttribute('shown');
+
+            var observer = new MutationObserver(function (mutations) {
+                mutations.forEach(function (mutation) {
+                    if (mutation.type === "attributes" && element.getAttribute('style') === "cursor: none;") {
+                        element.getElementsByClassName('shaka-controls-container')[0].removeAttribute('shown');
+                    }
+                });
+            });
+
+            observer.observe(element, {
+                attributes: true //configure it to listen to attribute changes
+            });
+        },
+
+        isFs() {
+            this.info.fs = !!document.fullscreenElement;
+        }
+    },
+
     mounted() {
         this.shaka();
 
@@ -160,7 +209,7 @@ export default {
                         if (parsedMessage.response !== 'accepted') {
                             var errorMsg = parsedMessage.message ? parsedMessage.message : 'Unknow error';
                             //console.warn('Call not accepted for the following reason: ' + errorMsg);
-                            drone.dispose();
+                            drone.stop();
                             alert(errorMsg);
 
                             this.info.isVideo = false;
@@ -170,7 +219,7 @@ export default {
                         }
                         break;
                     case 'stopCommunication':
-                        drone.dispose();
+                        drone.stop();
                         break;
                     case 'iceCandidate':
                         drone.webRtcPeer.addIceCandidate(parsedMessage.candidate)
@@ -181,121 +230,34 @@ export default {
             }
         });
 
-        EventBus.$on('hud-data-' + this.drone_name, (hudData) => {
-            if (hudData) {
-                this.info = hudData;
-            }
-        })
+        // EventBus.$on('hud-data-' + this.drone_name, (hudData) => {
+        //     if (hudData) {
+        //         this.info = hudData;
+        //     }
+        // })
 
-        EventBus.$on('hud-on-' + this.drone_name, () => {
-            let droneWrapper = document.querySelector(`#${this.drone_name}_wrapper`)
-            let hudContainer = droneWrapper.querySelector('#hud-container')
-            let mainSvg = droneWrapper.querySelector('.mainSvg')
+        //this.$emit('mounted', this.drone_name);
 
-            hudContainer.style.background = 'transparent'
-            mainSvg.style.removeProperty('background')
-        })
+        this.droneWrapper = document.querySelector(`#${this.drone_name}_wrapper`);
 
-        EventBus.$on('hud-off-' + this.drone_name, () => {
-            let droneWrapper = document.querySelector(`#${this.drone_name}_wrapper`)
-            let hudContainer = droneWrapper.querySelector('#hud-container')
+        this.droneVideo = this.droneWrapper.querySelector('.video');
+        this.droneVideo.id = 'video-' + this.drone_name;
 
-            hudContainer.style.background = 'skyblue'
-        })
+        this.droneHudContainer = this.droneWrapper.querySelector('#hud-container');
 
-        this.$emit('mounted', this.drone_name)
     },
 
-    methods: {
-        viewer_start(droneName, initbitrate) {
-            if (this.drone) {
-                this.drone = null;
-            }
-
-            this.drone = new Drone(droneName, initbitrate);
-
-            this.bitrate = initbitrate;
-            this.drone.viewer();
-        },
-
-        viewer_stop() {
-            if (this.drone) {
-                this.drone.stop();
-                this.drone = null;
-            }
-        },
-
-        /**
-         * @WebRTC Event Handlers
-         */
-        open() {
-            this.shaka();
-            //this.$emit('onStart', this.itemIndex)
-        },
-
-        stop() {
-            this.viewer_stop();
-            //this.$emit('onStop', this.itemIndex)
-        },
-
-        videoOn() {
-            if (this.info.isVideo) {
-                this.viewer_start(this.drone_name, this.bitrate)
-            }
-            else {
-                this.viewer_stop();
-            }
-        },
-
-        shaka() {
-            const shaka = require('shaka-player/dist/shaka-player.ui.js');
-            const player = new shaka.Player(this.$refs.videoPlayer);
-
-            const ui = new shaka.ui.Overlay(
-                player,
-                this.$refs.videoContainer,
-                this.$refs.videoPlayer
-            );
-            const config = {
-                addSeekBar: false,
-                'controlPanelElements': ['fullscreen']
-            };
-            ui.configure(config);
-
-            document.addEventListener("fullscreenchange", this.isFs)
-
-            this.hideControls();
-        },
-
-        hideControls() {
-            var element = document.querySelector('#' + this.drone_name + '_wrapper .shaka-video-container');
-            element.getElementsByClassName('shaka-controls-container')[0].removeAttribute('shown');
-
-            var observer = new MutationObserver(function (mutations) {
-                mutations.forEach(function (mutation) {
-                    if (mutation.type === "attributes" && element.getAttribute('style') === "cursor: none;") {
-                        element.getElementsByClassName('shaka-controls-container')[0].removeAttribute('shown');
-                    }
-                });
-            });
-
-            observer.observe(element, {
-                attributes: true //configure it to listen to attribute changes
-            });
-        },
-
-        isFs() {
-            this.info.fs = !!document.fullscreenElement;
-        }
-    },
     beforeDestroy() {
+        if (this.drone) {
+            this.drone.stop();
+            this.drone = null;
+        }
+
         EventBus.$off('do-video-size-' + this.drone_name);
         EventBus.$off('do-video-close-' + this.drone_name);
         EventBus.$off('do-video-on-' + this.drone_name);
         EventBus.$off('ws-on-message-' + this.drone_name);
-        EventBus.$off('hud-data-' + this.drone_name);
-        EventBus.$off('hud-on-' + this.drone_name);
-        EventBus.$off('hud-off-' + this.drone_name);
+        //EventBus.$off('hud-data-' + this.drone_name);
     }
 }
 </script>
