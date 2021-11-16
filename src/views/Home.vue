@@ -18,11 +18,11 @@ export default {
     },
 
     created() {
-        console.log(document.cookie);
-        document.cookie.split(";").forEach((c) => {
-            console.log(c);
-            document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        });
+        // console.log(document.cookie);
+        // document.cookie.split(";").forEach((c) => {
+        //     console.log(c);
+        //     document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        // });
     }
 }
 </script>

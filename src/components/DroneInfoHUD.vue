@@ -230,14 +230,6 @@ export default {
             }
         });
 
-        // EventBus.$on('hud-data-' + this.drone_name, (hudData) => {
-        //     if (hudData) {
-        //         this.info = hudData;
-        //     }
-        // })
-
-        //this.$emit('mounted', this.drone_name);
-
         this.droneWrapper = document.querySelector(`#${this.drone_name}_wrapper`);
 
         this.droneVideo = this.droneWrapper.querySelector('.video');

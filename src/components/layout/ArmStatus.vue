@@ -2,7 +2,7 @@
     <v-container id="arm_status" fill-height class="pa-0 ma-n1">
         <v-row no-gutters align="center">
             <v-col cols="12" class="text-center">
-                <span class="shadow_icon" :style="fontSize">
+                <span class="pl-2 shadow_icon" :style="fontSize">
                     {{ (data.curArmStatus === 'DISARMED') ? 'DISARMED' : ''}}
                 </span>
             </v-col>
@@ -17,10 +17,10 @@ export default {
     computed: {
         fontSize() {
             if(this.data.fs) {
-                return {'font-size': '400%', color: 'red'};
+                return {'font-size': '600%', color: 'red'};
             }
             else {
-                return {'font-size': '200%', color: 'red'};
+                return {'font-size': '300%', color: 'red'};
             }
         },
     },

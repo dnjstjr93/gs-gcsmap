@@ -180,8 +180,9 @@
                 this.myHeight = window.innerHeight-50;
 
                 this.$store.state.command_tab_max_height = this.myHeight-50;
+                this.$store.state.command_tab_max_width = window.innerWidth-this.myWidth;
 
-                console.log('DroneInfoList-onResize', this.myWidth, this.myHeight);
+                console.log('DroneInfoList-onResize', this.$store.state.command_tab_max_width, this.myWidth, this.myHeight);
 
                 for(let dName in this.$store.state.drone_infos) {
                     if(Object.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
@@ -567,6 +568,9 @@
 
         beforeDestroy() {
             this.destroyConnection();
+
+            this.ws.close();
+
             EventBus.$off('onResize-DroneInfoList');
             EventBus.$off('gcs-map-ready');
             EventBus.$off('confirm_selected');

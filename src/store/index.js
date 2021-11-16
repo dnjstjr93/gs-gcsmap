@@ -435,6 +435,7 @@ export default new Vuex.Store({
             'FLIP', 'AUTOTUNE', 'POS_HOLD', 'BRAKE', 'THROW', 'AVOID_ADSB', 'GUIDED_NOGPS', 'SAFE_RTL'],
         command_tab_left_x: 0,
         command_tab_max_height: 640,
+        command_tab_max_width: 640,
         currentCommandTab: 'virtual',
         // dronesChecked: {},
 

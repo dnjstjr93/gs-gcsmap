@@ -1,5 +1,5 @@
 <template>
-    <v-container fluid class="mx-1 tab_position" :style="{top:context_top + 'px',left:(context_left+8)+'px'}">
+    <v-container fluid class="mx-1 tab_position" :style="{top:context_top + 'px', left:(context_left+8)+'px', width: ($store.state.command_tab_max_width-48)+'px'}">
         <v-tabs v-if="prepared"
                 background-color="deep-blue accent-4"
                 center-active
@@ -1415,7 +1415,7 @@
 
                 let pIndex = this.position_selections_index[d.name];
                 let pName = d.name;
-                this.position_selections_elevation[payload.pName] = parseFloat(this.$store.state.tempMarkers[pName][pIndex].elevation).toFixed(1);
+                this.position_selections_elevation[pName] = parseFloat(this.$store.state.tempMarkers[pName][pIndex].elevation).toFixed(1);
 
                 let payload = {};
                 payload.pName = d.name;
@@ -1828,7 +1828,6 @@
         position: absolute;
         opacity: 0.9; /* for demo purpose  */
         z-index: 2;
-        width:90%;
     }
 
 
