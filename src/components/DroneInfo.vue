@@ -515,8 +515,7 @@
                                 <!--                                        </draggable>-->
                                 <!--                                    </v-list-item-group>-->
                                 <!--                                </v-list>-->
-                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity"
-                                           color="#E0E0E0"></v-overlay>
+                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
                             </v-card>
                         </v-col>
                     </v-row>
@@ -3693,11 +3692,12 @@ export default {
                     this.att.pitchspeed = Buffer.from(pitchspeed, 'hex').readFloatLE(0);
                     this.att.yawspeed = Buffer.from(yawspeed, 'hex').readFloatLE(0);
 
-                    this.roll = this.att.roll * 100;
+
+                    this.roll = (-1) * this.att.roll * 100;
                     this.pitch = this.att.pitch * 100;
 
-                    this.info.anglePitch = this.pitch;
                     this.info.bankAngle = this.roll;
+                    this.info.anglePitch = this.pitch;
 
                     // console.log('roll: ' + this.roll, 'pitch: ' + this.pitch);
                 }

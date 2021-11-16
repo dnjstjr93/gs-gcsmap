@@ -54,7 +54,7 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../assets/index';
+//@import '../../assets/index';
 @import './node_modules/swiper/swiper.scss';
 
 #hud-container {
