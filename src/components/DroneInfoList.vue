@@ -545,11 +545,44 @@
                 setTimeout(this.onResize, 500);
             });
 
-            this.ws = new WebSocket(this.wsUrl);
+            EventBus.$on('ws-connect', () => {
+                this.ws = new WebSocket(this.wsUrl);
 
-            this.ws.onclose = function () {
-                console.log("Server is already in CLOSING or CLOSED state.\nPlease refresh the page after running the server.");
-            };
+                this.ws.onopen = () => {
+                    this.$store.state.enableVideo = true;
+                };
+
+                this.ws.onclose = () => {
+                    console.log("Server is already in CLOSING or CLOSED state.\nPlease refresh the page after running the server.");
+
+                    for(let dName in this.$store.state.drone_infos) {
+                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if(dName === 'unknown') {
+                                continue;
+                            }
+
+                            if(this.$store.state.drone_infos[dName].selected) {
+                                EventBus.$emit('do-video-close-' + dName);
+                            }
+                        }
+                    }
+
+                    this.$store.state.enableVideo = false;
+
+                    this.ws = null;
+
+                    setTimeout(() => {
+                        EventBus.$emit('ws-connect');
+                    }, (1000 * 60));
+                };
+
+                this.ws.onmessage = (message) => {
+                    let parsedMessage = JSON.parse(message.data);
+                    let droneName = parsedMessage.droneName;
+
+                    EventBus.$emit('ws-on-message-' + droneName, parsedMessage);
+                };
+            });
 
             EventBus.$on('ws-send-message', (message) => {
                 let jsonMessage = JSON.stringify(message);
@@ -558,12 +591,7 @@
                 }
             });
 
-            this.ws.onmessage = function (message) {
-                let parsedMessage = JSON.parse(message.data);
-                let droneName = parsedMessage.droneName;
-
-                EventBus.$emit('ws-on-message-' + droneName, parsedMessage);
-            }
+            EventBus.$emit('ws-connect');
         },
 
         beforeDestroy() {

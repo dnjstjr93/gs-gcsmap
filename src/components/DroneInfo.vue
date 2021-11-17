@@ -43,7 +43,7 @@
                                         hide-details
                                         v-model="info.isVideo"
                                         @change="onVideoHandler(name)"
-                                        :disabled="!flagReceiving"
+                                        :disabled="!$store.state.enableVideo"
                                     ></v-switch>
                                 </v-col>
                                 <v-col cols="2">

@@ -90,15 +90,18 @@ export default {
 
     props: ['drone_name', 'bitrate', 'info'],
 
-    data: () => ({
-        fullScreen: false,
-        width: 640,
-        height: 480,
-        droneWrapper: null,
-        droneVideo: null,
-        droneHudContainer: null,
-        webRtcPeer: null,
-    }),
+    data() {
+        return {
+            fullScreen: false,
+            width: 640,
+            height: 480,
+            droneWrapper: null,
+            droneVideo: null,
+            droneHudContainer: null,
+            webRtcPeer: null,
+            drone: null,
+        };
+    },
 
     methods: {
         viewer_start(droneName, initbitrate) {

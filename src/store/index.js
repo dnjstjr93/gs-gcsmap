@@ -458,7 +458,8 @@ export default new Vuex.Store({
         },
 
         didIPublish: false,
-        fs: false
+        fs: false,
+        enableVideo: true,
     },
 
     mutations: {
