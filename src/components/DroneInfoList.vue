@@ -569,6 +569,7 @@
 
                     this.$store.state.enableVideo = false;
 
+                    this.ws.close();
                     this.ws = null;
 
                     setTimeout(() => {
