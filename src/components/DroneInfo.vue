@@ -808,7 +808,9 @@ export default {
             iconLte: 'mdi-network-strength-off-outline',
 
             roll: 0,
+            arrRoll: [],
             pitch: 0,
+            arrPitch: [],
             heading: 0,
             airspeed: 0,
             colorAirspeed: 'td-text-gray',
@@ -3692,11 +3694,18 @@ export default {
                     this.att.pitchspeed = Buffer.from(pitchspeed, 'hex').readFloatLE(0);
                     this.att.yawspeed = Buffer.from(yawspeed, 'hex').readFloatLE(0);
 
-
-                    this.roll = (-1) * this.att.roll * 100;
-                    this.pitch = this.att.pitch * 100;
-
+                    this.arrRoll.push((-1) * this.att.roll * 100);
+                    while(this.arrRoll.length > 3) {
+                        this.arrRoll.shift();
+                    }
+                    this.roll = this.arrRoll.reduce( ( p, c ) => p + c, 0 ) / this.arrRoll.length
                     this.info.bankAngle = this.roll;
+
+                    this.arrPitch.push(this.att.pitch * 100);
+                    while(this.arrPitch.length > 3) {
+                        this.arrPitch.shift();
+                    }
+                    this.pitch = this.arrPitch.reduce( ( p, c ) => p + c, 0 ) / this.arrPitch.length
                     this.info.anglePitch = this.pitch;
 
                     // console.log('roll: ' + this.roll, 'pitch: ' + this.pitch);

@@ -574,7 +574,7 @@
 
                     setTimeout(() => {
                         EventBus.$emit('ws-connect');
-                    }, (1000 * 60));
+                    }, (2 * 1000 * 60));
                 };
 
                 this.ws.onmessage = (message) => {
