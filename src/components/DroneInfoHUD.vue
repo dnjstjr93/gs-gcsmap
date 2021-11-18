@@ -187,7 +187,7 @@ export default {
     },
 
     mounted() {
-        this.shaka();
+        //this.shaka();
 
         EventBus.$on('do-video-size-' + this.drone_name, (payload) => {
             this.width = payload.width;

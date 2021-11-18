@@ -3,15 +3,31 @@
         <v-row no-gutters>
             <v-col cols="12" sm="6" md="2" class="drone_list">
                 <v-card flat tile outlined color="#E8F5E9">
-                    <v-card ref="prev" flat tile class="overflow-y-auto" :style="listHeight" :min-width="myMinWidth+'px'">
+                    <v-card ref="prev" flat tile class="overflow-y-auto" :style="listHeight" :min-width="myMinWidth+'px'" :width="myMinWidth+'px'">
                         <v-card flat tile outlined>
-                            <v-switch
-                                    v-model="distanceMonitor"
-                                    label="드론간 근접감시"
-                                    color="warning"
-                                    class="ma-0 pa-0 pl-2 py-2"
-                                    hide-details
-                            ></v-switch>
+                            <v-row no-gutters justify="center" align="center">
+                                <v-col cols="8">
+                                    <v-switch
+                                            v-model="distanceMonitor"
+                                            label="드론간 근접감시"
+                                            color="warning"
+                                            class="ma-0 pa-0 pl-2 py-2"
+                                            hide-details
+                                    ></v-switch>
+                                </v-col>
+                                <v-col cols="4" class="text-right" >
+                                    <v-btn class="mr-2" small @click.stop="zoomDouble">
+                                        <v-icon>
+                                            mdi-magnify-plus-outline
+                                        </v-icon>
+                                    </v-btn>
+                                    <v-btn class="mr-2" small @click.stop="zoomNormal">
+                                        <v-icon>
+                                            mdi-magnify-minus-outline
+                                        </v-icon>
+                                    </v-btn>
+                                </v-col>
+                            </v-row>
                             <v-card v-if=!$store.state.client.connected class="py-3 px-2" color="orange">
                                 <span class="text-h5 font-weight-bold">Connection Failed!!!</span>
                             </v-card>
@@ -174,6 +190,7 @@
         methods: {
             onResize() {
                 this.myWidth = this.$refs.prev.$el.clientWidth;
+                console.log(this.myWidth);
 
                 this.$store.commit('setCommandTabLeftX', this.myWidth);
 
@@ -190,6 +207,7 @@
                             let payload = {};
                             payload.width = this.myWidth;
                             //payload.height = parseInt((this.myWidth*9)/16);
+                            // payload.height = parseInt((payload.width*3)/4)+parseInt(((payload.width*3)/4)*0.08);
                             payload.height = parseInt((payload.width*3)/4);
 
                             EventBus.$emit('do-video-size-' + dName, payload);
@@ -355,6 +373,20 @@
                     }
                 }
             },
+            zoomDouble() {
+                this.myMinWidth = 640;
+
+                setTimeout(() => {
+                    this.onResize();
+                }, 50);
+            },
+            zoomNormal() {
+                this.myMinWidth = 480;
+
+                setTimeout(() => {
+                    this.onResize();
+                }, 50);
+            }
         },
 
         mounted() {
