@@ -537,10 +537,10 @@ import moment from 'moment'
 import axios from "axios";
 
 import draggable from 'vuedraggable';
-//import mqtt from "mqtt";
 import {nanoid} from "nanoid";
 import DroneInfoHUD from "./DroneInfoHUD";
 import DroneInfoBox from "@/components/DroneInfoBox";
+import mqtt from "mqtt";
 
 const byteToHex = [];
 
@@ -703,7 +703,7 @@ export default {
             iconFlightElapsed: 'mdi-timer-off-outline',
             flightElapsedTime: '00:00',
             iconBattery: 'mdi-battery-off-outline',
-            colorBattery: 'td-text-gray',
+            colorBattery: 'gray',
             infos1: [
                 {
                     name: 'Bat',
@@ -804,7 +804,7 @@ export default {
             missionLteUrl: '',
 
             curLteVal: -80,
-            colorLteVal: 'td-text-gray',
+            colorLteVal: 'gray',
             iconLte: 'mdi-network-strength-off-outline',
 
             roll: 0,
@@ -861,8 +861,8 @@ export default {
                 username: 'keti_muv',
                 password: 'keti_muv',
             },
-            drone_topic: '/Mobius/' + this.gcs + '/Drone_Data/' + this.name + '/#',
-            broadcast_topic: '/Mobius/' + this.gcs + '/watchingMission/' + this.name,
+            drone_topic: '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + this.name + '/#',
+            broadcast_topic: '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + this.name,
             droneSubscribeSuccess: {},
 
             mavStrFromDrone: {},
@@ -956,10 +956,10 @@ export default {
                 isVideo: false,
                 num_satellites: 0,
                 rssi: 0,
-                colorLteVal: 'td-text-gray',
+                colorLteVal: 'gray',
                 curLteVal: 0,
                 iconLte: 'mdi-network-strength-off-outline',
-                colorBattery: 'td-text-gray',
+                colorBattery: 'gray',
                 iconBattery: 'mdi-battery-off-outline',
                 voltageBattery: 0,
                 iconFlightElapsed: 'mdi-timer-off-outline',
@@ -1062,8 +1062,10 @@ export default {
             console.log(this.missionLteUrl);
 
             if (newData !== 'disarm') {
-                var now = moment();
+                var now = moment.utc();
                 this.startFlightTime = moment(newData.replace(/_/g, ''));
+                console.log('sortie_name', this.startFlightTime);
+
                 //let diff = (now.seconds() - this.startFlightTime.seconds());
                 let diff = now.subtract(this.startFlightTime);
                 console.log(diff.unix());
@@ -1079,56 +1081,54 @@ export default {
                 return;
             }
 
-            let self = this;
             let sortie = newData;
             let mission_topic = '/oneM2M/req/Mobius2/' + this.name + '/json';
 
-            let tid = setInterval(this.getParentSubscription, 2000, sortie, function (res) {
+            function resParentSubscription() {
+                this.getSubscription(sortie, (res) => {
+                    console.log('getSubscription', res);
+
+                    if (res.status === 200) {
+                        //EventBus.$emit('do-subscribe', mission_topic);
+
+                        this.doSubscribe(mission_topic);
+
+                        this.droneSubscribeSuccess[mission_topic] = true;
+                        console.log('Subscribe mission topic to ', mission_topic);
+                    }
+                    else {
+                        this.createSubscription(sortie, function (res) {
+                            console.log('createSubscription', res);
+
+                            if (res.status === 201 || res.status === 409) {
+                                //EventBus.$emit('do-subscribe', mission_topic);
+
+                                this.doSubscribe(mission_topic);
+
+                                this.droneSubscribeSuccess[mission_topic] = true;
+                                console.log('Subscribe mission topic to ', mission_topic);
+                            }
+                        });
+                    }
+                });
+            }
+
+            this.getParentSubscription(sortie, (res) => {
                 console.log('getParentSubscription', res);
 
                 if (res.status === 200) {
-                    clearInterval(tid);
-
-                    self.getSubscription(sortie, function (res) {
-                        console.log('getSubscription', res);
+                    resParentSubscription();
+                }
+                else {
+                    let tid = setInterval(this.getParentSubscription, 2000, sortie, (res) => {
+                        console.log('getParentSubscription', res);
 
                         if (res.status === 200) {
-                            //EventBus.$emit('do-subscribe', mission_topic);
+                            clearInterval(tid);
 
-                            self.doSubscribe(mission_topic);
-
-                            self.droneSubscribeSuccess[mission_topic] = true;
-                            console.log('Subscribe mission topic to ', mission_topic);
-                        }
-                        else {
-                            self.createSubscription(sortie, function (res) {
-                                console.log('createSubscription', res);
-
-                                if (res.status === 201 || res.status === 409) {
-                                    //EventBus.$emit('do-subscribe', mission_topic);
-
-                                    self.doSubscribe(mission_topic);
-
-                                    self.droneSubscribeSuccess[mission_topic] = true;
-                                    console.log('Subscribe mission topic to ', mission_topic);
-                                }
-                            });
+                            resParentSubscription();
                         }
                     });
-
-                    // self.deleteSubscription(sortie, function (res) {
-                    //     console.log('deleteSubscription', res);
-                    //
-                    //     if (res.status == 200 || res.status == 404) {
-                    //         self.createSubscription(sortie, function (res) {
-                    //             console.log('createSubscription', res);
-                    //
-                    //             if (res.status === 201 || res.status === 409) {
-                    //                 EventBus.$emit('do-subscribe', mission_topic);
-                    //             }
-                    //         });
-                    //     }
-                    // });
                 }
             });
         },
@@ -1432,39 +1432,32 @@ export default {
             this.$store.state.didIPublish = false;
         },
 
-        onMessageHandler(topic, message) {
+        onDroneMessageHandler(topic, message) {
             let chkTopic = topic.substr(0, 7);
 
             if (chkTopic === "/Mobius") {
-                let watchingMissionTopic = topic.substr(7+(this.gcs.length)+1, 16);
+                this.strContentEach += message.toString('hex').toLowerCase();
+                while (this.strContentEach.length > 12) {
+                    if (this.strContentEach.substr(0, 2) === 'fe') {
 
-                if(watchingMissionTopic === '/watchingMission') {
-                    this.onMessageBroadcast(message);
-                }
-                else {
-                    this.strContentEach += message.toString('hex').toLowerCase();
-                    while (this.strContentEach.length > 12) {
-                        if (this.strContentEach.substr(0, 2) === 'fe') {
+                        var len = parseInt(this.strContentEach.substr(2, 2), 16);
+                        var contentLenth = (6 * 2) + (len * 2) + (2 * 2);
 
-                            var len = parseInt(this.strContentEach.substr(2, 2), 16);
-                            var contentLenth = (6 * 2) + (len * 2) + (2 * 2);
-
-                            if (contentLenth > this.strContentEach.length) {
-                                break;
-                            }
-                            else {
-                                // var mavLength = (6 * 2) + (contentLenth * 2) + (2 * 2);
-                                //console.log(this.name, this.strContentEach.substr(0, mavLength));
-
-                                this.receiveFromDrone(topic, this.strContentEach.substr(0, contentLenth));
-
-                                this.strContentEach = this.strContentEach.substr(contentLenth);
-                                //console.log(this.strContentEach);
-                            }
+                        if (contentLenth > this.strContentEach.length) {
+                            break;
                         }
                         else {
-                            this.strContentEach = this.strContentEach.substr(2);
+                            // var mavLength = (6 * 2) + (contentLenth * 2) + (2 * 2);
+                            //console.log(this.name, this.strContentEach.substr(0, mavLength));
+
+                            this.receiveFromDrone(topic, this.strContentEach.substr(0, contentLenth));
+
+                            this.strContentEach = this.strContentEach.substr(contentLenth);
+                            //console.log(this.strContentEach);
                         }
+                    }
+                    else {
+                        this.strContentEach = this.strContentEach.substr(2);
                     }
                 }
             }
@@ -1521,7 +1514,7 @@ export default {
                                         // console.log(payload.sur);
 
                                         if (Object.prototype.hasOwnProperty.call(payload.con, 'rsrp')) {
-                                            this.colorLteVal = 'td-text-gray';
+                                            this.colorLteVal = 'gray';
 
                                             this.curLteVal = payload.con.rsrp;
                                             //console.log(this.curLteVal);
@@ -1530,19 +1523,19 @@ export default {
 
                                             if (0 > this.curLteVal && this.curLteVal >= -80) {
                                                 this.iconLte = 'mdi-network-strength-4';
-                                                this.colorLteVal = 'td-text-blue';
+                                                this.colorLteVal = '#1E88E5';
                                             }
                                             else if (-80 > this.curLteVal && this.curLteVal >= -90) {
                                                 this.iconLte = 'mdi-network-strength-3';
-                                                this.colorLteVal = 'td-text-green';
+                                                this.colorLteVal = '#76FF03';
                                             }
                                             else if (-90 > this.curLteVal && this.curLteVal >= -100) {
                                                 this.iconLte = 'mdi-network-strength-2';
-                                                this.colorLteVal = 'td-text-yellow';
+                                                this.colorLteVal = '#FFFF00';
                                             }
                                             else {
                                                 this.iconLte = 'mdi-network-strength-1';
-                                                this.colorLteVal = 'td-text-red';
+                                                this.colorLteVal = '#FF3D00';
                                             }
 
                                             this.info.colorLteVal = this.colorLteVal;
@@ -1555,7 +1548,7 @@ export default {
 
                                             this.lteTimeoutObj = setTimeout(() => {
                                                 this.lteTimeoutObj = null;
-                                                this.colorLteVal = 'td-text-gray';
+                                                this.colorLteVal = 'gray';
                                                 this.iconLte = 'mdi-network-strength-off-outline';
                                             }, 5500);
                                         }
@@ -1567,71 +1560,98 @@ export default {
                 }
             }
         },
-        //
-        // createConnection(onConnect) {
-        //     if (this.$store.state.client.connected) {
-        //         console.log('DroneInfo', this.name, '-', 'destroyConnection')
-        //         this.destroyConnection();
-        //     }
-        //
-        //     if (!this.$store.state.client.connected) {
-        //         //var self = this;
-        //
-        //         this.$store.state.client.loading = true;
-        //         this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
-        //         const {host, port, endpoint, ...options} = this.connection
-        //         const connectUrl = `ws://${host}:${port}${endpoint}`
-        //         try {
-        //             this.$store.state.client = mqtt.connect(connectUrl, options);
-        //
-        //             this.$store.state.client.on('connect', () => {
-        //                 console.log(this.name, 'Connection succeeded!');
-        //
-        //                 this.$store.state.client.connected = true;
-        //
-        //                 // if(this.subscribeSuccess) {
-        //                 //     this.doUnSubscribe()
-        //                 // }
-        //
-        //                 this.$store.state.client.loading = false;
-        //
-        //                 localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
-        //
-        //                 onConnect();
-        //             });
-        //
-        //             this.$store.state.client.on('error', (error) => {
-        //                 console.log('Connection failed', error);
-        //
-        //                 this.destroyConnection();
-        //             });
-        //
-        //             this.$store.state.client.on('close', () => {
-        //                 console.log('Connection closed');
-        //
-        //                 this.destroyConnection();
-        //
-        //                 this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
-        //             });
-        //
-        //             this.$store.state.client.on('message', (topic, message) => {
-        //                 // this.receiveNews = this.receiveNews.concat(message)
-        //                 // console.log(`Received message ${message} from topic ${topic}`);
-        //
-        //                 this.onMessageHandler(topic, message);
-        //             });
-        //         }
-        //         catch (error) {
-        //             console.log('mqtt.connect error', error);
-        //             this.$store.state.client.connected = false;
-        //         }
-        //     }
-        // },
+
+        onMessageHandler(topic, message) {
+            let chkTopic = topic.substr(0, 7);
+
+            if (chkTopic === "/Mobius") {
+                let watchingMissionTopic = topic.substr(7+(this.gcs.length)+1, 16);
+
+                if(watchingMissionTopic === '/watchingMission') {
+                    this.onMessageBroadcast(message);
+                }
+            }
+        },
+
+        createConnection() {
+            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[this.name], 'client')) {
+                this.$store.state.drone_infos[this.name].client = {
+                    connected: false,
+                    loading: false
+                };
+            }
+
+            if (this.$store.state.drone_infos[this.name].client.connected) {
+                console.log('DroneInfo', this.name, 'createConnection', 'destroyConnection')
+                this.destroyConnection();
+            }
+
+            if (!this.$store.state.drone_infos[this.name].client.connected) {
+
+                this.$store.state.drone_infos[this.name].client.loading = true;
+                this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
+                this.connection.host = this.$store.state.VUE_APP_MOBIUS_HOST;
+                const {host, port, endpoint, ...options} = this.connection;
+                const connectUrl = `ws://${host}:${port}${endpoint}`
+                try {
+                    this.$store.state.drone_infos[this.name].client = mqtt.connect(connectUrl, options);
+
+                    this.$store.state.drone_infos[this.name].client.on('connect', () => {
+                        console.log(this.name, host, 'DroneInfo Connection succeeded!');
+
+                        this.$store.state.drone_infos[this.name].client.connected = true;
+                        this.$store.state.drone_infos[this.name].client.loading = false;
+
+                        localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.drone_infos[this.name].client));
+
+                        this.drone_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + this.name + '/#';
+                        this.doUnSubscribe(this.drone_topic);
+
+                        setTimeout(() => {
+                            this.doSubscribe(this.drone_topic);
+                            console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic);
+                        }, 200);
+                    });
+
+                    this.$store.state.drone_infos[this.name].client.on('error', (error) => {
+                        console.log('Drone Connection failed', error);
+
+                        this.destroyConnection();
+                    });
+
+                    this.$store.state.drone_infos[this.name].client.on('close', () => {
+                        console.log('Drone Connection closed');
+
+                        this.destroyConnection();
+
+                        this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
+                    });
+
+                    this.$store.state.drone_infos[this.name].client.on('message', (topic, message) => {
+                        // this.receiveNews = this.receiveNews.concat(message)
+                        //console.log(`Received message ${message} from topic ${topic}`);
+
+                        //console.log(topic.split('/')[4], message.toString());
+
+                        let payload = {};
+                        payload.topic = topic;
+                        payload.message = message;
+
+                        this.onDroneMessageHandler(payload.topic, payload.message);
+                    });
+                }
+                catch (error) {
+                    console.log('mqtt.connect error', error);
+                    this.$store.state.drone_infos[this.name].client.connected = false;
+                }
+            }
+        },
+
         doSubscribe(topic) {
-            if (this.$store.state.client.connected) {
+            if (this.$store.state.drone_infos[this.name].client.connected) {
                 const qos = 0;
                 let self = this;
-                this.$store.state.client.subscribe(topic, {qos}, (error) => {
+                this.$store.state.drone_infos[this.name].client.subscribe(topic, {qos}, (error) => {
                     if (error) {
                         console.log('Subscribe to topics error', error)
                         return
@@ -1640,74 +1660,55 @@ export default {
                 });
             }
         },
-        // doUnSubscribe(topic) {
-        //     if (this.$store.state.client.connected) {
-        //         let self = this;
-        //         this.$store.state.client.unsubscribe(topic, error => {
-        //             if (error) {
-        //                 console.log('Unsubscribe error', error)
-        //             }
-        //
-        //             self.droneSubscribeSuccess[topic] = false;
-        //             console.log('Unsubscribe to topics (', topic, ')');
-        //
-        //             self.receiveNews = '';
-        //         });
-        //     }
-        // },
+
+        doUnSubscribe(topic) {
+            if (this.$store.state.drone_infos[this.name].client.connected) {
+                let self = this;
+                this.$store.state.drone_infos[this.name].client.unsubscribe(topic, error => {
+                    if (error) {
+                        console.log('Unsubscribe error', error)
+                    }
+
+                    self.droneSubscribeSuccess[topic] = false;
+                    console.log('Unsubscribe to topics (', topic, ')');
+
+                    self.receiveNews = '';
+                });
+            }
+        },
+
         doPublish(topic, payload) {
-            if (this.$store.state.client.connected) {
-                this.$store.state.client.publish(topic, payload, 0, error => {
+            if (this.$store.state.drone_infos[this.name].client.connected) {
+                this.$store.state.drone_infos[this.name].client.publish(topic, payload, 0, error => {
                     if (error) {
                         console.log('Publish error', error)
                     }
                 });
             }
         },
-        // destroyConnection() {
-        //     if (this.$store.state.client.connected) {
-        //         try {
-        //             this.$store.state.client.end()
-        //             this.$store.state.client = {
-        //                 connected: false,
-        //             }
-        //             console.log(this.name, 'Successfully disconnected!');
-        //
-        //             localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
-        //
-        //             // let self = this;
-        //             // axios({
-        //             //     validateStatus: function (status) {
-        //             //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-        //             //         return status < 500;
-        //             //     },
-        //             //     method: 'post',
-        //             //     url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Info',
-        //             //     headers: {
-        //             // 'X-M2M-RI': String(parseInt(Math.random()*10000)),
-        //             //         'X-M2M-Origin': 'SVue',
-        //             //         'Content-Type': 'application/json;ty=4'
-        //             //     },
-        //             //     data: {
-        //             //         'm2m:cin': {
-        //             //             con: self.$store.state.drone_infos
-        //             //         }
-        //             //     }
-        //             // }).then(
-        //             //     function (res) {
-        //             //         console.log('setFlyingDroneInfo-axios', res.data);
-        //             //     }
-        //             // ).catch(
-        //             //     function (err) {
-        //             //         console.log(err.message);
-        //             //     }
-        //             // );
-        //         }
-        //         catch (error) {
-        //             console.log('Disconnect failed', error.toString())
-        //         }
-        //     }
-        // },
+
+        destroyConnection() {
+            if (this.$store.state.drone_infos[this.name].client.connected) {
+                try {
+                    this.$store.state.drone_infos[this.name].client.end()
+                    this.$store.state.drone_infos[this.name].client = {
+                        connected: false,
+                    }
+                    console.log(this.name, 'Successfully disconnected!');
+
+                    localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.drone_infos[this.name].client));
+                }
+                catch (error) {
+                    this.$store.state.drone_infos[this.name].client.end()
+                    this.$store.state.drone_infos[this.name].client = {
+                        connected: false,
+                    }
+                    localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.drone_infos[this.name].client));
+
+                    console.log('Disconnect failed', this.name, error.toString())
+                }
+            }
+        },
 
         receiveFromDrone(topic, hex_content_each) {
             var arr_topic = topic.split('/');
@@ -1775,7 +1776,7 @@ export default {
                     this.iconDistance = 'mdi-map-marker-distance';
 
                     this.iconBattery = 'mdi-battery-off-outline';
-                    this.colorBattery = 'td-text-gray';
+                    this.colorBattery = 'gray';
 
                     this.info.iconBattery = this.iconBattery;
                     this.info.colorBattery = this.colorBattery;
@@ -3101,25 +3102,25 @@ export default {
         },
 
         checkLteValRsrp(_curLteVal) {
-            this.colorLteVal = 'td-text-gray';
+            this.colorLteVal = 'gray';
             this.iconLte = 'mdi-network-strength-off-outline';
 
             if (0 > _curLteVal && _curLteVal >= -80) {
                 this.iconLte = 'mdi-network-strength-4';
-                this.colorLteVal = 'td-text-blue';
+                this.colorLteVal = 'blue';
 
             }
             else if (-80 > _curLteVal && _curLteVal >= -90) {
                 this.iconLte = 'mdi-network-strength-3';
-                this.colorLteVal = 'td-text-green';
+                this.colorLteVal = '#76FF03';
             }
             else if (-90 > _curLteVal && _curLteVal >= -100) {
                 this.iconLte = 'mdi-network-strength-2';
-                this.colorLteVal = 'td-text-yellow';
+                this.colorLteVal = 'yellow';
             }
             else if (-10 > _curLteVal) {
                 this.iconLte = 'mdi-network-strength-1';
-                this.colorLteVal = 'td-text-red';
+                this.colorLteVal = 'red';
             }
 
             if (this.lteTimeoutObj) {
@@ -3128,7 +3129,7 @@ export default {
 
             this.lteTimeoutObj = setTimeout(() => {
                 this.lteTimeoutObj = null;
-                this.colorLteVal = 'td-text-gray';
+                this.colorLteVal = 'gray';
                 this.iconLte = 'mdi-network-strength-off-outline';
             }, 2500);
         },
@@ -3274,15 +3275,15 @@ export default {
 
                     if (this.mid_v < this.ss.voltage_battery) {
                         this.iconBattery = 'mdi-battery-high';
-                        this.colorBattery = 'td-text-green';
+                        this.colorBattery = '#76FF03';
                     }
                     else if (this.min_v < this.ss.voltage_battery && this.ss.voltage_battery <= this.mid_v) {
                         this.iconBattery = 'mdi-battery-medium';
-                        this.colorBattery = 'td-text-yellow';
+                        this.colorBattery = '#FFFF00';
                     }
                     else {
                         this.iconBattery = 'mdi-battery-low';
-                        this.colorBattery = 'td-text-red';
+                        this.colorBattery = '#FF3D00';
                     }
 
                     this.info.colorBattery = this.colorBattery;
@@ -3458,7 +3459,7 @@ export default {
                                 // this.droneStatus.startCount++;
                                 //
                                 // if(this.droneStatus.startCount > 16) {
-                                    console.log(this.droneStatus.initHeading, this.heading)
+                                    //console.log(this.droneStatus.initHeading, this.heading)
                                     let cur_heading = this.heading;
                                     let diff = 0;
                                     if(this.$store.state.drone_infos[this.name].circleType === 'cw') {
@@ -3725,20 +3726,50 @@ export default {
                     this.info.num_satellites = this.num_satellites;
                 }
 
-                else if (msg_id === mavlink.MAVLINK_MSG_ID_RADIO_STATUS) {
-                    if (ver === 'fd') {
-                        base_offset = 20;
-                        var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
-                    else {
-                        base_offset = 12;
-                        rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
+                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RADIO_STATUS) {
+                //     if (ver === 'fd') {
+                //         base_offset = 20 + 2;
+                //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //     else {
+                //         base_offset = 12 + 2;
+                //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //
+                //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
+                //     this.info.rssi = this.rssi;
+                //     console.log('MAVLINK_MSG_ID_RADIO_STATUS', this.rssi);
+                // }
 
-                    this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
-                    this.info.rssi = this.rssi;
-                    console.log('MAVLINK_MSG_ID_RADIO_STATUS', this.rssi);
-                }
+                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS_RAW) {
+                //     if (ver === 'fd') {
+                //         base_offset = 20 + 42;
+                //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //     else {
+                //         base_offset = 12 + 42;
+                //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //
+                //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
+                //     this.info.rssi = this.rssi;
+                //     console.log('MAVLINK_MSG_ID_RC_CHANNELS_RAW', this.rssi);
+                // }
+
+                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
+                //     if (ver === 'fd') {
+                //         base_offset = 20 + 46;
+                //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //     else {
+                //         base_offset = 12 + 46;
+                //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //
+                //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
+                //     this.info.rssi = this.rssi;
+                //     console.log('MAVLINK_MSG_ID_RC_CHANNELS_RAW', this.rssi);
+                // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM_REACHED) {
                     if (ver === 'fd') {
@@ -4370,7 +4401,13 @@ export default {
             }
 
             console.log('broadcast_topic', this.broadcast_topic, '-', JSON.stringify(watchingPayload));
-            this.doPublish(this.broadcast_topic, JSON.stringify(watchingPayload));
+            if (this.$store.state.client.connected) {
+                this.$store.state.client.publish(this.broadcast_topic, JSON.stringify(watchingPayload), 0, error => {
+                    if (error) {
+                        console.log('Publish Broadcast error', error)
+                    }
+                });
+            }
 
             this.$store.state.didIPublish = true;
         },
@@ -5205,6 +5242,30 @@ export default {
         //         }
         //     }
         // });
+
+        if (localStorage.getItem('mqttConnection-' + this.name)) {
+            if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
+                this.$store.state.drone_infos[this.name].client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
+                console.log(this.name, 'client', this.$store.state.drone_infos[this.name].client);
+
+                // if(this.$store.state.client.connected) {
+                //     this.$store.state.client.end()
+                // }
+
+                this.$store.state.drone_infos[this.name].client = {
+                    connected: false,
+                }
+
+                localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+            }
+        }
+        else {
+            this.$store.state.drone_infos[this.name].client = {
+                connected: false,
+            }
+        }
+
+        this.createConnection();
     },
 
 
@@ -5243,35 +5304,8 @@ export default {
             }
         }
 
-        //let self = this;
-        // this.connection.host = this.broker;
-        //
-        // if (localStorage.getItem('mqttConnection-' + this.name)) {
-        //     if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
-        //         this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
-        //         console.log('client', this.$store.state.client);
-        //
-        //         // if(this.$store.state.client.connected) {
-        //         //     this.$store.state.client.end()
-        //         // }
-        //
-        //         this.$store.state.client = {
-        //             connected: false,
-        //         }
-        //
-        //         localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
-        //     }
-        // }
 
-        // this.createConnection(function () {
-        //     self.doSubscribe(self.drone_topic);
-        //     console.log('createConnection - Subscribe to ', self.drone_topic);
-        //
-        //     self.doSubscribe(self.broadcast_topic);
-        //     console.log('createConnection - Subscribe to ', self.broadcast_topic);
-        // });
-
-        //this.getDroneMissionInfo();
+        this.getDroneMissionInfo();
 
         console.log('DroneInfo-mounted', this.lat, this.lng);
 
@@ -5288,6 +5322,29 @@ export default {
     },
 
     beforeDestroy() {
+        this.destroyConnection();
+
+        EventBus.$off('do-drone-selected' + this.name);
+        EventBus.$off('do-target-selected' + this.name);
+        EventBus.$off('initialize-' + this.name);
+        EventBus.$off('command-set-pwms-mission-' + this.name);
+        EventBus.$off('command-set-params-' + this.name);
+        EventBus.$off('command-set-disarm-' + this.name);
+        EventBus.$off('command-set-auto_goto-' + this.name);
+        EventBus.$off('command-set-pwms-' + this.name);
+        EventBus.$off('command-set-rtl-' + this.name);
+        EventBus.$off('command-set-land-' + this.name);
+        EventBus.$off('command-set-stop-' + this.name);
+        EventBus.$off('command-set-change-speed-' + this.name);
+        EventBus.$off('command-set-goto-circle-' + this.name);
+        EventBus.$off('command-set-goto-' + this.name);
+        EventBus.$off('command-set-goto-alt-' + this.name);
+        EventBus.$off('command-set-takeoff-' + this.name);
+        EventBus.$off('command-set-mode-' + this.name);
+        EventBus.$off('command-set-mode-' + this.name);
+        EventBus.$off('command-set-arm-' + this.name);
+        EventBus.$off('on-message-handler-' + this.name);
+
         if (this.timer_id) {
             clearInterval(this.timer_id);
         }

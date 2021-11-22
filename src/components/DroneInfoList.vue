@@ -169,7 +169,7 @@
                     username: 'keti_muv',
                     password: 'keti_muv',
                 },
-                drone_topic: {},
+                //drone_topic: {},
                 broadcast_topic: {},
                 droneSubscribeSuccess: {},
                 wsUrl: 'wss://' + 'webrtc.intellicode.info:443' + '/webRTC',
@@ -252,8 +252,8 @@
                                         continue;
                                     }
 
-                                    this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
-                                    this.doUnSubscribe(this.drone_topic[dName]);
+                                    //this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
+                                    //this.doUnSubscribe(this.drone_topic[dName]);
                                     this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
                                     this.doUnSubscribe(this.broadcast_topic[dName]);
                                 }
@@ -270,8 +270,8 @@
                                         }
 
                                         if(this.$store.state.drone_infos[dName].selected) {
-                                            this.doSubscribe(this.drone_topic[dName]);
-                                            console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic[dName]);
+                                            //this.doSubscribe(this.drone_topic[dName]);
+                                            //console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic[dName]);
 
                                             this.doSubscribe(this.broadcast_topic[dName]);
                                             console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
@@ -501,20 +501,21 @@
                     }
                 }
 
-                if (localStorage.getItem('mqttConnection-' + this.name)) {
-                    if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
-                        this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
-                        console.log('client', this.$store.state.client);
-
-                        // if(this.$store.state.client.connected) {
-                        //     this.$store.state.client.end()
-                        // }
+                if (localStorage.getItem('mqttConnection-DroneInfoList')) {
+                    if (JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList')).connected) {
+                        this.$store.state.drone_infos[this.name].client = JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList'));
+                        console.log(this.name, 'client', this.$store.state.client);
 
                         this.$store.state.client = {
                             connected: false,
                         }
 
                         localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+                    }
+                }
+                else {
+                    this.$store.state.client = {
+                        connected: false,
                     }
                 }
 
@@ -559,14 +560,14 @@
                             continue;
                         }
 
-                        this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
-                        this.doUnSubscribe(this.drone_topic[dName]);
+                        //this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
+                        //this.doUnSubscribe(this.drone_topic[dName]);
                         this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
                         this.doUnSubscribe(this.broadcast_topic[dName]);
 
                         if(this.$store.state.drone_infos[dName].selected) {
-                            this.doSubscribe(this.drone_topic[dName]);
-                            console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.drone_topic[dName]);
+                            //this.doSubscribe(this.drone_topic[dName]);
+                            //console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.drone_topic[dName]);
 
                             this.doSubscribe(this.broadcast_topic[dName]);
                             console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
@@ -635,7 +636,6 @@
             EventBus.$off('onResize-DroneInfoList');
             EventBus.$off('gcs-map-ready');
             EventBus.$off('confirm_selected');
-
             EventBus.$off('ws-send-message');
         }
     }
