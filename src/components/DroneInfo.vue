@@ -1690,16 +1690,19 @@ export default {
         destroyConnection() {
             if (this.$store.state.drone_infos[this.name].client.connected) {
                 try {
-                    this.$store.state.drone_infos[this.name].client.end()
+                    if(Object.hasOwnProperty.call(this.$store.state.drone_infos[this.name].client, '__ob__')) {
+                        this.$store.state.drone_infos[this.name].client.end();
+                    }
+
                     this.$store.state.drone_infos[this.name].client = {
                         connected: false,
                     }
+
                     console.log(this.name, 'Successfully disconnected!');
 
                     localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.drone_infos[this.name].client));
                 }
                 catch (error) {
-                    this.$store.state.drone_infos[this.name].client.end()
                     this.$store.state.drone_infos[this.name].client = {
                         connected: false,
                     }
@@ -3768,7 +3771,7 @@ export default {
                 //
                 //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
                 //     this.info.rssi = this.rssi;
-                //     console.log('MAVLINK_MSG_ID_RC_CHANNELS_RAW', this.rssi);
+                //     console.log('MAVLINK_MSG_ID_RC_CHANNELS', this.rssi);
                 // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM_REACHED) {
@@ -5247,10 +5250,6 @@ export default {
             if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
                 this.$store.state.drone_infos[this.name].client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
                 console.log(this.name, 'client', this.$store.state.drone_infos[this.name].client);
-
-                // if(this.$store.state.client.connected) {
-                //     this.$store.state.client.end()
-                // }
 
                 this.$store.state.drone_infos[this.name].client = {
                     connected: false,

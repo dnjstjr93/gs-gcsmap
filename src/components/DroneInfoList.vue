@@ -172,7 +172,8 @@
                 //drone_topic: {},
                 broadcast_topic: {},
                 droneSubscribeSuccess: {},
-                wsUrl: 'wss://' + 'webrtc.intellicode.info:443' + '/webRTC',
+                //wsUrl: 'wss://' + 'webrtc.intellicode.info:443' + '/webRTC',
+                wsUrl: 'wss://' + 'webrtc.iotocean.org:7598' + '/webRTC',
                 ws: null,
             };
         },
@@ -360,7 +361,9 @@
             destroyConnection() {
                 if (this.$store.state.client.connected) {
                     try {
-                        this.$store.state.client.end()
+                        if(Object.hasOwnProperty.call(this.$store.state.client, '__ob__')) {
+                            this.$store.state.client.end();
+                        }
                         this.$store.state.client = {
                             connected: false,
                         }
