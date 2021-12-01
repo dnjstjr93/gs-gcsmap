@@ -63,7 +63,7 @@
                                             <div v-if="d.selected && d.targeted">
                                                 <v-select
                                                         dense hide-details outlined
-                                                        v-if="command.title === commands[0].title" :items="mode_items"
+                                                        v-if="command.title === commands[0].title" :items="$store.state[d.type + '_mode_items']"
                                                         :label="d.name+' 모드: '"
                                                         v-model="targetModeSelection[d.name]"
                                                         class="ml-1 mt-4 mr-1"
@@ -1185,10 +1185,6 @@
                 if (this.target_alt < 75) return 'green'
                 if (this.target_alt < 100) return 'orange'
                 return 'red'
-            },
-
-            mode_items() {
-                return (this.$store.state.mode_items);
             },
 
             // selectedDrone() {

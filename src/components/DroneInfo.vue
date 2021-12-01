@@ -428,7 +428,17 @@
                         </v-col>
                     </v-row>
                     <v-row no-gutters>
-                        <v-col cols="12">
+                        <v-col cols="2">
+                            <v-img v-if="fc_img === 'ardupilot.png'"
+                                src="../assets/ardupilot.png"
+                                alt="Ahn"
+                            ></v-img>
+                            <v-img v-else-if="fc_img === 'px4.png'"
+                                src="../assets/px4.png"
+                                alt="Ahn"
+                            ></v-img>
+                        </v-col>
+                        <v-col cols="10">
                             <v-card class="singleline-ellipsis" outlined tile>
                                 <span style="font-size: 14px">{{ mavStr }}</span>
                                 <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
@@ -930,6 +940,31 @@ export default {
                 14: 'MAV_MISSION_DENIED',
                 15: 'MAV_MISSION_OPERATION_CANCELLED',
             },
+
+            MAV_AUTOPILOT: {
+                0: 'MAV_AUTOPILOT_GENERIC',
+                1: 'MAV_AUTOPILOT_RESERVED',
+                2: 'MAV_AUTOPILOT_SLUGS',
+                3: 'MAV_AUTOPILOT_ARDUPILOTMEGA',
+                4: 'MAV_AUTOPILOT_OPENPILOT',
+                5: 'MAV_AUTOPILOT_GENERIC_WAYPOINTS_ONLY',
+                6: 'MAV_AUTOPILOT_GENERIC_WAYPOINTS_AND_SIMPLE_NAVIGATION_ONLY',
+                7: 'MAV_AUTOPILOT_GENERIC_MISSION_FULL',
+                8: 'MAV_AUTOPILOT_INVALID',
+                9: 'MAV_AUTOPILOT_PPZ',
+                10: 'MAV_AUTOPILOT_UDB',
+                11: 'MAV_AUTOPILOT_FP',
+                12: 'MAV_AUTOPILOT_PX4',
+                13: 'MAV_AUTOPILOT_SMACCMPILOT',
+                14: 'MAV_AUTOPILOT_AUTOQUAD',
+                15: 'MAV_AUTOPILOT_ARMAZILA',
+                16: 'MAV_AUTOPILOT_AEROB',
+                17: 'MAV_AUTOPILOT_ASLUAV',
+                18: 'MAV_AUTOPILOT_SMARTAP',
+                19: 'MAV_AUTOPILOT_AIRRAILS',
+                20: 'MAV_AUTOPILOT_REFLEX',
+            },
+
             enableVideo: false,
             info: {
                 no: this.name,
@@ -968,7 +1003,9 @@ export default {
                 colorMode: 'gray',
                 curMode: 'UNKNOWN',
                 curArmStatus: 'DISARMED'
-            }
+            },
+            fc_img: "ardupilot.png",
+            type: 'ardupilot',
         }
     },
 
@@ -983,9 +1020,6 @@ export default {
         },
         animationDuration() {
             return `${60 / this.bpm}s`
-        },
-        mode_items() {
-            return (this.$store.state.mode_items);
         },
         iconFontSize() {
             return ("font-size: " + (this.airspeed_size / 6) + 'px');
@@ -2668,10 +2702,7 @@ export default {
 
                 delete this.$store.state.targetCircles[target_name];
 
-                var custom_mode = this.$store.state.mode_items.indexOf('AUTO'); // AUTO Mode
-                var base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                setTimeout(this.send_set_mode_command, 50, this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                setTimeout(this.send_set_mode_command, 50, this.name, this.target_pub_topic, this.sys_id, 'AUTO');
             }
             else {
                 result_check_count++;
@@ -3083,7 +3114,18 @@ export default {
             }
         },
 
-        send_set_mode_command(target_name, pub_topic, target_sys_id, base_mode, custom_mode) {
+        send_set_mode_command(target_name, pub_topic, target_sys_id, target_mode) {
+
+            if(this.type === 'px4') {
+                if(target_mode === 'GUIDE') {
+                    target_mode = 'HOLD';
+                }
+            }
+
+            var custom_mode = this.$store.state[this.type + '_mode_items'].indexOf(target_mode);
+            var base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
+            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
+
             var btn_params = {};
             btn_params.target_system = target_sys_id;
             btn_params.base_mode = base_mode;
@@ -3095,7 +3137,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('send_set_mode_command (', this.$store.state.mode_items[custom_mode], ') - ', this.name);
+                    console.log('send_set_mode_command (', this.$store.state[this.type + '_mode_items'][custom_mode], ') - ', this.name);
                     this.doPublish(pub_topic, msg);
                 }
             }
@@ -3188,32 +3230,22 @@ export default {
                 if (msg_id === mavlink.MAVLINK_MSG_ID_HEARTBEAT && ((ver === 'fd') || (ver === 'fe' && mavPacket.length === 34))) {
                     if (ver === 'fd') {
                         var base_offset = 20;
-                        var custom_mode = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var type = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        var autopilot = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        var base_mode = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        var system_status = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        var mavlink_version = mavPacket.substr(base_offset, 2).toLowerCase();
                     }
                     else {
                         base_offset = 12;
-                        custom_mode = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        type = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        autopilot = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        base_mode = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        system_status = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        mavlink_version = mavPacket.substr(base_offset, 2).toLowerCase();
                     }
+
+                    var custom_mode = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var type = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    var autopilot = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    var base_mode = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    var system_status = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    var mavlink_version = mavPacket.substr(base_offset, 2).toLowerCase();
 
                     this.hb.type = Buffer.from(type, 'hex').readUInt8(0);
                     this.hb.autopilot = Buffer.from(autopilot, 'hex').readUInt8(0);
@@ -3221,6 +3253,19 @@ export default {
                     this.hb.custom_mode = Buffer.from(custom_mode, 'hex').readUInt32LE(0);
                     this.hb.system_status = Buffer.from(system_status, 'hex').readUInt8(0);
                     this.hb.mavlink_version = Buffer.from(mavlink_version, 'hex').readUInt8(0);
+
+                    // console.log(this.MAV_AUTOPILOT[this.hb.autopilot]);
+
+                    if(this.hb.autopilot == mavlink.MAV_AUTOPILOT_ARDUPILOTMEGA) {
+                        this.fc_img = 'ardupilot.png';
+                        this.$store.state.drone_infos[this.name].type = 'ardupilot';
+                        this.type = 'ardupilot';
+                    }
+                    else if(this.hb.autopilot == mavlink.MAV_AUTOPILOT_PX4) {
+                        this.fc_img = 'px4.png';
+                        this.$store.state.drone_infos[this.name].type = 'px4';
+                        this.type = 'px4';
+                    }
 
                     if(!Object.hasOwnProperty.call(this.$store.state.trackingLines, this.name)) {
                         if(localStorage.getItem('trackingLines-' + this.name)) {
@@ -3238,7 +3283,6 @@ export default {
                             this.$store.state.trackingLines[this.name] = [];
                         }
 
-
                         this.iconArming = 'mdi-airplane';
                         this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
                         this.curArmStatus = 'ARMED';
@@ -3255,7 +3299,7 @@ export default {
 
                     this.info.curArmStatus = this.curArmStatus;
 
-                    this.curMode = this.mode_items[this.hb.custom_mode];
+                    this.curMode = this.$store.state[this.type + '_mode_items'][this.hb.custom_mode];
 
                     //console.log(this.name, ' - bpm - ', this.bpm);
                     if (this.bpm < 50) {
@@ -3271,6 +3315,43 @@ export default {
                         EventBus.$emit('onResize-DroneInfoList');
                     }
                 }
+
+                // else if (msg_id === mavlink.MAVLINK_MSG_ID_AUTOPILOT_VERSION) {
+                //     if (ver === 'fd') {
+                //         base_offset = 20;
+                //     }
+                //     else {
+                //         base_offset = 12;
+                //     }
+                //
+                //     var capabilities = mavPacket.substr(base_offset, 16).toLowerCase();
+                //     base_offset += 16;
+                //     var flight_sw_version = mavPacket.substr(base_offset, 8).toLowerCase();
+                //     base_offset += 8;
+                //     var middleware_sw_version = mavPacket.substr(base_offset, 8).toLowerCase();
+                //     base_offset += 8;
+                //     var os_sw_version = mavPacket.substr(base_offset, 8).toLowerCase();
+                //     base_offset += 8;
+                //     var board_version = mavPacket.substr(base_offset, 8).toLowerCase();
+                //     base_offset += 8;
+                //     // var flight_custom_version = mavPacket.substr(base_offset, 16).toLowerCase();
+                //     // base_offset += 16;
+                //     // var middleware_custom_version = mavPacket.substr(base_offset, 16).toLowerCase();
+                //     // base_offset += 16;
+                //     // var os_custom_version = mavPacket.substr(base_offset, 16).toLowerCase();
+                //     // base_offset += 16;
+                //     // var vendor_id = mavPacket.substr(base_offset, 4).toLowerCase();
+                //     // base_offset += 4;
+                //     // var product_id = mavPacket.substr(base_offset, 4).toLowerCase();
+                //     // base_offset += 4;
+                //     // var uid = mavPacket.substr(base_offset, 16).toLowerCase();
+                //
+                //     console.log('capabilities', Buffer.from(capabilities, 'hex').readBigUInt64LE(0));
+                //     console.log('flight_sw_version', Buffer.from(flight_sw_version, 'hex').readInt32LE(0));
+                //     console.log('middleware_sw_version', Buffer.from(middleware_sw_version, 'hex').readInt32LE(0));
+                //     console.log('os_sw_version', Buffer.from(os_sw_version, 'hex').readInt32LE(0));
+                //     console.log('board_version', Buffer.from(board_version, 'hex').readInt32LE(0));
+                // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_SYS_STATUS && ((ver === 'fd') || (ver === 'fe' && mavPacket.length === 78))) {
                     // console.log(mavPacket.length);
@@ -3810,10 +3891,7 @@ export default {
                         if(this.droneStatus.mission_count === (this.mission_seq+1)) {
                             console.log('Auto Mission Complete at %s', this.droneStatus.target_name);
 
-                            let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
-                            let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
 
                             this.watchingMission = 'auto-goto-complete';
                         }
@@ -3824,10 +3902,7 @@ export default {
 
                         this.droneStatus.startFlag = false;
 
-                        let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
-                        let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                        base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
 
                         this.watchingMission = 'goto-circle-complete';
                     }
@@ -4163,10 +4238,7 @@ export default {
                             delete this.$store.state.targetCircles[this.droneStatus.target_name];
                         }
 
-                        let custom_mode = this.$store.state.mode_items.indexOf('AUTO'); // AUTO Mode
-                        let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                        base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, 'AUTO');
                     }
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM_INT) {
@@ -4581,21 +4653,14 @@ export default {
                 if (params.wpYawBehavior[this.name] !== undefined) {
                     let param_value = parseInt(params.wpYawBehavior[this.name].charAt(0));
 
+                    let pre_custom_mode = this.$store.state[this.type + '_mode_items'].indexOf(this.curMode);
 
-                    let pre_custom_mode = this.$store.state.mode_items.indexOf(this.curMode);
-
-                    let custom_mode = this.$store.state.mode_items.indexOf('LOITER');
-                    let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                    base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                    setTimeout(this.send_set_mode_command, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                    setTimeout(this.send_set_mode_command, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, 'LOITER');
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
                         this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
 
-                        custom_mode = pre_custom_mode;
-                        base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                        base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                        setTimeout(this.send_set_mode_command, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                        setTimeout(this.send_set_mode_command, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, pre_custom_mode);
 
                     }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
                 }
@@ -4664,10 +4729,7 @@ export default {
 
             this.send_wpnav_speed_param_set_command(this.name, this.target_pub_topic, this.sys_id, auto_speed);
 
-            let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
-            let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
 
             var auto_goto_positions = this.$store.state.drone_infos[this.name].goto_positions.slice(start_idx, (end_idx + 1));
             let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:16:1';
@@ -4785,10 +4847,7 @@ export default {
         });
 
         EventBus.$on('command-set-stop-' + this.name, () => {
-            var custom_mode = this.$store.state.mode_items.indexOf('LOITER');
-            var base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            setTimeout(this.send_set_mode_command, 0, this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            setTimeout(this.send_set_mode_command, 0, this.name, this.target_pub_topic, this.sys_id, 'LOITER');
 
             //this.watchingMission = 'stop';
         });
@@ -4823,10 +4882,7 @@ export default {
                     this.send_circle_rate_param_set_command(name, target_pub_topic, sys_id, degree_speed);
 
                     setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed) => {
-                        let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
-                        let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                        base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                        this.send_set_mode_command(name, target_pub_topic, sys_id, base_mode, custom_mode);
+                        this.send_set_mode_command(name, target_pub_topic, sys_id, 'GUIDED');
 
                         var auto_goto_positions = [];
 
@@ -4921,10 +4977,7 @@ export default {
         });
 
         EventBus.$on('command-set-goto-' + this.name, (position) => {
-            let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
-            let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
 
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
@@ -5052,10 +5105,7 @@ export default {
         });
 
         EventBus.$on('command-set-goto-alt-' + this.name, () => {
-            let custom_mode = this.$store.state.mode_items.indexOf('GUIDED');
-            let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
 
             let _alt = this.$store.state.drone_infos[this.name].targetAlt;
 
@@ -5079,10 +5129,7 @@ export default {
                 console.log("비행체가 이륙된 상태 입니다.");
             }
             else {
-                let custom_mode = this.$store.state.mode_items.indexOf('ALT_HOLD'); // ALT_HOLD Mode
-                let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-                setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+                setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'ALT_HOLD');
 
                 console.log('send_arm_command ', this.name);
                 setTimeout(this.send_arm_command, parseInt(50 + Math.random() * 50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
@@ -5090,19 +5137,15 @@ export default {
                 let takeoffDelay = this.$store.state.drone_infos[this.name].takeoffDelay;
                 let _alt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
 
-                custom_mode = this.$store.state.mode_items.indexOf('GUIDED'); // GUIDED Mode
-                base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-                base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-
                 // setTimeout(this.send_set_mode_command, parseInt(((takeoffDelay) * 1000) + Math.random()*10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
                 //
                 // console.log('send_takeoff_command - alt - delay: ', _alt, takeoffDelay);
                 // setTimeout(this.send_takeoff_command, parseInt((takeoffDelay * 1000) + Math.random()*100), this.name, this.target_pub_topic, this.sys_id, _alt);
 
                 //this.send_set_do_set_home(this.name, this.target_pub_topic, this.sys_id);
-                setTimeout((name, target_pub_topic, sys_id, base_mode, custom_mode, takeoff_alt) => {
+                setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
                     if (this.curArmStatus === 'ARMED') {
-                        this.send_set_mode_command(name, target_pub_topic, sys_id, base_mode, custom_mode);
+                        this.send_set_mode_command(name, target_pub_topic, sys_id, 'GUIDED');
 
                         setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
                             console.log('send_takeoff_command - alt - delay: ', _alt, takeoffDelay);
@@ -5137,33 +5180,25 @@ export default {
                     else {
                         console.log("시동이 걸리지 않았습니다.");
                     }
-                }, parseInt(((takeoffDelay) * 1000) + Math.random() * 10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode, _alt);
+                }, parseInt(((takeoffDelay) * 1000) + Math.random() * 10), this.name, this.target_pub_topic, this.sys_id, _alt);
             }
         });
 
         EventBus.$on('command-set-mode-' + this.name, (selected_mode) => {
-            var custom_mode = this.mode_items.indexOf(selected_mode);
-
-            var base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-
-            setTimeout(this.send_set_mode_command, 1, this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            setTimeout(this.send_set_mode_command, 1, this.name, this.target_pub_topic, this.sys_id, selected_mode);
 
             this.watchingMission = 'mode';
         });
 
         EventBus.$on('command-set-arm-' + this.name, () => {
-            let custom_mode = this.$store.state.mode_items.indexOf('ALT_HOLD'); // ALT_HOLD Mode
-            let base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
-            base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
-            setTimeout((name, target_pub_topic, sys_id, base_mode, custom_mode) => {
-                this.send_set_mode_command(name, target_pub_topic, sys_id, base_mode, custom_mode);
+            setTimeout((name, target_pub_topic, sys_id) => {
+                this.send_set_mode_command(name, target_pub_topic, sys_id, 'ALT_HOLD');
                 setTimeout((name, target_pub_topic, sys_id) => {
                     console.log('send_arm_command ', this.name);
                     this.send_arm_command(name, target_pub_topic, sys_id, 1, 0);
                     this.watchingMission = 'arm';
                 }, parseInt(Math.random() * 5), name, target_pub_topic, sys_id);
-            }, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
+            }, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id);
         });
 
         EventBus.$on('on-message-handler-' + this.name, (payload) => {
