@@ -3222,12 +3222,22 @@ export default {
                     this.hb.system_status = Buffer.from(system_status, 'hex').readUInt8(0);
                     this.hb.mavlink_version = Buffer.from(mavlink_version, 'hex').readUInt8(0);
 
+                    if(!Object.hasOwnProperty.call(this.$store.state.trackingLines, this.name)) {
+                        if(localStorage.getItem('trackingLines-' + this.name)) {
+                            this.$store.state.trackingLines[this.name] = JSON.parse(localStorage.getItem('trackingLines-' + this.name));
+                        }
+                        else {
+                            this.$store.state.trackingLines[this.name] = [];
+                        }
+                    }
+
                     if ((this.hb.base_mode & 0x80) === 0x80) {
                         if (this.curArmStatus === 'DISARMED') {
                             this.$store.state.trackingLines[this.name] = null;
                             delete this.$store.state.trackingLines[this.name];
                             this.$store.state.trackingLines[this.name] = [];
                         }
+
 
                         this.iconArming = 'mdi-airplane';
                         this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
@@ -3547,6 +3557,8 @@ export default {
                             }
 
                             this.$store.state.trackingLines[this.name].push({lat: _payload.lat, lng: _payload.lng});
+
+                            localStorage.setItem('trackingLines-' + this.name, JSON.stringify(this.$store.state.trackingLines[this.name]));
 
                             let temp = JSON.parse(JSON.stringify(this.$store.state.trackingLines[this.name]));
                             this.$store.state.trackingLines[this.name] = null;
