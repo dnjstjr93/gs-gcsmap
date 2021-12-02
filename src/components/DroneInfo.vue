@@ -35,25 +35,33 @@
                                         </v-avatar>
                                     </v-fade-transition>
                                 </v-col>
-                                <v-col cols="3">
+                                <v-col cols="2">
                                     <v-switch
-                                        label="video"
-                                        color="warning"
-                                        class="ma-0 pa-0 pl-2 py-2"
+                                        dark
+                                        prepend-icon="mdi-video"
+                                        :color="$store.state.drone_infos[name].color"
+                                        class="ma-0 pa-0 pl-2"
                                         hide-details
                                         v-model="info.isVideo"
                                         @change="onVideoHandler(name)"
                                         :disabled="!$store.state.enableVideo"
-                                    ></v-switch>
+                                    >
+                                    </v-switch>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-btn
+                                        class="mx-2 my-1" small text outlined
+                                        @click.stop="clearTrackingLines"
+                                    >
+                                        <v-icon>
+                                            mdi-layers-off
+                                        </v-icon>
+                                    </v-btn>
                                 </v-col>
                                 <v-col cols="2">
                                     <div class="text-right">
                                         <v-btn
-                                            class="mr-2"
-                                            fab
-                                            dark
-                                            small
-                                            elevation="10"
+                                            class="mr-1" dark small elevation="10"
                                             :color="$store.state.drone_infos[name].color"
                                             @click.stop="showMyDroneInfoDialog"
                                         >
@@ -3267,21 +3275,22 @@ export default {
                         this.type = 'px4';
                     }
 
-                    if(!Object.hasOwnProperty.call(this.$store.state.trackingLines, this.name)) {
-                        if(localStorage.getItem('trackingLines-' + this.name)) {
-                            this.$store.state.trackingLines[this.name] = JSON.parse(localStorage.getItem('trackingLines-' + this.name));
-                        }
-                        else {
-                            this.$store.state.trackingLines[this.name] = [];
-                        }
-                    }
+                    // if(!Object.hasOwnProperty.call(this.$store.state.trackingLines, this.name)) {
+                    //     console.log('---------------------------------------------------------------------------------------------------')
+                    //     if(localStorage.getItem('trackingLines-' + this.name)) {
+                    //         this.$store.state.trackingLines[this.name] = JSON.parse(localStorage.getItem('trackingLines-' + this.name));
+                    //     }
+                    //     else {
+                    //         this.$store.state.trackingLines[this.name] = [];
+                    //     }
+                    // }
 
                     if ((this.hb.base_mode & 0x80) === 0x80) {
-                        if (this.curArmStatus === 'DISARMED') {
-                            this.$store.state.trackingLines[this.name] = null;
-                            delete this.$store.state.trackingLines[this.name];
-                            this.$store.state.trackingLines[this.name] = [];
-                        }
+                        // if (this.curArmStatus === 'DISARMED') {
+                        //     this.$store.state.trackingLines[this.name] = null;
+                        //     delete this.$store.state.trackingLines[this.name];
+                        //     this.$store.state.trackingLines[this.name] = [];
+                        // }
 
                         this.iconArming = 'mdi-airplane';
                         this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
@@ -4498,6 +4507,12 @@ export default {
 
             this.$store.state.didIPublish = true;
         },
+
+        clearTrackingLines() {
+            this.$store.state.trackingLines[this.name] = null;
+            delete this.$store.state.trackingLines[this.name];
+            this.$store.state.trackingLines[this.name] = [];
+        },
     },
 
     created() {
@@ -5365,6 +5380,20 @@ export default {
 
         this.gpi.lat = parseFloat(this.lat) * 10000000;
         this.gpi.lon = parseFloat(this.lng) * 10000000;
+
+        if(localStorage.getItem('trackingLines-' + this.name)) {
+            this.$store.state.trackingLines[this.name] = JSON.parse(localStorage.getItem('trackingLines-' + this.name));
+
+            let temp = JSON.parse(JSON.stringify(this.$store.state.trackingLines[this.name]));
+            this.$store.state.trackingLines[this.name] = null;
+            delete this.$store.state.trackingLines[this.name];
+            this.$store.state.trackingLines[this.name] = [];
+            this.$store.state.trackingLines[this.name] = JSON.parse(JSON.stringify(temp));
+            temp = null;
+        }
+        else {
+            this.$store.state.trackingLines[this.name] = [];
+        }
     },
 
     beforeDestroy() {
