@@ -68,20 +68,33 @@
                         <!--                      :icon="{ url: require('../assets/black-24dp/2x/outline_room_black_24dp.png')}"-->
 
                         <div v-if="readyFlagGcsMap">
-                            <div v-for="(pName, mIndex) in tempMarkers" :key="'targetTempMarker_'+mIndex">
-                                <GmapMarker
-                                        v-for="(pos, pIndex) in pName" :key="pIndex"
-                                        :position="{lat:pos.lat, lng:pos.lng}"
-                                        :clickable="true"
-                                        :draggable="true"
-                                        @dblclick="selectTempMarker($event, mIndex, pIndex)"
-                                        @click="targetTempMarker($event, mIndex, pIndex)"
-                                        @dragend="updateTempPosition($event, mIndex, pIndex)"
-                                        :icon="pos.m_icon"
-                                        :label="pos.m_label"
-                                        :title="mIndex  + ':' + pos.alt  + ':' + pos.speed  + ':' + pos.radius"
-                                />
-                            </div>
+<!--                            <div v-for="(pName, mIndex) in tempMarkers" :key="'targetTempMarker_'+mIndex">-->
+<!--                                <GmapMarker-->
+<!--                                        v-for="(pos, pIndex) in pName" :key="pIndex"-->
+<!--                                        :position="{lat:pos.lat, lng:pos.lng}"-->
+<!--                                        :clickable="true"-->
+<!--                                        :draggable="true"-->
+<!--                                        @dblclick="selectTempMarker($event, mIndex, pIndex)"-->
+<!--                                        @click="targetTempMarker($event, mIndex, pIndex)"-->
+<!--                                        @dragend="updateTempPosition($event, mIndex, pIndex)"-->
+<!--                                        :icon="pos.m_icon"-->
+<!--                                        :label="pos.m_label"-->
+<!--                                        :title="mIndex  + ':' + pos.alt  + ':' + pos.speed  + ':' + pos.radius"-->
+<!--                                />-->
+<!--                            </div>-->
+
+                            <GmapMarker
+                                v-for="(pos, pIndex) in $store.state.tempMarkers.unknown" :key="'marker'+pIndex"
+                                :position="{lat:pos.lat, lng:pos.lng}"
+                                :clickable="true"
+                                :draggable="true"
+                                @dblclick="selectTempMarker($event, 'unknown', pIndex)"
+                                @click="targetTempMarker($event, 'unknown', pIndex)"
+                                @dragend="updateTempPosition($event, 'unknown', pIndex)"
+                                :icon="pos.m_icon"
+                                :label="pos.m_label"
+                                :title="'unknown'  + ':' + pos.alt  + ':' + pos.speed  + ':' + pos.radius"
+                            />
 
                             <GmapPolyline
                                     v-for="(line, lIndex) in $store.state.trackingLines" :key="'trackingLline_'+lIndex"
@@ -98,6 +111,19 @@
 
                             <div v-for="drone in $store.state.drone_infos" :key="'guideCircles_'+drone.id">
                                 <div v-if="drone.selected">
+                                    <GmapMarker
+                                        v-for="(pos, pIndex) in $store.state.tempMarkers[drone.name]" :key="'marker'+pIndex"
+                                        :position="{lat:pos.lat, lng:pos.lng}"
+                                        :clickable="true"
+                                        :draggable="true"
+                                        @dblclick="selectTempMarker($event, drone.name, pIndex)"
+                                        @click="targetTempMarker($event, drone.name, pIndex)"
+                                        @dragend="updateTempPosition($event, drone.name, pIndex)"
+                                        :icon="pos.m_icon"
+                                        :label="pos.m_label"
+                                        :title="drone.name  + ':' + pos.alt  + ':' + pos.speed  + ':' + pos.radius"
+                                    />
+
                                     <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
                                             :radius="2"
@@ -201,7 +227,7 @@
     import InfoMarker from "./InfoMarker";
     import EventBus from "@/EventBus";
     import {nanoid} from "nanoid";
-    import {gmapApi} from 'vue2-google-maps'
+    import {gmapApi} from 'vue2-google-maps';
 
     var curElevationVal = 0;
 
@@ -305,7 +331,7 @@
                 }
             },
 
-            tempMarkers: {
+            ['$store.state.tempMarkers']: {
                 deep: true,
                 handler: function (newVal) {
                     console.log('watch-tempMakers', newVal);
@@ -365,9 +391,9 @@
             gotoMarkers() {
                 return (this.$store.state.gotoMarkers);
             },
-            tempMarkers() {
-                return (this.$store.state.tempMarkers);
-            },
+            // tempMarkers() {
+            //     return (this.$store.state.tempMarkers);
+            // },
             defaultDroneIcon() {
                 return (this.$store.state.defaultDroneIcon);
             },

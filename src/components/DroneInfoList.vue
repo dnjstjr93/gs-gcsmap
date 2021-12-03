@@ -245,7 +245,7 @@
 
                             this.$store.state.client.loading = false;
 
-                            localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+                            localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
 
                             for(let dName in this.$store.state.drone_infos) {
                                 if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
@@ -369,7 +369,7 @@
                         }
                         console.log(this.name, 'Successfully disconnected!');
 
-                        localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+                        localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
                     }
                     catch (error) {
                         console.log('Disconnect failed', error.toString())
@@ -506,14 +506,14 @@
 
                 if (localStorage.getItem('mqttConnection-DroneInfoList')) {
                     if (JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList')).connected) {
-                        this.$store.state.drone_infos[this.name].client = JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList'));
+                        this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList'));
                         console.log(this.name, 'client', this.$store.state.client);
 
                         this.$store.state.client = {
                             connected: false,
                         }
 
-                        localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
+                        localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
                     }
                 }
                 else {

@@ -23,6 +23,8 @@ Vue.use(Vuex)
 // <v-row justify="space-around"></v-row> // centered - spaced evenly around
 // <v-row justify="space-between"></v-row> // not centered - spaced evenly between
 
+import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+
 const defaultForm = Object.freeze({
     first: '',
     last: '',
@@ -37,20 +39,23 @@ const _defaultPosition = Object(
         type: 'goto',
         owner: 'unknown',
         m_icon: {
-            path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
+            //path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
+            path: faMapMarkerAlt.icon[4],
             fillColor: "grey",
             fillOpacity: 0.9,
             strokeWeight: 0.9,
             strokeColor: 'grey',
             rotation: 0,
-            scale: 1.8,
-            anchor: {x: 12, y: 24},
-            labelOrigin: {x: 12, y: 12}
+            scale: 0.07,
+            // anchor: {x: 12, y: 24},
+            anchor: {x: faMapMarkerAlt.icon[0] / 2, y: faMapMarkerAlt.icon[1]},
+            labelOrigin: {x: faMapMarkerAlt.icon[0] / 2, y: 0},
+            // labelOrigin: {x: 12, y: 12}
         },
         m_label: {
             text: 'T',
             color: 'white',
-            fontSize: '25px',
+            fontSize: '26px',
             fontWeight: 'bold'
         },
         selected: false,
@@ -518,8 +523,8 @@ export default new Vuex.Store({
                     pos.m_label.fontSize = '14px';
                     pos.m_label.text = 'T:' + String(pos.alt);
 
-                    state.drone_infos['unknown'].color = pos.color;
-                    state.tempMarkers['unknown'].push(pos);
+                    state.drone_infos.unknown.color = pos.color;
+                    state.tempMarkers.unknown.push(pos);
                     pos = null;
                 }
             }
@@ -530,9 +535,7 @@ export default new Vuex.Store({
 
             // let self = this;
             let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-
             state.tempMarkers = null;
-
             state.tempMarkers = JSON.parse(JSON.stringify(temp));
             temp = null;
 
@@ -543,7 +546,6 @@ export default new Vuex.Store({
             let drone = state.drone_infos[payload.pName];
 
             let mav_cmd = (drone.goto_positions[payload.pIndex].split(':')[6])?drone.goto_positions[payload.pIndex].split(':')[6]:16;
-
             let targetStayTime = (drone.goto_positions[payload.pIndex].split(':')[7])?drone.goto_positions[payload.pIndex].split(':')[7]:1;
 
             drone.goto_positions[payload.pIndex] = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
@@ -788,6 +790,7 @@ export default new Vuex.Store({
             marker.elevation = payload.elevation;
             marker.targetMavCmd = payload.targetMavCmd;
             marker.targetStayTime = payload.targetStayTime;
+
             marker.m_icon.fillColor = payload.color;
             marker.m_label.fontSize = '14px';
             marker.m_label.text = ((payload.pName === 'unknown') ? 'T' : String(state.tempMarkers[payload.pName].length)) + ':' + String(marker.alt);
@@ -811,7 +814,7 @@ export default new Vuex.Store({
 
         cancelTempMarker(state) {
             if (state.adding) {
-                state.tempMarkers['unknown'].pop();
+                state.tempMarkers.unknown.pop();
                 state.tempPayload = {};
             }
 
@@ -886,7 +889,7 @@ export default new Vuex.Store({
             oldPos.m_icon.fillColor = 'grey';
             oldPos.m_label.text = 'T:' + String(oldPos.alt);
 
-            let count = state.tempMarkers['unknown'].push(oldPos);
+            let count = state.tempMarkers.unknown.push(oldPos);
 
             oldPos = null;
 
@@ -929,7 +932,7 @@ export default new Vuex.Store({
         removeAllMarker(state, payload) {
             console.log('removeAllMarker', payload);
 
-            let unknownMarker = JSON.parse(JSON.stringify(state.tempMarkers['unknown']));
+            let unknownMarker = JSON.parse(JSON.stringify(state.tempMarkers.unknown));
             state.tempMarkers = null;
             state.tempMarkers = {};
             state.tempMarkers.unknown = JSON.parse(JSON.stringify(unknownMarker));
@@ -1447,6 +1450,7 @@ export default new Vuex.Store({
                         }
 
                         if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'client')) {
+
                             state.drone_infos[dName].client = {
                                 connected: false,
                                 loading: false
@@ -1455,8 +1459,8 @@ export default new Vuex.Store({
 
                         state.tempMarkers[dName] = null;
                         state.tempMarkers[dName] = [];
-                        state.trackingLines[dName] = null;
-                        state.trackingLines[dName] = [];
+                        // state.trackingLines[dName] = null;
+                        // state.trackingLines[dName] = [];
 
                         if (state.drone_infos[dName].selected) {
                             let drone = state.drone_infos[dName];

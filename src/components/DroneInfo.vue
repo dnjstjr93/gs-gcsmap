@@ -1616,35 +1616,28 @@ export default {
         },
 
         createConnection() {
-            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[this.name], 'client')) {
-                this.$store.state.drone_infos[this.name].client = {
-                    connected: false,
-                    loading: false
-                };
-            }
-
-            if (this.$store.state.drone_infos[this.name].client.connected) {
+            if (this.client.connected) {
                 console.log('DroneInfo', this.name, 'createConnection', 'destroyConnection')
                 this.destroyConnection();
             }
 
-            if (!this.$store.state.drone_infos[this.name].client.connected) {
+            if (!this.client.connected) {
 
-                this.$store.state.drone_infos[this.name].client.loading = true;
+                this.client.loading = true;
                 this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
                 this.connection.host = this.$store.state.VUE_APP_MOBIUS_HOST;
                 const {host, port, endpoint, ...options} = this.connection;
                 const connectUrl = `ws://${host}:${port}${endpoint}`
                 try {
-                    this.$store.state.drone_infos[this.name].client = mqtt.connect(connectUrl, options);
+                    this.client = mqtt.connect(connectUrl, options);
 
-                    this.$store.state.drone_infos[this.name].client.on('connect', () => {
+                    this.client.on('connect', () => {
                         console.log(this.name, host, 'DroneInfo Connection succeeded!');
 
-                        this.$store.state.drone_infos[this.name].client.connected = true;
-                        this.$store.state.drone_infos[this.name].client.loading = false;
+                        this.client.connected = true;
+                        this.client.loading = false;
 
-                        localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.drone_infos[this.name].client));
+                        //localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
 
                         this.drone_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + this.name + '/#';
                         this.doUnSubscribe(this.drone_topic);
@@ -1655,13 +1648,13 @@ export default {
                         }, 200);
                     });
 
-                    this.$store.state.drone_infos[this.name].client.on('error', (error) => {
+                    this.client.on('error', (error) => {
                         console.log('Drone Connection failed', error);
 
                         this.destroyConnection();
                     });
 
-                    this.$store.state.drone_infos[this.name].client.on('close', () => {
+                    this.client.on('close', () => {
                         console.log('Drone Connection closed');
 
                         this.destroyConnection();
@@ -1669,7 +1662,7 @@ export default {
                         this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
                     });
 
-                    this.$store.state.drone_infos[this.name].client.on('message', (topic, message) => {
+                    this.client.on('message', (topic, message) => {
                         // this.receiveNews = this.receiveNews.concat(message)
                         //console.log(`Received message ${message} from topic ${topic}`);
 
@@ -1684,16 +1677,16 @@ export default {
                 }
                 catch (error) {
                     console.log('mqtt.connect error', error);
-                    this.$store.state.drone_infos[this.name].client.connected = false;
+                    this.client.connected = false;
                 }
             }
         },
 
         doSubscribe(topic) {
-            if (this.$store.state.drone_infos[this.name].client.connected) {
+            if (this.client.connected) {
                 const qos = 0;
                 let self = this;
-                this.$store.state.drone_infos[this.name].client.subscribe(topic, {qos}, (error) => {
+                this.client.subscribe(topic, {qos}, (error) => {
                     if (error) {
                         console.log('Subscribe to topics error', error)
                         return
@@ -1704,9 +1697,9 @@ export default {
         },
 
         doUnSubscribe(topic) {
-            if (this.$store.state.drone_infos[this.name].client.connected) {
+            if (this.client.connected) {
                 let self = this;
-                this.$store.state.drone_infos[this.name].client.unsubscribe(topic, error => {
+                this.client.unsubscribe(topic, error => {
                     if (error) {
                         console.log('Unsubscribe error', error)
                     }
@@ -1720,8 +1713,8 @@ export default {
         },
 
         doPublish(topic, payload) {
-            if (this.$store.state.drone_infos[this.name].client.connected) {
-                this.$store.state.drone_infos[this.name].client.publish(topic, payload, 0, error => {
+            if (this.client.connected) {
+                this.client.publish(topic, payload, 0, error => {
                     if (error) {
                         console.log('Publish error', error)
                     }
@@ -1730,27 +1723,29 @@ export default {
         },
 
         destroyConnection() {
-            if (this.$store.state.drone_infos[this.name].client.connected) {
+            if (this.client.connected) {
                 try {
-                    if(Object.hasOwnProperty.call(this.$store.state.drone_infos[this.name].client, '__ob__')) {
-                        this.$store.state.drone_infos[this.name].client.end();
+                    if(Object.hasOwnProperty.call(this.client, '__ob__')) {
+                        this.client.end();
                     }
 
-                    this.$store.state.drone_infos[this.name].client = {
+                    this.client = {
                         connected: false,
-                    }
+                        loading: false
+                    };
 
                     console.log(this.name, 'Successfully disconnected!');
 
-                    localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.drone_infos[this.name].client));
+                    //localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
                 }
                 catch (error) {
-                    this.$store.state.drone_infos[this.name].client = {
+                    this.client = {
                         connected: false,
-                    }
-                    localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.drone_infos[this.name].client));
+                        loading: false
+                    };
+                    //localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
 
-                    console.log('Disconnect failed', this.name, error.toString())
+                    console.log('Disconnect failed', this.name, error.toString());
                 }
             }
         },
@@ -5308,23 +5303,24 @@ export default {
         //     }
         // });
 
-        if (localStorage.getItem('mqttConnection-' + this.name)) {
-            if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
-                this.$store.state.drone_infos[this.name].client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
-                console.log(this.name, 'client', this.$store.state.drone_infos[this.name].client);
-
-                this.$store.state.drone_infos[this.name].client = {
-                    connected: false,
-                }
-
-                localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.$store.state.client));
-            }
-        }
-        else {
-            this.$store.state.drone_infos[this.name].client = {
+        // if (localStorage.getItem('mqttConnection-' + this.name)) {
+        //     if (JSON.parse(localStorage.getItem('mqttConnection-' + this.name)).connected) {
+        //         this.client = JSON.parse(localStorage.getItem('mqttConnection-' + this.name));
+        //         console.log(this.name, 'client', this.client);
+        //
+        //         this.client = {
+        //             connected: false,
+        //         }
+        //
+        //         localStorage.setItem('mqttConnection-' + this.name, JSON.stringify(this.client));
+        //     }
+        // }
+        // else {
+            this.client = {
                 connected: false,
-            }
-        }
+                loading: false
+            };
+        // }
 
         this.createConnection();
     },
