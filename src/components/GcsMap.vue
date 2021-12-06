@@ -686,7 +686,7 @@
                     let payload = {};
 
                     if (selected) {
-                                          payload.pName = pName;
+                        payload.pName = pName;
                         payload.pIndex = pIndex;
                         payload.value = selected;
                         this.$store.commit('setTempMarker', payload);
@@ -1575,7 +1575,7 @@
         position: absolute;
         left: 0;
         top: 0;
-        opacity: 0.85;
+        opacity: 0.93;
         z-index: 2;
         width: 100%;
     }

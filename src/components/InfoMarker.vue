@@ -1,23 +1,25 @@
 <template>
     <v-card flat>
-        <v-snackbar
-                v-model="snackbar"
-                absolute
-                top
-                right
-                color="success"
-        >
+        <v-snackbar v-model="snackbar" absolute top right color="success">
             <span>Action successful!</span>
             <v-icon dark right>
                 mdi-checkbox-marked-circle
             </v-icon>
         </v-snackbar>
-        <v-form
-                ref="form"
-                @submit.prevent="submit"
-        >
+        <v-form ref="form" @submit.prevent="submit">
             <v-card tile flat>
-                <v-row align="center" justify="center" style="height: 260px">
+                <v-row align="center" justify="center">
+                    <v-col cols="12">
+                        <v-card flat tile class="px-5">
+                            <v-radio-group label="Marker Type:" v-model="$store.state.tempMarkers[markerName].type" row hide-details mandatory>
+                                <v-radio label="Goto" value="Goto"></v-radio>
+                                <v-radio label="Circle" value="Circle"></v-radio>
+                                <v-radio label="Survey" value="Survey"></v-radio>
+                            </v-radio-group>
+                        </v-card>
+                    </v-col>
+                </v-row>
+                <v-row align="center" justify="center">
                     <v-col cols="4">
                         <v-card flat tile>
                             <v-row align="center" justify="center">
@@ -30,6 +32,7 @@
                                             :disabled="disableTargetSelect"
                                             dense
                                             hide-details
+                                            single-line
                                     >
                                         <template v-slot:selection="data">
                                             <v-chip class="ma-0"
@@ -117,7 +120,7 @@
                             </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="2" class="text-center">
+                    <v-col cols="2" v-if="$store.state.tempMarkers[markerName].type === 'Goto'" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">비행고도</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetAlt}}</span>
@@ -171,7 +174,7 @@
                             </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="2" class="text-center">
+                    <v-col cols="2" v-if="$store.state.tempMarkers[markerName].type === 'Goto'" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">비행속도</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetSpeed}}</span>
@@ -225,7 +228,7 @@
                             </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="2" class="text-center">
+                    <v-col cols="2" v-if="$store.state.tempMarkers[markerName].type === 'Circle'" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">선회반지름</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetRadius}}</span>
@@ -279,7 +282,7 @@
                             </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="2" class="text-center">
+                    <v-col cols="2" v-if="$store.state.tempMarkers[markerName].type === 'Circle'" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">선회속도</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetTurningSpeed}}</span>
@@ -356,32 +359,15 @@
             </v-card>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn
-                        text
-                        @click="resetForm"
-                        outlined
-                >
+                <v-btn text @click="resetForm" outlined>
                     Cancel
                 </v-btn>
                 <v-spacer></v-spacer>
-                <v-btn
-                        text
-                        color="primary"
-                        type="submit"
-                        :disabled="conditions"
-                        outlined
-                >
+                <v-btn text color="primary" type="submit" outlined :disabled="conditions">
                     Register
                 </v-btn>
                 <v-spacer></v-spacer>
-                <v-btn
-                        text
-                        color="warning"
-                        fab
-                        dark
-                        @click="deleteMarker"
-                        outlined
-                >
+                <v-btn text color="warning" fab dark @click="deleteMarker" outlined>
                     <v-icon>mdi-delete</v-icon>
                 </v-btn>
                 <v-spacer></v-spacer>
@@ -423,7 +409,7 @@
                     'Vuetify',
                 ],
 
-                targetTypes: ['Goto', 'Turn'],
+                targetTypes: ['Goto', 'Circle', 'Survey'],
                 targetType: 'Goto',
                 targetSelect: '',
                 targetSelectIndex: '0',

@@ -696,9 +696,9 @@ export default {
             selectedItem: -1,
             colorSelectedNumber: 'deep-orange darken-4',
             positions: [
-                {type: 'turn', text: '37.0000000:127.0000000:100.0:100.0:5', icon: 'mdi-google-circles-group'},
-                {type: 'goto', text: '37.0000000:127.0000000:100.0', icon: 'mdi-logout-variant'},
-                {type: 'goto', text: '37.0000000:127.0000000:100.0', icon: 'mdi-logout-variant'},
+                {type: 'Circle', text: '37.0000000:127.0000000:100.0:100.0:5', icon: 'mdi-google-circles-group'},
+                {type: 'Goto', text: '37.0000000:127.0000000:100.0', icon: 'mdi-logout-variant'},
+                {type: 'Goto', text: '37.0000000:127.0000000:100.0', icon: 'mdi-logout-variant'},
             ],
             absolute: true,
             opacity: 0.8,
@@ -1058,7 +1058,7 @@ export default {
                 for (let i in newData) {
                     if (Object.prototype.hasOwnProperty.call(newData, i)) {
                         let goto_pos = {};
-                        goto_pos.type = 'goto';
+                        goto_pos.type = 'Goto';
                         goto_pos.text = newData[i];
                         goto_pos.icon = 'mdi-logout-variant';
                         this.positions.push(goto_pos);
@@ -1126,40 +1126,36 @@ export default {
             let sortie = newData;
             let mission_topic = '/oneM2M/req/Mobius2/' + this.name + '/json';
 
-            function resParentSubscription() {
-                this.getSubscription(sortie, (res) => {
-                    console.log('getSubscription', res);
-
-                    if (res.status === 200) {
-                        //EventBus.$emit('do-subscribe', mission_topic);
-
-                        this.doSubscribe(mission_topic);
-
-                        this.droneSubscribeSuccess[mission_topic] = true;
-                        console.log('Subscribe mission topic to ', mission_topic);
-                    }
-                    else {
-                        this.createSubscription(sortie, function (res) {
-                            console.log('createSubscription', res);
-
-                            if (res.status === 201 || res.status === 409) {
-                                //EventBus.$emit('do-subscribe', mission_topic);
-
-                                this.doSubscribe(mission_topic);
-
-                                this.droneSubscribeSuccess[mission_topic] = true;
-                                console.log('Subscribe mission topic to ', mission_topic);
-                            }
-                        });
-                    }
-                });
-            }
-
             this.getParentSubscription(sortie, (res) => {
                 console.log('getParentSubscription', res);
 
                 if (res.status === 200) {
-                    resParentSubscription();
+                    this.getSubscription(sortie, (res) => {
+                        console.log('getSubscription', res);
+
+                        if (res.status === 200) {
+                            //EventBus.$emit('do-subscribe', mission_topic);
+
+                            this.doSubscribe(mission_topic);
+
+                            this.droneSubscribeSuccess[mission_topic] = true;
+                            console.log('Subscribe mission topic to ', mission_topic);
+                        }
+                        else {
+                            this.createSubscription(sortie, function (res) {
+                                console.log('createSubscription', res);
+
+                                if (res.status === 201 || res.status === 409) {
+                                    //EventBus.$emit('do-subscribe', mission_topic);
+
+                                    this.doSubscribe(mission_topic);
+
+                                    this.droneSubscribeSuccess[mission_topic] = true;
+                                    console.log('Subscribe mission topic to ', mission_topic);
+                                }
+                            });
+                        }
+                    });
                 }
                 else {
                     let tid = setInterval(this.getParentSubscription, 2000, sortie, (res) => {
@@ -1351,7 +1347,7 @@ export default {
                 for (let i in this.$store.state.drone_infos[this.name].goto_positions) {
                     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[this.name].goto_positions, i)) {
                         let goto_pos = {};
-                        goto_pos.type = 'goto';
+                        goto_pos.type = 'Goto';
                         goto_pos.text = this.$store.state.drone_infos[this.name].goto_positions[i];
                         goto_pos.icon = 'mdi-logout-variant';
                         this.positions.push(goto_pos);
@@ -5333,7 +5329,7 @@ export default {
         //     if(Object.prototype.hasOwnProperty.call(this.goto_positions, i)) {
         //         // console.log('DroneInfo-mounted', this.goto_positions[i]);
         //         let goto_pos = {};
-        //         goto_pos.type = 'goto';
+        //         goto_pos.type = 'Goto';
         //         goto_pos.text = this.goto_positions[i];
         //         goto_pos.icon = 'mdi-logout-variant';
         //         this.positions.push(goto_pos);
@@ -5353,7 +5349,7 @@ export default {
                     this.$store.state.tempMarkers[this.name][idx].elevation;
 
                 let goto_pos = {};
-                goto_pos.type = 'goto';
+                goto_pos.type = 'Goto';
                 goto_pos.text = str;
                 goto_pos.icon = 'mdi-logout-variant';
                 this.positions.push(goto_pos);
