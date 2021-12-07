@@ -49,6 +49,17 @@
                             :title="d.name"
                         />
 
+                        <GmapMarker
+                            v-for="(p, pIndex) in planeMarkers" :key="'targetPlaneMarker_'+pIndex"
+                            :position="{lat: p.lat, lng: p.lng}"
+                            :clickable="false"
+                            :draggable="false"
+                            :icon="p.icon"
+                            :label="p.label"
+                            @click="targetPlaneMarker($event, p, pIndex)"
+                            :title="p.name"
+                        />
+
 <!--                        <div v-for="(m, mIndex) in gotoMarkers" :key="mIndex">-->
 <!--                            <GmapMarker-->
 <!--                                    v-for="(pos, pIndex) in m.positions"-->
@@ -274,6 +285,8 @@
                 myWidth: window.innerWidth,
                 readyFlagGcsMap: false,
                 droneMarkers: {},
+                planeMarkers: {},
+
                 map: null,
                 // targetCirclesOptions: {},
 
@@ -286,6 +299,9 @@
 
                 boundaryCircles: {},
                 curBoundaryRadius: 100,
+
+                preADSB: {},
+                count: {},
 
                 // missionCirclesOptions: {
                 //     strokeColor: 'amber',
@@ -399,6 +415,9 @@
             },
             defaultDroneLabel() {
                 return (this.$store.state.defaultDroneLabel);
+            },
+            defaultPlaneIcon() {
+                return (this.$store.state.defaultPlaneIcon);
             },
             myGcsStyle() {
                 return ("width: " + window.innerWidth + "px'" + "; height: " + (this.myHeight) + 'px')
@@ -767,6 +786,52 @@
                     }
                     this.$forceUpdate();
                 }
+            },
+
+            targetPlaneMarker(e, pMarker, pName) {
+
+                if(pName === 'unknown') {
+                    return;
+                }
+
+                console.log('targetPlaneMarker - pMarker', pMarker);
+                console.log('targetPlaneMarker - pName', pName);
+
+                if(!Object.prototype.hasOwnProperty.call(pMarker, 'icon')) {
+                    pMarker.icon = JSON.parse(JSON.stringify(this.$store.state.defaultPlaneIcon));
+                }
+
+                let temp = JSON.parse(JSON.stringify(pMarker.icon));
+
+                pMarker.icon = null;
+                pMarker.icon = JSON.parse(JSON.stringify(temp));
+                pMarker.icon.strokeWeight = 3;
+                pMarker.icon.strokeOpacity = 0.5
+                pMarker.icon.strokeColor = 'orange';
+
+                //if(this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회') {
+                for(let pIndex in this.$store.state.tempMarkers[pName]) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[pName], pIndex)) {
+                        if (this.$store.state.tempMarkers[pName][pIndex].targeted) {
+                            let payload = {};
+                            payload.pName = pName;
+                            payload.pIndex = pIndex;
+                        }
+                    }
+                }
+
+                pMarker = this.clone(pMarker);
+
+                temp = null;
+
+                // this.$store.state.drone_infos[pName].targeted = pMarker.selected;
+
+                // EventBus.$emit('do-targetPlane');
+
+                // temp = JSON.parse(JSON.stringify(this.$store.state.dronesChecked));
+                // this.$store.state.dronesChecked = null;
+                // this.$store.state.dronesChecked = JSON.parse(JSON.stringify(temp));
+                // temp = null;
             },
 
             targetDroneMarker(e, dMarker, dName) {
@@ -1344,6 +1409,24 @@
                 // });
             });
 
+            setInterval(() => {
+                for (let idx in this.planeMarkers) {
+
+                    if ((this.preADSB[idx].lat == this.planeMarkers[idx].lat) && (this.preADSB[idx].lng == this.planeMarkers[idx].lng)) {
+                        if (this.count[idx] > 20) {
+                            EventBus.$emit('clearPlaneMarker', this.planeMarkers[idx].ICAO_address);
+                        }
+                        this.count[idx]++;
+                        // EventBus.$emit('clearAllPlaneMarker', '');
+                    } else {
+                        this.preADSB[idx].ICAO_address = this.planeMarkers[idx].ICAO_address;
+                        this.preADSB[idx].lat = this.planeMarkers[idx].lat;
+                        this.preADSB[idx].lng = this.planeMarkers[idx].lng;
+                    }
+
+                }
+            }, 1000);
+
             EventBus.$on('do-centerCurrentPosition', (positionCenter) => {
                 this.center = positionCenter;
             });
@@ -1395,6 +1478,11 @@
                 this.targetDroneMarker('', dMarker, pName);
             });
 
+            EventBus.$on('do-targetPlaneMarker', (pName) => {
+                let pMarker = this.planeMarkers[pName];
+                this.targetPlaneMarker('', pMarker, pName);
+            });
+
             EventBus.$on('gcs-map-ready', () => {
                 this.readyFlagGcsMap = true;
 
@@ -1429,6 +1517,67 @@
 
                     console.log('gotoLines', this.gotoLines);
                 }
+            });
+
+            EventBus.$on('updatePlaneMarker', (payload) => {
+                this.$refs.mapRef.$mapPromise.then((map) => {
+                    this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                });
+
+                if(!Object.prototype.hasOwnProperty.call(this.planeMarkers, payload.ICAO_address)) {
+                    this.planeMarkers[payload.ICAO_address] = {};
+                    this.preADSB[payload.ICAO_address] = {};
+                    this.count[payload.ICAO_address] = 0;
+                }
+                this.planeMarkers[payload.ICAO_address].ICAO_address = payload.ICAO_address;
+                this.planeMarkers[payload.ICAO_address].lat = payload.lat;
+                this.planeMarkers[payload.ICAO_address].lng = payload.lng;
+                this.planeMarkers[payload.ICAO_address].alt = payload.alt;
+                this.planeMarkers[payload.ICAO_address].heading = payload.heading;
+                this.planeMarkers[payload.ICAO_address].speed = payload.speed;
+                this.planeMarkers[payload.ICAO_address].callsign = payload.callsign;
+                this.planeMarkers[payload.ICAO_address].squawk = payload.squawk;
+                this.planeMarkers[payload.ICAO_address].name = 'ICAO_address : ' + payload.ICAO_address + '\n' +
+                    'lat : ' + payload.lat + '\n' +
+                    'lng : ' + payload.lng + '\n' +
+                    'alt : ' + payload.alt + '\n' +
+                    'heading : ' + payload.heading + '\n' +
+                    'speed : ' + payload.speed + '\n' +
+                    'callsign : ' + payload.callsign + '\n' +
+                    'squawk : ' + payload.squawk;
+                this.planeMarkers[payload.ICAO_address].icon = null;
+                this.planeMarkers[payload.ICAO_address].icon = {};
+
+                this.planeMarkers[payload.ICAO_address].icon = JSON.parse(JSON.stringify(this.$store.state.defaultPlaneIcon));
+
+                this.planeMarkers[payload.ICAO_address].icon.rotation = payload.heading;
+                this.planeMarkers = this.clone(this.planeMarkers);
+
+                payload = null;
+            });
+
+            EventBus.$on('clearPlaneMarker', (dName) => {
+                if (Object.prototype.hasOwnProperty.call(this.planeMarkers, dName)) {
+                    delete this.planeMarkers[dName];
+                    delete this.preADSB[dName];
+                    delete this.count[dName];
+
+                    this.planeMarkers = this.clone(this.planeMarkers);
+                    this.preADSB = this.clone(this.preADSB);
+
+                }
+            });
+
+            EventBus.$on('clearAllPlaneMarker', () => {
+                for(let dName in this.planeMarkers) {
+                    if (Object.prototype.hasOwnProperty.call(this.planeMarkers, dName)) {
+                        this.planeMarkers[dName] = null;
+                        this.planeMarkers[dName] = {};
+                    }
+                }
+
+                this.planeMarkers = null;
+                this.planeMarkers = {};
             });
 
             EventBus.$on('updateDroneMarker', (payload) => {
