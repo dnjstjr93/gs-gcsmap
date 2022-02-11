@@ -481,13 +481,17 @@
                                         active-class="primary--text"
                                         :center-active="true"
                                         show-arrows
+                                        class="px-3"
                                     >
                                         <draggable v-model="positions">
                                             <v-chip
                                                 v-for="(position, i) in positions" :key="'pos_chip'+i"
                                                 @click="selectedPosition(i)"
+                                                label
+                                                outlined
                                             >
                                                 {{ String(i) }}
+                                                <v-icon :color="evalAltColor[i]" class="ml-1">mdi-altimeter</v-icon>
                                             </v-chip>
                                         </draggable>
                                     </v-chip-group>
@@ -681,6 +685,8 @@ export default {
 
     data() {
         return {
+            evalAltColor: [],
+
             hud_gap: 31,
             showLoadWaypointsBtn: true,
             strWaypoints: null,
@@ -698,7 +704,7 @@ export default {
             positions: [
                 {type: 'Circle', text: '37.0000000:127.0000000:100.0:100.0:5', icon: 'mdi-google-circles-group'},
                 {type: 'Goto', text: '37.0000000:127.0000000:100.0', icon: 'mdi-logout-variant'},
-                {type: 'Goto', text: '37.0000000:127.0000000:100.0', icon: 'mdi-logout-variant'},
+                {type: 'Survey', text: '37.0000000:127.0000000:100.0', icon: 'mdi-logout-variant'},
             ],
             absolute: true,
             opacity: 0.8,
@@ -1049,19 +1055,43 @@ export default {
             this.showLoadWaypointsBtn = !newVal;
         },
 
-        goto_positions: {
+        '$store.state.tempMarkers': {
             deep: true,
             handler: function (newData) {
                 //console.log('DroneInfo-watch-goto_positions', newData);
 
                 this.positions = [];
-                for (let i in newData) {
-                    if (Object.prototype.hasOwnProperty.call(newData, i)) {
-                        let goto_pos = {};
-                        goto_pos.type = 'Goto';
-                        goto_pos.text = newData[i];
-                        goto_pos.icon = 'mdi-logout-variant';
-                        this.positions.push(goto_pos);
+                for (let dName in newData) {
+                    if (Object.prototype.hasOwnProperty.call(newData, dName)) {
+                        if(dName === this.name) {
+                            for (let pIndex in newData[dName]) {
+                                let goto_pos = {};
+                                goto_pos.type = 'Goto';
+                                goto_pos.text = newData[dName][pIndex].lat + ':' +
+                                    newData[dName][pIndex].lng + ':' +
+                                    newData[dName][pIndex].alt + ':' +
+                                    newData[dName][pIndex].speed + ':' +
+                                    newData[dName][pIndex].radius + ':' +
+                                    newData[dName][pIndex].turningSpeed + ':' +
+                                    newData[dName][pIndex].targetMavCmd + ':' +
+                                    newData[dName][pIndex].targetStayTime + ':' +
+                                    newData[dName][pIndex].elevation;
+                                goto_pos.icon = 'mdi-logout-variant';
+
+                                let diffAlt = newData[dName][pIndex].alt - newData[dName][pIndex].elevation;
+                                if(diffAlt > 5) {
+                                    this.evalAltColor[pIndex] = 'green';
+                                }
+                                else if(diffAlt > 0) {
+                                    this.evalAltColor[pIndex] = 'yellow';
+                                }
+                                else {
+                                    this.evalAltColor[pIndex] = 'red';
+                                }
+
+                                this.positions.push(goto_pos);
+                            }
+                        }
                     }
                 }
                 this.$forceUpdate();
@@ -1157,17 +1187,17 @@ export default {
                         }
                     });
                 }
-                else {
-                    let tid = setInterval(this.getParentSubscription, 2000, sortie, (res) => {
-                        console.log('getParentSubscription', res);
-
-                        if (res.status === 200) {
-                            clearInterval(tid);
-
-                            resParentSubscription();
-                        }
-                    });
-                }
+                // else {
+                //     let tid = setInterval(this.getParentSubscription, 2000, sortie, (res) => {
+                //         console.log('getParentSubscription', res);
+                //
+                //         if (res.status === 200) {
+                //             clearInterval(tid);
+                //
+                //             resParentSubscription();
+                //         }
+                //     });
+                // }
             });
         },
         // iconArming: function (newData) {
@@ -1235,7 +1265,7 @@ export default {
                                     String(objMyDroneInfo.targetRadius) + ':' +
                                     String(objMyDroneInfo.targetTurningSpeed) + ':' +
                                     String(arrWaypoint[3])  + ':' +
-                                    String(arrWaypoint[4])  + ':0';
+                                    String(arrWaypoint[4])  + ':0.0:0';
 
                                 console.log(strGotoPosition);
 
@@ -1343,17 +1373,30 @@ export default {
                 this.$store.state.drone_infos[this.name] = JSON.parse(JSON.stringify(temp));
                 temp = null;
 
-                this.positions = [];
-                for (let i in this.$store.state.drone_infos[this.name].goto_positions) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[this.name].goto_positions, i)) {
-                        let goto_pos = {};
-                        goto_pos.type = 'Goto';
-                        goto_pos.text = this.$store.state.drone_infos[this.name].goto_positions[i];
-                        goto_pos.icon = 'mdi-logout-variant';
-                        this.positions.push(goto_pos);
-                    }
-                }
-                this.$forceUpdate();
+                // this.positions = [];
+                // for (let i in this.$store.state.drone_infos[this.name].goto_positions) {
+                //     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[this.name].goto_positions, i)) {
+                //         let goto_pos = {};
+                //         if(typeof this.$store.state.drone_infos[this.name].goto_positions[i][9] === 'undefined') {
+                //             goto_pos.type = 'Goto';
+                //         }
+                //         else {
+                //             if(this.$store.state.drone_infos[this.name].goto_positions[i][9] === '2') {
+                //                 goto_pos.type = 'Survey';
+                //             }
+                //             else if(this.$store.state.drone_infos[this.name].goto_positions[i][9] === '1') {
+                //                 goto_pos.type = 'Circle';
+                //             }
+                //             else {
+                //                 goto_pos.type = 'Goto';
+                //             }
+                //         }
+                //         goto_pos.text = this.$store.state.drone_infos[this.name].goto_positions[i];
+                //         goto_pos.icon = 'mdi-logout-variant';
+                //         this.positions.push(goto_pos);
+                //     }
+                // }
+                // this.$forceUpdate();
 
                 this.$store.commit('updateDroneInfosSelected');
 
@@ -1366,38 +1409,38 @@ export default {
             this.dialog = false;
         },
 
-        postDroneInfos(callback) {
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Info',
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=4'
-                },
-                data: {
-                    'm2m:cin': {
-                        con: this.$store.state.drone_infos
-                    }
-                }
-            }).then(
-                function (res) {
-                    console.log('postDroneInfos-axios', res.data);
-
-                    callback(res);
-                }
-            ).catch(
-                function (err) {
-                    console.log(err.message);
-
-                    callback(err)
-                }
-            );
-        },
+        // postDroneInfos(callback) {
+        //     axios({
+        //         validateStatus: function (status) {
+        //             // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+        //             return status < 500;
+        //         },
+        //         method: 'post',
+        //         url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Info',
+        //         headers: {
+        //             'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+        //             'X-M2M-Origin': 'SVue',
+        //             'Content-Type': 'application/json;ty=4'
+        //         },
+        //         data: {
+        //             'm2m:cin': {
+        //                 con: this.$store.state.drone_infos
+        //             }
+        //         }
+        //     }).then(
+        //         function (res) {
+        //             console.log('postDroneInfos-axios', res.data);
+        //
+        //             callback(res);
+        //         }
+        //     ).catch(
+        //         function (err) {
+        //             console.log(err.message);
+        //
+        //             callback(err)
+        //         }
+        //     );
+        // },
 
         currentPosition() {
             EventBus.$emit('do-centerCurrentPosition', {lat: this.gpi.lat / 10000000, lng: this.gpi.lon / 10000000})
@@ -4519,6 +4562,18 @@ export default {
                     this.$store.state.tempMarkers[this.name][idx].targetMavCmd + ':' +
                     this.$store.state.tempMarkers[this.name][idx].targetStayTime + ':' +
                     this.$store.state.tempMarkers[this.name][idx].elevation;
+
+                let diffAlt = this.$store.state.tempMarkers[this.name][idx].alt - this.$store.state.tempMarkers[this.name][idx].elevation;
+                if(diffAlt > 5) {
+                    this.evalAltColor[idx] = 'green';
+                }
+                else if(diffAlt > 0) {
+                    this.evalAltColor[idx] = 'yellow';
+                }
+                else {
+                    this.evalAltColor[idx] = 'red';
+                }
+
                 this.positions.push(str);
             }
         }
@@ -5211,6 +5266,40 @@ export default {
             this.onMessageHandler(payload.topic, payload.message);
         });
 
+        EventBus.$on('do-positions-elevation-' + this.name, () => {
+            for (let idx in this.$store.state.tempMarkers[this.name]) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[this.name], idx)) {
+                    let str = this.$store.state.tempMarkers[this.name][idx].lat + ':' +
+                        this.$store.state.tempMarkers[this.name][idx].lng + ':' +
+                        this.$store.state.tempMarkers[this.name][idx].alt + ':' +
+                        this.$store.state.tempMarkers[this.name][idx].speed + ':' +
+                        this.$store.state.tempMarkers[this.name][idx].radius + ':' +
+                        this.$store.state.tempMarkers[this.name][idx].turningSpeed + ':' +
+                        this.$store.state.tempMarkers[this.name][idx].targetMavCmd + ':' +
+                        this.$store.state.tempMarkers[this.name][idx].targetStayTime + ':' +
+                        this.$store.state.tempMarkers[this.name][idx].elevation;
+
+                    let diffAlt = this.$store.state.tempMarkers[this.name][idx].alt - this.$store.state.tempMarkers[this.name][idx].elevation;
+                    if(diffAlt > 5) {
+                        this.evalAltColor[idx] = 'green';
+                    }
+                    else if(diffAlt > 0) {
+                        this.evalAltColor[idx] = 'yellow';
+                    }
+                    else {
+                        this.evalAltColor[idx] = 'red';
+                    }
+
+                    let goto_pos = {};
+                    goto_pos.type = 'Goto';
+                    goto_pos.text = str;
+                    goto_pos.icon = 'mdi-logout-variant';
+                    this.positions.push(goto_pos);
+                    goto_pos = null;
+                }
+            }
+        });
+
         // EventBus.$on('push-status-' + this.name, (payload) => {
         //     //console.log(payload);
         //
@@ -5357,7 +5446,6 @@ export default {
             }
         }
 
-
         this.getDroneMissionInfo();
 
         console.log('DroneInfo-mounted', this.lat, this.lng);
@@ -5411,6 +5499,8 @@ export default {
         EventBus.$off('command-set-mode-' + this.name);
         EventBus.$off('command-set-arm-' + this.name);
         EventBus.$off('on-message-handler-' + this.name);
+
+        EventBus.$off('do-positions-elevation-' + this.name);
 
         if (this.timer_id) {
             clearInterval(this.timer_id);

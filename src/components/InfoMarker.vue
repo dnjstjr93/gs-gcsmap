@@ -11,7 +11,7 @@
                 <v-row align="center" justify="center">
                     <v-col cols="12">
                         <v-card flat tile class="px-5">
-                            <v-radio-group label="Marker Type:" v-model="$store.state.tempMarkers[markerName].type" row hide-details mandatory>
+                            <v-radio-group label="Marker Type:" v-model="targetType" row hide-details @change="selectTargetType($event)">
                                 <v-radio label="Goto" value="Goto"></v-radio>
                                 <v-radio label="Circle" value="Circle"></v-radio>
                                 <v-radio label="Survey" value="Survey"></v-radio>
@@ -120,7 +120,7 @@
                             </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="2" v-if="$store.state.tempMarkers[markerName].type === 'Goto'" class="text-center">
+                    <v-col cols="2" v-if="targetType === 'Goto'" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">비행고도</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetAlt}}</span>
@@ -174,7 +174,7 @@
                             </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="2" v-if="$store.state.tempMarkers[markerName].type === 'Goto'" class="text-center">
+                    <v-col cols="2" v-if="targetType === 'Goto'" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">비행속도</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetSpeed}}</span>
@@ -228,7 +228,7 @@
                             </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="2" v-if="$store.state.tempMarkers[markerName].type === 'Circle'" class="text-center">
+                    <v-col cols="2" v-if="targetType === 'Circle'" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">선회반지름</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetRadius}}</span>
@@ -282,7 +282,7 @@
                             </v-row>
                         </v-card>
                     </v-col>
-                    <v-col cols="2" v-if="$store.state.tempMarkers[markerName].type === 'Circle'" class="text-center">
+                    <v-col cols="2" v-if="targetType === 'Circle'" class="text-center">
                         <v-card flat tile>
                             <span class="display-0 font-weight-bold">선회속도</span>
                             <span class="pl-6 display-1 font-weight-light">{{targetTurningSpeed}}</span>
@@ -605,7 +605,7 @@
                 else {
                     this.disableTargetSelect = false;
                 }
-            }
+            },
         },
 
         computed: {
@@ -643,6 +643,7 @@
             },
 
             curDroneColorMap() {
+                console.log('curDroneColorMap', this.targetSelect, this.$store.state.drone_infos[this.targetSelect])
                 return (this.$store.state.drone_infos[this.targetSelect].color);
             },
 
@@ -738,6 +739,40 @@
             incrementTurningSpeed () {
                 this.targetTurningSpeed++;
             },
+
+            selectTargetType(event) {
+                this.$store.state.tempMarkers[this.markerName][this.markerIndex].type = event;
+
+                var m_icon = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName][this.markerIndex].m_icon));
+
+                if(this.$store.state.tempMarkers[this.markerName][this.markerIndex].type === 'Goto') {
+                    m_icon.path = this.$store.state.defaultGotoMarkerIcon.path;
+                    m_icon.anchor = this.$store.state.defaultGotoMarkerIcon.anchor;
+                    m_icon.labelOrigin = this.$store.state.defaultGotoMarkerIcon.labelOrigin;
+                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].m_icon = JSON.parse(JSON.stringify(m_icon));
+                }
+                else if(this.$store.state.tempMarkers[this.markerName][this.markerIndex].type === 'Circle') {
+                    m_icon.path = this.$store.state.defaultCircleMarkerIcon.path;
+                    m_icon.anchor = this.$store.state.defaultCircleMarkerIcon.anchor;
+                    m_icon.labelOrigin = this.$store.state.defaultCircleMarkerIcon.labelOrigin;
+                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].m_icon = JSON.parse(JSON.stringify(m_icon));
+                }
+                else {
+                    m_icon.path = this.$store.state.defaultGotoMarkerIcon.path;
+                    m_icon.anchor = this.$store.state.defaultGotoMarkerIcon.anchor;
+                    m_icon.labelOrigin = this.$store.state.defaultGotoMarkerIcon.labelOrigin;
+                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].m_icon = JSON.parse(JSON.stringify(m_icon));
+                }
+
+                console.log('InfoMarker:selectTargetType - ' + this.$store.state.tempMarkers[this.markerName][this.markerIndex].type);
+
+                let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers));
+                this.$store.state.tempMarkers = null;
+                this.$store.state.tempMarkers = JSON.parse(JSON.stringify(temp));
+                temp = null;
+
+                this.targetType = this.$store.state.tempMarkers[this.markerName][this.markerIndex].type;
+            },
         },
 
         created() {
@@ -761,6 +796,10 @@
             }
 
             this.elevation = this.marker.elevation;
+
+            this.targetType = this.marker.type;
+
+            console.log('InfoMarker', this.$store.state.tempMarkers[this.markerName]);
         }
     }
 </script>

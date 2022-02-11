@@ -111,18 +111,27 @@
 
                             <div v-for="drone in $store.state.drone_infos" :key="'guideCircles_'+drone.id">
                                 <div v-if="drone.selected">
-                                    <GmapMarker
-                                        v-for="(pos, pIndex) in $store.state.tempMarkers[drone.name]" :key="'marker'+pIndex"
-                                        :position="{lat:pos.lat, lng:pos.lng}"
-                                        :clickable="true"
-                                        :draggable="true"
-                                        @dblclick="selectTempMarker($event, drone.name, pIndex)"
-                                        @click="targetTempMarker($event, drone.name, pIndex)"
-                                        @dragend="updateTempPosition($event, drone.name, pIndex)"
-                                        :icon="pos.m_icon"
-                                        :label="pos.m_label"
-                                        :title="drone.name  + ':' + pos.alt  + ':' + pos.speed  + ':' + pos.radius"
-                                    />
+                                    <div v-for="(pos, pIndex) in $store.state.tempMarkers[drone.name]" :key="'marker'+pIndex">
+                                        <GmapMarker
+                                            :position="{lat:pos.lat, lng:pos.lng}"
+                                            :clickable="true"
+                                            :draggable="true"
+                                            @dblclick="selectTempMarker($event, drone.name, pIndex)"
+                                            @click="targetTempMarker($event, drone.name, pIndex)"
+                                            @dragend="updateTempPosition($event, drone.name, pIndex)"
+                                            :icon="pos.m_icon"
+                                            :label="pos.m_label"
+                                            :title="drone.name  + ':' + pos.alt  + ':' + pos.speed  + ':' + pos.radius"
+                                        />
+
+                                      <div v-if="$store.state.tempMarkers[drone.name][pIndex].type === 'Circle'">
+                                        <GmapCircle
+                                            :center="{lat: $store.state.tempMarkers[drone.name][pIndex].lat, lng: $store.state.tempMarkers[drone.name][pIndex].lng}"
+                                            :radius="50"
+                                            :options="{fillOpacity: 0, strokeColor: '#D50000', strokeOpacity: 1, strokeWeight: 1}"
+                                        ></GmapCircle>
+                                      </div>
+                                    </div>
 
                                     <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
@@ -340,6 +349,7 @@
                     for (let pName in newVal) {
                         if(Object.prototype.hasOwnProperty.call(newVal, pName)) {
                             if (pName !== 'unknown') {
+                                console.log('***************************************************', newVal)
                                 newVal[pName].forEach((pos) => {
                                     if (!Object.prototype.hasOwnProperty.call(this.gotoLines, pName)) {
                                         this.gotoLines[pName] = null;
@@ -361,7 +371,7 @@
                         }
                     }
 
-                    this.curTargets = Object.keys(newVal);
+                    this.curTargets = Object.keys(this.$store.state.drone_infos);
 
                     console.log('curTargets', this.curTargets);
 
@@ -378,6 +388,19 @@
                     this.$forceUpdate();
                 }
             },
+
+            // ['$store.state.drone_infos']: {
+            //     deep: true,
+            //     handler: function (newVal) {
+            //         console.log('watch-drone_infos', newVal);
+            //
+            //         this.curTargets = Object.keys(newVal);
+            //
+            //         console.log('curTargets', this.curTargets);
+            //
+            //         this.$forceUpdate();
+            //     }
+            // },
 
             curFlagMarker: function (newVal, oldVal) {
                 if(oldVal) {
@@ -480,7 +503,7 @@
                     console.log('curElevation', val);
 
                     this.$store.state.tempPayload.elevation = val;
-
+                    this.$store.state.tempPayload.type = 0;
 
                     this.$store.commit('confirmAddTempMarker', false);
 
@@ -526,6 +549,7 @@
                 payload.targetStayTime = 1;
                 payload.color = 'grey';
                 payload.elevation = 0;
+                payload.type = 'Goto';
                 this.$store.commit('setDroneColorMap', payload); //JSON.parse(JSON.stringify(payload)));
 
                 this.$store.commit('addingTempMarker', payload);
@@ -678,11 +702,9 @@
                     console.log('selectTempMarker - pName', pName);
                     console.log('selectTempMarker - pIndex', pIndex);
 
-
                     let selected = !this.$store.state.tempMarkers[pName][pIndex].selected;
 
                     this.$store.commit('setAllTempMarker', false);
-
                     let payload = {};
 
                     if (selected) {
@@ -706,7 +728,6 @@
 
                             this.$store.state.tempMarkers[pName][pIndex].elevation = val;
 
-                            this.curFlagMarker = true;
                             if (!Object.hasOwnProperty.call(this.$store.state.tempMarkers[pName][pIndex], 'targetStayTime')) {
                                 this.$store.state.tempMarkers[pName][pIndex].targetStayTime = 1;
                             }
@@ -723,6 +744,7 @@
                             this.curSelectedMarker = this.$store.state.tempMarkers[pName][pIndex];
                             this.curIndexMarker = pIndex;
                             this.curNameMarker = pName;
+                            this.curFlagMarker = true;
 
                             console.log('curSelectedMarker', pName, pIndex, this.$store.state.tempMarkers[pName][pIndex]);
                         });
@@ -1402,13 +1424,13 @@
                     map.setTilt(45);
                 });
 
-                console.log('GcsMap-mounted-tempMarker', this.tempMarkers);
+                console.log('GcsMap-mounted-tempMarker', this.$store.state.tempMarkers);
 
-                for (let pName in this.tempMarkers) {
-                    if(Object.prototype.hasOwnProperty.call(this.tempMarkers, pName)) {
-                        console.log('GcsMap-mounted-tempMarker', pName, this.tempMarkers);
+                for (let pName in this.$store.state.tempMarkers) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, pName)) {
+                        console.log('GcsMap-mounted-tempMarker', pName, this.$store.state.tempMarkers);
                         if (pName !== 'unknown') {
-                            this.tempMarkers[pName].forEach((pos) => {
+                            this.$store.state.tempMarkers[pName].forEach((pos) => {
                                 if (!Object.prototype.hasOwnProperty.call(this.gotoLines, pName)) {
                                     this.gotoLines[pName] = [];
                                     this.gotoLinesOptions[pName] = {};
@@ -1428,6 +1450,23 @@
                     }
 
                     console.log('gotoLines', this.gotoLines);
+                }
+            });
+
+            EventBus.$on('draw-gotoLines', (payload) => {
+                let dName = payload.dName
+                if (dName !== 'unknown') {
+                    this.$store.state.tempMarkers[dName].forEach((pos) => {
+                        if (!Object.prototype.hasOwnProperty.call(this.gotoLines, dName)) {
+                            this.gotoLines[dName] = [];
+                            this.gotoLinesOptions[dName] = {};
+                            this.gotoLinesOptions[dName].strokeColor = pos.m_icon.fillColor;
+                            this.gotoLinesOptions[dName].strokeOpacity = 0.2;
+                            this.gotoLinesOptions[dName].strokeWeight = 10;
+                        }
+
+                        this.gotoLines[dName].push(pos);
+                    });
                 }
             });
 
@@ -1566,6 +1605,8 @@
             EventBus.$off('on-message-handler-gcsmap');
             EventBus.$off('doBroadcastRegisterMaker');
             EventBus.$off('doBroadcastDeleteMaker');
+
+            EventBus.$off('draw-gotoLines');
         }
     }
 </script>

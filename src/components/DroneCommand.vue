@@ -189,7 +189,7 @@
                                                             <v-col cols="4">
                                                                 <v-select
                                                                         dense outlined hide-details
-                                                                        :items="d.goto_positions" label="Goto positions"
+                                                                        :items="position_selections_items[d.name]" label="Goto positions"
                                                                         v-model="position_selections[d.name]"
                                                                         @change="selectedPosition($event, d)"
                                                                         class="mt-4"
@@ -259,7 +259,7 @@
                                                             <v-col cols="4">
                                                                 <v-select
                                                                         dense outlined hide-details
-                                                                        :items="d.goto_positions" label="Center positions"
+                                                                        :items="position_selections_items[d.name]" label="Center positions"
                                                                         v-model="position_selections[d.name]"
                                                                         @change="selectedPosition($event, d)"
                                                                         class="ml-1 mt-4 mr-1"
@@ -1077,6 +1077,7 @@
                 active_tab: 'virtual',
                 target_alt: 20,
 
+                position_selections_items: {},
                 position_selections: {},
                 position_selections_index: {},
                 position_selections_elevation: {},
@@ -1115,6 +1116,31 @@
             }
         },
         watch: {
+            '$store.state.tempMarkers': {
+                deep: true,
+                handler: function (newData) {
+                    for (let dName in newData) {
+                        if (Object.prototype.hasOwnProperty.call(newData, dName)) {
+                            this.position_selections_items[dName] = [];
+                            for (let pIndex in newData[dName]) {
+                                if (Object.prototype.hasOwnProperty.call(newData[dName], pIndex)) {
+                                    let strPos = newData[dName][pIndex].lat + ':' +
+                                        newData[dName][pIndex].lng + ':' +
+                                        newData[dName][pIndex].alt + ':' +
+                                        newData[dName][pIndex].speed + ':' +
+                                        newData[dName][pIndex].radius + ':' +
+                                        newData[dName][pIndex].turningSpeed + ':' +
+                                        newData[dName][pIndex].targetMavCmd + ':' +
+                                        newData[dName][pIndex].targetStayTime + ':' +
+                                        newData[dName][pIndex].elevation;
+                                    this.position_selections_items[dName].push(strPos);
+                                }
+                            }
+                        }
+                    }
+                    this.$forceUpdate();
+                }
+            },
             // selectedDrone: {
             //     deep: true,
             //     handler: function (newVal) {
@@ -1198,6 +1224,33 @@
         created() {
             this.context_left = this.$store.state.command_tab_left_x;
 
+            EventBus.$on('gcs-map-ready', () => {
+                setTimeout(() => {
+                    console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%DroneCommand', 'gcs-map-ready', this.$store.state.tempMarkers);
+                    for (let dName in this.$store.state.tempMarkers) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
+                            this.position_selections_items[dName] = [];
+                            for (let pIndex in this.$store.state.tempMarkers[dName]) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
+                                    let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].alt + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].speed + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].radius + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].turningSpeed + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].targetMavCmd + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].targetStayTime + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].elevation;
+                                    this.position_selections_items[dName].push(strPos);
+                                }
+                            }
+                        }
+                    }
+
+                    console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%DroneCommand', 'gcs-map-ready', this.position_selections_items);
+                }, 2000);
+            });
+
             EventBus.$on('do-targetDrone', () => {
                 console.log('DroneCommand-do-targetDrone');
 
@@ -1272,7 +1325,7 @@
 
                 if(payload.value) {
                     this.position_selections_index[payload.pName] = payload.pIndex;
-                    this.position_selections[payload.pName] = this.$store.state.drone_infos[payload.pName].goto_positions[payload.pIndex];
+                    this.position_selections[payload.pName] = this.position_selections_items[payload.pName][payload.pIndex];
                     this.position_selections_elevation[payload.pName] = parseFloat(this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation).toFixed(1);
                 }
                 else {
@@ -1287,7 +1340,7 @@
             EventBus.$on('update-goto-positions', (payload) => {
                 console.log('update-goto-positions', payload);
 
-                this.position_selections[payload.pName] = this.$store.state.drone_infos[payload.pName].goto_positions[payload.pIndex];
+                this.position_selections[payload.pName] = this.position_selections_items[payload.pName][payload.pIndex];
 
                 this.$forceUpdate();
             });
@@ -1407,7 +1460,7 @@
             },
 
             selectedPosition: function(event, d) {
-                this.position_selections_index[d.name] = d.goto_positions.indexOf(event);
+                this.position_selections_index[d.name] = this.position_selections_items[d.name].indexOf(event);
 
                 let pIndex = this.position_selections_index[d.name];
                 let pName = d.name;
@@ -1497,7 +1550,13 @@
                 this.curTab = 'virtual';
                 this.active_tab = 'virtual';
 
-                this.$store.commit('saveCurrentDroneInfos');
+                for(let name in this.$store.state.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                        if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                            this.$store.commit('saveCurrentDroneInfos', name);
+                        }
+                    }
+                }
             },
 
             setMode() {
@@ -1796,6 +1855,7 @@
             },
         },
         beforeDestroy() {
+            EventBus.$off('gcs-map-ready');
             EventBus.$off('do-targetDrone');
             EventBus.$off('do-selected-position');
             EventBus.$off('update-goto-positions');
