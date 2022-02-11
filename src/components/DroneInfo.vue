@@ -853,6 +853,7 @@ export default {
             mid_v: (this.bat_cell * 3.95),
             min_v: (this.bat_cell * 3.75),
             ss: {voltage_battery: 44000},
+            adsb: {ICAO_address: '12K345', lat: 370000000, lon: 1270000000, attitude: 1000000, heading: 100, callsign: 'KETI', speed: 100, squawk: 0},
             att: {},
             rc1_max: {},
             rc1_min: {},
@@ -923,6 +924,8 @@ export default {
             strContentEach: '',
 
             droneStatus: {},
+
+            ADSB_Monitor_Flag: false,
 
             MAV_CMD_ACK_CODE: {
                 0: 'MAV_CMD_ACK_OK',
@@ -1194,7 +1197,32 @@ export default {
                 //         if (res.status === 200) {
                 //             clearInterval(tid);
                 //
-                //             resParentSubscription();
+                //             this.getSubscription(sortie, (res) => {
+                //
+                //                 console.log('getSubscription', res);
+                //
+                //                 if (res.status === 200) {
+                //                     //EventBus.$emit('do-subscribe', mission_topic);
+                //                     console.log(mission_topic);
+                //                     this.doSubscribe(mission_topic);
+                //
+                //                     this.droneSubscribeSuccess[mission_topic] = true;
+                //                     console.log('Subscribe mission topic to ', mission_topic);
+                //                 } else {
+                //                     this.createSubscription(sortie, function (res) {
+                //                         console.log('createSubscription', res);
+                //
+                //                         if (res.status === 201 || res.status === 409) {
+                //                             //EventBus.$emit('do-subscribe', mission_topic);
+                //
+                //                             this.doSubscribe(mission_topic);
+                //
+                //                             this.droneSubscribeSuccess[mission_topic] = true;
+                //                             console.log('Subscribe mission topic to ', mission_topic);
+                //                         }
+                //                     });
+                //                 }
+                //             });
                 //         }
                 //     });
                 // }
@@ -4314,7 +4342,93 @@ export default {
 
                     console.log(this.name, 'MAVLINK_MSG_ID_COMMAND_ACK', '-', this.result_command_ack[sys_id].command, this.MAV_CMD_ACK_CODE[this.result_command_ack[sys_id].command_result]);
                 }
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_ADSB_VEHICLE) {
+                    if (ver === 'fd') {
+                        base_offset = 20;
+                        var ICAO_address = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        var adsb_lat = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        var adsb_lon = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        var attitude = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        // var attitude_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                        // base_offset += 2;
+                        var heading = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        var hor_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        var ver_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        var flag = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        var squawk = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        var callsign = mavPacket.substr(base_offset, 20).toLowerCase();
+                        base_offset += 20;
+                        var emitter_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                        base_offset += 2;
+                        var tslc = mavPacket.substr(base_offset, 2).toLowerCase();
+                    } else {
+                        base_offset = 12;
+                        ICAO_address = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        adsb_lat = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        adsb_lon = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        attitude = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        // attitude_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                        // base_offset += 2;
+                        heading = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        hor_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        ver_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        flag = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        squawk = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        callsign = mavPacket.substr(base_offset, 20).toLowerCase();
+                        base_offset += 20;
+                        emitter_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                        base_offset += 2;
+                        tslc = mavPacket.substr(base_offset, 2).toLowerCase();
+                    }
 
+                    this.adsb.ICAO_address = Buffer.from(ICAO_address, 'hex').readUInt32LE(0).toString(16).toUpperCase();
+                    this.adsb.lat = Buffer.from(adsb_lat, 'hex').readInt32LE(0);
+                    this.adsb.lon = Buffer.from(adsb_lon, 'hex').readInt32LE(0);
+                    this.adsb.attitude = Buffer.from(attitude, 'hex').readInt32LE(0);
+                    this.adsb.heading = Buffer.from(heading, 'hex').readUInt16LE(0);
+                    this.adsb.hor_velocity = Buffer.from(hor_velocity, 'hex').readUInt16LE(0);
+                    this.adsb.ver_velocity = Buffer.from(ver_velocity, 'hex').readInt16LE(0);
+                    this.adsb.speed = Math.sqrt(Math.pow(this.adsb.hor_velocity, 2) + Math.pow(this.adsb.ver_velocity, 2))
+                    this.adsb.callsign = Buffer.from(callsign, "hex").toString('ASCII').toUpperCase();
+                    this.adsb.emitter_type = Buffer.from(emitter_type, 'hex').readUInt8(0);
+                    this.adsb.tslc = Buffer.from(tslc, 'hex').readInt8(0);
+                    this.adsb.flag = Buffer.from(flag, 'hex').readUInt16LE(0);
+                    this.adsb.squawk = Buffer.from(squawk, 'hex').readUInt16LE(0);
+
+                    if (this.ADSB_Monitor_Flag) {
+                        let _payload = {};
+                        _payload.ICAO_address = this.adsb.ICAO_address;
+                        _payload.lat = (this.adsb.lat / 10000000);
+                        _payload.lng = (this.adsb.lon / 10000000);
+                        _payload.alt = Math.round(this.adsb.attitude / 1000);
+                        _payload.heading = Math.round(this.adsb.heading / 100);
+                        _payload.speed = Math.round(this.adsb.speed / 100);
+                        _payload.callsign = (this.adsb.callsign.replace(/\0/g, '').replace('  ', ''));
+                        _payload.squawk = this.adsb.squawk;
+
+                        EventBus.$emit('updatePlaneMarker', JSON.parse(JSON.stringify(_payload)));
+                    } else {
+                        EventBus.$emit('clearAllPlaneMarker', '');
+                    }
+                }
                 mavPacket = null;
             }
             catch (e) {
@@ -4657,6 +4771,10 @@ export default {
         // EventBus.$on('push-heading-' + this.name, (payload) => {
         //     this.heading = payload.heading;
         // });
+
+        EventBus.$on('ClickADSBMonitor', (flag) => {
+            this.ADSB_Monitor_Flag = flag;
+        });
 
         EventBus.$on('do-drone-selected' + this.name, (value_selected) => {
             console.log(value_selected);
@@ -5500,6 +5618,7 @@ export default {
         EventBus.$off('command-set-arm-' + this.name);
         EventBus.$off('on-message-handler-' + this.name);
 
+        EventBus.$off('ClickADSBMonitor');
         EventBus.$off('do-positions-elevation-' + this.name);
 
         if (this.timer_id) {

@@ -6,13 +6,22 @@
                     <v-card ref="prev" flat tile class="overflow-y-auto" :style="listHeight" :min-width="myMinWidth+'px'" :width="myMinWidth+'px'">
                         <v-card flat tile outlined>
                             <v-row no-gutters justify="center" align="center">
-                                <v-col cols="8">
+                                <v-col cols="5">
                                     <v-switch
-                                            v-model="distanceMonitor"
-                                            label="드론간 근접감시"
-                                            color="warning"
-                                            class="ma-0 pa-0 pl-2 py-2"
-                                            hide-details
+                                        v-model="distanceMonitor"
+                                        label="드론간 근접감시"
+                                        color="warning"
+                                        class="ma-0 pa-0 pl-2 py-2"
+                                        hide-details
+                                    ></v-switch>
+                                </v-col>
+                                <v-col cols="3">
+                                        <v-switch
+                                        v-model="ADSBMonitor"
+                                        label="ADS-B"
+                                        color="warning"
+                                        class="ma-0 pa-0 pl-2 py-2"
+                                        hide-details
                                     ></v-switch>
                                 </v-col>
                                 <v-col cols="4" class="text-right" >
@@ -157,6 +166,7 @@
                 drones_selected: [],
                 candidate: {},
                 distanceMonitor: false,
+                ADSBMonitor: false,
                 myMinWidth: 480,
                 connection: {
                     host: this.$store.state.VUE_APP_MOBIUS_HOST,
@@ -431,6 +441,10 @@
             //         );
             //     }
             // }, 60000);
+
+            setInterval(() => {
+                EventBus.$emit('ClickADSBMonitor', this.ADSBMonitor);
+            }, 100);
 
             setInterval(() => {
                 if(this.distanceMonitor) {
