@@ -821,7 +821,7 @@
                             </v-col>
                             <v-col cols="1">
                                 <v-card class="pa-2 align-self-center text-center" outlined tile>
-                                    <v-btn color="blue" @click="curTab = command.title; mode_sheet = !mode_sheet;"
+                                    <v-btn v-if="command.title !== commands[15].title" color="blue" @click="curTab = command.title; mode_sheet = !mode_sheet;"
                                            :disabled="(command.title === commands[14].title)"
                                     >
                                         <span v-if="command.title === commands[0].title">모드확인</span>
