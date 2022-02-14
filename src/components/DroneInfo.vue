@@ -4899,7 +4899,7 @@ export default {
             //this.watchingMission = 'disarm';
         });
 
-        EventBus.$on('command-set-auto_goto-' + this.name, () => {
+        EventBus.$on('command-set-auto_goto-' + this.name, (payload) => {
             let start_idx = parseInt(this.$store.state.drone_infos[this.name].autoStartIndex);
             let end_idx = parseInt(this.$store.state.drone_infos[this.name].autoEndIndex);
             let delay = this.$store.state.drone_infos[this.name].autoDelay;
@@ -4910,7 +4910,7 @@ export default {
 
             this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
 
-            var auto_goto_positions = this.$store.state.drone_infos[this.name].goto_positions.slice(start_idx, (end_idx + 1));
+            var auto_goto_positions = payload.goto_positions.slice(start_idx, (end_idx + 1));
             let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:16:1';
             auto_goto_positions.unshift(ele0);
 

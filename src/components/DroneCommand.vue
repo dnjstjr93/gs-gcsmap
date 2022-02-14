@@ -437,7 +437,7 @@
                                                         </v-col>
                                                         <v-col cols="3">
                                                             <v-select
-                                                                dense outlined :items="Object.keys(d.goto_positions)"
+                                                                dense outlined :items="Object.keys(position_selections_items[d.name])"
                                                                 label="Start Index" v-model="autoStartIndex[d.name]"
                                                                 class="mx-2"
                                                                 hide-details
@@ -445,7 +445,7 @@
                                                         </v-col>
                                                         <v-col cols="3">
                                                             <v-select
-                                                                dense outlined :items="Object.keys(d.goto_positions)"
+                                                                dense outlined :items="Object.keys(position_selections_items[d.name])"
                                                                 label="End Index" v-model="autoEndIndex[d.name]"
                                                                 hide-details
                                                                 class="mx-2"
@@ -1957,7 +1957,9 @@ export default {
                         this.$store.state.drone_infos[name].autoSpeed = parseInt(this.autoSpeed[name]);
                         console.log('setAutoGoto', parseInt(this.$store.state.drone_infos[name].autoStartIndex), parseInt(this.$store.state.drone_infos[name].autoEndIndex), this.$store.state.drone_infos[name].autoDelay);
                         if(parseInt(this.$store.state.drone_infos[name].autoStartIndex) <= parseInt(this.$store.state.drone_infos[name].autoEndIndex)) {
-                            EventBus.$emit('command-set-auto_goto-' + name);
+                            let payload = {};
+                            payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[name]));
+                            EventBus.$emit('command-set-auto_goto-' + name, payload);
                         }
                         else {
                             console.log('setAutoGoto-', name, 'auto index setting error!!!');
