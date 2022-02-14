@@ -3708,7 +3708,9 @@ export default {
                                 this.$store.state.trackingLines[this.name].shift();
                             }
 
-                            this.$store.state.trackingLines[this.name].push({lat: _payload.lat, lng: _payload.lng});
+                            if(this.curArmStatus === 'ARMED') {
+                                this.$store.state.trackingLines[this.name].push({lat: _payload.lat, lng: _payload.lng});
+                            }
 
                             localStorage.setItem('trackingLines-' + this.name, JSON.stringify(this.$store.state.trackingLines[this.name]));
 
