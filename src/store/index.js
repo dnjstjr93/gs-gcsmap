@@ -1127,7 +1127,28 @@ export default new Vuex.Store({
             }
 
             else {
-                this.commit('regMarkerDroneInfo', payload);
+                console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
+
+                console.log(state.tempMarkers[payload.pOldName]);
+
+                state.tempMarkers[payload.pOldName].splice(payload.pIndex, 0, oldPos);
+
+                state.tempMarkers[payload.pOldName].forEach((pos, pIndex) => {
+                    pos.m_label.fontSize = '14px';
+                    pos.m_label.text = ((payload.pOldName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
+                });
+
+                // state.drone_infos[payload.pName].goto_positions.splice(payload.pOldIndex, 1);
+                this.commit('regMarkerIndexDroneInfo', payload);
+
+                let payload2 = {};
+                payload2.pName = payload.pOldName;
+                this.commit('regMarkerNameDroneInfo', payload2);
+            }
+
+            if(payload.pOldName === payload.pName && payload.pOldName === 'unknown') {
+                state.tempMarkers[payload.pOldName][payload.pOldIndex].m_label.text = 'T:' + String(state.tempMarkers[payload.pOldName][payload.pOldIndex].alt);
             }
 
             oldPos = null;
@@ -1136,10 +1157,6 @@ export default new Vuex.Store({
             state.tempMarkers = {};
             state.tempMarkers = JSON.parse(JSON.stringify(temp));
             temp = null;
-
-            if(payload.pOldName === payload.pName && payload.pOldName === 'unknown') {
-                state.tempMarkers[payload.pOldName][payload.pOldIndex].m_label.text = 'T:' + String(state.tempMarkers[payload.pOldName][payload.pOldIndex].alt);
-            }
         },
 
         removeMarkerDroneInfo(state, payload) {

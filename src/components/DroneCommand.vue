@@ -1655,7 +1655,7 @@ export default {
                 for (let dName in this.$store.state.drone_infos) {
                     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                            console.log('targetModeSelection', dName, this.$store.state.drone_infos[dName].curMode);
+                            console.log('targetModeSelection', dName, this.targetModeSelection[dName], this.$store.state.drone_infos[dName].curMode);
                             this.targetModeSelection[dName] = this.$store.state.drone_infos[dName].curMode;
                         }
                     }
