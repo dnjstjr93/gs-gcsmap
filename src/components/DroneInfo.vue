@@ -1019,7 +1019,9 @@ export default {
                 valueDistance: '0 m',
                 colorMode: 'gray',
                 curMode: 'UNKNOWN',
-                curArmStatus: 'DISARMED'
+                curArmStatus: 'DISARMED',
+                severity: 6,
+                text: ''
             },
             fc_img: "ardupilot.png",
             fcType: 'ardupilot',
@@ -3385,44 +3387,31 @@ export default {
 
                         EventBus.$emit('onResize-DroneInfoList');
                     }
+                } else if (msg_id === mavlink.MAVLINK_MSG_ID_STATUSTEXT) {
+                    /*
+                    0 비상: 시스템을 사용할 수 없음
+                    1 경고: 즉시 조치를 취해야 합니다.
+                    2 크리티컬: 크리티컬 조건
+                    3 오류: 오류 조건
+                    4 경고: 경고 조건
+                    5 주의: 정상적이지만 중요한 상태
+                    6 정보: 정보 메시지
+                    7 디버그: 디버그 수준 메시지
+                     */
+                    if (ver == 'fd') {
+                        base_offset = 20;
+                        var severity = mavPacket.substr(base_offset, 2).toLowerCase();
+                        base_offset += 8;
+                        var text = mavPacket.substr(base_offset, 100).toLowerCase();
+                    } else {
+                        base_offset = 12;
+                        severity = mavPacket.substr(base_offset, 2).toLowerCase();
+                        base_offset += 2;
+                        text = mavPacket.substr(base_offset, 100).toLowerCase();
+                    }
+                    this.info.severity = Buffer.from(severity, 'hex').readUInt8(0);
+                    this.info.text = Buffer.from(text, 'hex').toString('ASCII').replace(/\0/g, '').replace('  ', '');
                 }
-
-                // else if (msg_id === mavlink.MAVLINK_MSG_ID_AUTOPILOT_VERSION) {
-                //     if (ver === 'fd') {
-                //         base_offset = 20;
-                //     }
-                //     else {
-                //         base_offset = 12;
-                //     }
-                //
-                //     var capabilities = mavPacket.substr(base_offset, 16).toLowerCase();
-                //     base_offset += 16;
-                //     var flight_sw_version = mavPacket.substr(base_offset, 8).toLowerCase();
-                //     base_offset += 8;
-                //     var middleware_sw_version = mavPacket.substr(base_offset, 8).toLowerCase();
-                //     base_offset += 8;
-                //     var os_sw_version = mavPacket.substr(base_offset, 8).toLowerCase();
-                //     base_offset += 8;
-                //     var board_version = mavPacket.substr(base_offset, 8).toLowerCase();
-                //     base_offset += 8;
-                //     // var flight_custom_version = mavPacket.substr(base_offset, 16).toLowerCase();
-                //     // base_offset += 16;
-                //     // var middleware_custom_version = mavPacket.substr(base_offset, 16).toLowerCase();
-                //     // base_offset += 16;
-                //     // var os_custom_version = mavPacket.substr(base_offset, 16).toLowerCase();
-                //     // base_offset += 16;
-                //     // var vendor_id = mavPacket.substr(base_offset, 4).toLowerCase();
-                //     // base_offset += 4;
-                //     // var product_id = mavPacket.substr(base_offset, 4).toLowerCase();
-                //     // base_offset += 4;
-                //     // var uid = mavPacket.substr(base_offset, 16).toLowerCase();
-                //
-                //     console.log('capabilities', Buffer.from(capabilities, 'hex').readBigUInt64LE(0));
-                //     console.log('flight_sw_version', Buffer.from(flight_sw_version, 'hex').readInt32LE(0));
-                //     console.log('middleware_sw_version', Buffer.from(middleware_sw_version, 'hex').readInt32LE(0));
-                //     console.log('os_sw_version', Buffer.from(os_sw_version, 'hex').readInt32LE(0));
-                //     console.log('board_version', Buffer.from(board_version, 'hex').readInt32LE(0));
-                // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_SYS_STATUS && ((ver === 'fd') || (ver === 'fe' && mavPacket.length === 78))) {
                     // console.log(mavPacket.length);
