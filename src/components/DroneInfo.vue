@@ -1022,7 +1022,7 @@ export default {
                 curArmStatus: 'DISARMED'
             },
             fc_img: "ardupilot.png",
-            type: 'ardupilot',
+            fcType: 'ardupilot',
         }
     },
 
@@ -3186,13 +3186,13 @@ export default {
 
         send_set_mode_command(target_name, pub_topic, target_sys_id, target_mode) {
 
-            if(this.type === 'px4') {
+            if(this.fcType === 'px4') {
                 if(target_mode === 'GUIDE') {
                     target_mode = 'HOLD';
                 }
             }
 
-            var custom_mode = this.$store.state[this.type + '_mode_items'].indexOf(target_mode);
+            var custom_mode = this.$store.state[this.fcType + '_mode_items'].indexOf(target_mode);
             var base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
             base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
 
@@ -3207,7 +3207,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('send_set_mode_command (', this.$store.state[this.type + '_mode_items'][custom_mode], ') - ', this.name);
+                    console.log('send_set_mode_command (', this.$store.state[this.fcType + '_mode_items'][custom_mode], ') - ', this.name);
                     this.doPublish(pub_topic, msg);
                 }
             }
@@ -3326,15 +3326,15 @@ export default {
 
                     // console.log(this.MAV_AUTOPILOT[this.hb.autopilot]);
 
-                    if(this.hb.autopilot == mavlink.MAV_AUTOPILOT_ARDUPILOTMEGA) {
+                    if(this.hb.autopilot === mavlink.MAV_AUTOPILOT_ARDUPILOTMEGA) {
                         this.fc_img = 'ardupilot.png';
-                        this.$store.state.drone_infos[this.name].type = 'ardupilot';
-                        this.type = 'ardupilot';
+                        this.$store.state.drone_infos[this.name].fcType = 'ardupilot';
+                        this.fcType = 'ardupilot';
                     }
-                    else if(this.hb.autopilot == mavlink.MAV_AUTOPILOT_PX4) {
+                    else if(this.hb.autopilot === mavlink.MAV_AUTOPILOT_PX4) {
                         this.fc_img = 'px4.png';
-                        this.$store.state.drone_infos[this.name].type = 'px4';
-                        this.type = 'px4';
+                        this.$store.state.drone_infos[this.name].fcType = 'px4';
+                        this.fcType = 'px4';
                     }
 
                     // if(!Object.hasOwnProperty.call(this.$store.state.trackingLines, this.name)) {
@@ -3370,7 +3370,7 @@ export default {
 
                     this.info.curArmStatus = this.curArmStatus;
 
-                    this.curMode = this.$store.state[this.type + '_mode_items'][this.hb.custom_mode];
+                    this.curMode = this.$store.state[this.fcType + '_mode_items'][this.hb.custom_mode];
 
                     //console.log(this.name, ' - bpm - ', this.bpm);
                     if (this.bpm < 50) {
@@ -4834,16 +4834,21 @@ export default {
                 if (params.wpYawBehavior[this.name] !== undefined) {
                     let param_value = parseInt(params.wpYawBehavior[this.name].charAt(0));
 
-                    let pre_custom_mode = this.$store.state[this.type + '_mode_items'].indexOf(this.curMode);
+                    let pre_custom_mode = this.curMode;
 
-                    setTimeout(this.send_set_mode_command, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, 'LOITER');
+                    setTimeout((name, target_pub_topic, sys_id, mode) => {
+                        console.log('send_set_mode_command', mode);
+                        this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+                    }, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, 'LOITER');
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
                         this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
-
-                        setTimeout(this.send_set_mode_command, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, pre_custom_mode);
-
                     }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
+
+                    setTimeout((name, target_pub_topic, sys_id, mode) => {
+                        console.log('send_set_mode_command', mode);
+                        this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+                    }, parseInt(50 + (Math.random() * 2)), this.name, this.target_pub_topic, this.sys_id, pre_custom_mode);
                 }
             }
 
