@@ -25,6 +25,7 @@ Vue.use(Vuex)
 
 import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
 import { faDotCircle } from "@fortawesome/free-solid-svg-icons";
+//import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 
 const defaultForm = Object.freeze({
     first: '',

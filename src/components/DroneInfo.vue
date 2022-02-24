@@ -855,18 +855,11 @@ export default {
             ss: {voltage_battery: 44000},
             adsb: {ICAO_address: '12K345', lat: 370000000, lon: 1270000000, attitude: 1000000, heading: 100, callsign: 'KETI', speed: 100, squawk: 0},
             att: {},
-            rc1_max: {},
-            rc1_min: {},
-            rc1_trim: {},
-            rc2_max: {},
-            rc2_min: {},
-            rc2_trim: {},
-            rc3_max: {},
-            rc3_min: {},
-            rc3_trim: {},
-            rc4_max: {},
-            rc4_min: {},
-            rc4_trim: {},
+            rc1: {},
+            rc2: {},
+            rc3: {},
+            rc4: {},
+
             num_satellites: 0,
 
             recv_counter: 1,
@@ -1387,7 +1380,22 @@ export default {
         },
 
         showMyDroneInfoDialog() {
+            this.$store.state.drone_infos[this.name].goto_positions = [];
+            this.$store.state.tempMarkers[this.name].forEach((pos) => {
+                let strPos = pos.lat + ':' +
+                    pos.lng + ':' +
+                    pos.alt + ':' +
+                    pos.speed + ':' +
+                    pos.radius + ':' +
+                    pos.turningSpeed + ':' +
+                    pos.targetMavCmd + ':' +
+                    pos.targetStayTime + ':' +
+                    pos.elevation;
+                this.$store.state.drone_infos[this.name].goto_positions.push(strPos);
+            });
+
             this.strMyDroneInfo = JSON.stringify(this.$store.state.drone_infos[this.name], null, 4);
+
             this.chosenWaypointsFile = null;
             this.dialog = true;
         },
@@ -1402,6 +1410,31 @@ export default {
                 delete this.$store.state.drone_infos[this.name];
                 this.$store.state.drone_infos[this.name] = JSON.parse(JSON.stringify(temp));
                 temp = null;
+
+                this.$store.state.tempMarkers[this.name] = [];
+                this.$store.state.drone_infos[this.name].goto_positions.forEach((ele) => {
+                    let pos_arr = ele.split(':');
+
+                    let marker = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
+
+                    marker.lat = parseFloat(pos_arr[0]);
+                    marker.lng = parseFloat(pos_arr[1]);
+                    marker.alt = parseFloat(pos_arr[2]);
+                    marker.speed = parseFloat(pos_arr[3]);
+                    marker.radius = parseFloat(pos_arr[4]);
+                    marker.turningSpeed = parseFloat(pos_arr[5]);
+                    marker.targetMavCmd = (typeof pos_arr[6] === 'undefined') ? 16 : parseInt(pos_arr[6]);
+                    marker.targetStayTime = (typeof pos_arr[7] === 'undefined') ? 1 : parseInt(pos_arr[7]);
+                    marker.elevation = (typeof pos_arr[8] === 'undefined') ? 0.0 : parseInt(pos_arr[8]);
+                    marker.type = 'Goto';
+
+                    marker.color = this.$store.state.drone_infos[this.name].color;
+                    marker.m_icon.fillColor = this.$store.state.drone_infos[this.name].color;
+                    marker.m_label.fontSize = '14px';
+                    marker.m_label.text = String(this.$store.state.tempMarkers[this.name].length) + ':' + String(marker.alt);
+
+                    this.$store.state.tempMarkers[this.name].push(marker);
+                });
 
                 // this.positions = [];
                 // for (let i in this.$store.state.drone_infos[this.name].goto_positions) {
@@ -3339,6 +3372,8 @@ export default {
                         this.fcType = 'px4';
                     }
 
+                    // console.log('this.hb.mavlink_version', this.hb.mavlink_version);
+
                     // if(!Object.hasOwnProperty.call(this.$store.state.trackingLines, this.name)) {
                     //     console.log('---------------------------------------------------------------------------------------------------')
                     //     if(localStorage.getItem('trackingLines-' + this.name)) {
@@ -3985,207 +4020,218 @@ export default {
                     }
                 }
 
-                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
-                    //     if (ver === 'fd') {
-                    //         base_offset = 20;
-                    //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                    //         base_offset += (8 + 2 + (4 * 18));
-                    //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                    //     }
-                    //     else {
-                    //         base_offset = 12;
-                    //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                    //         base_offset += (8 + 2 + (4 * 18));
-                    //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                    //     }
-                    //
-                    //     this.rssi = parseInt((Buffer.from(rssi, 'hex').readUInt8(0)) / 255 * 100);
-                    // }
-
-                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_PARAM_VALUE) {
-                    //      if (ver === 'fd') {
-                    //         base_offset = 20;
-                    //         var param_value = mavPacket.substr(base_offset, 8).toLowerCase();
-                    //         base_offset += 8;
-                    //         var param_count = mavPacket.substr(base_offset, 4).toLowerCase();
-                    //         base_offset += 4;
-                    //         var param_index = mavPacket.substr(base_offset, 4).toLowerCase();
-                    //         base_offset += 4;
-                    //         var param_id = mavPacket.substr(base_offset, 32).toLowerCase();
-                    //         base_offset += 32;
-                    //         var param_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                    //     }
-                    //     else {
-                    //         base_offset = 12;
-                    //         param_value = mavPacket.substr(base_offset, 8).toLowerCase();
-                    //         base_offset += 8;
-                    //         param_count = mavPacket.substr(base_offset, 4).toLowerCase();
-                    //         base_offset += 4;
-                    //         param_index = mavPacket.substr(base_offset, 4).toLowerCase();
-                    //         base_offset += 4;
-                    //         param_id = mavPacket.substr(base_offset, 32).toLowerCase();
-                    //         base_offset += 32;
-                    //         param_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                    //     }
-                    //
-                    //     param_id = Buffer.from(param_id, "hex").toString('ASCII');
-                    //
-                    //     // if (param_id.includes('STAT_FLTTIME')) {
-                    //     //
-                    //     //     this.stat_flttime_param = {};
-                    //     //     this.stat_flttime_param.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //     //     this.stat_flttime_param.param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //     //     this.stat_flttime_param.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //     //     this.stat_flttime_param.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     //
-                    //     //     console.log(this.name, 'STAT_FLTTIME', this.stat_flttime_param.param_value);
-                    //     //
-                    //     //     // if(this.$store.state.drone_infos[this.name].lastFlightTime > this.stat_flttime_param.param_value) {
-                    //     //     //     this.$store.state.drone_infos[this.name].lastFlightTime = this.stat_flttime_param.param_value;
-                    //     //     //
-                    //     //     //     this.postDroneInfos();
-                    //     //     // }
-                    //     // }
-                    //     // else {
-                    //     //     if(this.curArmStatus === 'ARMED') {
-                    //     //         let curFlightTime = this.stat_flttime_param.param_value - this.$store.state.drone_infos[this.name].lastFlightTime;
-                    //     //         console.log(this.name, 'curFlightTime', curFlightTime);
-                    //     //     }
-                    //     // }
-                    //
-                    //     // else if (param_id.includes('STAT_RUNTIME')) {
-                    //     //
-                    //     //     let stat_runtime_param = {};
-                    //     //     stat_runtime_param.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //     //     stat_runtime_param.param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //     //     stat_runtime_param.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //     //     stat_runtime_param.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     //
-                    //     //     console.log(this.name, 'STAT_RUNTIME', stat_runtime_param);
-                    //     // }
-                    //
-                    //     if (param_id.includes('RC1_MIN')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc1_min, sys_id)) {
-                    //             this.rc1_min[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc1_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc1_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc1_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc1_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC1_MAX')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc1_max, sys_id)) {
-                    //             this.rc1_max[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc1_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc1_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc1_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc1_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC1_TRIM')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc1_trim, sys_id)) {
-                    //             this.rc1_trim[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc1_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc1_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc1_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc1_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC2_MIN')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc2_min, sys_id)) {
-                    //             this.rc2_min[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc2_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc2_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc2_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc2_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC2_MAX')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc2_max, sys_id)) {
-                    //             this.rc2_max[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc2_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc2_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc2_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc2_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC2_TRIM')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc2_trim, sys_id)) {
-                    //             this.rc2_trim[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc2_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc2_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc2_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc2_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC3_MIN')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc3_min, sys_id)) {
-                    //             this.rc3_min[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc3_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc3_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc3_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc3_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC3_MAX')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc3_max, sys_id)) {
-                    //             this.rc3_max[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc3_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc3_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc3_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc3_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC3_TRIM')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc3_trim, sys_id)) {
-                    //             this.rc3_trim[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc3_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc3_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc3_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc3_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC4_MIN')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc4_min, sys_id)) {
-                    //             this.rc4_min[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc4_min[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc4_min[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc4_min[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc4_min[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC4_MAX')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc4_max, sys_id)) {
-                    //             this.rc4_max[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc4_max[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc4_max[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc4_max[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc4_max[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
-                    //     else if (param_id.includes('RC4_TRIM')) {
-                    //         if (!Object.prototype.hasOwnProperty.call(this.rc4_trim, sys_id)) {
-                    //             this.rc4_trim[sys_id] = {};
-                    //         }
-                    //
-                    //         this.rc4_trim[sys_id].param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
-                    //         this.rc4_trim[sys_id].param_type = Buffer.from(param_type, 'hex').readInt8(0);
-                    //         this.rc4_trim[sys_id].param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
-                    //         this.rc4_trim[sys_id].param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                    //     }
+                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
+                //     if (ver === 'fd') {
+                //         base_offset = 20;
+                //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
+                //         base_offset += (8 + 2 + (4 * 18));
+                //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //     else {
+                //         base_offset = 12;
+                //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
+                //         base_offset += (8 + 2 + (4 * 18));
+                //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //
+                //     this.rssi = parseInt((Buffer.from(rssi, 'hex').readUInt8(0)) / 255 * 100);
                 // }
 
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_PARAM_VALUE) {
+                     if (ver === 'fd') {
+                        base_offset = 20;
+                        var param_value = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        var param_count = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        var param_index = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        var param_id = mavPacket.substr(base_offset, 32).toLowerCase();
+                        base_offset += 32;
+                        var param_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                    }
+                    else {
+                        base_offset = 12;
+                        param_value = mavPacket.substr(base_offset, 8).toLowerCase();
+                        base_offset += 8;
+                        param_count = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        param_index = mavPacket.substr(base_offset, 4).toLowerCase();
+                        base_offset += 4;
+                        param_id = mavPacket.substr(base_offset, 32).toLowerCase();
+                        base_offset += 32;
+                        param_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                    }
+
+                    param_id = Buffer.from(param_id, "hex").toString('ASCII');
+
+                    // if (param_id.includes('STAT_FLTTIME')) {
+                    //
+                    //     this.stat_flttime_param = {};
+                    //     this.stat_flttime_param.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //     this.stat_flttime_param.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //     this.stat_flttime_param.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //     this.stat_flttime_param.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //
+                    //     console.log(this.name, 'STAT_FLTTIME', this.stat_flttime_param.param_value);
+                    //
+                    //     // if(this.$store.state.drone_infos[this.name].lastFlightTime > this.stat_flttime_param.param_value) {
+                    //     //     this.$store.state.drone_infos[this.name].lastFlightTime = this.stat_flttime_param.param_value;
+                    //     //
+                    //     //     this.postDroneInfos();
+                    //     // }
+                    // }
+                    // else {
+                    //     if(this.curArmStatus === 'ARMED') {
+                    //         let curFlightTime = this.stat_flttime_param.param_value - this.$store.state.drone_infos[this.name].lastFlightTime;
+                    //         console.log(this.name, 'curFlightTime', curFlightTime);
+                    //     }
+                    // }
+
+                    // else if (param_id.includes('STAT_RUNTIME')) {
+                    //
+                    //     let stat_runtime_param = {};
+                    //     stat_runtime_param.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                    //     stat_runtime_param.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                    //     stat_runtime_param.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                    //     stat_runtime_param.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                    //
+                    //     console.log(this.name, 'STAT_RUNTIME', stat_runtime_param);
+                    // }
+
+                    if (param_id.includes('RC1_MIN')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc1, 'min')) {
+                            this.rc1.min = {};
+                        }
+
+                        this.rc1.min.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc1.min.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc1.min.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc1.min.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC1_MIN', this.rc1.min.param_value);
+                    }
+                    else if (param_id.includes('RC1_MAX')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc1, 'max')) {
+                            this.rc1.max = {};
+                        }
+
+                        this.rc1.max.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc1.max.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc1.max.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc1.max.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC1_MAX', this.rc1.max.param_value);
+                    }
+                    else if (param_id.includes('RC1_TRIM')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc1, 'trim')) {
+                            this.rc1.trim = {};
+                        }
+
+                        this.rc1.trim.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc1.trim.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc1.trim.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc1.trim.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC1_TRIM', this.rc1.trim.param_value);
+                    }
+                    else if (param_id.includes('RC2_MIN')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc2, 'min')) {
+                            this.rc2.min = {};
+                        }
+
+                        this.rc2.min.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc2.min.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc2.min.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc2.min.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC2_MIN', this.rc2.min.param_value);
+                    }
+                    else if (param_id.includes('RC2_MAX')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc2, 'max')) {
+                            this.rc2.max = {};
+                        }
+
+                        this.rc2.max.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc2.max.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc2.max.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc2.max.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC2_MAX', this.rc2.max.param_value);
+                    }
+                    else if (param_id.includes('RC2_TRIM')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc2, 'trim')) {
+                            this.rc2.trim = {};
+                        }
+
+                        this.rc2.trim.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc2.trim.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc2.trim.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc2.trim.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC2_TRIM', this.rc2.trim.param_value);
+                    }
+                    else if (param_id.includes('RC3_MIN')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc3, 'min')) {
+                            this.rc3.min = {};
+                        }
+
+                        this.rc3.min.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc3.min.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc3.min.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc3.min.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC3_MIN', this.rc3.min.param_value);
+                    }
+                    else if (param_id.includes('RC3_MAX')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc3, 'max')) {
+                            this.rc3.max = {};
+                        }
+
+                        this.rc3.max.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc3.max.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc3.max.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc3.max.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC3_MAX', this.rc3.max.param_value);
+                    }
+                    else if (param_id.includes('RC3_TRIM')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc3, 'trim')) {
+                            this.rc3.trim = {};
+                        }
+
+                        this.rc3.trim.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc3.trim.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc3.trim.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc3.trim.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC3_TRIM', this.rc3.trim.param_value);
+                    }
+                    else if (param_id.includes('RC4_MIN')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc4, 'min')) {
+                            this.rc4.min = {};
+                        }
+
+                        this.rc4.min.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc4.min.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc4.min.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc4.min.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_MIN', this.rc4.min.param_value);
+                    }
+                    else if (param_id.includes('RC4_MAX')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc4, 'max')) {
+                            this.rc4.max = {};
+                        }
+
+                        this.rc4.max.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc4.max.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc4.max.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc4.max.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_MAX', this.rc4.max.param_value);
+                    }
+                    else if (param_id.includes('RC4_TRIM')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.rc4, 'trim')) {
+                            this.rc4.trim = {};
+                        }
+
+                        this.rc4.trim.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.rc4.trim.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.rc4.trim.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.rc4.trim.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_TRIM', this.rc4.trim.param_value);
+                    }
+                }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ITEM - ' + mavPacket);
                 }
@@ -4683,12 +4729,47 @@ export default {
             }
         }
 
-        // setInterval(() => {
-        //     if(this.flagReceiving) {
-        //         //this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'STAT_FLTTIME');
-        //         //this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'STAT_RUNTIME');
-        //     }
-        // }, 1000);
+        var tidRcParam = setInterval(() => {
+            if(!Object.prototype.hasOwnProperty.call(this.rc1, 'min')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC1_MIN');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc1, 'max')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC1_MAX');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc1, 'trim')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC1_TRIM');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc2, 'min')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC2_MIN');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc2, 'max')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC2_MAX');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc2, 'trim')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC2_TRIM');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc3, 'min')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC3_MIN');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc3, 'max')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC3_MAX');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc3, 'trim')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC3_TRIM');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc4, 'min')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC4_MIN');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc4, 'max')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC4_MAX');
+            }
+            else if(!Object.prototype.hasOwnProperty.call(this.rc4, 'trim')) {
+                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC4_TRIM');
+            }
+            else {
+                clearInterval(tidRcParam);
+            }
+        }, 500);
 
         // setInterval(() => {
         //     if(this.flagReceiving) {
