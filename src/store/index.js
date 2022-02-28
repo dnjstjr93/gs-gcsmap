@@ -1594,6 +1594,10 @@ export default new Vuex.Store({
                             state.drone_infos[dName].headingLine = [];
                         }
 
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'directionLine')) {
+                            state.drone_infos[dName].directionLine = [];
+                        }
+
                         if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'client')) {
 
                             state.drone_infos[dName].client = {

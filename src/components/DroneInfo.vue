@@ -3534,8 +3534,8 @@ export default {
                     this.gpi.lon = Buffer.from(lon, 'hex').readInt32LE(0);
                     this.gpi.alt = Buffer.from(alt, 'hex').readInt32LE(0);
                     this.gpi.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
-                    this.gpi.vx = Buffer.from(vx, 'hex').readInt16LE(0);
-                    this.gpi.vy = Buffer.from(vy, 'hex').readInt16LE(0);
+                    this.gpi.vy = Buffer.from(vx, 'hex').readInt16LE(0);
+                    this.gpi.vx = Buffer.from(vy, 'hex').readInt16LE(0);
                     this.gpi.vz = Buffer.from(vz, 'hex').readInt16LE(0);
                     this.gpi.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
@@ -3543,7 +3543,8 @@ export default {
 
                     //this.$store.state.drone_infos[this.name].offset_alt = (parseFloat(this.gpi.alt) - parseFloat(this.gpi.relative_alt)) * 1000;
 
-                    this.airspeed = Math.sqrt(Math.pow(this.gpi.vx, 2) + Math.pow(this.gpi.vy, 2) + Math.pow(this.gpi.vz, 2)) / 100;
+                    //this.airspeed = Math.sqrt(Math.pow(this.gpi.vx, 2) + Math.pow(this.gpi.vy, 2) + Math.pow(this.gpi.vz, 2)) / 100;
+                    this.airspeed = Math.abs((this.gpi.vx + this.gpi.vy + this.gpi.vz) / 100);
                     this.colorAirspeed = 'td-text-green';
 
                     this.info.airSpeed = this.airspeed.toFixed(1);
@@ -3554,6 +3555,14 @@ export default {
                     this.$store.state.drone_infos[this.name].headingLine = [];
                     this.$store.state.drone_infos[this.name].headingLine.push({lat: (this.gpi.lat / 10000000), lng: (this.gpi.lon / 10000000)});
                     this.$store.state.drone_infos[this.name].headingLine.push({lat: h_pos.lat, lng: h_pos.lon});
+
+                    let dir = (360 + Math.atan2(this.gpi.vx, this.gpi.vy) * 180 / Math.PI) % 360;
+                    //console.log("vx", this.gpi.vx / 100, "vy", this.gpi.vy / 100, "theta", dir, "heading", this.heading);
+
+                    let dir_pos = get_point_dist((this.gpi.lat / 10000000), (this.gpi.lon / 10000000), (0.001 + ((this.airspeed * 5)/1000)), dir);
+                    this.$store.state.drone_infos[this.name].directionLine = [];
+                    this.$store.state.drone_infos[this.name].directionLine.push({lat: (this.gpi.lat / 10000000), lng: (this.gpi.lon / 10000000)});
+                    this.$store.state.drone_infos[this.name].directionLine.push({lat: dir_pos.lat, lng: dir_pos.lon});
 
                     this.info.headingDirection = this.heading;
 

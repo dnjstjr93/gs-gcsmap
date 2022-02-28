@@ -145,6 +145,20 @@
                                     </div>
 
                                     <GmapCircle
+                                        :center="{lat: drone.home_position.lat, lng: drone.home_position.lng}"
+                                        :radius="3"
+                                        :options="{fillOpacity: 1, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 1, strokeWeight: 1}"
+                                    ></GmapCircle>
+
+                                    <GmapCircle
+                                        :center="{lat: drone.home_position.lat, lng: drone.home_position.lng}"
+                                        :radius="500"
+                                        :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"
+                                        @dblclick="addingTempMarker"
+                                        @click="printPosClick"
+                                    ></GmapCircle>
+
+                                    <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
                                             :radius="2"
                                             :options="{fillOpacity: 0, strokeColor: '#D50000', strokeOpacity: 1, strokeWeight: 1}"
@@ -153,16 +167,25 @@
                                     <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
                                             :radius="5"
-                                            :options="{fillOpacity: 0, strokeColor: '#FF5252', strokeOpacity: 0.9, strokeWeight: 1}"
+                                            :options="{fillOpacity: 0, strokeColor: '#FF5252', strokeOpacity: 0.8, strokeWeight: 1}"
                                     ></GmapCircle>
 
                                     <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
                                             :radius="10"
-                                            :options="{fillOpacity: 0, strokeColor: '#FFCDD2', strokeOpacity: 0.8, strokeWeight: 1}"
+                                            :options="{fillOpacity: 0, strokeColor: '#FFCDD2', strokeOpacity: 0.6, strokeWeight: 1}"
                                     ></GmapCircle>
 
-<!--                                    <GmapCircle-->
+                                    <GmapCircle
+                                        :center="{lat: drone.lat, lng: drone.lng}"
+                                        :radius="100"
+                                        :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"
+                                        @dblclick="addingTempMarker"
+                                        @click="printPosClick"
+                                    ></GmapCircle>
+
+
+                                    <!--                                    <GmapCircle-->
 <!--                                            :center="{lat: drone.lat, lng: drone.lng}"-->
 <!--                                            :radius="100"-->
 <!--                                            :options="{fillOpacity: 0, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"-->
@@ -174,24 +197,14 @@
 <!--                                            :radius="250"-->
 <!--                                            :options="{fillOpacity: 0, strokeColor: drone.color, strokeOpacity: 0.6, strokeWeight: 1}"-->
 <!--                                    ></GmapCircle>-->
-
-                                    <GmapCircle
-                                            :center="{lat: drone.home_position.lat, lng: drone.home_position.lng}"
-                                            :radius="3"
-                                            :options="{fillOpacity: 1, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 1, strokeWeight: 1}"
-                                    ></GmapCircle>
-
-                                    <GmapCircle
-                                            :center="{lat: drone.home_position.lat, lng: drone.home_position.lng}"
-                                            :radius="500"
-                                            :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"
-                                            @dblclick="addingTempMarker"
-                                            @click="printPosClick"
-                                    ></GmapCircle>
-
                                     <GmapPolyline
                                         :path.sync="drone.headingLine"
-                                        :options="{strokeColor: drone.color, strokeOpacity: 0.9, strokeWeight: 2, zIndex: 5}"
+                                        :options="{strokeColor: drone.color, strokeOpacity: 0.9, strokeWeight: 2, zIndex: 4}"
+                                    ></GmapPolyline>
+
+                                    <GmapPolyline
+                                        :path.sync="drone.directionLine"
+                                        :options="{strokeColor: drone.color, strokeOpacity: 0.95, strokeWeight: 5, zIndex: 5, icons: [{icon: lineArrow, offset: '100%'}]}"
                                     ></GmapPolyline>
                                 </div>
                             </div>
@@ -264,6 +277,7 @@
 
         data () {
             return {
+                lineArrow: null,
                 curElevation: 0,
                 zoom: 18,
                 curFlagMarker: false,
@@ -524,7 +538,7 @@
             },
 
             addingTempMarker(e) {
-                this.drawBoundaryCircles(100);
+                //this.drawBoundaryCircles(100);
 
                 //this.curBoundaryRadius = 1;
 
@@ -1500,6 +1514,10 @@
                     map.setTilt(45);
                 });
 
+                this.lineArrow = {
+                    path: this.google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+                };
+
                 console.log('GcsMap-mounted-tempMarker', this.$store.state.tempMarkers);
 
                 for (let pName in this.$store.state.tempMarkers) {
@@ -1627,7 +1645,7 @@
                 //     strokeWeight: 6,
                 // };
 
-                this.drawBoundaryCircles(100);
+                //this.drawBoundaryCircles(100);
 
                 //this.droneMarkers[payload.name] = null;
                 this.$refs.mapRef.$mapPromise.then((map) => {
