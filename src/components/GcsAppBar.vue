@@ -796,7 +796,7 @@
                 }).then(
                     function (res) {
 
-                        console.log('getEachDroneInfoFromMobius', 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName + '/la', res);
+                        console.log('getEachDroneInfoFromMobius', 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName + '/la', res.data['m2m:cin'].con);
 
                         if (res.status === 200) {
                             callback(res.status, res.data['m2m:cin'].con);
@@ -863,7 +863,6 @@
                     this.getEachDroneInfoFromMobius(dName, (status, con) => {
                         if (status === 200) {
                             console.log(count, dName, con);
-                            this.$store.state.drone_infos = {};
                             this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(con));
 
                             this.initDroneInfos(drones, ++count, () => {
@@ -1222,6 +1221,7 @@
                                     if (status === 201) {
                                         this.getDroneInfosFromMobius((status, drones) => {
                                             if(status === 200) {
+                                                this.$store.state.drone_infos = {};
                                                 this.initDroneInfos(drones, 0, () => {
                                                     console.log(this.$store.state.drone_infos);
 
@@ -1234,6 +1234,7 @@
                             });
                         }
                         else {
+                            this.$store.state.drone_infos = {};
                             this.initDroneInfos(drones, 0, () => {
                                 console.log(this.$store.state.drone_infos);
 
@@ -1248,6 +1249,7 @@
                                     if(status === 201) {
                                         this.getDroneInfosFromMobius((status, drones) => {
                                             if(status === 200) {
+                                                this.$store.state.drone_infos = {};
                                                 this.initDroneInfos(drones, 0, () => {
                                                     console.log(this.$store.state.drone_infos);
 

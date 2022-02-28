@@ -1632,6 +1632,7 @@ export default {
             let payload = {};
             payload.pName = d.name;
             payload.pIndex = this.position_selections_index[d.name];
+            payload.targeted = true;
 
             EventBus.$emit('do-targetTempMarker', payload);
         },

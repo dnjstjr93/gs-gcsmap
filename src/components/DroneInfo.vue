@@ -1367,6 +1367,7 @@ export default {
             let payload = {};
             payload.pName = this.name;
             payload.pIndex = i;
+            payload.targeted = true;
 
             console.log('selectedPosition', this.selectedItem);
 

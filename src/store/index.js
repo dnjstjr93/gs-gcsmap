@@ -709,6 +709,9 @@ export default new Vuex.Store({
 
         setSelected(state, payload) {
             state.tempMarkers[payload.pName][payload.pIndex].selected = payload.value;
+
+            payload.targeted = true;
+            EventBus.$emit('do-targetTempMarker', payload);
         },
 
         setAllTempMarker(state, value) {

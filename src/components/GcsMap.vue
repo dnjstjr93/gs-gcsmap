@@ -100,7 +100,7 @@
                                 :clickable="true"
                                 :draggable="true"
                                 @dblclick="selectTempMarker($event, 'unknown', pIndex)"
-                                @click="targetTempMarker($event, 'unknown', pIndex)"
+                                @click="targetTempMarker($event, 'unknown', pIndex, pos.targeted)"
                                 @dragend="updateTempPosition($event, 'unknown', pIndex)"
                                 :icon="pos.m_icon"
                                 :label="pos.m_label"
@@ -128,7 +128,7 @@
                                             :clickable="true"
                                             :draggable="true"
                                             @dblclick="selectTempMarker($event, drone.name, pIndex)"
-                                            @click="targetTempMarker($event, drone.name, pIndex)"
+                                            @click="targetTempMarker($event, drone.name, pIndex, pos.targeted)"
                                             @dragend="updateTempPosition($event, drone.name, pIndex)"
                                             :icon="pos.m_icon"
                                             :label="pos.m_label"
@@ -682,10 +682,10 @@
 
                         this.$store.state.tempMarkers[pName][pIndex].elevation = val;
 
-                        this.$store.commit('updateTempPosition', payload);
-
                         payload.value = false;
                         this.$store.commit('setSelected', payload);
+
+                        this.$store.commit('updateTempPosition', payload);
 
                         this.drawLineTarget(payload);
 
@@ -780,14 +780,13 @@
                 }
             },
 
-            targetTempMarker(e, pName, pIndex) {
+            targetTempMarker(e, pName, pIndex, _targeted) {
                 if(!this.$store.state.adding) {
-                    console.log('targetTempMarker - pName', pName);
-                    console.log('targetTempMarker - pIndex', pIndex);
+                    console.log('targetTempMarker - pName', pName, 'pIndex', pIndex);
 
                     if(!this.$store.state.tempMarkers[pName][pIndex].selected) {
 
-                        let targeted = !this.$store.state.tempMarkers[pName][pIndex].targeted;
+                        let targeted = !_targeted;
                         let payload = {};
                         payload.pName = pName;
                         payload.pIndex = pIndex;
@@ -1494,7 +1493,7 @@
             });
 
             EventBus.$on('do-targetTempMarker', (payload) => {
-                this.targetTempMarker('', payload.pName, payload.pIndex);
+                this.targetTempMarker('', payload.pName, payload.pIndex, payload.targeted);
             });
 
             EventBus.$on('do-targetDroneMarker', (pName) => {
