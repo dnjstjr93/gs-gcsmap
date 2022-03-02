@@ -1655,7 +1655,8 @@ export default {
                                     arr_sur.pop();
                                     payload.sur = '/' + arr_sur.join('/');
 
-                                    if ((this.missionLteUrl + '/' + this.sortie_name) === payload.sur) {
+                                    //if ((this.missionLteUrl + '/' + this.sortie_name) === payload.sur) {
+                                    if (this.missionLteUrl === payload.sur) {
                                         // console.log(payload.sur);
 
                                         if (Object.prototype.hasOwnProperty.call(payload.con, 'rsrp')) {
