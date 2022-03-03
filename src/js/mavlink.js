@@ -62,7 +62,7 @@ mavlink.header = function(protocolVersion, msgId, mlen, incompatFlags, compatFla
     this.protocolVersion = ( typeof protocolVersion === 'undefined' ) ? mavlink.WIRE_PROTOCOL_VERSION_2 : protocolVersion;
     this.mlen = ( typeof mlen === 'undefined' ) ? 0 : mlen;
     this.seq = ( typeof seq === 'undefined' ) ? 0 : seq;
-    if (this.protocolVersion == mavlink.WIRE_PROTOCOL_VERSION_2) {
+    if (this.protocolVersion === mavlink.WIRE_PROTOCOL_VERSION_2) {
         this.incompatFlags = ( typeof incompatFlags === 'undefined' ) ? 0 : incompatFlags;
         this.compatFlags = ( typeof compatFlags === 'undefined' ) ? 0 : compatFlags;
     }
@@ -74,7 +74,7 @@ mavlink.header = function(protocolVersion, msgId, mlen, incompatFlags, compatFla
 mavlink.header.prototype.pack = function() {
     var packData;
 
-    if (this.protocolVersion == mavlink.WIRE_PROTOCOL_VERSION_2) { // mavlink v2
+    if (this.protocolVersion === mavlink.WIRE_PROTOCOL_VERSION_2) { // mavlink v2
         packData = jspack.Pack('BBBBBBBBBB',
             [0xfd, 
             this.mlen, 
@@ -7941,7 +7941,7 @@ mavlink.messages.bad_data = function(data, reason) {
 }
 
 /* MAVLink protocol handling class */
-let MAVLink = function(logger, srcSystem, srcComponent) {
+let MAVLink = function(logger, srcSystem, srcComponent, protocolVersion='v1') {
     this.logger = logger;
 
     this.seq = 0;
@@ -7950,8 +7950,14 @@ let MAVLink = function(logger, srcSystem, srcComponent) {
 
     this.incompatFlags = 0;
     this.compatFlags = 0;
-    this.protocolVersion = mavlink.WIRE_PROTOCOL_VERSION_1; // 1.0:mavlink v1, 2.0:mavlink v2
-   
+
+    if(protocolVersion === 'v2') {
+        this.protocolVersion = mavlink.WIRE_PROTOCOL_VERSION_2; // 1.0:mavlink v1, 2.0:mavlink v2
+    }
+    else {
+        this.protocolVersion = mavlink.WIRE_PROTOCOL_VERSION_1; // 1.0:mavlink v1, 2.0:mavlink v2
+    }
+
     this.srcSystem = (typeof srcSystem === 'undefined') ? 0 : srcSystem;
     this.srcComponent =  (typeof srcComponent === 'undefined') ? 0 : srcComponent;
     

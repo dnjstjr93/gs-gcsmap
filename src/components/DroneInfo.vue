@@ -436,8 +436,8 @@
                             </v-card>
                         </v-col>
                     </v-row>
-                    <v-row no-gutters>
-                        <v-col cols="2">
+                    <v-row no-gutters justify="center" align="center">
+                        <v-col cols="2" class="pl-1 pt-1">
                             <v-img v-if="fc_img === 'ardupilot.png'"
                                 src="../assets/ardupilot.png"
                                 alt="Ahn"
@@ -447,14 +447,20 @@
                                 alt="Ahn"
                             ></v-img>
                         </v-col>
-                        <v-col cols="10">
-                            <v-card class="singleline-ellipsis" outlined tile>
+                        <v-col cols="2">
+                            <v-select class="ma-0 pa-0 pl-1" v-model="mavVersion" :items="mavVersions"
+                                      @change="selectedMavVersion($event)"
+                                      dark outlined dense flat tile hide-details
+                            ></v-select>
+                        </v-col>
+                        <v-col cols="8">
+                            <v-card class="singleline-ellipsis py-1" outlined tile>
                                 <span style="font-size: 14px">{{ mavStr }}</span>
                                 <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
                                 <v-progress-linear
                                     active absolute top
                                     :color="$store.state.drone_infos[name].color"
-                                    height="25"
+                                    height="32"
                                     :value="watchingMissionStatus"
                                 >
                                     <template v-slot:default="{ value }">
@@ -687,6 +693,8 @@ export default {
 
     data() {
         return {
+            mavVersion: 'v1',
+            mavVersions: ['v1', 'v2'],
             evalAltColor: [],
 
             hud_gap: 31,
@@ -1242,6 +1250,13 @@ export default {
     },
 
     methods: {
+        selectedMavVersion: function(event) {
+            // console.log("selectedMavVersion", event)
+            this.mavVersion = event;
+
+            localStorage.setItem(this.name + '_mavVersion', this.mavVersion);
+        },
+
         onVideoHandler(drone_name) {
             EventBus.$emit('do-video-on-' + drone_name, {});
             //EventBus.$emit('hud-data-' + drone_name, this.info);
@@ -1712,10 +1727,28 @@ export default {
             if (chkTopic === "/Mobius") {
                 this.strContentEach += message.toString('hex').toLowerCase();
                 while (this.strContentEach.length > 12) {
-                    if (this.strContentEach.substr(0, 2) === 'fe') {
+                    if (this.mavVersion === 'v1' && this.strContentEach.substr(0, 2) === 'fe') {
 
                         var len = parseInt(this.strContentEach.substr(2, 2), 16);
                         var contentLenth = (6 * 2) + (len * 2) + (2 * 2);
+
+                        if (contentLenth > this.strContentEach.length) {
+                            break;
+                        }
+                        else {
+                            // var mavLength = (6 * 2) + (contentLenth * 2) + (2 * 2);
+                            //console.log(this.name, this.strContentEach.substr(0, mavLength));
+
+                            this.receiveFromDrone(topic, this.strContentEach.substr(0, contentLenth));
+
+                            this.strContentEach = this.strContentEach.substr(contentLenth);
+                            //console.log(this.strContentEach);
+                        }
+                    }
+                    else if (this.mavVersion === 'v2' && this.strContentEach.substr(0, 2) === 'fd') {
+
+                        len = parseInt(this.strContentEach.substr(2, 2), 16);
+                        contentLenth = (10 * 2) + (len * 2) + (2 * 2);
 
                         if (contentLenth > this.strContentEach.length) {
                             break;
@@ -2008,8 +2041,15 @@ export default {
             //var stx = this.mavStrFromDrone[topic].substr(0, 2);
             //if (stx === 'fe') {
             var len = parseInt(this.mavStrFromDrone[topic].substr(2, 2), 16);
-            var recv_sys_id = parseInt(this.mavStrFromDrone[topic].substr(6, 2), 16);
-            var mavLength = (6 * 2) + (len * 2) + (2 * 2);
+
+            if(this.mavVersion === 'v1') {
+                var recv_sys_id = parseInt(this.mavStrFromDrone[topic].substr(6, 2), 16);
+                var mavLength = (6 * 2) + (len * 2) + (2 * 2);
+            }
+            else {
+                recv_sys_id = parseInt(this.mavStrFromDrone[topic].substr(10, 2), 16);
+                mavLength = (10 * 2) + (len * 2) + (2 * 2);
+            }
 
             if (recv_sys_id === parseInt(this.ref_sys_id)) {
                 // if ((this.mavStrFromDrone[topic].length - this.mavStrFromDroneLength[topic]) >= mavLength) {
@@ -2210,7 +2250,7 @@ export default {
 
 
         mavlinkGenerateMessage(src_sys_id, src_comp_id, type, params) {
-            const mavlinkParser = new MAVLink(null/*logger*/, src_sys_id, src_comp_id);
+            const mavlinkParser = new MAVLink(null/*logger*/, src_sys_id, src_comp_id, this.mavVersion);
             try {
                 var mavMsg = null;
                 var genMsg = null;
@@ -5764,6 +5804,10 @@ export default {
         //         this.positions.push(goto_pos);
         //     }
         // }
+
+        if (localStorage.getItem(this.name + '_mavVersion')) {
+            this.mavVersion = localStorage.getItem(this.name + '_mavVersion');
+        }
 
         for (let idx in this.$store.state.tempMarkers[this.name]) {
             if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[this.name], idx)) {
