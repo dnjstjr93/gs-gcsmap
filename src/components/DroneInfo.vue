@@ -79,7 +79,8 @@
                                                     <v-spacer></v-spacer>
                                                     <v-file-input
                                                         class="mr-2"
-                                                        accept=".waypoints,.txt" label="Waypoints File input"
+                                                        accept=".waypoints,.txt,.kml,.plan"
+                                                        label="Waypoints File input"
                                                         :color="'#FF5722'"
                                                         outlined dense hide-details small-chips
                                                         v-model="chosenWaypointsFile"
