@@ -1260,27 +1260,34 @@ export default {
             reader.onload = () => {
                 this.strWaypoints = reader.result;
 
-                console.log(this.strWaypoints);
+                console.log('strWaypoints', this.strWaypoints);
 
                 this.strWaypoints = this.strWaypoints.replace(/\n/g, '\r');
                 let arrWayPoints = this.strWaypoints.split('\r');
-                console.log(arrWayPoints);
+                console.log('arrWayPoints', arrWayPoints);
 
                 let objMyDroneInfo = JSON.parse(this.strMyDroneInfo);
+
+                console.log('strMyDroneInfo', this.strMyDroneInfo, 'drone_infos', JSON.stringify(this.$store.state.drone_infos[this.name]));
+
+                console.log('objMyDroneInfo', objMyDroneInfo);
+
                 objMyDroneInfo.goto_positions = null;
                 objMyDroneInfo.goto_positions = [];
 
+                let acceptSeq = 0;
                 arrWayPoints.forEach((waypoint)=>{
                     waypoint = waypoint.replace(/\n/g, '');
                     waypoint = waypoint.replace(/\t\t/g, '\t');
                     let arrWaypoint = waypoint.split('\t');
 
-                    if(arrWaypoint.length > 1) {
-                        let seq = arrWaypoint[0];
-                        if(seq > 0) {
-                            if(arrWaypoint[3] === 16 || arrWaypoint[3] === '16' || arrWaypoint[3] === 21 || arrWaypoint[3] === '21') {
-                                console.log(arrWaypoint);
+                    console.log('arrWaypoint.length', arrWaypoint.length, 'arrWaypoint', arrWaypoint, 'arrWaypoint[0]', parseInt(arrWaypoint[0]));
 
+                    let seq = parseInt(arrWaypoint[0]);
+
+                    if(!isNaN(seq)) {
+                        //if(seq > 0) {
+                            if(arrWaypoint[3] === 16 || arrWaypoint[3] === '16' || arrWaypoint[3] === 21 || arrWaypoint[3] === '21') {
                                 let strGotoPosition = String(arrWaypoint[8]) + ':' +
                                     String(arrWaypoint[9]) + ':' +
                                     String(arrWaypoint[10]) + ':' +
@@ -1292,13 +1299,15 @@ export default {
 
                                 console.log(strGotoPosition);
 
-                                objMyDroneInfo.goto_positions[seq - 1] = strGotoPosition;
+                                objMyDroneInfo.goto_positions[acceptSeq++] = strGotoPosition;
 
-                                this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                                //this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
                             }
-                        }
+                        //}
                     }
                 });
+
+                this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
             }
         },
 
@@ -1464,6 +1473,10 @@ export default {
 
                 this.$store.commit('updateDroneInfosSelected');
 
+                this.postMarkerInfos(this.name, () => {
+                    console.log('DroneInfo.vue', 'postMarkerInfos');
+                });
+
                 EventBus.$emit('gcs-map-ready');
             }
             catch (e) {
@@ -1471,6 +1484,38 @@ export default {
             }
 
             this.dialog = false;
+        },
+
+        postMarkerInfos(dName, callback) {
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName,
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: this.$store.state.tempMarkers[dName]
+                    }
+                }
+            }).then(
+                function (res) {
+
+                    console.log('postMarkerInfos-axios', dName, res.data);
+
+                    callback(res.status, '');
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
         },
 
         // postDroneInfos(callback) {

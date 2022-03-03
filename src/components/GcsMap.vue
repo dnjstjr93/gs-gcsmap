@@ -144,6 +144,7 @@
                                       </div>
                                     </div>
 
+<!--                                    home_position circle-->
                                     <GmapCircle
                                         :center="{lat: drone.home_position.lat, lng: drone.home_position.lng}"
                                         :radius="3"
@@ -158,6 +159,7 @@
                                         @click="printPosClick"
                                     ></GmapCircle>
 
+<!--                                    drone circle -->
                                     <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
                                             :radius="2"
