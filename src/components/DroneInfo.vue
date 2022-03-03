@@ -563,6 +563,7 @@ import {nanoid} from "nanoid";
 import DroneInfoHUD from "./DroneInfoHUD";
 import DroneInfoBox from "@/components/DroneInfoBox";
 import mqtt from "mqtt";
+import convert from "xml-js";
 
 const byteToHex = [];
 
@@ -1261,53 +1262,135 @@ export default {
                 this.strWaypoints = reader.result;
 
                 console.log('strWaypoints', this.strWaypoints);
+                if (this.chosenWaypointsFile.name.includes('.waypoints') || this.chosenWaypointsFile.name.includes('.txt')) {
+                    console.log('Waypoints File in Mission Planner');
+                    this.strWaypoints = this.strWaypoints.replace(/\n/g, '\r');
+                    let arrWayPoints = this.strWaypoints.split('\r');
+                    console.log('arrWayPoints', arrWayPoints);
 
-                this.strWaypoints = this.strWaypoints.replace(/\n/g, '\r');
-                let arrWayPoints = this.strWaypoints.split('\r');
-                console.log('arrWayPoints', arrWayPoints);
+                    let objMyDroneInfo = JSON.parse(this.strMyDroneInfo);
 
-                let objMyDroneInfo = JSON.parse(this.strMyDroneInfo);
+                    console.log('strMyDroneInfo', this.strMyDroneInfo, 'drone_infos', JSON.stringify(this.$store.state.drone_infos[this.name]));
 
-                console.log('strMyDroneInfo', this.strMyDroneInfo, 'drone_infos', JSON.stringify(this.$store.state.drone_infos[this.name]));
+                    console.log('objMyDroneInfo', objMyDroneInfo);
 
-                console.log('objMyDroneInfo', objMyDroneInfo);
+                    objMyDroneInfo.goto_positions = null;
+                    objMyDroneInfo.goto_positions = [];
 
-                objMyDroneInfo.goto_positions = null;
-                objMyDroneInfo.goto_positions = [];
+                    let acceptSeq = 0;
+                    arrWayPoints.forEach((waypoint) => {
+                        waypoint = waypoint.replace(/\n/g, '');
+                        waypoint = waypoint.replace(/\t\t/g, '\t');
+                        let arrWaypoint = waypoint.split('\t');
 
-                let acceptSeq = 0;
-                arrWayPoints.forEach((waypoint)=>{
-                    waypoint = waypoint.replace(/\n/g, '');
-                    waypoint = waypoint.replace(/\t\t/g, '\t');
-                    let arrWaypoint = waypoint.split('\t');
+                        console.log('arrWaypoint.length', arrWaypoint.length, 'arrWaypoint', arrWaypoint, 'arrWaypoint[0]', parseInt(arrWaypoint[0]));
 
-                    console.log('arrWaypoint.length', arrWaypoint.length, 'arrWaypoint', arrWaypoint, 'arrWaypoint[0]', parseInt(arrWaypoint[0]));
+                        let seq = parseInt(arrWaypoint[0]);
 
-                    let seq = parseInt(arrWaypoint[0]);
+                        if (!isNaN(seq)) {
+                            if (seq > 1) { // seq = 0 (home position), seq = 1 (takeoff)
+                                if (arrWaypoint[3] === 16 || arrWaypoint[3] === '16' || arrWaypoint[3] === 21 || arrWaypoint[3] === '21') {
+                                    let strGotoPosition = String(arrWaypoint[8]) + ':' +
+                                        String(arrWaypoint[9]) + ':' +
+                                        String(arrWaypoint[10]) + ':' +
+                                        (arrWaypoint[12] ? String(arrWaypoint[12]) : String(objMyDroneInfo.targetSpeed)) + ':' +
+                                        String(objMyDroneInfo.targetRadius) + ':' +
+                                        String(objMyDroneInfo.targetTurningSpeed) + ':' +
+                                        String(arrWaypoint[3]) + ':' +
+                                        String(arrWaypoint[4]) + ':0.0:0';
 
-                    if(!isNaN(seq)) {
-                        //if(seq > 0) {
-                            if(arrWaypoint[3] === 16 || arrWaypoint[3] === '16' || arrWaypoint[3] === 21 || arrWaypoint[3] === '21') {
-                                let strGotoPosition = String(arrWaypoint[8]) + ':' +
-                                    String(arrWaypoint[9]) + ':' +
-                                    String(arrWaypoint[10]) + ':' +
-                                    (arrWaypoint[12] ? String(arrWaypoint[12]) : String(objMyDroneInfo.targetSpeed)) + ':' +
+                                    console.log(strGotoPosition);
+
+                                    objMyDroneInfo.goto_positions[acceptSeq++] = strGotoPosition;
+
+                                    //this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                                }
+                            }
+                        }
+                    });
+
+                    this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                } else if (this.chosenWaypointsFile.name.includes('.kml')) {
+                    console.log('Waypoints File(KML) in QGroundControl');
+
+                    let objMyDroneInfo = JSON.parse(this.strMyDroneInfo);
+
+                    console.log('strMyDroneInfo', this.strMyDroneInfo, 'drone_infos', JSON.stringify(this.$store.state.drone_infos[this.name]));
+
+                    console.log('objMyDroneInfo', objMyDroneInfo);
+
+                    objMyDroneInfo.goto_positions = null;
+                    objMyDroneInfo.goto_positions = [];
+
+                    let json = convert.xml2json(this.strWaypoints, {compact: true})
+                    let placemark = JSON.parse(json).kml.Document.Folder.Placemark
+                    // console.log(placemark)
+
+                    let acceptSeq = 0;
+
+                    placemark.forEach((waypoint) => {
+                        waypoint = waypoint.description['_cdata'].split('\r\n')
+                        console.log(waypoint)
+                        // let arrWaypoint = []
+                        let seq = parseInt(waypoint[0].split(' ')[1]);
+
+                        if (!isNaN(seq)) {
+                            if (seq !== 0 && waypoint[1] === 'Waypoint') {
+                                let strGotoPosition = String(waypoint[4].split(' ')[1]) + ':' +
+                                    String(waypoint[5].split(' ')[1]) + ':' +
+                                    String(waypoint[3].split(' ')[2]) + ':' +
+                                    (waypoint[7] ? String(waypoint[7]) : String(objMyDroneInfo.targetSpeed)) + ':' +
                                     String(objMyDroneInfo.targetRadius) + ':' +
-                                    String(objMyDroneInfo.targetTurningSpeed) + ':' +
-                                    String(arrWaypoint[3])  + ':' +
-                                    String(arrWaypoint[4])  + ':0.0:0';
+                                    String(objMyDroneInfo.targetTurningSpeed) + ':16:0:0.0:0';
 
                                 console.log(strGotoPosition);
 
                                 objMyDroneInfo.goto_positions[acceptSeq++] = strGotoPosition;
-
-                                //this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
                             }
-                        //}
-                    }
-                });
+                        }
+                    });
+                    this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                } else if (this.chosenWaypointsFile.name.includes('.plan')) {
+                    console.log('Waypoints File(plan) in QGroundControl');
+                    this.strWaypoints = JSON.parse(this.strWaypoints);
 
-                this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                    let objMyDroneInfo = JSON.parse(this.strMyDroneInfo);
+
+                    console.log('strMyDroneInfo', this.strMyDroneInfo, 'drone_infos', JSON.stringify(this.$store.state.drone_infos[this.name]));
+
+                    console.log('objMyDroneInfo', objMyDroneInfo);
+
+                    objMyDroneInfo.goto_positions = null;
+                    objMyDroneInfo.goto_positions = [];
+
+                    let WayPoints = null;
+
+                    for (let idx in this.strWaypoints.mission.items) {
+                        if (Object.prototype.hasOwnProperty.call(this.strWaypoints.mission.items[idx], 'TransectStyleComplexItem')) {
+                            WayPoints = this.strWaypoints.mission.items[idx].TransectStyleComplexItem.Items;
+                        }
+                    }
+                    let acceptSeq = 0;
+                    if (WayPoints) {
+                        WayPoints.forEach((waypoint) => {
+                            if (waypoint.command === 16 || waypoint.command === '16' || waypoint.command === 21 || waypoint.command === '21') {
+                                let strGotoPosition = String(waypoint.params[4]) + ':' +
+                                    String(waypoint.params[5]) + ':' +
+                                    String(waypoint.params[6]) + ':' +
+                                    (waypoint.params[7] ? String(waypoint.params[7]) : String(objMyDroneInfo.targetSpeed)) + ':' +
+                                    String(objMyDroneInfo.targetRadius) + ':' +
+                                    String(objMyDroneInfo.targetTurningSpeed) + ':' +
+                                    String(waypoint.command) + ':' +
+                                    String(waypoint.params[0]) + ':0.0:0';
+
+                                console.log(strGotoPosition);
+
+                                objMyDroneInfo.goto_positions[acceptSeq++] = strGotoPosition;
+                            }
+                        });
+                    }
+                    this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                }
             }
         },
 
