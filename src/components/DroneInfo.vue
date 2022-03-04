@@ -4105,61 +4105,64 @@ export default {
                 }
 
                 // else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_STATUS) {
-                //     if (ver === 'fd') {
-                //         base_offset = 20;
-                //         satellites = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     let my_len = 101;
+                //     let ar = mavPacket.split('');
+                //     for (let i = 0; i < (my_len - msg_len); i++) {
+                //         ar.splice(ar.length-4, 0, '0');
+                //         ar.splice(ar.length-4, 0, '0');
                 //     }
-                //     else {
-                //         base_offset = 12;
-                //         satellites = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
+                //     mavPacket = ar.join('');
                 //
+                //     satellites = mavPacket.substr(base_offset, 2).toLowerCase();
                 //     this.num_satellites = Buffer.from(satellites, 'hex').readUInt8(0);
                 //     this.info.num_satellites = this.num_satellites;
                 //
                 //     console.log("MAVLINK_MSG_ID_GPS_STATUS", "num_satellites ", this.num_satellites);
                 // }
 
-                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_RADIO_STATUS) {
-                //     if (ver === 'fd') {
-                //         base_offset = 20 + 2;
-                //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RADIO_STATUS) {
+                //     let my_len = 9;
+                //     let ar = mavPacket.split('');
+                //     for (let i = 0; i < (my_len - msg_len); i++) {
+                //         ar.splice(ar.length-4, 0, '0');
+                //         ar.splice(ar.length-4, 0, '0');
                 //     }
-                //     else {
-                //         base_offset = 12 + 2;
-                //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
+                //     mavPacket = ar.join('');
                 //
+                //     base_offset += 2;
+                //     var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
                 //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
                 //     this.info.rssi = this.rssi;
                 //     console.log('MAVLINK_MSG_ID_RADIO_STATUS', this.rssi);
                 // }
 
                 // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS_RAW) {
-                //     if (ver === 'fd') {
-                //         base_offset = 20 + 42;
-                //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     let my_len = 22;
+                //     let ar = mavPacket.split('');
+                //     for (let i = 0; i < (my_len - msg_len); i++) {
+                //         ar.splice(ar.length-4, 0, '0');
+                //         ar.splice(ar.length-4, 0, '0');
                 //     }
-                //     else {
-                //         base_offset = 12 + 42;
-                //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
+                //     mavPacket = ar.join('');
                 //
+                //     base_offset += 42;
+                //     var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
                 //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
                 //     this.info.rssi = this.rssi;
                 //     console.log('MAVLINK_MSG_ID_RC_CHANNELS_RAW', this.rssi);
                 // }
 
                 // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
-                //     if (ver === 'fd') {
-                //         base_offset = 20 + 46;
-                //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     let my_len = 42;
+                //     let ar = mavPacket.split('');
+                //     for (let i = 0; i < (my_len - msg_len); i++) {
+                //         ar.splice(ar.length-4, 0, '0');
+                //         ar.splice(ar.length-4, 0, '0');
                 //     }
-                //     else {
-                //         base_offset = 12 + 46;
-                //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
+                //     mavPacket = ar.join('');
                 //
+                //     base_offset += 82;
+                //     var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
                 //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
                 //     this.info.rssi = this.rssi;
                 //     console.log('MAVLINK_MSG_ID_RC_CHANNELS', this.rssi);
@@ -4578,12 +4581,13 @@ export default {
 
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_ADSB_VEHICLE) {
-                    if (ver === 'fd') {
-                        base_offset = 20;
+                    let my_len = 38;
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
                     }
-                    else {
-                        base_offset = 12;
-                    }
+                    mavPacket = ar.join('');
 
                     var ICAO_address = mavPacket.substr(base_offset, 8).toLowerCase();
                     base_offset += 8;
