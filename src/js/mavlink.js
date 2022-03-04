@@ -8045,7 +8045,7 @@ MAVLink.prototype.parseLength = function() {
     if( this.buf.length >= 2 ) {
         var unpacked = jspack.Unpack('BB', this.buf.slice(0, 2));
         this.expected_length = unpacked[1] + 
-                                ((this.protocolVersion == mavlink.WIRE_PROTOCOL_VERSION_2)?
+                                ((this.protocolVersion === mavlink.WIRE_PROTOCOL_VERSION_2)?
                                 mavlink.MAVLINK_HEADER_LEN_V2:
                                 mavlink.MAVLINK_HEADER_LEN_V1) +
                                 2; // length of message + header + CRC(2 bytes)
@@ -8078,7 +8078,7 @@ MAVLink.prototype.parseChar = function(c) {
 
 MAVLink.prototype.parsePayload = function() {
     var m = null;
-    var header_length = ((this.protocolVersion == mavlink.WIRE_PROTOCOL_VERSION_2) ? 
+    var header_length = ((this.protocolVersion === mavlink.WIRE_PROTOCOL_VERSION_2) ?
                         mavlink.MAVLINK_HEADER_LEN_V2 :
                         mavlink.MAVLINK_HEADER_LEN_V1) + 2; // header + CRC(2 bytes)
 
@@ -8137,26 +8137,26 @@ MAVLink.prototype.decode = function(msgbuf) {
     var i = 0;
     var magic, mlen, incompatFlags, compatFlags, seq, srcSystem, srcComponent, unpacked, msgId;
 
-    var header_length = ((this.protocolVersion == mavlink.WIRE_PROTOCOL_VERSION_2) ? 
+    var header_length = ((this.protocolVersion === mavlink.WIRE_PROTOCOL_VERSION_2) ?
                         mavlink.MAVLINK_HEADER_LEN_V2 :
                         mavlink.MAVLINK_HEADER_LEN_V1) + 2; // header + CRC(2 bytes)
 
     // decode the header
     try {
-        if (this.protocolVersion == mavlink.WIRE_PROTOCOL_VERSION_2) {
+        if (this.protocolVersion === mavlink.WIRE_PROTOCOL_VERSION_2) {
             unpacked = jspack.Unpack('cBBBBBBBBB', msgbuf.slice(0, mavlink.MAVLINK_HEADER_LEN_V2));
         } else {
             unpacked = jspack.Unpack('cBBBBB', msgbuf.slice(0, mavlink.MAVLINK_HEADER_LEN_V1));
         }
         magic = unpacked[i++];
         mlen = unpacked[i++];
-        incompatFlags = (this.protocolVersion == mavlink.WIRE_PROTOCOL_VERSION_2) ? unpacked[i++] : 0;
-        compatFlags = (this.protocolVersion == mavlink.WIRE_PROTOCOL_VERSION_2) ? unpacked[i++] : 0;
+        incompatFlags = (this.protocolVersion === mavlink.WIRE_PROTOCOL_VERSION_2) ? unpacked[i++] : 0;
+        compatFlags = (this.protocolVersion === mavlink.WIRE_PROTOCOL_VERSION_2) ? unpacked[i++] : 0;
         seq = unpacked[i++];
         srcSystem = unpacked[i++];
         srcComponent = unpacked[i++];
         msgId = unpacked[i++]; // low
-        if (this.protocolVersion == mavlink.WIRE_PROTOCOL_VERSION_2) {
+        if (this.protocolVersion === mavlink.WIRE_PROTOCOL_VERSION_2) {
             msgId |= unpacked[i++] << 8; // middle
             msgId |= unpacked[i++] << 16; // high
             // TODO : SIGNATURE(13 bytes, Optional)

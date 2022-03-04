@@ -3492,7 +3492,7 @@ export default {
                 if (ver === 'fd') {
                     sysid = mavPacket.substr(10, 2).toLowerCase();
                     //msgid = mavPacket.substr(14, 6).toLowerCase();
-                    msgid = mavPacket.substr(18, 2)+mavPacket.substr(16, 2)+mavPacket.substr(14, 2);
+                    msgid = mavPacket.substr(18, 2) + mavPacket.substr(16, 2) + mavPacket.substr(14, 2);
                 }
                 else {
                     sysid = mavPacket.substr(6, 2).toLowerCase();
@@ -3605,7 +3605,7 @@ export default {
                     6 정보: 정보 메시지
                     7 디버그: 디버그 수준 메시지
                      */
-                    if (ver == 'fd') {
+                    if (ver === 'fd') {
                         base_offset = 20;
                         var severity = mavPacket.substr(base_offset, 2).toLowerCase();
                         base_offset += 8;
@@ -4098,9 +4098,27 @@ export default {
 
                     this.num_satellites = Buffer.from(satellites, 'hex').readUInt8(0);
                     this.info.num_satellites = this.num_satellites;
+
+                    //console.log("MAVLINK_MSG_ID_GPS_RAW_INT", "num_satellites ", this.num_satellites);
                 }
 
-                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RADIO_STATUS) {
+                // else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_STATUS) {
+                //     if (ver === 'fd') {
+                //         base_offset = 20;
+                //         satellites = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //     else {
+                //         base_offset = 12;
+                //         satellites = mavPacket.substr(base_offset, 2).toLowerCase();
+                //     }
+                //
+                //     this.num_satellites = Buffer.from(satellites, 'hex').readUInt8(0);
+                //     this.info.num_satellites = this.num_satellites;
+                //
+                //     console.log("MAVLINK_MSG_ID_GPS_STATUS", "num_satellites ", this.num_satellites);
+                // }
+
+                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_RADIO_STATUS) {
                 //     if (ver === 'fd') {
                 //         base_offset = 20 + 2;
                 //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
