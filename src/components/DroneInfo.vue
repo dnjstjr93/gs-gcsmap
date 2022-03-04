@@ -1726,9 +1726,8 @@ export default {
 
             if (chkTopic === "/Mobius") {
                 this.strContentEach += message.toString('hex').toLowerCase();
-                while (this.strContentEach.length > 12) {
+                while (this.strContentEach.length > 20) {
                     if (this.mavVersion === 'v1' && this.strContentEach.substr(0, 2) === 'fe') {
-
                         var len = parseInt(this.strContentEach.substr(2, 2), 16);
                         var contentLenth = (6 * 2) + (len * 2) + (2 * 2);
 
@@ -1746,7 +1745,6 @@ export default {
                         }
                     }
                     else if (this.mavVersion === 'v2' && this.strContentEach.substr(0, 2) === 'fd') {
-
                         len = parseInt(this.strContentEach.substr(2, 2), 16);
                         contentLenth = (10 * 2) + (len * 2) + (2 * 2);
 
@@ -3493,25 +3491,20 @@ export default {
                     sysid = mavPacket.substr(10, 2).toLowerCase();
                     //msgid = mavPacket.substr(14, 6).toLowerCase();
                     msgid = mavPacket.substr(18, 2) + mavPacket.substr(16, 2) + mavPacket.substr(14, 2);
+                    var base_offset = 20;
                 }
                 else {
                     sysid = mavPacket.substr(6, 2).toLowerCase();
                     msgid = mavPacket.substr(10, 2).toLowerCase();
+                    base_offset = 12;
                 }
 
-                const sys_id = parseInt(sysid, 16);
-                const msg_id = parseInt(msgid, 16);
+                var sys_id = parseInt(sysid, 16);
+                var msg_id = parseInt(msgid, 16);
 
                 this.sys_id = sys_id;
 
-                if (msg_id === mavlink.MAVLINK_MSG_ID_HEARTBEAT && ((ver === 'fd') || (ver === 'fe' && mavPacket.length === 34))) {
-                    if (ver === 'fd') {
-                        var base_offset = 20;
-                    }
-                    else {
-                        base_offset = 12;
-                    }
-
+                if (msg_id === mavlink.MAVLINK_MSG_ID_HEARTBEAT) {
                     var custom_mode = mavPacket.substr(base_offset, 8).toLowerCase();
                     base_offset += 8;
                     var type = mavPacket.substr(base_offset, 2).toLowerCase();
@@ -3594,7 +3587,8 @@ export default {
 
                         EventBus.$emit('onResize-DroneInfoList');
                     }
-                } else if (msg_id === mavlink.MAVLINK_MSG_ID_STATUSTEXT) {
+                }
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_STATUSTEXT) {
                     /*
                     0 비상: 시스템을 사용할 수 없음
                     1 경고: 즉시 조치를 취해야 합니다.
@@ -3605,17 +3599,10 @@ export default {
                     6 정보: 정보 메시지
                     7 디버그: 디버그 수준 메시지
                      */
-                    if (ver === 'fd') {
-                        base_offset = 20;
-                        var severity = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 8;
-                        var text = mavPacket.substr(base_offset, 100).toLowerCase();
-                    } else {
-                        base_offset = 12;
-                        severity = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        text = mavPacket.substr(base_offset, 100).toLowerCase();
-                    }
+                    var severity = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    var text = mavPacket.substr(base_offset, 100).toLowerCase();
+
                     this.info.severity = Buffer.from(severity, 'hex').readUInt8(0);
                     this.info.text = Buffer.from(text, 'hex').toString('ASCII').replace(/\0/g, '').replace('  ', '');
                 }
@@ -3623,14 +3610,8 @@ export default {
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_SYS_STATUS && ((ver === 'fd') || (ver === 'fe' && mavPacket.length === 78))) {
                     // console.log(mavPacket.length);
 
-                    if (ver === 'fd') {
-                        let base_offset = 20 + 28;
-                        var voltage_battery = mavPacket.substr(base_offset, 8).toLowerCase();
-                    }
-                    else {
-                        base_offset = 12 + 28;
-                        voltage_battery = mavPacket.substr(base_offset, 8).toLowerCase();
-                    }
+                    base_offset += 28;
+                    var voltage_battery = mavPacket.substr(base_offset, 8).toLowerCase();
 
                     this.ss.voltage_battery = Buffer.from(voltage_battery, 'hex').readUInt16LE(0);
 
@@ -3655,46 +3636,23 @@ export default {
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) {
-                    if (ver === 'fd') {
-                        base_offset = 20;
-                        var time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var lat = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var lon = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var alt = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var relative_alt = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var vx = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var vy = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var vz = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var hdg = mavPacket.substr(base_offset, 4).toLowerCase();
-                    }
-                    else {
-                        base_offset = 12;
-                        time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        lat = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        lon = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        alt = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        relative_alt = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        vx = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        vy = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        vz = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        hdg = mavPacket.substr(base_offset, 4).toLowerCase();
-                    }
+                    var time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var lat = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var lon = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var alt = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var relative_alt = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var vx = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var vy = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var vz = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var hdg = mavPacket.substr(base_offset, 4).toLowerCase();
 
                     // eslint-disable-next-line no-prototype-builtins
                     if (!Object.prototype.hasOwnProperty.call(this.gpi, sys_id)) {
@@ -4023,38 +3981,19 @@ export default {
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_ATTITUDE) {
-                    if (ver === 'fd') {
-                        base_offset = 20;
-                        time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var roll = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var pitch = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var yaw = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var rollspeed = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var pitchspeed = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var yawspeed = mavPacket.substr(base_offset, 8).toLowerCase();
-                    }
-                    else {
-                        base_offset = 12;
-                        time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        roll = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        pitch = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        yaw = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        rollspeed = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        pitchspeed = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        yawspeed = mavPacket.substr(base_offset, 8).toLowerCase();
-                    }
+                    time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var roll = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var pitch = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var yaw = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var rollspeed = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var pitchspeed = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var yawspeed = mavPacket.substr(base_offset, 8).toLowerCase();
 
                     // eslint-disable-next-line no-prototype-builtins
                     if (!Object.prototype.hasOwnProperty.call(this.att, sys_id)) {
@@ -4087,14 +4026,8 @@ export default {
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RAW_INT) {
-                    if (ver === 'fd') {
-                        base_offset = 20 + (16 + 2 + 8 + 8 + 8 + 4 + 4 + 4 + 4);
-                        var satellites = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
-                    else {
-                        base_offset = 12 + (16 + 2 + 8 + 8 + 8 + 4 + 4 + 4 + 4);
-                        satellites = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
+                    base_offset += (16 + 2 + 8 + 8 + 8 + 4 + 4 + 4 + 4);
+                    var satellites = mavPacket.substr(base_offset, 2).toLowerCase();
 
                     this.num_satellites = Buffer.from(satellites, 'hex').readUInt8(0);
                     this.info.num_satellites = this.num_satellites;
@@ -4164,18 +4097,7 @@ export default {
                 // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM_REACHED) {
-                    if (ver === 'fd') {
-                        base_offset = 20;
-                        // time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                        // base_offset += (8 + 2 + (4 * 18));
-                        var mission_seq = mavPacket.substr(base_offset, 4).toLowerCase();
-                    }
-                    else {
-                        base_offset = 12;
-                        // time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                        // base_offset += (8 + 2 + (4 * 18));
-                        mission_seq = mavPacket.substr(base_offset, 4).toLowerCase();
-                    }
+                    var mission_seq = mavPacket.substr(base_offset, 4).toLowerCase();
 
                     this.mission_seq = Buffer.from(mission_seq, 'hex').readUInt16LE(0);
 
@@ -4237,30 +4159,15 @@ export default {
                 // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_PARAM_VALUE) {
-                     if (ver === 'fd') {
-                        base_offset = 20;
-                        var param_value = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var param_count = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var param_index = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var param_id = mavPacket.substr(base_offset, 32).toLowerCase();
-                        base_offset += 32;
-                        var param_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
-                    else {
-                        base_offset = 12;
-                        param_value = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        param_count = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        param_index = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        param_id = mavPacket.substr(base_offset, 32).toLowerCase();
-                        base_offset += 32;
-                        param_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
+                    var param_value = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var param_count = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var param_index = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var param_id = mavPacket.substr(base_offset, 32).toLowerCase();
+                    base_offset += 32;
+                    var param_type = mavPacket.substr(base_offset, 2).toLowerCase();
 
                     param_id = Buffer.from(param_id, "hex").toString('ASCII');
 
@@ -4436,26 +4343,14 @@ export default {
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_REQUEST) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_REQUEST - ' + mavPacket);
-                    if (ver === 'fd') {
-                        base_offset = 20;
-                        var mission_sequence = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var target_system = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        //var target_component = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        //var mission_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
-                    else {
-                        base_offset = 12;
-                        mission_sequence = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        target_system = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        //target_component = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        //mission_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
+
+                    var mission_sequence = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var target_system = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    //var target_component = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    //var mission_type = mavPacket.substr(base_offset, 2).toLowerCase();
 
                     if (!Object.prototype.hasOwnProperty.call(this.mission_request, sys_id)) {
                         this.mission_request[sys_id] = {};
@@ -4482,26 +4377,14 @@ export default {
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ACK) { // #47 - mission_ack
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ACK - ' + mavPacket);
-                    if (ver === 'fd') {
-                        base_offset = 20;
-                        target_system = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        //target_component = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        var mission_result_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        //mission_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
-                    else {
-                        base_offset = 12;
-                        target_system = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        //target_component = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        mission_result_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        //mission_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
+
+                    target_system = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    //target_component = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    var mission_result_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    //mission_type = mavPacket.substr(base_offset, 2).toLowerCase();
 
                     if (!Object.prototype.hasOwnProperty.call(this.result_mission_ack, sys_id)) {
                         this.result_mission_ack[sys_id] = {};
@@ -4553,20 +4436,11 @@ export default {
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_COMMAND_ACK) { // #77 command_ack
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ACK - ' + mavPacket);
-                    if (ver === 'fd') {
-                        base_offset = 20;
-                        var command = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var command_result = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                    }
-                    else {
-                        base_offset = 12;
-                        command = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        command_result = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                    }
+
+                    var command = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var command_result = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
 
                     if (!Object.prototype.hasOwnProperty.call(this.result_command_ack, sys_id)) {
                         this.result_command_ack = {};
@@ -4579,61 +4453,31 @@ export default {
                     console.log(this.name, 'MAVLINK_MSG_ID_COMMAND_ACK', '-', this.result_command_ack[sys_id].command, this.MAV_CMD_ACK_CODE[this.result_command_ack[sys_id].command_result]);
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_ADSB_VEHICLE) {
-                    if (ver === 'fd') {
-                        base_offset = 20;
-                        var ICAO_address = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var adsb_lat = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var adsb_lon = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        var attitude = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        // var attitude_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                        // base_offset += 2;
-                        var heading = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var hor_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var ver_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var flag = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var squawk = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        var callsign = mavPacket.substr(base_offset, 20).toLowerCase();
-                        base_offset += 20;
-                        var emitter_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        var tslc = mavPacket.substr(base_offset, 2).toLowerCase();
-                    } else {
-                        base_offset = 12;
-                        ICAO_address = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        adsb_lat = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        adsb_lon = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        attitude = mavPacket.substr(base_offset, 8).toLowerCase();
-                        base_offset += 8;
-                        // attitude_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                        // base_offset += 2;
-                        heading = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        hor_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        ver_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        flag = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        squawk = mavPacket.substr(base_offset, 4).toLowerCase();
-                        base_offset += 4;
-                        callsign = mavPacket.substr(base_offset, 20).toLowerCase();
-                        base_offset += 20;
-                        emitter_type = mavPacket.substr(base_offset, 2).toLowerCase();
-                        base_offset += 2;
-                        tslc = mavPacket.substr(base_offset, 2).toLowerCase();
-                    }
+                    var ICAO_address = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var adsb_lat = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var adsb_lon = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    var attitude = mavPacket.substr(base_offset, 8).toLowerCase();
+                    base_offset += 8;
+                    // var attitude_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                    // base_offset += 2;
+                    var heading = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var hor_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var ver_velocity = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var flag = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var squawk = mavPacket.substr(base_offset, 4).toLowerCase();
+                    base_offset += 4;
+                    var callsign = mavPacket.substr(base_offset, 20).toLowerCase();
+                    base_offset += 20;
+                    var emitter_type = mavPacket.substr(base_offset, 2).toLowerCase();
+                    base_offset += 2;
+                    var tslc = mavPacket.substr(base_offset, 2).toLowerCase();
 
                     this.adsb.ICAO_address = Buffer.from(ICAO_address, 'hex').readUInt32LE(0).toString(16).toUpperCase();
                     this.adsb.lat = Buffer.from(adsb_lat, 'hex').readInt32LE(0);
