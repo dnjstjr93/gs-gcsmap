@@ -2071,7 +2071,8 @@ export default {
                 this.borderColor = 'indicator-border-green';
                 this.flagReceiving = true;
 
-                //setTimeout(this.parseMavFromDrone, 0, JSON.parse(JSON.stringify(payload.data)));
+                //setTimeout(this.parseMavFromDrone, 0, mavPacket);
+
                 this.parseMavFromDrone(mavPacket);
 
                 // payload = null;
@@ -2432,7 +2433,7 @@ export default {
 
             if (mavMsg) {
                 genMsg = Buffer.from(mavMsg.pack(mavlinkParser));
-                console.log('>>>>> MAVLINK OUTGOING MSG: ' + genMsg.toString('hex'));
+                //console.log('>>>>> MAVLINK OUTGOING MSG: ' + genMsg.toString('hex'));
             }
 
             return genMsg;
@@ -3484,15 +3485,16 @@ export default {
         parseMavFromDrone(mavPacket) {
             try {
                 var ver = mavPacket.substr(0, 2);
-                //var msglen = mavPacket.substr(2, 2);
+                var msglen = mavPacket.substr(2, 2);
                 var sysid = '';
                 var msgid = '';
+                var base_offset = 12;
 
                 if (ver === 'fd') {
                     sysid = mavPacket.substr(10, 2).toLowerCase();
                     //msgid = mavPacket.substr(14, 6).toLowerCase();
                     msgid = mavPacket.substr(18, 2) + mavPacket.substr(16, 2) + mavPacket.substr(14, 2);
-                    var base_offset = 20;
+                    base_offset = 20;
                 }
                 else {
                     sysid = mavPacket.substr(6, 2).toLowerCase();
@@ -3502,11 +3504,19 @@ export default {
 
                 var sys_id = parseInt(sysid, 16);
                 var msg_id = parseInt(msgid, 16);
-                //var msg_len = parseInt(msglen, 16);
+                var msg_len = parseInt(msglen, 16);
 
                 this.sys_id = sys_id;
 
                 if (msg_id === mavlink.MAVLINK_MSG_ID_HEARTBEAT) {
+                    let my_len = 9;
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
+
                     var custom_mode = mavPacket.substr(base_offset, 8).toLowerCase();
                     base_offset += 8;
                     var type = mavPacket.substr(base_offset, 2).toLowerCase();
@@ -3528,12 +3538,11 @@ export default {
 
                     // console.log(this.MAV_AUTOPILOT[this.hb.autopilot]);
 
-                    if(this.hb.autopilot === mavlink.MAV_AUTOPILOT_ARDUPILOTMEGA) {
+                    if (this.hb.autopilot === mavlink.MAV_AUTOPILOT_ARDUPILOTMEGA) {
                         this.fc_img = 'ardupilot.png';
                         this.$store.state.drone_infos[this.name].fcType = 'ardupilot';
                         this.fcType = 'ardupilot';
-                    }
-                    else if(this.hb.autopilot === mavlink.MAV_AUTOPILOT_PX4) {
+                    } else if (this.hb.autopilot === mavlink.MAV_AUTOPILOT_PX4) {
                         this.fc_img = 'px4.png';
                         this.$store.state.drone_infos[this.name].fcType = 'px4';
                         this.fcType = 'px4';
@@ -3563,8 +3572,7 @@ export default {
                         this.curArmStatus = 'ARMED';
                         this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
                         this.colorArm = 'td-text-red';
-                    }
-                    else {
+                    } else {
                         this.iconArming = 'mdi-airplane-off';
                         this.colorArming = 'white';
                         this.curArmStatus = 'DISARMED';
@@ -3601,6 +3609,17 @@ export default {
                     6 정보: 정보 메시지
                     7 디버그: 디버그 수준 메시지
                      */
+                    let my_len = 53;
+                    if(ver === 'fd') {
+                        my_len += 3;
+                    }
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
+
                     var severity = mavPacket.substr(base_offset, 2).toLowerCase();
                     base_offset += 2;
                     var text = mavPacket.substr(base_offset, 100).toLowerCase();
@@ -3610,7 +3629,16 @@ export default {
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_SYS_STATUS && ((ver === 'fd') || (ver === 'fe' && mavPacket.length === 78))) {
-                    // console.log(mavPacket.length);
+                    let my_len = 31;
+                    if(ver === 'fd') {
+                        my_len += 12;
+                    }
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
 
                     base_offset += 28;
                     var voltage_battery = mavPacket.substr(base_offset, 8).toLowerCase();
@@ -3638,6 +3666,14 @@ export default {
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) {
+                    let my_len = 28;
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
+
                     var time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
                     base_offset += 8;
                     var lat = mavPacket.substr(base_offset, 8).toLowerCase();
@@ -3666,8 +3702,8 @@ export default {
                     this.gpi.lon = Buffer.from(lon, 'hex').readInt32LE(0);
                     this.gpi.alt = Buffer.from(alt, 'hex').readInt32LE(0);
                     this.gpi.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
-                    this.gpi.vy = Buffer.from(vx, 'hex').readInt16LE(0);
-                    this.gpi.vx = Buffer.from(vy, 'hex').readInt16LE(0);
+                    this.gpi.vx = Buffer.from(vx, 'hex').readInt16LE(0);
+                    this.gpi.vy = Buffer.from(vy, 'hex').readInt16LE(0);
                     this.gpi.vz = Buffer.from(vz, 'hex').readInt16LE(0);
                     this.gpi.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
@@ -3986,6 +4022,14 @@ export default {
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_ATTITUDE) {
+                    let my_len = 28;
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
+
                     time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
                     base_offset += 8;
                     var roll = mavPacket.substr(base_offset, 8).toLowerCase();
@@ -4039,6 +4083,18 @@ export default {
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RAW_INT) {
+
+                    let my_len = 30;
+                    if(ver === 'fd') {
+                        my_len += 22;
+                    }
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
+
                     base_offset += (16 + 2 + 8 + 8 + 8 + 4 + 4 + 4 + 4);
                     var satellites = mavPacket.substr(base_offset, 2).toLowerCase();
 
@@ -4110,6 +4166,17 @@ export default {
                 // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM_REACHED) {
+                    let my_len = 30;
+                    if(ver === 'fd') {
+                        my_len += 22;
+                    }
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
+
                     var mission_seq = mavPacket.substr(base_offset, 4).toLowerCase();
 
                     this.mission_seq = Buffer.from(mission_seq, 'hex').readUInt16LE(0);
@@ -4172,6 +4239,14 @@ export default {
                 // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_PARAM_VALUE) {
+                    let my_len = 25;
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
+
                     var param_value = mavPacket.substr(base_offset, 8).toLowerCase();
                     base_offset += 8;
                     var param_count = mavPacket.substr(base_offset, 4).toLowerCase();
@@ -4227,7 +4302,7 @@ export default {
                         this.rc1.min.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc1.min.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc1.min.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC1_MIN', this.rc1.min.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC1_MIN', this.rc1.min.param_value);
                     }
                     else if (param_id.includes('RC1_MAX')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc1, 'max')) {
@@ -4238,7 +4313,7 @@ export default {
                         this.rc1.max.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc1.max.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc1.max.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC1_MAX', this.rc1.max.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC1_MAX', this.rc1.max.param_value);
                     }
                     else if (param_id.includes('RC1_TRIM')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc1, 'trim')) {
@@ -4249,7 +4324,7 @@ export default {
                         this.rc1.trim.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc1.trim.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc1.trim.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC1_TRIM', this.rc1.trim.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC1_TRIM', this.rc1.trim.param_value);
                     }
                     else if (param_id.includes('RC2_MIN')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc2, 'min')) {
@@ -4260,7 +4335,7 @@ export default {
                         this.rc2.min.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc2.min.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc2.min.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC2_MIN', this.rc2.min.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC2_MIN', this.rc2.min.param_value);
                     }
                     else if (param_id.includes('RC2_MAX')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc2, 'max')) {
@@ -4271,7 +4346,7 @@ export default {
                         this.rc2.max.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc2.max.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc2.max.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC2_MAX', this.rc2.max.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC2_MAX', this.rc2.max.param_value);
                     }
                     else if (param_id.includes('RC2_TRIM')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc2, 'trim')) {
@@ -4282,7 +4357,7 @@ export default {
                         this.rc2.trim.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc2.trim.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc2.trim.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC2_TRIM', this.rc2.trim.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC2_TRIM', this.rc2.trim.param_value);
                     }
                     else if (param_id.includes('RC3_MIN')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc3, 'min')) {
@@ -4293,7 +4368,7 @@ export default {
                         this.rc3.min.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc3.min.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc3.min.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC3_MIN', this.rc3.min.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC3_MIN', this.rc3.min.param_value);
                     }
                     else if (param_id.includes('RC3_MAX')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc3, 'max')) {
@@ -4304,7 +4379,7 @@ export default {
                         this.rc3.max.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc3.max.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc3.max.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC3_MAX', this.rc3.max.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC3_MAX', this.rc3.max.param_value);
                     }
                     else if (param_id.includes('RC3_TRIM')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc3, 'trim')) {
@@ -4315,7 +4390,7 @@ export default {
                         this.rc3.trim.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc3.trim.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc3.trim.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC3_TRIM', this.rc3.trim.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC3_TRIM', this.rc3.trim.param_value);
                     }
                     else if (param_id.includes('RC4_MIN')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc4, 'min')) {
@@ -4326,7 +4401,7 @@ export default {
                         this.rc4.min.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc4.min.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc4.min.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_MIN', this.rc4.min.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_MIN', this.rc4.min.param_value);
                     }
                     else if (param_id.includes('RC4_MAX')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc4, 'max')) {
@@ -4337,7 +4412,7 @@ export default {
                         this.rc4.max.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc4.max.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc4.max.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_MAX', this.rc4.max.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_MAX', this.rc4.max.param_value);
                     }
                     else if (param_id.includes('RC4_TRIM')) {
                         if (!Object.prototype.hasOwnProperty.call(this.rc4, 'trim')) {
@@ -4348,7 +4423,7 @@ export default {
                         this.rc4.trim.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.rc4.trim.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.rc4.trim.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_TRIM', this.rc4.trim.param_value);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_TRIM', this.rc4.trim.param_value);
                     }
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM) {
@@ -4356,6 +4431,17 @@ export default {
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_REQUEST) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_REQUEST - ' + mavPacket);
+
+                    let my_len = 4;
+                    if(ver === 'fd') {
+                        my_len += 1;
+                    }
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
 
                     var mission_sequence = mavPacket.substr(base_offset, 4).toLowerCase();
                     base_offset += 4;
@@ -4390,6 +4476,17 @@ export default {
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ACK) { // #47 - mission_ack
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ACK - ' + mavPacket);
+
+                    let my_len = 3;
+                    if(ver === 'fd') {
+                        my_len += 1;
+                    }
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
 
                     target_system = mavPacket.substr(base_offset, 2).toLowerCase();
                     base_offset += 2;
@@ -4450,6 +4547,13 @@ export default {
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_COMMAND_ACK) { // #77 command_ack
                     console.log('---> ' + 'MAVLINK_MSG_ID_COMMAND_ACK - ' + mavPacket);
 
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (3 - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
+
                     var command = mavPacket.substr(base_offset, 4).toLowerCase();
                     base_offset += 4;
                     var command_result = mavPacket.substr(base_offset, 2).toLowerCase();
@@ -4463,6 +4567,8 @@ export default {
                     this.result_command_ack[sys_id].command = Buffer.from(command, 'hex').readUInt16LE(0);
                     this.result_command_ack[sys_id].command_result = Buffer.from(command_result, 'hex').readUInt8(0);
 
+                    console.log(this.name, 'MAVLINK_MSG_ID_COMMAND_ACK', '-', this.result_command_ack[sys_id].command, this.MAV_CMD_ACK_CODE[this.result_command_ack[sys_id].command_result]);
+
                     // fd 01 00 00 27 69 01 4d0000 0b d24b
                     // fd 01 00 00 27 69 01 4d0000 0b d24b
                     // fd 01 00 00 42 69 01 4d0000 0b b20f
@@ -4470,9 +4576,15 @@ export default {
                     // fd 17 00 00 00 ff be 170000 00 00 0040690157505f5941575f4245484156 494f5200 01 319e
                     // fd 06 00 00 0f ff be 0b0000 11 00 00 00 69 59 3f3b
 
-                    console.log(this.name, 'MAVLINK_MSG_ID_COMMAND_ACK', '-', this.result_command_ack[sys_id].command, this.MAV_CMD_ACK_CODE[this.result_command_ack[sys_id].command_result]);
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_ADSB_VEHICLE) {
+                    if (ver === 'fd') {
+                        base_offset = 20;
+                    }
+                    else {
+                        base_offset = 12;
+                    }
+
                     var ICAO_address = mavPacket.substr(base_offset, 8).toLowerCase();
                     base_offset += 8;
                     var adsb_lat = mavPacket.substr(base_offset, 8).toLowerCase();
@@ -4532,7 +4644,7 @@ export default {
                 mavPacket = null;
             }
             catch (e) {
-                console.log(e.message);
+                console.log(msg_id, e.message);
             }
         },
 
