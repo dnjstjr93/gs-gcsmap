@@ -2432,7 +2432,7 @@ export default {
 
             if (mavMsg) {
                 genMsg = Buffer.from(mavMsg.pack(mavlinkParser));
-                //console.log('>>>>> MAVLINK OUTGOING MSG: ' + genMsg.toString('hex'));
+                console.log('>>>>> MAVLINK OUTGOING MSG: ' + genMsg.toString('hex'));
             }
 
             return genMsg;
@@ -3484,6 +3484,7 @@ export default {
         parseMavFromDrone(mavPacket) {
             try {
                 var ver = mavPacket.substr(0, 2);
+                //var msglen = mavPacket.substr(2, 2);
                 var sysid = '';
                 var msgid = '';
 
@@ -3501,6 +3502,7 @@ export default {
 
                 var sys_id = parseInt(sysid, 16);
                 var msg_id = parseInt(msgid, 16);
+                //var msg_len = parseInt(msglen, 16);
 
                 this.sys_id = sys_id;
 
@@ -3679,7 +3681,10 @@ export default {
 
                     this.info.airSpeed = this.airspeed.toFixed(1);
 
-                    this.heading = (this.gpi.hdg / 100);
+                    // this.heading = (this.gpi.hdg / 100) % 360;
+                    //
+
+                    //console.log('this.gpi.hdg', (this.gpi.hdg / 100) % 360);
 
                     let h_pos = get_point_dist((this.gpi.lat / 10000000), (this.gpi.lon / 10000000), 1, this.heading);
                     this.$store.state.drone_infos[this.name].headingLine = [];
@@ -4023,6 +4028,14 @@ export default {
                     this.info.anglePitch = this.pitch;
 
                     // console.log('roll: ' + this.roll, 'pitch: ' + this.pitch);
+
+                    if(this.att.yaw < 0) {
+                        this.att.yaw += (2 * Math.PI);
+                    }
+
+                    // console.log('yaw', ((this.att.yaw * 180) / Math.PI));
+
+                    this.heading = ((this.att.yaw * 180)/Math.PI);
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RAW_INT) {
@@ -4435,7 +4448,7 @@ export default {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ITEM_INT - ' + mavPacket);
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_COMMAND_ACK) { // #77 command_ack
-                    // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ACK - ' + mavPacket);
+                    console.log('---> ' + 'MAVLINK_MSG_ID_COMMAND_ACK - ' + mavPacket);
 
                     var command = mavPacket.substr(base_offset, 4).toLowerCase();
                     base_offset += 4;
@@ -4449,6 +4462,13 @@ export default {
 
                     this.result_command_ack[sys_id].command = Buffer.from(command, 'hex').readUInt16LE(0);
                     this.result_command_ack[sys_id].command_result = Buffer.from(command_result, 'hex').readUInt8(0);
+
+                    // fd 01 00 00 27 69 01 4d0000 0b d24b
+                    // fd 01 00 00 27 69 01 4d0000 0b d24b
+                    // fd 01 00 00 42 69 01 4d0000 0b b20f
+                    // fd 01 00 00 42 69 01 4d0000 0b b20f
+                    // fd 17 00 00 00 ff be 170000 00 00 0040690157505f5941575f4245484156 494f5200 01 319e
+                    // fd 06 00 00 0f ff be 0b0000 11 00 00 00 69 59 3f3b
 
                     console.log(this.name, 'MAVLINK_MSG_ID_COMMAND_ACK', '-', this.result_command_ack[sys_id].command, this.MAV_CMD_ACK_CODE[this.result_command_ack[sys_id].command_result]);
                 }
