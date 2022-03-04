@@ -3491,7 +3491,8 @@ export default {
 
                 if (ver === 'fd') {
                     sysid = mavPacket.substr(10, 2).toLowerCase();
-                    msgid = mavPacket.substr(14, 6).toLowerCase();
+                    //msgid = mavPacket.substr(14, 6).toLowerCase();
+                    msgid = mavPacket.substr(18, 2)+mavPacket.substr(16, 2)+mavPacket.substr(14, 2);
                 }
                 else {
                     sysid = mavPacket.substr(6, 2).toLowerCase();
