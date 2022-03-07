@@ -1294,6 +1294,7 @@ export default {
                     objMyDroneInfo.goto_positions = [];
 
                     let acceptSeq = 0;
+                    let takeoff_alt = 0;
                     arrWayPoints.forEach((waypoint) => {
                         waypoint = waypoint.replace(/\n/g, '');
                         waypoint = waypoint.replace(/\t\t/g, '\t');
@@ -1304,22 +1305,26 @@ export default {
                         let seq = parseInt(arrWaypoint[0]);
 
                         if (!isNaN(seq)) {
-                            if (seq > 1) { // seq = 0 (home position), seq = 1 (takeoff)
-                                if (arrWaypoint[3] === 16 || arrWaypoint[3] === '16' || arrWaypoint[3] === 21 || arrWaypoint[3] === '21') {
-                                    let strGotoPosition = String(arrWaypoint[8]) + ':' +
-                                        String(arrWaypoint[9]) + ':' +
-                                        String(arrWaypoint[10]) + ':' +
-                                        (arrWaypoint[12] ? String(arrWaypoint[12]) : String(objMyDroneInfo.targetSpeed)) + ':' +
-                                        String(objMyDroneInfo.targetRadius) + ':' +
-                                        String(objMyDroneInfo.targetTurningSpeed) + ':' +
-                                        String(arrWaypoint[3]) + ':' +
-                                        String(arrWaypoint[4]) + ':0.0:0';
+                            if (seq > 0) { // seq = 0 (home position), seq = 1 (takeoff)
+                                if (seq === 1) {
+                                    takeoff_alt = arrWaypoint[10]
+                                } else {
+                                    if (arrWaypoint[3] === 16 || arrWaypoint[3] === '16' || arrWaypoint[3] === 21 || arrWaypoint[3] === '21') {
+                                        let strGotoPosition = String(arrWaypoint[8]) + ':' +
+                                            String(arrWaypoint[9]) + ':' +
+                                            (String(arrWaypoint[10]) === '0.000000' ? String(takeoff_alt) : String(arrWaypoint[10])) + ':' +
+                                            (arrWaypoint[12] ? String(arrWaypoint[12]) : String(objMyDroneInfo.targetSpeed)) + ':' +
+                                            String(objMyDroneInfo.targetRadius) + ':' +
+                                            String(objMyDroneInfo.targetTurningSpeed) + ':' +
+                                            String(arrWaypoint[3]) + ':' +
+                                            String(arrWaypoint[4]) + ':0.0:0';
 
-                                    console.log(strGotoPosition);
+                                        // console.log(strGotoPosition);
 
-                                    objMyDroneInfo.goto_positions[acceptSeq++] = strGotoPosition;
+                                        objMyDroneInfo.goto_positions[acceptSeq++] = strGotoPosition;
 
-                                    //this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                                        //this.strMyDroneInfo = JSON.stringify(objMyDroneInfo, null, 4);
+                                    }
                                 }
                             }
                         }
