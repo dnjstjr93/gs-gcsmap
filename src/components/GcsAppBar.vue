@@ -1225,7 +1225,9 @@
                                                 this.initDroneInfos(drones, 0, () => {
                                                     console.log(this.$store.state.drone_infos);
 
-                                                    this.readyDroneInfos();
+                                                    setTimeout(() => {
+                                                        this.readyDroneInfos();
+                                                    }, 250);
                                                 });
                                             }
                                         });
@@ -1238,7 +1240,9 @@
                             this.initDroneInfos(drones, 0, () => {
                                 console.log(this.$store.state.drone_infos);
 
-                                this.readyDroneInfos();
+                                setTimeout(() => {
+                                    this.readyDroneInfos();
+                                }, 250);
                             });
                         }
                     }
@@ -1253,7 +1257,9 @@
                                                 this.initDroneInfos(drones, 0, () => {
                                                     console.log(this.$store.state.drone_infos);
 
-                                                    this.readyDroneInfos();
+                                                    setTimeout(() => {
+                                                        this.readyDroneInfos();
+                                                    }, 250);
                                                 });
                                             }
                                         });
