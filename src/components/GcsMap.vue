@@ -403,7 +403,21 @@
                         }
                     }
 
-                    this.curTargets = Object.keys(this.$store.state.drone_infos);
+                    this.curTargets = [];
+                    for(var dName in this.$store.state.drone_infos) {
+                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if(dName === 'unknown') {
+                                this.curTargets.push(dName);
+                            }
+                            else {
+                                if(this.$store.state.drone_infos[dName].selected) {
+                                    this.curTargets.push(dName);
+                                }
+                            }
+                        }
+                    }
+
+                    //this.curTargets = Object.keys(this.$store.state.drone_infos);
 
                     console.log('curTargets', this.curTargets);
 
