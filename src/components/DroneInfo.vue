@@ -3363,8 +3363,8 @@ export default {
             btn_params.target_system = target_sys_id;
             btn_params.target_component = 1;
             btn_params.command = mavlink.MAV_CMD_NAV_TAKEOFF;
-            btn_params.confirmation = 1;
-            btn_params.param1 = 0; // Minimum pitch (if airspeed sensor present)
+            btn_params.confirmation = 0;
+            btn_params.param1 = -1; // Minimum pitch (if airspeed sensor present)
             btn_params.param2 = 0; // Empty
             btn_params.param3 = 0; // Empty
             btn_params.param4 = 0; // Yaw angle
@@ -5624,9 +5624,9 @@ export default {
                 let _alt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
 
                 if(this.fcType === 'px4') {
-                    console.log(_alt, this.gpi.alt / 100);
+                    console.log(_alt, this.gpi.alt / 1000);
 
-                    _alt = (this.gpi.alt / 100) + _alt;
+                    _alt = parseFloat((this.gpi.alt / 1000) + _alt);
                 }
 
                 // setTimeout(this.send_set_mode_command, parseInt(((takeoffDelay) * 1000) + Math.random()*10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
