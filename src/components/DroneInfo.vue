@@ -3435,7 +3435,8 @@ export default {
                 }
             }
 
-            var custom_mode = this.$store.state[this.fcType + '_mode_items'].indexOf(target_mode);
+            var str_custom_mode = this.$store.state[this.fcType + '_mode_indexs_obj'][target_mode];
+            var custom_mode = Buffer.from(str_custom_mode, 'hex').readUInt32LE(0);
             var base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
             base_mode |= mavlink.MAV_MODE_FLAG_CUSTOM_MODE_ENABLED;
 
@@ -3450,7 +3451,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('send_set_mode_command (', this.$store.state[this.fcType + '_mode_items'][custom_mode], ') - ', this.name);
+                    console.log('send_set_mode_command (', this.$store.state[this.fcType + '_mode_items_obj'][str_custom_mode], ') - ', this.name);
                     this.doPublish(pub_topic, msg);
                 }
             }
@@ -3580,7 +3581,8 @@ export default {
                         this.fc_img = 'ardupilot.png';
                         this.$store.state.drone_infos[this.name].fcType = 'ardupilot';
                         this.fcType = 'ardupilot';
-                    } else if (this.hb.autopilot === mavlink.MAV_AUTOPILOT_PX4) {
+                    }
+                    else if (this.hb.autopilot === mavlink.MAV_AUTOPILOT_PX4) {
                         this.fc_img = 'px4.png';
                         this.$store.state.drone_infos[this.name].fcType = 'px4';
                         this.fcType = 'px4';
@@ -3621,10 +3623,7 @@ export default {
 
                     this.info.curArmStatus = this.curArmStatus;
 
-                    //console.log(this.name, 'MAVLINK_MSG_ID_HEARTBEAT', 'this.hb.base_mode', this.hb.base_mode);
-                    //console.log(this.name, 'MAVLINK_MSG_ID_HEARTBEAT', 'this.hb.custom_mode', this.hb.custom_mode);
-
-                    this.curMode = this.$store.state[this.fcType + '_mode_items'][this.hb.custom_mode];
+                    this.curMode = this.$store.state[this.fcType + '_mode_items_obj'][custom_mode];
 
                     //console.log(this.name, ' - bpm - ', this.bpm);
                     if (this.bpm < 50) {
@@ -5611,13 +5610,24 @@ export default {
                 console.log("비행체가 이륙된 상태 입니다.");
             }
             else {
-                setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'ALT_HOLD');
+                let target_mode = 'ALT_HOLD';
+                if(this.fcType === 'px4') {
+                    target_mode = 'AUTO_LOITER';
+                }
+
+                setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
 
                 console.log('send_arm_command ', this.name);
                 setTimeout(this.send_arm_command, parseInt(50 + Math.random() * 50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
 
                 let takeoffDelay = this.$store.state.drone_infos[this.name].takeoffDelay;
                 let _alt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
+
+                if(this.fcType === 'px4') {
+                    console.log(_alt, this.gpi.alt / 100);
+
+                    _alt = (this.gpi.alt / 100) + _alt;
+                }
 
                 // setTimeout(this.send_set_mode_command, parseInt(((takeoffDelay) * 1000) + Math.random()*10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
                 //
@@ -5627,7 +5637,12 @@ export default {
                 //this.send_set_do_set_home(this.name, this.target_pub_topic, this.sys_id);
                 setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
                     if (this.curArmStatus === 'ARMED') {
-                        this.send_set_mode_command(name, target_pub_topic, sys_id, 'GUIDED');
+
+                        target_mode = 'GUIDED';
+                        if(this.fcType === 'px4') {
+                            target_mode = 'AUTO_LOITER';
+                        }
+                        this.send_set_mode_command(name, target_pub_topic, sys_id, target_mode);
 
                         setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
                             console.log('send_takeoff_command - alt - delay: ', _alt, takeoffDelay);
@@ -5674,7 +5689,11 @@ export default {
 
         EventBus.$on('command-set-arm-' + this.name, () => {
             setTimeout((name, target_pub_topic, sys_id) => {
-                this.send_set_mode_command(name, target_pub_topic, sys_id, 'ALT_HOLD');
+                let target_mode = 'ALT_HOLD';
+                if(this.fcType === 'px4') {
+                    target_mode = 'AUTO_LOITER';
+                }
+                this.send_set_mode_command(name, target_pub_topic, sys_id, target_mode);
                 setTimeout((name, target_pub_topic, sys_id) => {
                     console.log('send_arm_command ', this.name);
                     this.send_arm_command(name, target_pub_topic, sys_id, 1, 0);
