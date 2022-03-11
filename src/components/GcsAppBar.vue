@@ -749,6 +749,36 @@
                 );
             },
 
+            createEachMarkerInfoToMobius(dName, callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            rn: dName,
+                            lbl: ['dName'],
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
             setEachDroneInfoToMobius(dName, con, callback) {
                 axios({
                     validateStatus: function (status) {
@@ -934,28 +964,57 @@
                 );
             },
 
-            createEachMarkerInfoToMobius(dName, callback) {
+            createSurveyMarkerInfoToMobius(callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
                         return status < 500;
                     },
                     method: 'post',
-                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius',
                     headers: {
                         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'SVue',
-                        'Content-Type': 'application/json;ty=3'
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=2'
                     },
                     data: {
-                        'm2m:cnt': {
-                            rn: dName,
-                            lbl: ['dName'],
+                        'm2m:ae': {
+                            rn: this.$store.state.VUE_APP_MOBIUS_GCS,
+                            api: '0.2.481.1.1111',
+                            lbl: [this.$store.state.VUE_APP_MOBIUS_GCS],
+                            rr: true,
+                            poa: ["http://localhost:8080"]
                         }
                     }
                 }).then(
-                    function (res) {
-                        callback(res.status, '');
+                    () => {
+                        axios({
+                            validateStatus: function (status) {
+                                // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                return status < 500;
+                            },
+                            method: 'post',
+                            url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            headers: {
+                                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                'X-M2M-Origin': 'SVue',
+                                'Content-Type': 'application/json;ty=3'
+                            },
+                            data: {
+                                'm2m:cnt': {
+                                    rn: 'SurveyMarkerInfos',
+                                    lbl: ['SurveyMarkerInfos'],
+                                }
+                            }
+                        }).then(
+                            function (res) {
+                                callback(res.status, '');
+                            }
+                        ).catch(
+                            function (err) {
+                                console.log(err.message);
+                            }
+                        );
                     }
                 ).catch(
                     function (err) {
@@ -1026,6 +1085,39 @@
                 );
             },
 
+            getEachSurveyMarkerInfoFromMobius(dName, callback) {
+                let self = this;
+
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'get',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName + '/la',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(
+                    function (res) {
+
+                        console.log('getEachSurveyMarkerInfoFromMobius', 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName + '/la', res);
+
+                        if (res.status === 200) {
+                            callback(res.status, res.data['m2m:cin'].con);
+                        } else {
+                            callback(res.status, '');
+                        }
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
             getMarkerInfosFromMobius(callback) {
                 axios({
                     validateStatus: function (status) {
@@ -1034,6 +1126,34 @@
                     },
                     method: 'get',
                     url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos?fu=1&ty=3',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(
+                    function (res) {
+                        if (res.status === 200) {
+                            callback(res.status, res.data['m2m:uril']);
+                        } else {
+                            callback(res.status, '');
+                        }
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            getSurveyMarkerInfosFromMobius(callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'get',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos?fu=1&ty=3',
                     headers: {
                         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                         'X-M2M-Origin': 'SVue',
@@ -1141,29 +1261,73 @@
 
                             console.log(count, dName, con);
 
-                            this.$store.state.tempMarkers[dName] = [];
-                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(con));
+                            if(con.length === 0) {
+                                this.$store.state.tempMarkers[dName] = [];
+                            }
+                            else {
+                                this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(con));
 
-                            this.$store.state.tempMarkers[dName].forEach((pos) => {
-                                let temp = JSON.parse(JSON.stringify(pos.m_icon));
-                                pos.targeted = false;
-                                pos.selected = false;
-                                pos.m_icon = null;
-                                pos.m_icon = JSON.parse(JSON.stringify(temp));
-                                temp = null;
-                                pos.m_icon.strokeWeight = 1;
-                                pos.m_icon.strokeColor = 'grey';
+                                this.$store.state.tempMarkers[dName].forEach((pos) => {
+                                    let temp = JSON.parse(JSON.stringify(pos.m_icon));
+                                    pos.targeted = false;
+                                    pos.selected = false;
+                                    pos.m_icon = null;
+                                    pos.m_icon = JSON.parse(JSON.stringify(temp));
+                                    temp = null;
+                                    pos.m_icon.strokeWeight = 1;
+                                    pos.m_icon.strokeColor = 'grey';
 
-                                this.$store.state.curTargetedTempMarkerIndex[dName] = null;
-                            });
+                                    this.$store.state.curTargetedTempMarkerIndex[dName] = null;
+                                });
 
-                            let payload = {};
-                            payload.dName = dName;
-                            EventBus.$emit('draw-gotoLines', payload);
+                                let payload = {};
+                                payload.dName = dName;
+                                EventBus.$emit('draw-gotoLines', payload);
 
-                            EventBus.$emit('do-positions-elevation-' + dName);
+                                EventBus.$emit('do-positions-elevation-' + dName);
+                            }
 
                             this.initMarkerInfos(markers, ++count, () => {
+                                callback();
+                            });
+                        }
+                    });
+                }
+                else {
+                    callback();
+                }
+            },
+
+            initSurveyMarkerInfos(markers, count, callback) {
+                if(markers.length > count) {
+                    let dName = markers[count].split('/')[3];
+                    this.getEachSurveyMarkerInfoFromMobius(dName, (status, con) => {
+                        if(status === 200) {
+                            if(con === undefined) {
+                                con = [];
+                            }
+
+                            console.log(count, dName, con);
+
+                            if(con.length === 0) {
+                                this.$store.state.surveyMarkers[dName] = [];
+                            }
+                            else {
+                                this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(con));
+
+                                this.$store.state.surveyMarkers[dName].forEach((pos) => {
+                                    let temp = JSON.parse(JSON.stringify(pos.m_icon));
+                                    pos.targeted = false;
+                                    pos.selected = false;
+                                    pos.m_icon = null;
+                                    pos.m_icon = JSON.parse(JSON.stringify(temp));
+                                    temp = null;
+                                    pos.m_icon.strokeWeight = 1;
+                                    pos.m_icon.strokeColor = 'grey';
+                                });
+                            }
+
+                            this.initSurveyMarkerInfos(markers, ++count, () => {
                                 callback();
                             });
                         }
@@ -1274,20 +1438,7 @@
                     console.log('GcsAppBarCreated-getMarkerInfosFromMobius', status, markers.length, markers);
                     if(status === 200) {
                         if(markers.length === 0) {
-                            this.createEachMarkerInfoToMobius('unknown', () => {
-                                this.postUnknownMarkerInfo((status) => {
-                                    if (status === 201) {
-                                        this.getMarkerInfosFromMobius((status, markers) => {
-                                            if(status === 200) {
-                                                this.$store.state.tempMarkers = {};
-                                                this.initMarkerInfos(markers, 0, () => {
-                                                    console.log('GcsAppBarCreated()-1', this.$store.state.tempMarkers);
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            });
+                            this.$store.state.tempMarkers = {};
                         }
                         else {
                             this.$store.state.tempMarkers = {};
@@ -1298,19 +1449,28 @@
                     }
                     else {
                         this.createMarkerInfoToMobius(() => {
-                            this.createEachMarkerInfoToMobius('unknown', () => {
-                                this.postUnknownMarkerInfo((status) => {
-                                    if(status === 201) {
-                                        this.getMarkerInfosFromMobius((status, markers) => {
-                                            if(status === 200) {
-                                                this.initMarkerInfos(markers, 0, () => {
-                                                    console.log('GcsAppBarCreated()-3', this.$store.state.tempMarkers);
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
+                        });
+
+                        this.createSurveyMarkerInfoToMobius(() => {
+                        });
+                    }
+                });
+
+                this.getSurveyMarkerInfosFromMobius((status, markers) => {
+                    console.log('GcsAppBarCreated-getSurveyMarkerInfosFromMobius', status, markers.length, markers);
+                    if(status === 200) {
+                        if(markers.length === 0) {
+                            this.$store.state.surveyMarkers = {};
+                        }
+                        else {
+                            this.$store.state.surveyMarkers = {};
+                            this.initSurveyMarkerInfos(markers, 0, () => {
+                                console.log('GcsAppBarCreated()-2', 'initSurveyMarkerInfos', this.$store.state.surveyMarkers);
                             });
+                        }
+                    }
+                    else {
+                        this.createSurveyMarkerInfoToMobius(() => {
                         });
                     }
                 });

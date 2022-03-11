@@ -547,6 +547,18 @@
             //     }
             // },
 
+            '$store.state.tempMarkers': {
+                deep: true,
+                handler: function (newData) {
+                    this.targetLat = newData[this.markerName][this.markerIndex].lat;
+                    this.targetLng = newData[this.markerName][this.markerIndex].lng;
+                    this.targetAlt = newData[this.markerName][this.markerIndex].alt;
+                    this.elevation = newData[this.markerName][this.markerIndex].elevation;
+
+                    this.$forceUpdate();
+                }
+            },
+
             markerName: function (newVal) {
 
                 console.log('InfoMaker - watch', newVal);
@@ -590,21 +602,11 @@
             },
 
             targetSelect: function (newVal) {
-                if((this.markerName !== newVal)) {
-                    this.disableTargetSelectIndex = true;
-                }
-                else {
-                    this.disableTargetSelectIndex = false;
-                }
+                this.disableTargetSelectIndex = (this.markerName !== newVal);
             },
 
             targetSelectIndex: function (newVal) {
-                if((String(this.markerIndex) !== newVal)) {
-                    this.disableTargetSelect = true;
-                }
-                else {
-                    this.disableTargetSelect = false;
-                }
+                this.disableTargetSelect = (String(this.markerIndex) !== newVal);
             },
         },
 

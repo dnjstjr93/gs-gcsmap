@@ -3610,7 +3610,8 @@ export default {
                         this.curArmStatus = 'ARMED';
                         this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
                         this.colorArm = 'td-text-red';
-                    } else {
+                    }
+                    else {
                         this.iconArming = 'mdi-airplane-off';
                         this.colorArming = 'white';
                         this.curArmStatus = 'DISARMED';
@@ -3619,6 +3620,9 @@ export default {
                     }
 
                     this.info.curArmStatus = this.curArmStatus;
+
+                    //console.log(this.name, 'MAVLINK_MSG_ID_HEARTBEAT', 'this.hb.base_mode', this.hb.base_mode);
+                    //console.log(this.name, 'MAVLINK_MSG_ID_HEARTBEAT', 'this.hb.custom_mode', this.hb.custom_mode);
 
                     this.curMode = this.$store.state[this.fcType + '_mode_items'][this.hb.custom_mode];
 

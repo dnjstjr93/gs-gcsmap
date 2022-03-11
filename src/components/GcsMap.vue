@@ -15,7 +15,8 @@
                         v-if="context_flag"
                 >
                     <v-btn tile @click="confirmAddTempMarker" elevation="2" color="success">마커생성</v-btn>
-                    <v-btn tile @click="cancelTempMarker" elevation="2" color="error">취소</v-btn>
+                    <v-btn tile @click="confirmAddSurveyMarker" elevation="2" color="warning">Survey생성</v-btn>
+                    <v-btn tile @click="cancelMarker" elevation="2" color="error">취소</v-btn>
                 </v-card>
                 <v-card>
                     <GmapMap ref="mapRef" :center="center"
@@ -27,8 +28,8 @@
                              :style="myGcsStyle"
                              :options="{disableDefaultUI: true, gestureHandling: 'auto', disableDoubleClickZoom: true, minZoom: 3, maxZoom: 30}"
                              @click="printPosClick"
-                             @dblclick="addingTempMarker"
-                             @dragstart="cancelTempMarker"
+                             @dblclick="addingMarker"
+                             @dragstart="cancelMarker"
                     >
 <!--                        <GmapMarker-->
 <!--                                :position="{lat: 37.40423134053018, lng: 127.16050533784832}"-->
@@ -155,7 +156,7 @@
                                         :center="{lat: drone.home_position.lat, lng: drone.home_position.lng}"
                                         :radius="500"
                                         :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"
-                                        @dblclick="addingTempMarker"
+                                        @dblclick="addingMarker"
                                         @click="printPosClick"
                                     ></GmapCircle>
 
@@ -182,7 +183,7 @@
                                         :center="{lat: drone.lat, lng: drone.lng}"
                                         :radius="100"
                                         :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"
-                                        @dblclick="addingTempMarker"
+                                        @dblclick="addingMarker"
                                         @click="printPosClick"
                                     ></GmapCircle>
 
@@ -191,7 +192,7 @@
 <!--                                            :center="{lat: drone.lat, lng: drone.lng}"-->
 <!--                                            :radius="100"-->
 <!--                                            :options="{fillOpacity: 0, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"-->
-<!--                                            @dblclick="addingTempMarker"-->
+<!--                                            @dblclick="addingMarker"-->
 <!--                                    ></GmapCircle>-->
 
 <!--                                    <GmapCircle-->
@@ -215,7 +216,7 @@
                                         :center="circle"
                                         :radius="circle.radius"
                                         :options="circle.options"
-                                        @dblclick="addingTempMarker"
+                                        @dblclick="addingMarker"
                                         @click="printPosClick"
                             ></GmapCircle>
 
@@ -263,6 +264,7 @@
     import EventBus from "@/EventBus";
     import {nanoid} from "nanoid";
     import {gmapApi} from 'vue2-google-maps';
+    import axios from "axios";
 
     var curElevationVal = 0;
 
@@ -293,6 +295,8 @@
                 },
                 click_x: 0,
                 click_y: 0,
+                click_lat: 0,
+                click_lng: 0,
                 context_flag: false,
                 gotoLines: {},
                 gotoLinesOptions: {},
@@ -488,9 +492,10 @@
                             console.log("No results found");
                         }
                     })
-                    .catch((e) =>
-                        console.log("Elevation service failed due to: " + e)
-                    );
+                    .catch((e) => {
+                        console.log(location, "Elevation service failed due to: " + e);
+                        onResult(0);
+                    });
             },
 
             onResize() {
@@ -526,34 +531,253 @@
                 }
             },
 
+            createEachTempMarkerInfoToMobius(dName, callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            rn: dName,
+                            lbl: ['dName'],
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
             confirmAddTempMarker() {
                 this.context_flag = false;
 
+                if(!Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, 'unknown')) {
+                    this.$store.state.tempMarkers.unknown = [];
+
+                    this.createEachTempMarkerInfoToMobius('unknown', () => {
+                        console.log('createEachTempMarkerInfoToMobius', 'unknown');
+                    });
+                }
+
                 const elevator = new this.google.maps.ElevationService();
 
-                console.log('elevation-confirmAddTempMarker', this.$store.state.tempPayload);
-                let lat = this.$store.state.tempPayload.lat;
-                let lng = this.$store.state.tempPayload.lng;
+                console.log('elevation-confirmAddTempMarker', this.$store.state.tempMarkers);
+                let lat = this.click_lat;
+                let lng = this.click_lng;
 
                 this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
-                    console.log('curElevation', val);
+                    console.log('__________________________________confirmAddTempMarker', 'curElevation', val);
 
-                    this.$store.state.tempPayload.elevation = val;
-                    this.$store.state.tempPayload.type = 0;
+                    let marker = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
+                    marker.lat = this.click_lat;
+                    marker.lng = this.click_lng;
+                    marker.alt = 20;
+                    marker.speed = 5;
+                    marker.radius = 50;
+                    marker.turningSpeed = 10;
+                    marker.targetMavCmd = 16;
+                    marker.targetStayTime = 1;
+                    marker.elevation = val;
+                    marker.type = 'Goto';
+                    marker.m_icon.fillColor = 'grey';
+                    marker.m_label.fontSize = '14px';
+                    marker.m_label.text = 'T:' + String(marker.alt);
+                    marker.type = 0;
 
-                    this.$store.commit('confirmAddTempMarker', false);
+                    this.$store.state.tempMarkers.unknown.push(marker);
 
-                    this.doBroadcastAddMarker(this.$store.state.tempPayload);
+                    this.doBroadcastAddMarker(JSON.parse(JSON.stringify(marker)));
+
+                    marker = null;
+
+                    axios({
+                        validateStatus: function (status) {
+                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            return status < 500;
+                        },
+                        method: 'post',
+                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/unknown',
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'SVue',
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                        data: {
+                            'm2m:cin': {
+                                con: this.$store.state.tempMarkers.unknown
+                            }
+                        }
+                    }).then(
+                        function (res) {
+                            console.log('++++++++ confirmAddTempMarker-axios', res.data);
+                        }
+                    ).catch(
+                        function (err) {
+                            console.log(err.message);
+                        }
+                    );
+
+                    this.$store.state.adding = false;
+                });
+
+                // let payload = {};
+                // payload.pName = 'unknown';
+                // payload.lat = this.click_lat;
+                // payload.lng = this.click_lng;
+                // payload.alt = 20;
+                // payload.speed = 5;
+                // payload.radius = 250;
+                // payload.turningSpeed = 10;
+                // payload.targetMavCmd = 16;
+                // payload.targetStayTime = 1;
+                // payload.color = 'grey';
+                // payload.elevation = 0;
+                // payload.type = 'Goto';
+                // this.$store.commit('setDroneColorMap', payload); //JSON.parse(JSON.stringify(payload)));
+                //
+                // this.$store.commit('addingTempMarker', payload);
+                //
+                // // const elevator = new this.google.maps.ElevationService();
+                //
+                // console.log('elevation-confirmAddTempMarker', this.$store.state.tempPayload);
+                // let lat = this.$store.state.tempPayload.lat;
+                // let lng = this.$store.state.tempPayload.lng;
+                //
+                // this.displayLocationElevation({lat:lat, lng:lng}, this.elevator, (val) => {
+                //     console.log('curElevation', val);
+                //
+                //     this.$store.state.tempPayload.elevation = val;
+                //     this.$store.state.tempPayload.type = 0;
+                //
+                //     this.$store.commit('confirmAddTempMarker', false);
+                //
+                //     this.doBroadcastAddMarker(this.$store.state.tempPayload);
+                // });
+            },
+
+            createEachSurveyMarkerInfoToMobius(dName, callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            rn: dName,
+                            lbl: ['dName'],
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            confirmAddSurveyMarker() {
+                this.context_flag = false;
+
+                if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, 'unknown')) {
+                    this.$store.state.surveyMarkers.unknown = [];
+
+                    this.createEachSurveyMarkerInfoToMobius('unknown', () => {
+                        console.log('createEachSurveyMarkerInfoToMobius', 'unknown');
+                    });
+                }
+
+                const elevator = new this.google.maps.ElevationService();
+
+                console.log('elevation-confirmAddSurveyMarker', this.$store.state.surveyMarkers);
+                let lat = this.click_lat;
+                let lng = this.click_lng;
+
+                this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
+                    console.log('__________________________________confirmAddSurveyMarker', 'curElevation', val);
+
+                    let marker = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
+                    marker.lat = this.click_lat;
+                    marker.lng = this.click_lng;
+                    marker.alt = 20;
+                    marker.speed = 5;
+                    marker.radius = 50;
+                    marker.turningSpeed = 10;
+                    marker.targetMavCmd = 16;
+                    marker.targetStayTime = 1;
+                    marker.elevation = val;
+                    marker.type = 'Goto';
+                    marker.m_icon.fillColor = 'grey';
+                    marker.m_label.fontSize = '14px';
+                    marker.m_label.text = 'T:' + String(marker.alt);
+                    marker.type = 0;
+
+                    this.$store.state.surveyMarkers.unknown.push(marker);
+
+                    this.doBroadcastAddSurveyMarker(JSON.parse(JSON.stringify(marker)));
+
+                    marker = null;
+
+                    axios({
+                        validateStatus: function (status) {
+                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            return status < 500;
+                        },
+                        method: 'post',
+                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/unknown',
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'SVue',
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                        data: {
+                            'm2m:cin': {
+                                con: this.$store.state.surveyMarkers.unknown
+                            }
+                        }
+                    }).then(
+                        function (res) {
+                            console.log('++++++++ confirmAddSurveyMarker-axios', res.data);
+                        }
+                    ).catch(
+                        function (err) {
+                            console.log(err.message);
+                        }
+                    );
+
+                    this.$store.state.adding = false;
                 });
             },
 
-            cancelTempMarker() {
+            cancelMarker() {
                 this.context_flag = false;
 
                 this.$store.commit('cancelTempMarker', false);
             },
 
-            addingTempMarker(e) {
+            addingMarker(e) {
                 //this.drawBoundaryCircles(100);
 
                 //this.curBoundaryRadius = 1;
@@ -571,24 +795,7 @@
 
                 console.log(e);
 
-                this.cancelTempMarker();
-
-                let payload = {};
-                payload.pName = 'unknown';
-                payload.lat = e.latLng.lat();
-                payload.lng = e.latLng.lng();
-                payload.alt = 20;
-                payload.speed = 5;
-                payload.radius = 250;
-                payload.turningSpeed = 10;
-                payload.targetMavCmd = 16;
-                payload.targetStayTime = 1;
-                payload.color = 'grey';
-                payload.elevation = 0;
-                payload.type = 'Goto';
-                this.$store.commit('setDroneColorMap', payload); //JSON.parse(JSON.stringify(payload)));
-
-                this.$store.commit('addingTempMarker', payload);
+                this.cancelMarker();
 
                 console.log(e);
                 console.log('click-pos', e.latLng.lat(), e.latLng.lng());
@@ -596,6 +803,9 @@
 
                 this.click_x = e.domEvent.clientX;
                 this.click_y = e.domEvent.clientY-50;
+
+                this.click_lat = e.latLng.lat();
+                this.click_lng = e.latLng.lng();
 
                 console.log('pixel', e.domEvent.clientX, e.domEvent.clientY-50);
 
@@ -609,13 +819,13 @@
                 this.curFlagMarker = false;
                 //this.$store.commit('setAllTempMarker', false);
 
-                // console.log('addingTempMarker', e.domEvent);
+                // console.log('addingMarker', e.domEvent);
                 //
                 // e.domEvent.preventDefault();
                 //
                 // e.domEvent.cancelBubble = true;
                 //
-                // console.log('addingTempMarker', e.domEvent);
+                // console.log('addingMarker', e.domEvent);
                 //
                 // e.domEvent.stopPropagation();
 
@@ -642,7 +852,7 @@
                 this.curFlagMarker = false;
                 //this.$store.commit('setAllTempMarker', false);
 
-                this.cancelTempMarker();
+                this.cancelMarker();
             },
             updatePosition(e, mIndex, pIndex) {
                 let payload = {};
@@ -680,28 +890,32 @@
 
             updateTempPosition(e, pName, pIndex) {
                 if(!this.$store.state.adding) {
-                    let payload = {};
-                    payload.pName = pName;
-                    payload.pIndex = pIndex;
-                    payload.lat = e.latLng.lat();
-                    payload.lng = e.latLng.lng();
+                    const elevator = new this.google.maps.ElevationService();
 
                     if(!Object.hasOwnProperty.call(this.$store.state.tempMarkers[pName][pIndex], 'elevation')) {
-                        console.log('elevation-updateTempPosition---------------------------------------------------------------------------');
                         this.$store.state.tempMarkers[pName][pIndex].elevation = 0;
                     }
 
-                    const elevator = new this.google.maps.ElevationService();
-                    console.log('elevation-updateTempPosition', this.$store.state.tempMarkers[pName][pIndex]);
-                    this.displayLocationElevation({lat:payload.lat, lng:payload.lng}, elevator, (val) => {
-                        console.log('curElevation', val);
+                    let lat = e.latLng.lat();
+                    let lng = e.latLng.lng();
+                    this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
+                        console.log('__________________________________updateTempPosition', 'curElevation', val);
+
+                        let payload = {};
+                        payload.pName = pName;
+                        payload.pIndex = pIndex;
+                        payload.lat = lat;
+                        payload.lng = lng;
+                        payload.value = false;
 
                         this.$store.state.tempMarkers[pName][pIndex].elevation = val;
+                        this.$store.state.tempMarkers[pName][pIndex].selected = false;
 
-                        payload.value = false;
-                        this.$store.commit('setSelected', payload);
+                        this.targetTempMarker('', pName, pIndex, true);
 
                         this.$store.commit('updateTempPosition', payload);
+
+                        this.$store.state.didIPublish = true;
 
                         this.drawLineTarget(payload);
 
@@ -712,25 +926,6 @@
                         // this.$store.commit('saveCurrentDroneInfos');
                     });
                 }
-
-                // this.gotoLines = {};
-                // for (let pName in this.tempMarkers) {
-                //     if(Object.prototype.hasOwnProperty.call(this.tempMarkers, pName)) {
-                //         if (pName !== 'unknown') {
-                //             this.tempMarkers[pName].forEach((pos) => {
-                //                 if (!Object.prototype.hasOwnProperty.call(this.gotoLines, pName)) {
-                //                     this.gotoLines[pName] = [];
-                //                     this.gotoLinesOptions[pName] = {};
-                //                     this.gotoLinesOptions[pName].strokeColor = pos.m_icon.fillColor;
-                //                     this.gotoLinesOptions[pName].strokeOpacity = 0.9;
-                //                     this.gotoLinesOptions[pName].strokeWeight = 2;
-                //                 }
-                //
-                //                 this.gotoLines[pName].push(pos);
-                //             });
-                //         }
-                //     }
-                // }
             },
 
             selectTempMarker(e, pName, pIndex) {
@@ -761,7 +956,7 @@
                         let lng = this.$store.state.tempMarkers[pName][pIndex].lng;
 
                         this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
-                            console.log('curElevation', val);
+                            console.log('__________________________________selectTempMarker', 'curElevation', val);
 
                             this.$store.state.tempMarkers[pName][pIndex].elevation = val;
 
@@ -1284,6 +1479,18 @@
                 this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
 
                 this.$store.state.didIPublish = true;
+            },
+
+            doBroadcastAddSurveyMarker(payload) {
+                let watchingPayload = {};
+                watchingPayload.broadcastMission = 'confirmAddSurveyMarker';
+                watchingPayload.payload = payload;
+
+                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                console.log('broadcast_gcsmap_topic', this.broadcast_gcsmap_topic, '-', JSON.stringify(watchingPayload));
+                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+
+                this.$store.state.didIPublish = true;
             }
         },
 
@@ -1532,6 +1739,8 @@
                 this.lineArrow = {
                     path: this.google.maps.SymbolPath.FORWARD_CLOSED_ARROW
                 };
+
+                //this.elevator = new this.google.maps.ElevationService();
 
                 console.log('GcsMap-mounted-tempMarker', this.$store.state.tempMarkers);
 
