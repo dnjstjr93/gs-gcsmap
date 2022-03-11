@@ -924,6 +924,8 @@
                         // this.selectTempMarker(e, pName, pIndex);
 
                         // this.$store.commit('saveCurrentDroneInfos');
+
+                        EventBus.$emit('on-update-infomarker');
                     });
                 }
             },

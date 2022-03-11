@@ -1215,7 +1215,7 @@ export default {
         }
     },
     watch: {
-        '$store.state.tempMarkers': {
+        ['$store.state.tempMarkers']: {
             deep: true,
             handler: function (newData) {
                 for (let dName in newData) {

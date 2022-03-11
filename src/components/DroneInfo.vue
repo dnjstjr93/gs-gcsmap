@@ -1063,7 +1063,7 @@ export default {
             this.showLoadWaypointsBtn = !newVal;
         },
 
-        '$store.state.tempMarkers': {
+        ['$store.state.tempMarkers']: {
             deep: true,
             handler: function (newData) {
                 //console.log('DroneInfo-watch-goto_positions', newData);
@@ -3368,8 +3368,8 @@ export default {
             btn_params.param2 = 0; // Empty
             btn_params.param3 = 0; // Empty
             btn_params.param4 = 0; // Yaw angle
-            btn_params.param5 = 0; // Latitude
-            btn_params.param6 = 0; // Longitude
+            btn_params.param5 = this.gpi.lat / 10000000; // Latitude
+            btn_params.param6 = this.gpi.lng / 10000000; // Longitude
             btn_params.param7 = alt; // Altitude
 
             try {
@@ -3428,13 +3428,6 @@ export default {
         },
 
         send_set_mode_command(target_name, pub_topic, target_sys_id, target_mode) {
-
-            if(this.fcType === 'px4') {
-                if(target_mode === 'GUIDE') {
-                    target_mode = 'HOLD';
-                }
-            }
-
             var str_custom_mode = this.$store.state[this.fcType + '_mode_indexs_obj'][target_mode];
             var custom_mode = Buffer.from(str_custom_mode, 'hex').readUInt32LE(0);
             var base_mode = this.hb.base_mode & ~mavlink.MAV_MODE_FLAG_DECODE_POSITION_CUSTOM_MODE;
@@ -4233,7 +4226,11 @@ export default {
                         if(this.droneStatus.mission_count === (this.mission_seq+1)) {
                             console.log('Auto Mission Complete at %s', this.droneStatus.target_name);
 
-                            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
+                            let target_mode = 'GUIDED';
+                            if(this.fcType === 'px4') {
+                                target_mode = 'AUTO_LOITER';
+                            }
+                            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
 
                             this.watchingMission = 'auto-goto-complete';
                         }
@@ -4244,7 +4241,11 @@ export default {
 
                         this.droneStatus.startFlag = false;
 
-                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
+                        let target_mode = 'GUIDED';
+                        if(this.fcType === 'px4') {
+                            target_mode = 'AUTO_LOITER';
+                        }
+                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
 
                         this.watchingMission = 'goto-circle-complete';
                     }
@@ -5131,10 +5132,15 @@ export default {
 
                     let pre_custom_mode = this.curMode;
 
+                    let target_mode = 'LOITER';
+                    if(this.fcType === 'px4') {
+                        target_mode = 'AUTO_LOITER';
+                    }
+
                     setTimeout((name, target_pub_topic, sys_id, mode) => {
                         console.log('send_set_mode_command', mode);
                         this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
-                    }, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, 'LOITER');
+                    }, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, target_mode);
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
                         this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
@@ -5210,7 +5216,11 @@ export default {
 
             this.send_wpnav_speed_param_set_command(this.name, this.target_pub_topic, this.sys_id, auto_speed);
 
-            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
+            let target_mode = 'GUIDED';
+            if(this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
 
             var auto_goto_positions = payload.goto_positions.slice(start_idx, (end_idx + 1));
             let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:16:1';
@@ -5328,7 +5338,12 @@ export default {
         });
 
         EventBus.$on('command-set-stop-' + this.name, () => {
-            setTimeout(this.send_set_mode_command, 0, this.name, this.target_pub_topic, this.sys_id, 'LOITER');
+
+            let target_mode = 'LOITER';
+            if(this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+            setTimeout(this.send_set_mode_command, 0, this.name, this.target_pub_topic, this.sys_id, target_mode);
 
             //this.watchingMission = 'stop';
         });
@@ -5363,7 +5378,11 @@ export default {
                     this.send_circle_rate_param_set_command(name, target_pub_topic, sys_id, degree_speed);
 
                     setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed) => {
-                        this.send_set_mode_command(name, target_pub_topic, sys_id, 'GUIDED');
+                        let target_mode = 'GUIDED';
+                        if(this.fcType === 'px4') {
+                            target_mode = 'AUTO_LOITER';
+                        }
+                        this.send_set_mode_command(name, target_pub_topic, sys_id, target_mode);
 
                         var auto_goto_positions = [];
 
@@ -5458,7 +5477,11 @@ export default {
         });
 
         EventBus.$on('command-set-goto-' + this.name, (position) => {
-            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
+            let target_mode = 'GUIDED';
+            if(this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
 
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
@@ -5586,7 +5609,11 @@ export default {
         });
 
         EventBus.$on('command-set-goto-alt-' + this.name, () => {
-            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'GUIDED');
+            let target_mode = 'GUIDED';
+            if(this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
 
             let _alt = this.$store.state.drone_infos[this.name].targetAlt;
 
@@ -5614,25 +5641,19 @@ export default {
                 if(this.fcType === 'px4') {
                     target_mode = 'AUTO_LOITER';
                 }
-
                 setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
 
                 console.log('send_arm_command ', this.name);
                 setTimeout(this.send_arm_command, parseInt(50 + Math.random() * 50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
 
                 let takeoffDelay = this.$store.state.drone_infos[this.name].takeoffDelay;
-                let _alt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
+                let relativeAlt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
+                let absoluteAlt = parseFloat((this.gpi.alt / 1000) + relativeAlt);
 
+                let _alt = relativeAlt;
                 if(this.fcType === 'px4') {
-                    console.log(_alt, this.gpi.alt / 1000);
-
-                    _alt = parseFloat((this.gpi.alt / 1000) + _alt);
+                    _alt = absoluteAlt;
                 }
-
-                // setTimeout(this.send_set_mode_command, parseInt(((takeoffDelay) * 1000) + Math.random()*10), this.name, this.target_pub_topic, this.sys_id, base_mode, custom_mode);
-                //
-                // console.log('send_takeoff_command - alt - delay: ', _alt, takeoffDelay);
-                // setTimeout(this.send_takeoff_command, parseInt((takeoffDelay * 1000) + Math.random()*100), this.name, this.target_pub_topic, this.sys_id, _alt);
 
                 //this.send_set_do_set_home(this.name, this.target_pub_topic, this.sys_id);
                 setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
@@ -5645,11 +5666,11 @@ export default {
                         this.send_set_mode_command(name, target_pub_topic, sys_id, target_mode);
 
                         setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
-                            console.log('send_takeoff_command - alt - delay: ', _alt, takeoffDelay);
+                            console.log('send_takeoff_command - alt - delay: ', relativeAlt, takeoffDelay);
                             this.send_takeoff_command(name, target_pub_topic, sys_id, takeoff_alt);
 
                             this.watchingMission = 'takeoff';
-                            this.watchingInitDist = Math.abs(takeoff_alt - parseFloat((this.gpi.relative_alt / 1000).toFixed(1)));
+                            this.watchingInitDist = Math.abs(relativeAlt - parseFloat((this.gpi.relative_alt / 1000).toFixed(1)));
                             this.watchingMissionStatus = 0;
 
                             if(this.watchingInitDist <= 0.1) {

@@ -547,18 +547,6 @@
             //     }
             // },
 
-            '$store.state.tempMarkers': {
-                deep: true,
-                handler: function (newData) {
-                    this.targetLat = newData[this.markerName][this.markerIndex].lat;
-                    this.targetLng = newData[this.markerName][this.markerIndex].lng;
-                    this.targetAlt = newData[this.markerName][this.markerIndex].alt;
-                    this.elevation = newData[this.markerName][this.markerIndex].elevation;
-
-                    this.$forceUpdate();
-                }
-            },
-
             markerName: function (newVal) {
 
                 console.log('InfoMaker - watch', newVal);
@@ -802,6 +790,19 @@
             this.targetType = this.marker.type;
 
             console.log('InfoMarker', this.$store.state.tempMarkers[this.markerName]);
+
+            EventBus.$on('on-update-infomarker', () => {
+                this.targetLat = this.$store.state.tempMarkers[this.markerName][this.markerIndex].lat;
+                this.targetLng = this.$store.state.tempMarkers[this.markerName][this.markerIndex].lng;
+                this.targetAlt = this.$store.state.tempMarkers[this.markerName][this.markerIndex].alt;
+                this.elevation = this.$store.state.tempMarkers[this.markerName][this.markerIndex].elevation;
+
+                this.$forceUpdate();
+            });
+        },
+
+        beforeDestroy() {
+            EventBus.$off('on-update-infomarker');
         }
     }
 </script>
