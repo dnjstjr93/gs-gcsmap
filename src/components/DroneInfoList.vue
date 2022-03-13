@@ -48,7 +48,7 @@
                                     v-bind:name="drone.name"
                                     :id="drone.id"
                                     :gcs="drone.gcs"
-                                    :sortie="'unknown'"
+                                    :sortie="drone.sortie_name"
                                     :bat_cell="drone.bat_cell"
                                     :goto_positions="drone.goto_positions"
                                     v-bind:airspeed_size="myWidth*0.45"
@@ -399,6 +399,25 @@
                 setTimeout(() => {
                     this.onResize();
                 }, 50);
+            }
+        },
+
+        created() {
+            for(let dName in this.$store.state.drone_infos) {
+                if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'sortie')) {
+                        this.$store.state.drone_infos[dName].sortie_name = 'unknown';
+                    }
+
+                    if(this.$store.state.drone_infos[dName].selected) {
+                        if (localStorage.getItem(this.$store.state.drone_infos[dName].name + '_sortie_name')) {
+                            this.$store.state.drone_infos[dName].sortie_name = localStorage.getItem(this.name + '_sortie_name');
+                        } else {
+                            this.$store.state.drone_infos[dName].sortie_name = 'disarm';
+                            localStorage.setItem(this.$store.state.drone_infos[dName].name + '_sortie_name', this.$store.state.drone_infos[dName].sortie_name);
+                        }
+                    }
+                }
             }
         },
 

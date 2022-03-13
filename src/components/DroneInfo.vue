@@ -1791,7 +1791,7 @@ export default {
                         }
                         else {
                             // var mavLength = (6 * 2) + (contentLenth * 2) + (2 * 2);
-                            //console.log(this.name, this.strContentEach.substr(0, mavLength));
+                            //console.log(this.name, this.strContentEach.substr(0, contentLenth));
 
                             this.receiveFromDrone(topic, this.strContentEach.substr(0, contentLenth));
 
@@ -2101,7 +2101,11 @@ export default {
 
                 this.recv_counter++;
 
-                this.sortie_name = sortie_name;
+                if(this.sortie_name !== sortie_name) {
+                    this.sortie_name = sortie_name;
+                    localStorage.setItem(this.name+'_sortie_name', this.sortie_name);
+                }
+
                 this.mavStr = mavPacket;
 
                 this.statusColor = 'indicator-green';
@@ -3368,8 +3372,14 @@ export default {
             btn_params.param2 = 0; // Empty
             btn_params.param3 = 0; // Empty
             btn_params.param4 = 0; // Yaw angle
-            btn_params.param5 = this.gpi.lat / 10000000; // Latitude
-            btn_params.param6 = this.gpi.lng / 10000000; // Longitude
+            if(this.fcType === 'ardupilot') {
+                btn_params.param5 = 0; // Latitude
+                btn_params.param6 = 0; // Longitude
+            }
+            else {
+                btn_params.param5 = this.gpi.lat / 10000000; // Latitude
+                btn_params.param6 = this.gpi.lng / 10000000; // Longitude
+            }
             btn_params.param7 = alt; // Altitude
 
             try {
@@ -3761,8 +3771,33 @@ export default {
                     this.$store.state.drone_infos[this.name].headingLine.push({lat: (this.gpi.lat / 10000000), lng: (this.gpi.lon / 10000000)});
                     this.$store.state.drone_infos[this.name].headingLine.push({lat: h_pos.lat, lng: h_pos.lon});
 
-                    let dir = (360 + Math.atan2(this.gpi.vx, this.gpi.vy) * 180 / Math.PI) % 360;
+                    if(Math.abs(this.gpi.vx) < 10) {
+                        this.gpi.vx = 0;
+                    }
+
+                    if(Math.abs(this.gpi.vy) < 10) {
+                        this.gpi.vy = 0;
+                    }
+
+                    let vyy = Math.ceil((this.gpi.vx));
+                    let vxx = Math.ceil((this.gpi.vy));
+                    let theta = (360 + (Math.atan2(vyy, vxx) * 180 / Math.PI)) % 360;
+
+                    //console.log('vxx', vxx, ', vyy', vyy, ', theta', theta);
+                    if(vxx >= 0 && vyy >= 0) {
+                        var dir = (360 + (90-theta)) % 360;
+                    }
+                    else if(vxx < 0 && vyy >= 0) {
+                        dir = (360 + (180-theta+270)) % 360;
+                    }
+                    else if(vxx < 0 && vyy < 0) {
+                        dir = (360 + (270-theta+180)) % 360;
+                    }
+                    else {
+                        dir = (360 + (360-theta+90)) % 360;
+                    }
                     //console.log("vx", this.gpi.vx / 100, "vy", this.gpi.vy / 100, "theta", dir, "heading", this.heading);
+
 
                     let dir_pos = get_point_dist((this.gpi.lat / 10000000), (this.gpi.lon / 10000000), (0.001 + ((this.airspeed * 5)/1000)), dir);
                     this.$store.state.drone_infos[this.name].directionLine = [];
