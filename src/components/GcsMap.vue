@@ -529,6 +529,54 @@
         },
 
         methods: {
+            line_intersect(x1, y1, x2, y2, x3, y3, x4, y4)
+            {
+                var ua, ub, denom = (y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1);
+                if (denom === 0) {
+                    return null;
+                }
+
+                ua = ((x4 - x3)*(y1 - y3) - (y4 - y3)*(x1 - x3))/denom;
+                ub = ((x2 - x1)*(y1 - y3) - (y2 - y1)*(x1 - x3))/denom;
+
+                var rx = x1 + ua * (x2 - x1);
+                var ry = y1 + ua * (y2 - y1);
+
+
+
+                var check_count = 0;
+                if((x1 < rx && rx < x2) || (x1 > rx && rx > x2)) {
+                    console.log(x1, rx, x2);
+                    check_count++;
+                }
+
+                else if((x3 < rx && rx < x3) || (x3 > rx && rx > x4)) {
+                    check_count++;
+                    console.log(x3, rx, x4);
+                }
+
+                if((y1 < ry && ry < y2) || (y1 > ry && ry > y2)) {
+                    check_count++;
+                    console.log(y1, ry, y2);
+                }
+                else if((y3 < ry && ry < y3) || (y3 > ry && ry > y4)) {
+                    check_count++;
+                    console.log(y3, ry, y4);
+                }
+
+                if(check_count >= 2) {
+                    return {
+                        x: rx,
+                        y: ry,
+                        seg1: ua >= 0 && ua <= 1,
+                        seg2: ub >= 0 && ub <= 1
+                    };
+                }
+                else {
+                    return null;
+                }
+            },
+
             showNewRect(e, dName, pIndex) {
                 this.$store.state.surveyMarkers[dName][pIndex].paths = [];
                 for(let idx in e.Fd[0].Fd) {
@@ -550,11 +598,12 @@
                     this.$store.state.surveyMarkers[dName][pIndex].pathLines = [];
                     this.$store.state.surveyMarkers[dName][pIndex].pathLines.push(center);
 
-                    let nextPoint = {lat: center.lat, lon: center.lng};
+                    var nextPoint = {lat: center.lat, lon: center.lng};
+                    var prevPoint = {lat: center.lat, lon: center.lng};
 
                     let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
-                    let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
-
+                    // let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
+                    let gap = 20;
                     let iter = 0;
                     let angle = 0;
                     while (iter++ < 10) {
@@ -570,6 +619,17 @@
                         }
 
                         nextPoint = get_point_dist(nextPoint.lat, nextPoint.lon, (gap/1000), angle);
+
+                        let intersectPoint = this.line_intersect(prevPoint.lat, prevPoint.lon,
+                            nextPoint.lat, nextPoint.lon,
+                            this.$store.state.surveyMarkers[dName][pIndex].paths[0].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[0].lng,
+                            this.$store.state.surveyMarkers[dName][pIndex].paths[1].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[1].lng,
+                        );
+
+                        console.log(iter, intersectPoint);
+
+                        prevPoint = {lat: nextPoint.lat, lon: nextPoint.lon};
+
                         this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({lat: nextPoint.lat, lng: nextPoint.lon});
                     }
 
