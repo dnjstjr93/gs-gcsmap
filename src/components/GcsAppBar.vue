@@ -1324,6 +1324,23 @@
                                     temp = null;
                                     pos.m_icon.strokeWeight = 1;
                                     pos.m_icon.strokeColor = 'grey';
+                                    pos.options.zIndex = 5;
+
+                                    if(!Object.prototype.hasOwnProperty.call(pos, 'dir')) {
+                                        pos.dir = 'cw';
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(pos, 'color')) {
+                                        pos.color = 'orange';
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(pos, 'gap')) {
+                                        pos.gap = 10;
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(pos, 'pathLines')) {
+                                        pos.pathLines = [];
+                                    }
                                 });
                             }
 

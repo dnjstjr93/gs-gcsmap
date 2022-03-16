@@ -1,4 +1,3 @@
-<script src="../../../gmap/src/main.js"></script>
 <template>
     <div>
         <v-row no-gutters>
@@ -108,6 +107,20 @@
                                 :title="'unknown'  + ':' + pos.alt  + ':' + pos.speed  + ':' + pos.radius"
                             />
 
+                            <div v-for="(survey, pIndex) in $store.state.surveyMarkers.unknown" :key="'survey'+pIndex">
+                                <GmapPolygon
+                                    :paths="survey.paths"
+                                    :options="survey.options"
+                                    @paths_changed="showNewRect($event, 'unknown', pIndex)"
+                                    @dragend="updataPolygon($event, 'unknown')"
+                                />
+                                <GmapPolyline
+                                    :path.sync="survey.pathLines"
+                                    :options="{strokeColor: survey.color, strokeOpacity: 0.9, strokeWeight: 2, zIndex: 1}"
+                                />
+                            </div>
+
+
                             <div v-for="drone in $store.state.drone_infos" :key="'guideCircles_'+drone.id">
                                 <div v-if="drone.selected">
                                     <GmapPolyline
@@ -161,25 +174,25 @@
                                     <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
                                             :radius="2"
-                                            :options="{fillOpacity: 0, strokeColor: '#D50000', strokeOpacity: 1, strokeWeight: 1}"
+                                            :options="{fillOpacity: 0, strokeColor: '#D50000', strokeOpacity: 1, strokeWeight: 1, zIndex: 0}"
                                     ></GmapCircle>
 
                                     <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
                                             :radius="5"
-                                            :options="{fillOpacity: 0, strokeColor: '#FF5252', strokeOpacity: 0.8, strokeWeight: 1}"
+                                            :options="{fillOpacity: 0, strokeColor: '#FF5252', strokeOpacity: 0.8, strokeWeight: 1, zIndex: 0}"
                                     ></GmapCircle>
 
                                     <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
                                             :radius="10"
-                                            :options="{fillOpacity: 0, strokeColor: '#FFCDD2', strokeOpacity: 0.6, strokeWeight: 1}"
+                                            :options="{fillOpacity: 0, strokeColor: '#FFCDD2', strokeOpacity: 0.6, strokeWeight: 1, zIndex: 0}"
                                     ></GmapCircle>
 
                                     <GmapCircle
                                         :center="{lat: drone.lat, lng: drone.lng}"
                                         :radius="100"
-                                        :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"
+                                        :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6, zIndex: 0}"
                                         @dblclick="addingMarker"
                                         @click="printPosClick"
                                     ></GmapCircle>
@@ -199,7 +212,7 @@
 <!--                                    ></GmapCircle>-->
                                     <GmapPolyline
                                         :path.sync="drone.headingLine"
-                                        :options="{strokeColor: drone.color, strokeOpacity: 0.9, strokeWeight: 2, zIndex: 4}"
+                                        :options="{strokeColor: drone.color, strokeOpacity: 0.9, strokeWeight: 2, zIndex: 1}"
                                     ></GmapPolyline>
 
                                     <GmapPolyline
@@ -266,6 +279,8 @@
     </div>
 </template>
 
+<script src="../../../gmap/src/main.js"></script>
+
 <script>
 
     import InfoMarker from "./InfoMarker";
@@ -275,6 +290,23 @@
     import axios from "axios";
 
     var curElevationVal = 0;
+
+    const get_point_dist = (latitude, longitude, distanceInKm, bearingInDegrees) => {
+        const R = 6378.1;
+        const dr = Math.PI / 180;
+        const bearing = bearingInDegrees * dr;
+        let lat = latitude * dr;
+        let lon = longitude * dr;
+
+        lat = Math.asin(Math.sin(lat) * Math.cos(distanceInKm / R) + Math.cos(lat) * Math.sin(distanceInKm / R) * Math.cos(bearing));
+        lon += Math.atan2(
+            Math.sin(bearing) * Math.sin(distanceInKm / R) * Math.cos(lat),
+            Math.cos(distanceInKm / R) - Math.sin(lat) * Math.sin(lat)
+        );
+        lat /= dr;
+        lon /= dr;
+        return {lat, lon};
+    }
 
     export default {
         name: 'GcsMap',
@@ -289,6 +321,24 @@
 
         data () {
             return {
+                idUpdateTimer: null,
+                blueCoords: [
+                    { lat: 25.774, lng: -60.19 },
+                    { lat: 18.466, lng: -46.118 },
+                    { lat: 32.321, lng: -44.757 },
+                ],
+                blueCoordsOptions: {
+                    strokeColor: "#0000FF",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: "#0000FF",
+                    fillOpacity: 0.35,
+                    draggable: true,
+                    geodesic: false,
+                    editable: true,
+                    zIndex: 5,
+                },
+
                 lineArrow: null,
                 curElevation: 0,
                 zoom: 18,
@@ -331,7 +381,7 @@
                     strokeColor: '#FF6D00',
                     strokeOpacity: 0.9,
                     strokeWeight: 2,
-                    zIndex: 5
+                    zIndex: 0
                 },
 
                 boundaryCircles: {},
@@ -479,6 +529,59 @@
         },
 
         methods: {
+            showNewRect(e, dName, pIndex) {
+                this.$store.state.surveyMarkers[dName][pIndex].paths = [];
+                for(let idx in e.Fd[0].Fd) {
+                    if(Object.prototype.hasOwnProperty.call(e.Fd[0].Fd, idx)) {
+                        this.$store.state.surveyMarkers[dName][pIndex].paths.push({lat: e.Fd[0].Fd[idx].lat(), lng: e.Fd[0].Fd[idx].lng()});
+                    }
+                }
+
+                if(this.idUpdateTimer !== null) {
+                    clearTimeout(this.idUpdateTimer);
+                }
+
+                this.idUpdateTimer = setTimeout((dName) => {
+                    this.$store.state.surveyMarkers[dName][pIndex].color = 'orange';
+
+                    let center = this.getCenterPoly(this.$store.state.surveyMarkers[dName][pIndex].paths);
+
+                    this.$store.state.surveyMarkers[dName][pIndex].center = center;
+                    this.$store.state.surveyMarkers[dName][pIndex].pathLines = [];
+                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.push(center);
+
+                    let nextPoint = {lat: center.lat, lon: center.lng};
+
+                    let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
+                    let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
+
+                    let iter = 0;
+                    let angle = 0;
+                    while (iter++ < 10) {
+                        if(iter === 3) {
+                            if(dir === 'cw') {
+                                angle += 90;
+                            }
+                        }
+                        else if(iter === 4) {
+                            if(dir === 'cw') {
+                                angle += 90;
+                            }
+                        }
+
+                        nextPoint = get_point_dist(nextPoint.lat, nextPoint.lon, (gap/1000), angle);
+                        this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({lat: nextPoint.lat, lng: nextPoint.lon});
+                    }
+
+                    this.postEachSurveyMarkerInfo(dName);
+
+                }, 1000, dName);
+            },
+
+            updataPolygon(e, dName) {
+                console.log('############', 'Polygon dragend', e, dName);
+            },
+
             displayLocationElevation(location, elevator, onResult) {
                 // Initiate the location request
                 elevator
@@ -706,6 +809,62 @@
                 );
             },
 
+            postEachSurveyMarkerInfo(dName) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                    data: {
+                        'm2m:cin': {
+                            con: this.$store.state.surveyMarkers[dName]
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        console.log('++++++++ confirmAddSurveyMarker-axios', res.data);
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            getCenterPoly(paths) {
+                let polyLatMin = paths[0].lat;
+                let polyLatMax = paths[0].lat;
+                let polyLngMin = paths[0].lng;
+                let polyLngMax = paths[0].lng;
+
+                for(let i = 1; i < paths.length; i++) {
+                    if(polyLatMin > paths[i].lat) {
+                        polyLatMin = paths[i].lat;
+                    }
+
+                    if(polyLatMax < paths[i].lat) {
+                        polyLatMax = paths[i].lat;
+                    }
+
+                    if(polyLngMin > paths[i].lng) {
+                        polyLngMin = paths[i].lng;
+                    }
+
+                    if(polyLngMax < paths[i].lng) {
+                        polyLngMax = paths[i].lng;
+                    }
+                }
+
+                return ({lat: (polyLatMin+polyLatMax)/2, lng: (polyLngMin+polyLngMax)/2});
+            },
+
             confirmAddSurveyMarker() {
                 this.context_flag = false;
 
@@ -723,60 +882,76 @@
                 let lat = this.click_lat;
                 let lng = this.click_lng;
 
-                this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
-                    console.log('__________________________________confirmAddSurveyMarker', 'curElevation', val);
+                let paths = [];
+                paths.push({lat: lat, lng: lng});
+                let pointU = get_point_dist(lat, lng, 0.1, 0);
+                paths.push({lat: pointU.lat, lng: pointU.lon});
+                let pointUL = get_point_dist(pointU.lat, pointU.lon, 0.1, -90);
+                paths.push({lat: pointUL.lat, lng: pointUL.lon});
+                let pointL = get_point_dist(lat, lng, 0.1, -90);
+                paths.push({lat: pointL.lat, lng: pointL.lon});
 
-                    let marker = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
-                    marker.lat = this.click_lat;
-                    marker.lng = this.click_lng;
-                    marker.alt = 20;
-                    marker.speed = 5;
-                    marker.radius = 50;
-                    marker.turningSpeed = 10;
-                    marker.targetMavCmd = 16;
-                    marker.targetStayTime = 1;
-                    marker.elevation = val;
-                    marker.type = 'Goto';
-                    marker.m_icon.fillColor = 'grey';
-                    marker.m_label.fontSize = '14px';
-                    marker.m_label.text = 'T:' + String(marker.alt);
-                    marker.type = 0;
+                let center = this.getCenterPoly(paths);
 
-                    this.$store.state.surveyMarkers.unknown.push(marker);
+                this.$store.state.surveyMarkers[dName][pIndex].center = center;
+                this.$store.state.surveyMarkers[dName][pIndex].pathLines = [];
+                this.$store.state.surveyMarkers[dName][pIndex].pathLines.push(center);
 
-                    this.doBroadcastAddSurveyMarker(JSON.parse(JSON.stringify(marker)));
+                //let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
+                let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
 
-                    marker = null;
+                let nextPoint = {lat: center.lat, lon: center.lng};
 
-                    axios({
-                        validateStatus: function (status) {
-                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                            return status < 500;
-                        },
-                        method: 'post',
-                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/unknown',
-                        headers: {
-                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                            'X-M2M-Origin': 'SVue',
-                            'Content-Type': 'application/json;ty=4'
-                        },
-                        data: {
-                            'm2m:cin': {
-                                con: this.$store.state.surveyMarkers.unknown
-                            }
-                        }
-                    }).then(
-                        function (res) {
-                            console.log('++++++++ confirmAddSurveyMarker-axios', res.data);
-                        }
-                    ).catch(
-                        function (err) {
-                            console.log(err.message);
-                        }
-                    );
+                let iter = 0;
+                while (iter++ < 10) {
+                    nextPoint = get_point_dist(nextPoint.lat, nextPoint.lon, (gap/1000), 0);
+                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({lat: nextPoint.lat, lng: nextPoint.lon});
+                }
+
+                this.blueCoords = JSON.parse(JSON.stringify(paths));
+
+                //this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
+                    //console.log('__________________________________confirmAddSurveyMarker', 'curElevation', val);
+
+                    let survey = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
+                    survey.lat = this.click_lat;
+                    survey.lng = this.click_lng;
+                    survey.alt = 20;
+                    survey.speed = 5;
+                    survey.radius = 50;
+                    survey.turningSpeed = 10;
+                    survey.targetMavCmd = 16;
+                    survey.targetStayTime = 1;
+                    // survey.elevation = val;
+                    survey.type = 'Survey';
+                    survey.color = 'orange';
+                    survey.m_icon.fillColor = 'grey';
+                    survey.m_label.fontSize = '14px';
+                    survey.m_label.text = 'T:' + String(survey.alt);
+                    survey.type = 0;
+                    survey.paths = JSON.parse(JSON.stringify(paths));
+                    survey.options = {
+                        strokeColor: "#0000FF",
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: "#0000FF",
+                        fillOpacity: 0.35,
+                        draggable: true,
+                        geodesic: false,
+                        editable: true,
+                        zIndex: 6,
+                    }
+
+                    this.$store.state.surveyMarkers.unknown.push(survey);
+
+                    this.doBroadcastAddSurveyMarker(JSON.parse(JSON.stringify(survey)));
+
+                    survey = null;
+
+                    this.postEachSurveyMarkerInfo('unknown');
 
                     this.$store.state.adding = false;
-                });
+                //});
             },
 
             cancelMarker() {
