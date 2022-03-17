@@ -1326,6 +1326,10 @@
                                     pos.m_icon.strokeColor = 'grey';
                                     pos.options.zIndex = 5;
 
+                                    if(!Object.prototype.hasOwnProperty.call(pos, 'angleStart')) {
+                                        pos.angleStart = 0;
+                                    }
+
                                     if(!Object.prototype.hasOwnProperty.call(pos, 'dir')) {
                                         pos.dir = 'cw';
                                     }

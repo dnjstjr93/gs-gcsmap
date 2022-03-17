@@ -111,7 +111,7 @@
                                 <GmapPolygon
                                     :paths="survey.paths"
                                     :options="survey.options"
-                                    @paths_changed="showNewRect($event, 'unknown', pIndex)"
+                                    @paths_changed="showNewPolygon($event, 'unknown', pIndex)"
                                     @dragend="updataPolygon($event, 'unknown')"
                                 />
                                 <GmapPolyline
@@ -321,6 +321,7 @@
 
         data () {
             return {
+                turningDir: [90, 90, -90, -90],
                 idUpdateTimer: null,
                 blueCoords: [
                     { lat: 25.774, lng: -60.19 },
@@ -542,29 +543,36 @@
                 var rx = x1 + ua * (x2 - x1);
                 var ry = y1 + ua * (y2 - y1);
 
+                console.log('px:', x1, x2, x3, x4);
+                console.log('rx:', rx);
+                console.log('py:', y1, y2, y3, y4);
+                console.log('ry:', ry);
 
 
                 var check_count = 0;
-                if((x1 < rx && rx < x2) || (x1 > rx && rx > x2)) {
-                    console.log(x1, rx, x2);
+                if((x1 <= rx && rx <= x2) || (x1 >= rx && rx >= x2)) {
                     check_count++;
+                    console.log('x1 x2 사이');
+
                 }
 
-                else if((x3 < rx && rx < x3) || (x3 > rx && rx > x4)) {
+                if((x3 <= rx && rx <= x4) || (x3 >= rx && rx >= x4)) {
                     check_count++;
-                    console.log(x3, rx, x4);
+                    console.log('x3 x4 사이');
                 }
 
-                if((y1 < ry && ry < y2) || (y1 > ry && ry > y2)) {
+                if((y1 <= ry && ry <= y2) || (y1 >= ry && ry >= y2)) {
                     check_count++;
-                    console.log(y1, ry, y2);
-                }
-                else if((y3 < ry && ry < y3) || (y3 > ry && ry > y4)) {
-                    check_count++;
-                    console.log(y3, ry, y4);
+                    console.log('y1 y2 사이');
                 }
 
-                if(check_count >= 2) {
+                if((y3 <= ry && ry <= y4) || (y3 >= ry && ry >= y4)) {
+                    check_count++;
+                    console.log('y3 y4 사이');
+                }
+
+
+                if(check_count >= 4) {
                     return {
                         x: rx,
                         y: ry,
@@ -577,11 +585,28 @@
                 }
             },
 
-            showNewRect(e, dName, pIndex) {
+            showNewPolygon(e, dName, pIndex) {
+                //console.log(e);
                 this.$store.state.surveyMarkers[dName][pIndex].paths = [];
-                for(let idx in e.Fd[0].Fd) {
-                    if(Object.prototype.hasOwnProperty.call(e.Fd[0].Fd, idx)) {
-                        this.$store.state.surveyMarkers[dName][pIndex].paths.push({lat: e.Fd[0].Fd[idx].lat(), lng: e.Fd[0].Fd[idx].lng()});
+
+                if(Object.prototype.hasOwnProperty.call(e, 'Fd')) {
+                    for (let idx in e.Fd[0].Fd) {
+                        if (Object.prototype.hasOwnProperty.call(e.Fd[0].Fd, idx)) {
+                            this.$store.state.surveyMarkers[dName][pIndex].paths.push({
+                                lat: e.Fd[0].Fd[idx].lat(),
+                                lng: e.Fd[0].Fd[idx].lng()
+                            });
+                        }
+                    }
+                }
+                else if(Object.prototype.hasOwnProperty.call(e, 'Ed')) {
+                    for (let idx in e.Ed[0].Ed) {
+                        if (Object.prototype.hasOwnProperty.call(e.Ed[0].Ed, idx)) {
+                            this.$store.state.surveyMarkers[dName][pIndex].paths.push({
+                                lat: e.Ed[0].Ed[idx].lat(),
+                                lng: e.Ed[0].Ed[idx].lng()
+                            });
+                        }
                     }
                 }
 
@@ -603,39 +628,72 @@
 
                     let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
                     // let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
-                    let gap = 20;
+
+                    let gap = 10;
                     let iter = 0;
-                    let angle = 0;
-                    while (iter++ < 10) {
-                        if(iter === 3) {
+
+                    let angle = this.$store.state.surveyMarkers[dName][pIndex].angleStart;
+                    let turn_state = 'none';
+                    let dir_count = 0;
+
+                    while (iter < 10) {
+
+                        if(turn_state === 'truning') {
                             if(dir === 'cw') {
-                                angle += 90;
+                                angle += this.turningDir[dir_count++];
+                                dir_count %= 4
+
+                                if(dir_count === 0 || dir_count === 2) {
+                                    turn_state = 'none';
+                                }
                             }
                         }
-                        else if(iter === 4) {
-                            if(dir === 'cw') {
-                                angle += 90;
-                            }
-                        }
+                        console.log(turn_state);
 
                         nextPoint = get_point_dist(nextPoint.lat, nextPoint.lon, (gap/1000), angle);
 
-                        let intersectPoint = this.line_intersect(prevPoint.lat, prevPoint.lon,
-                            nextPoint.lat, nextPoint.lon,
-                            this.$store.state.surveyMarkers[dName][pIndex].paths[0].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[0].lng,
-                            this.$store.state.surveyMarkers[dName][pIndex].paths[1].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[1].lng,
-                        );
+                        let intersectPoint = null;
+                        let len = this.$store.state.surveyMarkers[dName][pIndex].paths.length;
+                        for(let i = 0; i < len; i++) {
+                            console.log(iter, i, '-', (i+1)%len);
 
-                        console.log(iter, intersectPoint);
+                            intersectPoint = this.line_intersect(prevPoint.lat, prevPoint.lon,
+                                nextPoint.lat, nextPoint.lon,
+                                this.$store.state.surveyMarkers[dName][pIndex].paths[i].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[i].lng,
+                                this.$store.state.surveyMarkers[dName][pIndex].paths[(i+1)%len].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[(i+1)%len].lng,
+                            );
 
-                        prevPoint = {lat: nextPoint.lat, lon: nextPoint.lon};
+                            if(intersectPoint !== null) {
+                                break;
+                            }
+                        }
+
+                        // intersectPoint = this.line_intersect(prevPoint.lat, prevPoint.lon,
+                        //     nextPoint.lat, nextPoint.lon,
+                        //     this.$store.state.surveyMarkers[dName][pIndex].paths[0].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[0].lng,
+                        //     this.$store.state.surveyMarkers[dName][pIndex].paths[1].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[1].lng,
+                        // );
+                        //
+                        // console.log(intersectPoint);
+
+                        if(intersectPoint !== null) {
+                            if(turn_state === 'none') {
+                                turn_state = 'truning';
+                            }
+                        }
+                        else {
+                        }
 
                         this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({lat: nextPoint.lat, lng: nextPoint.lon});
+                        prevPoint = {lat: nextPoint.lat, lon: nextPoint.lon};
+
+
+                        iter++;
                     }
 
                     this.postEachSurveyMarkerInfo(dName);
 
-                }, 1000, dName);
+                }, 500, dName);
             },
 
             updataPolygon(e, dName) {
