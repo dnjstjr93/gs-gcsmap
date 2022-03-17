@@ -116,7 +116,7 @@
                                 />
                                 <GmapPolyline
                                     :path.sync="survey.pathLines"
-                                    :options="{strokeColor: survey.color, strokeOpacity: 0.9, strokeWeight: 2, zIndex: 1}"
+                                    :options="{strokeColor: survey.color, strokeOpacity: 0.9, strokeWeight: 3, zIndex: 1}"
                                 />
                             </div>
 
@@ -543,32 +543,32 @@
                 var rx = x1 + ua * (x2 - x1);
                 var ry = y1 + ua * (y2 - y1);
 
-                console.log('px:', x1, x2, x3, x4);
-                console.log('rx:', rx);
-                console.log('py:', y1, y2, y3, y4);
-                console.log('ry:', ry);
+                // console.log('px:', x1, x2, x3, x4);
+                // console.log('rx:', rx);
+                // console.log('py:', y1, y2, y3, y4);
+                // console.log('ry:', ry);
 
 
                 var check_count = 0;
                 if((x1 <= rx && rx <= x2) || (x1 >= rx && rx >= x2)) {
                     check_count++;
-                    console.log('x1 x2 사이');
+                    //console.log('x1 x2 사이');
 
                 }
 
                 if((x3 <= rx && rx <= x4) || (x3 >= rx && rx >= x4)) {
                     check_count++;
-                    console.log('x3 x4 사이');
+                    //console.log('x3 x4 사이');
                 }
 
                 if((y1 <= ry && ry <= y2) || (y1 >= ry && ry >= y2)) {
                     check_count++;
-                    console.log('y1 y2 사이');
+                    //console.log('y1 y2 사이');
                 }
 
                 if((y3 <= ry && ry <= y4) || (y3 >= ry && ry >= y4)) {
                     check_count++;
-                    console.log('y3 y4 사이');
+                    //console.log('y3 y4 사이');
                 }
 
 
@@ -586,6 +586,7 @@
             },
 
             checkBoundaryIntersectionNextPoint(dName, pIndex, currPoint, nextPoint) {
+                let resultPoints = [];
                 let intersectPoint = null;
                 let len = this.$store.state.surveyMarkers[dName][pIndex].paths.length;
                 for(let i = 0; i < len; i++) {
@@ -596,12 +597,12 @@
                     );
 
                     if(intersectPoint !== null) {
-                        break;
+                        resultPoints.push(intersectPoint);
                     }
                 }
 
-                if(intersectPoint !== null) {
-                    return intersectPoint;
+                if(resultPoints.length > 0) {
+                    return resultPoints;
                 }
                 else {
                     return null;
@@ -609,7 +610,10 @@
             },
 
             updateSurveyPath(dName, pIndex, gap, angle, dir) {
-                let center = this.getCenterPoly(this.$store.state.surveyMarkers[dName][pIndex].paths);
+                let objCenter = this.getCenterPoly(this.$store.state.surveyMarkers[dName][pIndex].paths);
+                let center = objCenter.center;
+                let min = objCenter.min;
+                let max = objCenter.max;
 
                 this.$store.state.surveyMarkers[dName][pIndex].center = center;
                 this.$store.state.surveyMarkers[dName][pIndex].pathLines = [];
@@ -619,79 +623,201 @@
                 this.$store.state.surveyMarkers[dName][pIndex].angle = angle;
                 this.$store.state.surveyMarkers[dName][pIndex].dir = dir;
 
-                for(let i = 0; i < 100; i++) {
+                const max_try_num = 100;
+                for(let i = 0; i < max_try_num; i++) {
                     let prevPoint = get_point_dist(center.lat, center.lng, (gap / 1000) * i, (360+(angle+(90*dir)))%360);
-                    let intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, {lat:center.lat, lon:center.lng}, prevPoint);
+                    //let intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, {lat:center.lat, lon:center.lng}, prevPoint);
+                    let intersectPoint = null;
+                    let checkCount = 0;
 
-                    if (intersectPoint !== null) {
+                    if(min.lat <= prevPoint.lat && prevPoint.lat <= max.lat) {
+                        checkCount++;
+                    }
+
+                    if(min.lng <= prevPoint.lon && prevPoint.lon <= max.lng){
+                        checkCount++;
+                    }
+
+                    if(checkCount <= 1) {
                         break;
                     }
 
-                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), angle);
-                    intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), angle);
+                    let intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
 
-                    if (intersectPoint !== null) {
-                        this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
-                            lat: intersectPoint.x,
-                            lng: intersectPoint.y
-                        });
-                    }
+                    if (intersectPoints !== null) {
+                        checkCount = 0;
 
-                    nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), (360+(angle+180))%360);
-                    intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+                        let dist = 0;
 
-                    if (intersectPoint !== null) {
-                        if(i%2 === 1) {
-                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1, 0, {
-                                lat: intersectPoint.x,
-                                lng: intersectPoint.y
-                            });
+                        for(let p = 0; p < intersectPoints.length; p++) {
+
+                            let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPoints[p].x, 2) + Math.pow(prevPoint.lon - intersectPoints[p].y, 2));
+                            if(dist < temp) {
+                                dist = temp;
+
+                                intersectPoint = {x: intersectPoints[p].x, y: intersectPoints[p].y};
+                            }
                         }
-                        else {
+
+                        if (intersectPoint !== null) {
                             this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
                                 lat: intersectPoint.x,
                                 lng: intersectPoint.y
                             });
                         }
                     }
+
+                    nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), (360+(angle+180))%360);
+                    intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPoints !== null) {
+                        checkCount = 0;
+
+                        let dist = 0;
+
+                        for(let p = 0; p < intersectPoints.length; p++) {
+
+                            let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPoints[p].x, 2) + Math.pow(prevPoint.lon - intersectPoints[p].y, 2));
+                            if(dist < temp) {
+                                dist = temp;
+
+                                intersectPoint = {x: intersectPoints[p].x, y: intersectPoints[p].y};
+                            }
+                        }
+
+                        if (intersectPoint !== null) {
+                            if(i%2 === 1) {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1, 0, {
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
+                            else {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
+                        }
+                    }
                 }
 
-                for(let i = 1; i < 100; i++) {
+                for(let i = 1; i < max_try_num; i++) {
                     let prevPoint = get_point_dist(center.lat, center.lng, (gap / 1000) * i, (360+(angle+(90*(-dir))))%360);
-                    let intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, {lat:center.lat, lon:center.lng}, prevPoint);
+                    //let intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, {lat:center.lat, lon:center.lng}, prevPoint);
+                    let intersectPoint = null;
+                    let checkCount = 0;
 
-                    if (intersectPoint !== null) {
+                    if(min.lat <= prevPoint.lat && prevPoint.lat <= max.lat) {
+                        checkCount++;
+                    }
+
+                    if(min.lng <= prevPoint.lon && prevPoint.lon <= max.lng){
+                        checkCount++;
+                    }
+
+                    if(checkCount <= 1) {
                         break;
                     }
 
-                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), angle);
-                    intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), angle);
+                    let intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
 
-                    if (intersectPoint !== null) {
-                        this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
-                            lat: intersectPoint.x,
-                            lng: intersectPoint.y
-                        });
-                    }
+                    if (intersectPoints !== null) {
+                        checkCount = 0;
 
-                    nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), (360+(angle+180))%360);
-                    intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+                        let dist = 0;
 
-                    if (intersectPoint !== null) {
-                        if(i%2 === 0) {
-                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(1, 0, {
-                                lat: intersectPoint.x,
-                                lng: intersectPoint.y
-                            });
+                        for(let p = 0; p < intersectPoints.length; p++) {
+
+                            let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPoints[p].x, 2) + Math.pow(prevPoint.lon - intersectPoints[p].y, 2));
+                            if(dist < temp) {
+                                dist = temp;
+
+                                intersectPoint = {x: intersectPoints[p].x, y: intersectPoints[p].y};
+                            }
                         }
-                        else {
+
+                        if (intersectPoint !== null) {
                             this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
                                 lat: intersectPoint.x,
                                 lng: intersectPoint.y
                             });
                         }
                     }
+
+                    nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), (360+(angle+180))%360);
+                    intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPoints !== null) {
+                        checkCount = 0;
+
+                        let dist = 0;
+
+                        for(let p = 0; p < intersectPoints.length; p++) {
+
+                            let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPoints[p].x, 2) + Math.pow(prevPoint.lon - intersectPoints[p].y, 2));
+                            if(dist < temp) {
+                                dist = temp;
+
+                                intersectPoint = {x: intersectPoints[p].x, y: intersectPoints[p].y};
+                            }
+                        }
+
+                        if (intersectPoint !== null) {
+                            if(i%2 === 0) {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(1, 0, {
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
+                            else {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
+                        }
+                    }
                 }
+
+                // for(let i = 1; i < 100; i++) {
+                //     let prevPoint = get_point_dist(center.lat, center.lng, (gap / 1000) * i, (360+(angle+(90*(-dir))))%360);
+                //     let intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, {lat:center.lat, lon:center.lng}, prevPoint);
+                //
+                //     if (intersectPoint !== null) {
+                //         break;
+                //     }
+                //
+                //     let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), angle);
+                //     intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+                //
+                //     if (intersectPoint !== null) {
+                //         this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                //             lat: intersectPoint.x,
+                //             lng: intersectPoint.y
+                //         });
+                //     }
+                //
+                //     nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), (360+(angle+180))%360);
+                //     intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+                //
+                //     if (intersectPoint !== null) {
+                //         if(i%2 === 0) {
+                //             this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(1, 0, {
+                //                 lat: intersectPoint.x,
+                //                 lng: intersectPoint.y
+                //             });
+                //         }
+                //         else {
+                //             this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                //                 lat: intersectPoint.x,
+                //                 lng: intersectPoint.y
+                //             });
+                //         }
+                //     }
+                // }
             },
 
             showNewPolygon(e, dName, pIndex) {
@@ -726,7 +852,7 @@
                 this.idUpdateTimer = setTimeout((dName) => {
                     this.$store.state.surveyMarkers[dName][pIndex].color = 'orange';
 
-                    this.updateSurveyPath(dName, pIndex, 20, 90, 1);
+                    this.updateSurveyPath(dName, pIndex, 20, 0, 1);
 
                     this.postEachSurveyMarkerInfo(dName);
 
@@ -1017,7 +1143,11 @@
                     }
                 }
 
-                return ({lat: (polyLatMin+polyLatMax)/2, lng: (polyLngMin+polyLngMax)/2});
+                return ({
+                    center: {lat: (polyLatMin + polyLatMax) / 2, lng: (polyLngMin + polyLngMax) / 2},
+                    min: {lat: polyLatMin, lng: polyLngMin},
+                    max: {lat: polyLatMax, lng: polyLngMax}
+                });
             },
 
             confirmAddSurveyMarker() {
