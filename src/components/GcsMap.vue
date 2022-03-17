@@ -585,6 +585,115 @@
                 }
             },
 
+            checkBoundaryIntersectionNextPoint(dName, pIndex, currPoint, nextPoint) {
+                let intersectPoint = null;
+                let len = this.$store.state.surveyMarkers[dName][pIndex].paths.length;
+                for(let i = 0; i < len; i++) {
+                    intersectPoint = this.line_intersect(currPoint.lat, currPoint.lon,
+                        nextPoint.lat, nextPoint.lon,
+                        this.$store.state.surveyMarkers[dName][pIndex].paths[i].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[i].lng,
+                        this.$store.state.surveyMarkers[dName][pIndex].paths[(i+1)%len].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[(i+1)%len].lng,
+                    );
+
+                    if(intersectPoint !== null) {
+                        break;
+                    }
+                }
+
+                if(intersectPoint !== null) {
+                    return intersectPoint;
+                }
+                else {
+                    return null;
+                }
+            },
+
+            updateSurveyPath(dName, pIndex, gap, angle, dir) {
+                let center = this.getCenterPoly(this.$store.state.surveyMarkers[dName][pIndex].paths);
+
+                this.$store.state.surveyMarkers[dName][pIndex].center = center;
+                this.$store.state.surveyMarkers[dName][pIndex].pathLines = [];
+                //this.$store.state.surveyMarkers[dName][pIndex].pathLines.push(center);
+
+                this.$store.state.surveyMarkers[dName][pIndex].gap = gap;
+                this.$store.state.surveyMarkers[dName][pIndex].angle = angle;
+                this.$store.state.surveyMarkers[dName][pIndex].dir = dir;
+
+                for(let i = 0; i < 100; i++) {
+                    let prevPoint = get_point_dist(center.lat, center.lng, (gap / 1000) * i, (360+(angle+(90*dir)))%360);
+                    let intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, {lat:center.lat, lon:center.lng}, prevPoint);
+
+                    if (intersectPoint !== null) {
+                        break;
+                    }
+
+                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), angle);
+                    intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPoint !== null) {
+                        this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                            lat: intersectPoint.x,
+                            lng: intersectPoint.y
+                        });
+                    }
+
+                    nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), (360+(angle+180))%360);
+                    intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPoint !== null) {
+                        if(i%2 === 1) {
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1, 0, {
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+                        }
+                        else {
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+                        }
+                    }
+                }
+
+                for(let i = 1; i < 100; i++) {
+                    let prevPoint = get_point_dist(center.lat, center.lng, (gap / 1000) * i, (360+(angle+(90*(-dir))))%360);
+                    let intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, {lat:center.lat, lon:center.lng}, prevPoint);
+
+                    if (intersectPoint !== null) {
+                        break;
+                    }
+
+                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), angle);
+                    intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPoint !== null) {
+                        this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                            lat: intersectPoint.x,
+                            lng: intersectPoint.y
+                        });
+                    }
+
+                    nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (100 / 1000), (360+(angle+180))%360);
+                    intersectPoint = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPoint !== null) {
+                        if(i%2 === 0) {
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(1, 0, {
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+                        }
+                        else {
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+                        }
+                    }
+                }
+            },
+
             showNewPolygon(e, dName, pIndex) {
                 //console.log(e);
                 this.$store.state.surveyMarkers[dName][pIndex].paths = [];
@@ -617,79 +726,7 @@
                 this.idUpdateTimer = setTimeout((dName) => {
                     this.$store.state.surveyMarkers[dName][pIndex].color = 'orange';
 
-                    let center = this.getCenterPoly(this.$store.state.surveyMarkers[dName][pIndex].paths);
-
-                    this.$store.state.surveyMarkers[dName][pIndex].center = center;
-                    this.$store.state.surveyMarkers[dName][pIndex].pathLines = [];
-                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.push(center);
-
-                    var nextPoint = {lat: center.lat, lon: center.lng};
-                    var prevPoint = {lat: center.lat, lon: center.lng};
-
-                    let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
-                    // let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
-
-                    let gap = 10;
-                    let iter = 0;
-
-                    let angle = this.$store.state.surveyMarkers[dName][pIndex].angleStart;
-                    let turn_state = 'none';
-                    let dir_count = 0;
-
-                    while (iter < 10) {
-
-                        if(turn_state === 'truning') {
-                            if(dir === 'cw') {
-                                angle += this.turningDir[dir_count++];
-                                dir_count %= 4
-
-                                if(dir_count === 0 || dir_count === 2) {
-                                    turn_state = 'none';
-                                }
-                            }
-                        }
-                        console.log(turn_state);
-
-                        nextPoint = get_point_dist(nextPoint.lat, nextPoint.lon, (gap/1000), angle);
-
-                        let intersectPoint = null;
-                        let len = this.$store.state.surveyMarkers[dName][pIndex].paths.length;
-                        for(let i = 0; i < len; i++) {
-                            console.log(iter, i, '-', (i+1)%len);
-
-                            intersectPoint = this.line_intersect(prevPoint.lat, prevPoint.lon,
-                                nextPoint.lat, nextPoint.lon,
-                                this.$store.state.surveyMarkers[dName][pIndex].paths[i].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[i].lng,
-                                this.$store.state.surveyMarkers[dName][pIndex].paths[(i+1)%len].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[(i+1)%len].lng,
-                            );
-
-                            if(intersectPoint !== null) {
-                                break;
-                            }
-                        }
-
-                        // intersectPoint = this.line_intersect(prevPoint.lat, prevPoint.lon,
-                        //     nextPoint.lat, nextPoint.lon,
-                        //     this.$store.state.surveyMarkers[dName][pIndex].paths[0].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[0].lng,
-                        //     this.$store.state.surveyMarkers[dName][pIndex].paths[1].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[1].lng,
-                        // );
-                        //
-                        // console.log(intersectPoint);
-
-                        if(intersectPoint !== null) {
-                            if(turn_state === 'none') {
-                                turn_state = 'truning';
-                            }
-                        }
-                        else {
-                        }
-
-                        this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({lat: nextPoint.lat, lng: nextPoint.lon});
-                        prevPoint = {lat: nextPoint.lat, lon: nextPoint.lon};
-
-
-                        iter++;
-                    }
+                    this.updateSurveyPath(dName, pIndex, 20, 90, 1);
 
                     this.postEachSurveyMarkerInfo(dName);
 
@@ -994,9 +1031,39 @@
                     });
                 }
 
-                const elevator = new this.google.maps.ElevationService();
+                //const elevator = new this.google.maps.ElevationService();
 
-                console.log('elevation-confirmAddSurveyMarker', this.$store.state.surveyMarkers);
+                //this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
+                    //console.log('__________________________________confirmAddSurveyMarker', 'curElevation', val);
+
+                let survey = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
+                survey.lat = this.click_lat;
+                survey.lng = this.click_lng;
+                survey.alt = 20;
+                survey.speed = 5;
+                survey.radius = 50;
+                survey.turningSpeed = 10;
+                survey.targetMavCmd = 16;
+                survey.targetStayTime = 1;
+                // survey.elevation = val;
+                survey.type = 'Survey';
+                survey.color = 'orange';
+                survey.m_icon.fillColor = 'grey';
+                survey.m_label.fontSize = '14px';
+                survey.m_label.text = 'T:' + String(survey.alt);
+                survey.type = 0;
+                survey.options = {
+                    strokeColor: "#0000FF",
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: "#0000FF",
+                    fillOpacity: 0.35,
+                    draggable: true,
+                    geodesic: false,
+                    editable: true,
+                    zIndex: 6,
+                }
+
                 let lat = this.click_lat;
                 let lng = this.click_lng;
 
@@ -1009,66 +1076,21 @@
                 let pointL = get_point_dist(lat, lng, 0.1, -90);
                 paths.push({lat: pointL.lat, lng: pointL.lon});
 
-                let center = this.getCenterPoly(paths);
-
-                this.$store.state.surveyMarkers[dName][pIndex].center = center;
-                this.$store.state.surveyMarkers[dName][pIndex].pathLines = [];
-                this.$store.state.surveyMarkers[dName][pIndex].pathLines.push(center);
-
-                //let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
-                let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
-
-                let nextPoint = {lat: center.lat, lon: center.lng};
-
-                let iter = 0;
-                while (iter++ < 10) {
-                    nextPoint = get_point_dist(nextPoint.lat, nextPoint.lon, (gap/1000), 0);
-                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({lat: nextPoint.lat, lng: nextPoint.lon});
-                }
-
+                survey.paths = JSON.parse(JSON.stringify(paths));
                 this.blueCoords = JSON.parse(JSON.stringify(paths));
 
-                //this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
-                    //console.log('__________________________________confirmAddSurveyMarker', 'curElevation', val);
+                this.$store.state.surveyMarkers.unknown.push(survey);
+                console.log('elevation-confirmAddSurveyMarker', this.$store.state.surveyMarkers);
 
-                    let survey = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
-                    survey.lat = this.click_lat;
-                    survey.lng = this.click_lng;
-                    survey.alt = 20;
-                    survey.speed = 5;
-                    survey.radius = 50;
-                    survey.turningSpeed = 10;
-                    survey.targetMavCmd = 16;
-                    survey.targetStayTime = 1;
-                    // survey.elevation = val;
-                    survey.type = 'Survey';
-                    survey.color = 'orange';
-                    survey.m_icon.fillColor = 'grey';
-                    survey.m_label.fontSize = '14px';
-                    survey.m_label.text = 'T:' + String(survey.alt);
-                    survey.type = 0;
-                    survey.paths = JSON.parse(JSON.stringify(paths));
-                    survey.options = {
-                        strokeColor: "#0000FF",
-                        strokeOpacity: 0.8,
-                        strokeWeight: 2,
-                        fillColor: "#0000FF",
-                        fillOpacity: 0.35,
-                        draggable: true,
-                        geodesic: false,
-                        editable: true,
-                        zIndex: 6,
-                    }
+                this.updateSurveyPath('unknown', this.$store.state.surveyMarkers.unknown.length-1, 20, 90, 1);
 
-                    this.$store.state.surveyMarkers.unknown.push(survey);
+                this.doBroadcastAddSurveyMarker(JSON.parse(JSON.stringify(survey)));
 
-                    this.doBroadcastAddSurveyMarker(JSON.parse(JSON.stringify(survey)));
+                survey = null;
 
-                    survey = null;
+                this.postEachSurveyMarkerInfo('unknown');
 
-                    this.postEachSurveyMarkerInfo('unknown');
-
-                    this.$store.state.adding = false;
+                this.$store.state.adding = false;
                 //});
             },
 
