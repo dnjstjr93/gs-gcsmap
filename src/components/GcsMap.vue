@@ -2,13 +2,21 @@
     <div>
         <v-row no-gutters>
             <v-col cols="12">
-                <v-card flat tile class="info_markers" v-if="curFlagMarker">
-                    <InfoMarker v-model="curFlagMarker"
+                <v-card flat tile class="info_markers" v-if="curTempMarkerFlag">
+                    <InfoMarker v-model="curTempMarkerFlag"
                                 :marker-name="curNameMarker"
                                 :marker-index="curIndexMarker"
                                 :marker="curSelectedMarker"
                                 :targets="curTargets"
                     ></InfoMarker>
+                </v-card>
+                <v-card flat tile class="info_markers" v-if="curSurveyMarkerFlag">
+                    <InfoSurveyMarker v-model="curSurveyMarkerFlag"
+                                :marker-name="curNameMarker"
+                                :marker-index="curIndexMarker"
+                                :marker="curSelectedMarker"
+                                :targets="curTargets"
+                    ></InfoSurveyMarker>
                 </v-card>
                 <v-card flat tile class="context-menu" :style="{top:context.top + 'px',left:context.left+'px'}"
                         v-if="context_flag"
@@ -112,7 +120,7 @@
                                     :paths="survey.paths"
                                     :options="survey.options"
                                     @paths_changed="showNewPolygon($event, 'unknown', pIndex)"
-                                    @dragend="updataPolygon($event, 'unknown')"
+                                    @dblclick="updataSurveyParam($event, 'unknown', pIndex)"
                                 />
                                 <GmapPolyline
                                     :path.sync="survey.pathLines"
@@ -284,6 +292,7 @@
 <script>
 
     import InfoMarker from "./InfoMarker";
+    import InfoSurveyMarker from "./InfoSurveyMarker";
     import EventBus from "@/EventBus";
     import {nanoid} from "nanoid";
     import {gmapApi} from 'vue2-google-maps';
@@ -316,7 +325,8 @@
         ],
 
         components: {
-            InfoMarker
+            InfoMarker,
+            InfoSurveyMarker,
         },
 
         data () {
@@ -343,7 +353,8 @@
                 lineArrow: null,
                 curElevation: 0,
                 zoom: 18,
-                curFlagMarker: false,
+                curTempMarkerFlag: false,
+                curSurveyMarkerFlag: false,
                 curSelectedMarker: {},
                 curIndexMarker: 0,
                 curNameMarker: 'unknown',
@@ -498,9 +509,9 @@
                 }
             },
 
-            curFlagMarker: function (newVal, oldVal) {
+            curTempMarkerFlag: function (newVal, oldVal) {
                 if(oldVal) {
-                    console.log('curFlagMarker', oldVal, '->', newVal);
+                    console.log('curTempMarkerFlag', oldVal, '->', newVal);
                     this.$store.commit('setAllTempMarker', false);
                 }
             },
@@ -619,9 +630,9 @@
                 this.$store.state.surveyMarkers[dName][pIndex].pathLines = [];
                 //this.$store.state.surveyMarkers[dName][pIndex].pathLines.push(center);
 
-                this.$store.state.surveyMarkers[dName][pIndex].gap = gap;
-                this.$store.state.surveyMarkers[dName][pIndex].angle = angle;
-                this.$store.state.surveyMarkers[dName][pIndex].dir = dir;
+                // this.$store.state.surveyMarkers[dName][pIndex].gap = gap;
+                // this.$store.state.surveyMarkers[dName][pIndex].angle = angle;
+                // this.$store.state.surveyMarkers[dName][pIndex].dir = dir;
 
                 const max_try_num = 100;
                 for(let i = 0; i < max_try_num; i++) {
@@ -852,7 +863,11 @@
                 this.idUpdateTimer = setTimeout((dName) => {
                     this.$store.state.surveyMarkers[dName][pIndex].color = 'orange';
 
-                    this.updateSurveyPath(dName, pIndex, 20, 0, 1);
+                    let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
+                    let angle = this.$store.state.surveyMarkers[dName][pIndex].angle;
+                    let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
+
+                    this.updateSurveyPath(dName, pIndex, gap, angle, dir);
 
                     this.postEachSurveyMarkerInfo(dName);
 
@@ -1209,10 +1224,14 @@
                 survey.paths = JSON.parse(JSON.stringify(paths));
                 this.blueCoords = JSON.parse(JSON.stringify(paths));
 
+                survey.gap = 20;
+                survey.dir = 1;
+                survey.angle = 0;
+
                 this.$store.state.surveyMarkers.unknown.push(survey);
                 console.log('elevation-confirmAddSurveyMarker', this.$store.state.surveyMarkers);
 
-                this.updateSurveyPath('unknown', this.$store.state.surveyMarkers.unknown.length-1, 20, 90, 1);
+                this.updateSurveyPath('unknown', this.$store.state.surveyMarkers.unknown.length-1, 20, 0, 1);
 
                 this.doBroadcastAddSurveyMarker(JSON.parse(JSON.stringify(survey)));
 
@@ -1269,7 +1288,8 @@
 
                 this.context_flag = true;
 
-                this.curFlagMarker = false;
+                this.curTempMarkerFlag = false;
+                this.curSurveyMarkerFlag = false;
                 //this.$store.commit('setAllTempMarker', false);
 
                 // console.log('addingMarker', e.domEvent);
@@ -1302,21 +1322,22 @@
 
                 console.log('context', this.context);
 
-                this.curFlagMarker = false;
+                this.curTempMarkerFlag = false;
+                this.curSurveyMarkerFlag = false;
                 //this.$store.commit('setAllTempMarker', false);
 
                 this.cancelMarker();
             },
-            updatePosition(e, mIndex, pIndex) {
-                let payload = {};
-                payload.mIndex = mIndex;
-                payload.pIndex = pIndex;
-                payload.lat = e.latLng.lat();
-                payload.lng = e.latLng.lng();
 
-                this.$store.commit('updatePosition', payload);
+            updataSurveyParam(e, dName, pIndex) {
+                if(!this.$store.state.adding) {
+                    console.log('updataSurveyParam', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex]);
 
-                //      this.$forceUpdate();
+                    this.curSelectedMarker = this.$store.state.surveyMarkers[dName][pIndex];
+                    this.curIndexMarker = pIndex;
+                    this.curNameMarker = dName;
+                    this.curSurveyMarkerFlag = true;
+                }
             },
 
             // f_icon(mIndex) {
@@ -1431,13 +1452,13 @@
                             this.curSelectedMarker = this.$store.state.tempMarkers[pName][pIndex];
                             this.curIndexMarker = pIndex;
                             this.curNameMarker = pName;
-                            this.curFlagMarker = true;
+                            this.curTempMarkerFlag = true;
 
                             console.log('curSelectedMarker', pName, pIndex, this.$store.state.tempMarkers[pName][pIndex]);
                         });
                     }
                     else {
-                        this.curFlagMarker = false;
+                        this.curTempMarkerFlag = false;
                     }
 
                     console.log('select', this.$store.state.tempMarkers[pName][pIndex].selected)
@@ -2128,6 +2149,18 @@
                 }
             }, 1000);
 
+            EventBus.$on('do-update-survey-angle-GcsMap', (payload) => {
+                let dName = payload.dName;
+                let pIndex = payload.pIndex;
+                let angle = payload.angle;
+                let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
+                let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
+
+                this.updateSurveyPath(dName, pIndex, gap, angle, dir);
+
+                this.postEachSurveyMarkerInfo(dName);
+            });
+
             EventBus.$on('do-centerCurrentPosition', (positionCenter) => {
                 this.center = positionCenter;
             });
@@ -2444,6 +2477,8 @@
             EventBus.$off('clearPlaneMarker');
             EventBus.$off('clearAllPlaneMarker');
             EventBus.$off('draw-gotoLines');
+
+            EventBus.$off('do-update-survey-angle-GcsMap');
         }
     }
 </script>
