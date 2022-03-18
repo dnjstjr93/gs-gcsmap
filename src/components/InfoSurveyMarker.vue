@@ -9,10 +9,10 @@
         <v-form ref="form" @submit.prevent="submit">
             <v-card tile flat>
                 <v-row align="center" justify="center">
-                    <v-col cols="6">
+                    <v-col cols="8">
                         <v-card flat tile>
                             <v-row align="center" justify="center">
-                                <v-col cols="3">
+                                <v-col cols="2">
                                     <v-combobox
                                             v-model="targetSelect"
                                             :items="targets"
@@ -42,7 +42,7 @@
                                         </template>
                                     </v-combobox>
                                 </v-col>
-                                <v-col cols="3">
+                                <v-col cols="2">
                                     <v-select
                                         class="py-3 pr-2"
                                         v-model="targetSelectIndex"
@@ -57,7 +57,7 @@
                                     >
                                     </v-select>
                                 </v-col>
-                                <v-col cols="3">
+                                <v-col cols="2">
                                     <v-select
                                         class="py-3 pr-2"
                                         :items="['cw', 'ccw']"
@@ -72,7 +72,7 @@
                                     >
                                     </v-select>
                                 </v-col>
-                                <v-col cols="3">
+                                <v-col cols="2">
                                     <v-text-field
                                         label="angle"
                                         v-model="paramAngle"
@@ -86,99 +86,73 @@
                                         @input="changeAngleSurveyPath($event)"
                                     ></v-text-field>
                                 </v-col>
-                            </v-row>
-                            <v-row align="center" justify="center">
-                                <v-col cols="4">
-                                    <v-text-field class="py-1 pl-4"
-                                                  v-model.number="targetLat"
-                                                  color="purple darken-2"
-                                                  label="Latitude"
-                                                  readonly
-                                                  filled
-                                                  dense
-                                                  hide-details
-                                                  outlined
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="4">
-                                    <v-text-field class="py-1 px-0"
-                                                  v-model.number="targetLng"
-                                                  color="blue darken-2"
-                                                  label="Longitude"
-                                                  readonly
-                                                  filled
-                                                  dense
-                                                  hide-details
-                                                  outlined
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="4">
-                                    <v-text-field class="py-1 pr-4"
-                                                  v-model.number="elevation"
-                                                  color="blue darken-2"
-                                                  label="Elevation"
-                                                  readonly
-                                                  filled
-                                                  dense
-                                                  hide-details
-                                                  outlined
-                                    ></v-text-field>
-                                </v-col>
-                            </v-row>
-                        </v-card>
-                    </v-col>
-                    <v-col cols="2" class="text-center">
-                        <v-card flat tile>
-                            <span class="display-0 font-weight-bold">비행고도</span>
-                            <span class="pl-6 display-1 font-weight-light">{{targetAlt}}</span>
-                            <span class="subheading font-weight-light mx-1">m</span>
-                        </v-card>
-                        <v-card flat tile class="pl-2 pt-12">
-                            <v-row align="center" justify="center">
-                                <v-col cols="8">
-                                    <v-slider
-                                            v-model="targetAlt"
-                                            color="amber"
-                                            hint="Altitude"
-                                            min="3"
-                                            max="500"
-                                            thumb-label="always"
-                                            track-fill-color="orange"
-                                            dense
-                                            ticks
-                                            hide-details
-                                    >
-                                        <template v-slot:prepend>
-                                            <v-icon
-                                                    color="primary"
-                                                    @click="decrementAlt"
-                                            >
-                                                mdi-minus
-                                            </v-icon>
-                                        </template>
-
-                                        <template v-slot:append>
-                                            <v-icon
-                                                    color="secondary"
-                                                    @click="incrementAlt"
-                                            >
-                                                mdi-plus
-                                            </v-icon>
-                                        </template>
-                                    </v-slider>
-                                </v-col>
-                                <v-col cols="4">
+                                <v-col cols="2">
                                     <v-text-field
-                                        v-model="targetAlt"
+                                        label="gap"
+                                        v-model="paramGap"
                                         class="mt-0 pt-0"
                                         hide-details
-                                        single-line
                                         type="number"
                                         outlined dense
                                         color="amber"
+                                        min="1"
+                                        max="500"
+                                        @input="changeGapSurveyPath($event)"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="2">
+                                    <v-text-field
+                                        label="비행고도"
+                                        v-model="paramAlt"
+                                        class="mt-0 pt-0"
+                                        hide-details
+                                        type="number"
+                                        outlined dense
+                                        color="amber"
+                                        min="3"
+                                        max="500"
+                                        @input="changeAltSurveyPath($event)"
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
+<!--                            <v-row align="center" justify="center">-->
+<!--                                <v-col cols="4">-->
+<!--                                    <v-text-field class="py-1 pl-4"-->
+<!--                                                  v-model.number="targetLat"-->
+<!--                                                  color="purple darken-2"-->
+<!--                                                  label="Latitude"-->
+<!--                                                  readonly-->
+<!--                                                  filled-->
+<!--                                                  dense-->
+<!--                                                  hide-details-->
+<!--                                                  outlined-->
+<!--                                    ></v-text-field>-->
+<!--                                </v-col>-->
+<!--                                <v-col cols="4">-->
+<!--                                    <v-text-field class="py-1 px-0"-->
+<!--                                                  v-model.number="targetLng"-->
+<!--                                                  color="blue darken-2"-->
+<!--                                                  label="Longitude"-->
+<!--                                                  readonly-->
+<!--                                                  filled-->
+<!--                                                  dense-->
+<!--                                                  hide-details-->
+<!--                                                  outlined-->
+<!--                                    ></v-text-field>-->
+<!--                                </v-col>-->
+<!--                                <v-col cols="4">-->
+<!--                                    <v-text-field class="py-1 pr-4"-->
+<!--                                                  v-model.number="elevation"-->
+<!--                                                  color="blue darken-2"-->
+<!--                                                  label="Elevation"-->
+<!--                                                  readonly-->
+<!--                                                  filled-->
+<!--                                                  dense-->
+<!--                                                  hide-details-->
+<!--                                                  outlined-->
+<!--                                    ></v-text-field>-->
+<!--                                </v-col>-->
+<!--                            </v-row>-->
                         </v-card>
                     </v-col>
                 </v-row>
@@ -250,9 +224,13 @@
 
                 idAngleUpdateTimer: null,
                 idDirUpdateTimer: null,
+                idGapUpdateTimer: null,
+                idAltUpdateTimer: null,
 
                 paramAngle: 0,
                 paramDir: 'cw',
+                paramGap: 10,
+                paramAlt: 20,
 
                 elevation: 0,
                 //form: Object.assign({}, defaultForm),
@@ -445,6 +423,26 @@
         },
 
         methods: {
+            changeAltSurveyPath(alt) {
+                if(this.idAltUpdateTimer !== null) {
+                    clearTimeout(this.idAltUpdateTimer);
+                }
+
+                this.idAltUpdateTimer = setTimeout((dName, pIndex) => {
+                    EventBus.$emit('do-update-survey-alt-GcsMap', {dName: dName, pIndex: pIndex, alt: parseInt(alt)});
+                }, 500, this.markerName, this.markerIndex);
+            },
+
+            changeGapSurveyPath(gap) {
+                if(this.idGapUpdateTimer !== null) {
+                    clearTimeout(this.idGapUpdateTimer);
+                }
+
+                this.idGapUpdateTimer = setTimeout((dName, pIndex) => {
+                    EventBus.$emit('do-update-survey-gap-GcsMap', {dName: dName, pIndex: pIndex, gap: parseInt(gap)});
+                }, 500, this.markerName, this.markerIndex);
+            },
+
             changeAngleSurveyPath(angle) {
                 if(this.idAngleUpdateTimer !== null) {
                     clearTimeout(this.idAngleUpdateTimer);
@@ -701,6 +699,8 @@
 
             this.paramAngle = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].angle;
             this.paramDir = (this.$store.state.surveyMarkers[this.markerName][this.markerIndex].dir === 1) ? 'cw' : 'ccw';
+            this.paramGap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap;
+            this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt;
 
             this.elevation = this.marker.elevation;
 
