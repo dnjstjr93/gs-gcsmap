@@ -9,10 +9,10 @@
         <v-form ref="form" @submit.prevent="submit">
             <v-card tile flat>
                 <v-row align="center" justify="center">
-                    <v-col cols="4">
+                    <v-col cols="6">
                         <v-card flat tile>
                             <v-row align="center" justify="center">
-                                <v-col cols="6">
+                                <v-col cols="3">
                                     <v-combobox
                                             v-model="targetSelect"
                                             :items="targets"
@@ -54,6 +54,21 @@
                                         dense
                                         hide-details
                                         :disabled="disableTargetSelectIndex"
+                                    >
+                                    </v-select>
+                                </v-col>
+                                <v-col cols="3">
+                                    <v-select
+                                        class="py-3 pr-2"
+                                        :items="['cw', 'ccw']"
+                                        v-model="paramDir"
+                                        color="black"
+                                        label="direction"
+                                        required
+                                        outlined
+                                        dense
+                                        hide-details
+                                        @change="changeDirSurveyPath($event)"
                                     >
                                     </v-select>
                                 </v-col>
@@ -233,8 +248,12 @@
                 targetRadius: 10,
                 targetTurningSpeed: 10,
 
-                idUpdateTimer: null,
+                idAngleUpdateTimer: null,
+                idDirUpdateTimer: null,
+
                 paramAngle: 0,
+                paramDir: 'cw',
+
                 elevation: 0,
                 //form: Object.assign({}, defaultForm),
                 rules: {
@@ -427,12 +446,27 @@
 
         methods: {
             changeAngleSurveyPath(angle) {
-                if(this.idUpdateTimer !== null) {
-                    clearTimeout(this.idUpdateTimer);
+                if(this.idAngleUpdateTimer !== null) {
+                    clearTimeout(this.idAngleUpdateTimer);
                 }
 
-                this.idUpdateTimer = setTimeout((dName, pIndex) => {
+                this.idAngleUpdateTimer = setTimeout((dName, pIndex) => {
                     EventBus.$emit('do-update-survey-angle-GcsMap', {dName: dName, pIndex: pIndex, angle: parseInt(angle)});
+                }, 500, this.markerName, this.markerIndex);
+            },
+
+            changeDirSurveyPath(strDir) {
+                if(this.idDirUpdateTimer !== null) {
+                    clearTimeout(this.idDirUpdateTimer);
+                }
+
+                let dir = 1;
+                if(strDir === 'ccw') {
+                    dir = -1;
+                }
+
+                this.idDirUpdateTimer = setTimeout((dName, pIndex) => {
+                    EventBus.$emit('do-update-survey-dir-GcsMap', {dName: dName, pIndex: pIndex, dir: parseInt(dir)});
                 }, 500, this.markerName, this.markerIndex);
             },
 
@@ -666,6 +700,7 @@
 
 
             this.paramAngle = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].angle;
+            this.paramDir = (this.$store.state.surveyMarkers[this.markerName][this.markerIndex].dir === 1) ? 'cw' : 'ccw';
 
             this.elevation = this.marker.elevation;
 

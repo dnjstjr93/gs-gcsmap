@@ -2171,6 +2171,18 @@
                 this.postEachSurveyMarkerInfo(dName);
             });
 
+            EventBus.$on('do-update-survey-dir-GcsMap', (payload) => {
+                let dName = payload.dName;
+                let pIndex = payload.pIndex;
+                let angle = this.$store.state.surveyMarkers[dName][pIndex].angle;
+                let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
+                let dir = payload.dir;
+
+                this.updateSurveyPath(dName, pIndex, gap, angle, dir);
+
+                this.postEachSurveyMarkerInfo(dName);
+            });
+
             EventBus.$on('do-centerCurrentPosition', (positionCenter) => {
                 this.center = positionCenter;
             });
@@ -2489,6 +2501,7 @@
             EventBus.$off('draw-gotoLines');
 
             EventBus.$off('do-update-survey-angle-GcsMap');
+            EventBus.$off('do-update-survey-dir-GcsMap');
         }
     }
 </script>
