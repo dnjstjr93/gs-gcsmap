@@ -126,6 +126,28 @@
                                     :path.sync="survey.pathLines"
                                     :options="{strokeColor: survey.color, strokeOpacity: 0.9, strokeWeight: 3, zIndex: 1}"
                                 />
+                                <div v-for="(pos, pIndex) in survey.pathLines" :key="'survey'+pIndex">
+                                    <GmapMarker
+                                        :position="{lat:pos.lat, lng:pos.lng}"
+                                        :icon="{
+                                            path: $store.state.iconSource.icon[4],
+                                            fillColor: 'grey',
+                                            fillOpacity: 0.4,
+                                            strokeWeight: 0.7,
+                                            strokeColor: 'black',
+                                            rotation: 0,
+                                            scale: 0.05,
+                                            anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
+                                            labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                        }"
+                                        :label="{
+                                            text: String(pIndex),
+                                            color: 'white',
+                                            fontSize: '15px',
+                                            fontWeight: 'bold',
+                                        }"
+                                    />
+                                </div>
                             </div>
 
 
@@ -297,6 +319,7 @@
     import {nanoid} from "nanoid";
     import {gmapApi} from 'vue2-google-maps';
     import axios from "axios";
+    import {faMapMarkerAlt} from "@fortawesome/free-solid-svg-icons";
 
     var curElevationVal = 0;
 
@@ -737,6 +760,40 @@
                             }
                         }
                     }
+                    else {
+                        let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), angle);
+                        let intersectPointsUp = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                        if (intersectPointsUp !== null) {
+                            checkCount = 0;
+
+                            let dist = 1000000;
+                            for(let p = 0; p < intersectPointsUp.length; p++) {
+
+                                let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPointsUp[p].x, 2) + Math.pow(prevPoint.lon - intersectPointsUp[p].y, 2));
+                                if(dist > temp) {
+                                    dist = temp;
+
+                                    intersectPoint = {x: intersectPointsUp[p].x, y: intersectPointsUp[p].y};
+                                }
+                            }
+
+                            if (intersectPoint !== null) {
+                                if(i%2 === 1) {
+                                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1, 0, {
+                                        lat: intersectPoint.x,
+                                        lng: intersectPoint.y
+                                    });
+                                }
+                                else {
+                                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                        lat: intersectPoint.x,
+                                        lng: intersectPoint.y
+                                    });
+                                }
+                            }
+                        }
+                    }
                 }
 
                 for(let i = 1; i < max_try_num; i++) {
@@ -839,6 +896,40 @@
                                     lat: intersectPoint.x,
                                     lng: intersectPoint.y
                                 });
+                            }
+                        }
+                    }
+                    else {
+                        let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), angle);
+                        let intersectPointsUp = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                        if (intersectPointsUp !== null) {
+                            checkCount = 0;
+
+                            let dist = 1000000;
+                            for(let p = 0; p < intersectPointsUp.length; p++) {
+
+                                let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPointsUp[p].x, 2) + Math.pow(prevPoint.lon - intersectPointsUp[p].y, 2));
+                                if(dist > temp) {
+                                    dist = temp;
+
+                                    intersectPoint = {x: intersectPointsUp[p].x, y: intersectPointsUp[p].y};
+                                }
+                            }
+
+                            if (intersectPoint !== null) {
+                                if(i%2 === 0) {
+                                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(1, 0, {
+                                        lat: intersectPoint.x,
+                                        lng: intersectPoint.y
+                                    });
+                                }
+                                else {
+                                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                        lat: intersectPoint.x,
+                                        lng: intersectPoint.y
+                                    });
+                                }
                             }
                         }
                     }
@@ -1208,8 +1299,10 @@
                 survey.type = 'Survey';
                 survey.color = 'orange';
                 survey.m_icon.fillColor = 'grey';
+                survey.m_icon.scale = 0.04;
                 survey.m_label.fontSize = '14px';
                 survey.m_label.text = 'T:' + String(survey.alt);
+                survey.m_label.labelOrigin = {x: 0, y: 0};
                 survey.type = 0;
                 survey.options = {
                     strokeColor: "#0000FF",
