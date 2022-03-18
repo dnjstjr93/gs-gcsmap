@@ -189,6 +189,7 @@
 
 <script>
     import EventBus from "@/EventBus";
+    import axios from "axios";
 
     export default {
         name: "InfoMarker",
@@ -438,18 +439,116 @@
             deleteMarker() {
                 console.log(this.markerName, this.markerIndex, this.marker);
 
-                let payload = {};
-                payload.pName = this.markerName;
-                payload.pIndex = this.markerIndex;
+                let watchingPayload = {};
+                watchingPayload.payload = {
+                    dName: this.markerName,
+                    pIndex: this.markerIndex,
+                };
 
                 if(this.markerName === 'unknown') {
-                    this.$store.commit('removeMarker', payload);
+                    this.$store.state.surveyMarkers[this.markerName].splice(this.markerIndex, 1);
+
+                    watchingPayload.broadcastMission = 'removeSurveyMarker';
+
+                    axios({
+                        validateStatus: function (status) {
+                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            return status < 500;
+                        },
+                        method: 'post',
+                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + this.markerName,
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'SVue',
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                        data: {
+                            'm2m:cin': {
+                                con: this.$store.state.surveyMarkers[this.markerName]
+                            }
+                        }
+                    }).then(
+                        function (res) {
+                            console.log('removeMarkerDroneInfo-axios', res.data);
+                        }
+                    ).catch(
+                        function (err) {
+                            console.log(err.message);
+                        }
+                    );
                 }
                 else {
-                    this.$store.commit('deleteMarker', payload);
+                    let oldObj = JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[this.markerName][this.markerIndex]));
+                    this.$store.state.surveyMarkers[this.markerName].splice(this.markerIndex, 1);
+                    this.$store.state.surveyMarkers.unknown.push(oldObj);
+
+                    watchingPayload.broadcastMission = 'deleteSurveyMarker';
+
+                    axios({
+                        validateStatus: function (status) {
+                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            return status < 500;
+                        },
+                        method: 'post',
+                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + this.markerName,
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'SVue',
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                        data: {
+                            'm2m:cin': {
+                                con: this.$store.state.surveyMarkers[this.markerName]
+                            }
+                        }
+                    }).then(
+                        function (res) {
+                            console.log('deleteMarkerDroneInfo-axios', res.data);
+                        }
+                    ).catch(
+                        function (err) {
+                            console.log(err.message);
+                        }
+                    );
+
+                    axios({
+                        validateStatus: function (status) {
+                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            return status < 500;
+                        },
+                        method: 'post',
+                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + 'unknown',
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'SVue',
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                        data: {
+                            'm2m:cin': {
+                                con: this.$store.state.surveyMarkers.unknown
+                            }
+                        }
+                    }).then(
+                        function (res) {
+                            console.log('deleteMarkerDroneInfo-axios', res.data);
+                        }
+                    ).catch(
+                        function (err) {
+                            console.log(err.message);
+                        }
+                    );
+
+                    // let temp = JSON.parse(JSON.stringify(state.tempMarkers));
+                    // state.tempMarkers = null;
+                    // state.tempMarkers = {};
+                    // state.tempMarkers = JSON.parse(JSON.stringify(temp));
+                    // temp = null;
                 }
 
-                EventBus.$emit('doBroadcastDeleteMaker', payload);
+                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+
+                this.$store.state.didIPublish = true;
 
                 this.snackbar = true;
 

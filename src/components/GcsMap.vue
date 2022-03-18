@@ -1924,6 +1924,16 @@
                                 this.$store.commit('deleteMarker', watchingPayload.payload);
                             }
                         }
+
+                        else if (watchingPayload.broadcastMission === 'removeSurveyMarker') {
+                            this.$store.state.surveyMarkers[watchingPayload.payload.dName].splice(watchingPayload.payload.pIndex, 1);
+                        }
+
+                        else if (watchingPayload.broadcastMission === 'deleteSurveyMarker') {
+                            let oldObj = JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[watchingPayload.payload.dName][watchingPayload.payload.pIndex]));
+                            this.$store.state.surveyMarkers[watchingPayload.payload.dName].splice(watchingPayload.payload.pIndex, 1);
+                            this.$store.state.surveyMarkers.unknown.push(oldObj);
+                        }
                     }
                     catch (e) {
                         console.log('GcsMap-onMessageBroadcast-watchingMission', e.message);
