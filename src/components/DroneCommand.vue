@@ -22,34 +22,13 @@
 <!--                    <v-card-title primary-title class="headline">-->
 <!--                        {{command.title}}-->
 <!--                    </v-card-title>-->
-                    <v-card-subtitle>
+                    <v-card-subtitle class="pl-1 pa-0">
                         {{command.text}}
                     </v-card-subtitle>
-                    <v-card style="opacity: 0.86" class="mx-4 my-2 pa-0">
-                        <v-row class="mb-6" no-gutters align="center">
-                            <v-col cols="2">
-                                <v-card class="pa-2" outlined tile>
-                                    <v-row>
-                                        <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
-                                            <div v-if="drone.selected && drone.targeted">
-                                                <v-chip
-                                                        label outlined
-                                                        class="px-4 py-5 ma-1"
-                                                        v-if="drone"
-                                                        color="primary"
-                                                >
-                                                    <v-icon left>
-                                                        mdi-airplane
-                                                    </v-icon> {{i}}
-                                                </v-chip>
-                                            </div>
-                                        </div>
-                                    </v-row>
-                                </v-card>
-                            </v-col>
-                            <v-col cols="9">
-                                <v-card class="pa-2" outlined tile>
-                                    <v-card class="mx-auto">
+                    <v-card style="opacity: 0.86" class="pa-0">
+                        <v-row class="mb-2" no-gutters align="center">
+                            <v-col cols="10">
+                                <v-card>
 <!--                                        <v-toolbar flat dense-->
 <!--                                            v-if="((command.title === commands[0].title) || (command.title === commands[2].title) || (command.title === commands[3].title))"-->
 <!--                                        >-->
@@ -59,155 +38,140 @@
 <!--                                                <span class="subheading" v-else-if="command.title === commands[3].title">비행 고도 설정</span>-->
 <!--                                            </v-toolbar-title>-->
 <!--                                        </v-toolbar>-->
-                                        <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'mode'+dIndex">
-                                            <div v-if="d.selected && d.targeted">
-                                                <v-select
-                                                        dense hide-details outlined
-                                                        v-if="command.title === commands[0].title" :items="$store.state[d.type + '_mode_items']"
-                                                        :label="d.name+' 모드: '"
-                                                        v-model="targetModeSelection[d.name]"
-                                                        class="ml-1 mt-4 mr-1"
-                                                ></v-select>
-                                            </div>
-                                        </div>
-                                        <v-card-text v-if="command.title === commands[2].title">
-<!--                                            <v-row class="" justify="space-between">-->
-<!--                                                <v-col cols="4">-->
-<!--                                                    <v-slider v-model="target_alt" :color="color" track-color="grey" always-dirty min="3" max="100" vertical thumb-label>-->
-<!--                                                        <template v-slot:prepend>-->
-<!--                                                            <v-icon :color="color" @click="decrement">-->
-<!--                                                                mdi-minus-->
-<!--                                                            </v-icon>-->
-<!--                                                        </template>-->
-<!--                                                        <template v-slot:append>-->
-<!--                                                            <v-icon :color="color" @click="increment">-->
-<!--                                                                mdi-plus-->
-<!--                                                            </v-icon>-->
-<!--                                                        </template>-->
-<!--                                                    </v-slider>-->
-<!--                                                </v-col>-->
-<!--                                                <v-col cols="8" class="text-left">-->
-<!--                                                    <span class="display-2 font-weight-light" v-text="target_alt"></span>-->
-<!--                                                    <span class="subheading font-weight-light ml-1">미터</span>-->
-<!--                                                </v-col>-->
-<!--                                            </v-row>-->
-
-                                            <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'takeoff'+dIndex">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-row no-gutters>
-                                                        <v-col cols="12">
-                                                            <v-subheader>
-                                                                {{ d.name }} 이륙 고도
-                                                            </v-subheader>
-                                                        </v-col>
-                                                        <v-col cols="7">
-                                                            <v-slider
-                                                                v-model="targetTakeoffAlt[d.name]"
-                                                                class="mx-2 my-3 align-center"
-                                                                :max="500"
-                                                                :min="3"
-                                                                hide-details
-                                                            >
-                                                                <template v-slot:append>
-                                                                    <v-text-field
-                                                                        v-model="targetTakeoffAlt[d.name]"
-                                                                        class="mt-0 pt-0"
-                                                                        hide-details
-                                                                        single-line
-                                                                        type="number"
-                                                                        style="width: 60px"
-                                                                    ></v-text-field>
-                                                                </template>
-                                                            </v-slider>
-                                                        </v-col>
-                                                        <v-col cols="5">
-                                                            <v-text-field
-                                                                label="시동 후 지연 시간(초): "
-                                                                class="mx-4 my-3"
-                                                                outlined dense hide-details
-                                                                v-model="takeoffDelay[d.name]"
-                                                                type="number"
-                                                                min="6" max="20"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                    </v-row>
-                                                </div>
-                                            </div>
-                                        </v-card-text>
-                                        <v-card-text v-if="command.title === commands[3].title">
-                                            <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'gotoalt'+dIndex">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-row no-gutters>
-                                                        <v-col cols="12">
-                                                            <v-subheader>
-                                                                {{ d.name }} 비행 고도
-                                                            </v-subheader>
-                                                        </v-col>
-                                                        <v-col cols="12">
-                                                            <v-slider
-                                                                v-model="targetAlt[d.name]"
-                                                                class="mx-2 my-3 align-center"
-                                                                :max="500"
-                                                                :min="3"
-                                                                hide-details
-                                                            >
-                                                                <template v-slot:append>
-                                                                    <v-text-field
-                                                                        v-model="targetAlt[d.name]"
-                                                                        class="mt-0 pt-0"
-                                                                        hide-details
-                                                                        label="고도(m)"
-                                                                        type="number"
-                                                                        style="width: 60px"
-                                                                    ></v-text-field>
-                                                                </template>
-                                                            </v-slider>
-                                                        </v-col>
-                                                    </v-row>
-                                                </div>
-                                            </div>
-                                        </v-card-text>
-                                        <v-card tile flat v-if="(command.title === commands[4].title)">
-                                            <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'goto'+dIndex">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-radio-group
-                                                        row hide-details
-                                                        v-model="gotoType[d.name]"
-                                                        :label="d.name + ' 이동 설정'"
-                                                    >
-                                                        <v-radio
-                                                            color="red"
-                                                            label="고도 먼저"
-                                                            value="alt_first"
-                                                        ></v-radio>
-                                                        <v-radio
-                                                            color="indigo"
-                                                            label="바로 이동"
-                                                            value="alt_with"
-                                                        ></v-radio>
-                                                        <v-row>
+                                    <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'mode'+dIndex">
+                                        <div v-if="d.selected && d.targeted">
+                                            <v-row no-gutters align="center">
+                                                <v-col cols="2">
+                                                    <v-card text outlined tile>
+                                                        <v-chip
+                                                            label outlined
+                                                            v-if="d"
+                                                            color="primary"
+                                                            class="ml-1"
+                                                        >
+                                                            <v-icon left>
+                                                                mdi-airplane
+                                                            </v-icon> {{dIndex}}
+                                                        </v-chip>
+                                                    </v-card>
+                                                </v-col>
+                                                <v-col cols="10">
+                                                    <v-card v-if="command.title === '모드'">
+                                                        <v-select
+                                                            dense hide-details outlined
+                                                            v-if="command.title === '모드'" :items="$store.state[d.type + '_mode_items']"
+                                                            :label="d.name+' 모드: '"
+                                                            v-model="targetModeSelection[d.name]"
+                                                            class="pa-1"
+                                                        ></v-select>
+                                                    </v-card>
+                                                    <v-card v-if="command.title === '이륙'">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="6">
+<!--                                                                    <v-slider-->
+<!--                                                                        v-model="targetTakeoffAlt[d.name]"-->
+<!--                                                                        class="mx-2 my-3 align-center"-->
+<!--                                                                        :max="500"-->
+<!--                                                                        :min="3"-->
+<!--                                                                        hide-details-->
+<!--                                                                    >-->
+<!--                                                                        <template v-slot:append>-->
+<!--                                                                            <v-text-field-->
+<!--                                                                                v-model="targetTakeoffAlt[d.name]"-->
+<!--                                                                                class="mt-0 pt-0"-->
+<!--                                                                                hide-details-->
+<!--                                                                                single-line-->
+<!--                                                                                type="number"-->
+<!--                                                                                style="width: 60px"-->
+<!--                                                                            ></v-text-field>-->
+<!--                                                                        </template>-->
+<!--                                                                    </v-slider>-->
+                                                                <v-text-field
+                                                                    label="이륙고도"
+                                                                    hide-details dense outlined
+                                                                    v-model="targetTakeoffAlt[d.name]"
+                                                                    type="number"
+                                                                    class="pa-1"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="6">
+                                                                <v-text-field
+                                                                    label="시동 후 지연 시간(초): "
+                                                                    outlined dense hide-details
+                                                                    v-model="takeoffDelay[d.name]"
+                                                                    type="number"
+                                                                    min="6" max="20"
+                                                                    class="pa-1"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-card>
+                                                    <v-card v-if="command.title === '고도'">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="12">
+                                                                <v-text-field
+                                                                    v-model="targetAlt[d.name]"
+                                                                    dense outlined hide-details
+                                                                    label="비행고도(m)"
+                                                                    type="number"
+                                                                    class="pa-1"
+                                                                ></v-text-field>
+<!--                                                                <v-slider-->
+<!--                                                                    v-model="targetAlt[d.name]"-->
+<!--                                                                    class="mx-2 my-3 align-center"-->
+<!--                                                                    :max="500"-->
+<!--                                                                    :min="3"-->
+<!--                                                                    hide-details-->
+<!--                                                                >-->
+<!--                                                                    <template v-slot:append>-->
+<!--                                                                        <v-text-field-->
+<!--                                                                            v-model="targetAlt[d.name]"-->
+<!--                                                                            class="mt-0 pt-0"-->
+<!--                                                                            hide-details-->
+<!--                                                                            label="고도(m)"-->
+<!--                                                                            type="number"-->
+<!--                                                                            style="width: 60px"-->
+<!--                                                                        ></v-text-field>-->
+<!--                                                                    </template>-->
+<!--                                                                </v-slider>-->
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '이동')">
+                                                        <v-row no-gutters>
                                                             <v-col cols="4">
                                                                 <v-select
-                                                                        dense outlined hide-details
-                                                                        :items="position_selections_items[d.name]" label="Goto positions"
-                                                                        v-model="position_selections[d.name]"
-                                                                        @change="selectedPosition($event, d)"
-                                                                        class="mt-4"
+                                                                    @change="changeGotoType($event, d.name)"
+                                                                    dense outlined hide-details
+                                                                    :items="['고도먼저', '바로이동']"
+                                                                    label="이동설정"
+                                                                    v-model="gotoType[d.name]"
+                                                                    class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
+<!--                                                            <v-col cols="2">-->
+<!--                                                                <v-select-->
+<!--                                                                    @change="selectedPosition($event, d)"-->
+<!--                                                                    dense outlined hide-details-->
+<!--                                                                    :items="position_selections_items[d.name]"-->
+<!--                                                                    label="Goto positions"-->
+<!--                                                                    v-model="position_selections[d.name]"-->
+<!--                                                                    class="px-1"-->
+<!--                                                                ></v-select>-->
+<!--                                                            </v-col>-->
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="지형높이(m)"
-                                                                    class="mt-4 text-right"
+                                                                    class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="position_selections_elevation[d.name]"
+                                                                    :value="parseFloat(position_selections_elevation[d.name]).toFixed(1)"
                                                                     readonly
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="이동고도(m)"
-                                                                    class="mt-4 text-right"
+                                                                    class="pa-1 text-right"
                                                                     outlined dense hide-details
                                                                     v-model="targetAlt[d.name]"
                                                                     type="number"
@@ -216,7 +180,7 @@
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="이동속도(m/s)"
-                                                                    class="mt-4 text-right"
+                                                                    class="pa-1 text-right"
                                                                     outlined dense hide-details
                                                                     v-model="targetSpeed[d.name]"
                                                                     type="number"
@@ -225,7 +189,7 @@
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="지점거리(m)"
-                                                                    class="mt-4 mr-2 text-right"
+                                                                    class="pa-1 text-right"
                                                                     outlined dense hide-details
                                                                     :value="isNaN(Math.ceil($store.state.distanceTarget[d.name]))?0:Math.ceil($store.state.distanceTarget[d.name])"
                                                                     type="number"
@@ -233,42 +197,32 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                         </v-row>
-                                                    </v-radio-group>
-                                                </div>
-                                            </div>
-                                        </v-card>
-                                        <v-card tile flat v-if="(command.title === commands[5].title)">
-                                            <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'goto'+dIndex">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-radio-group
-                                                        row hide-details
-                                                        v-model="circleType[d.name]"
-                                                        :label="d.name + ' 선회 방향'"
-                                                    >
-                                                        <v-radio
-                                                            color="red"
-                                                            label="시계 방향"
-                                                            value="cw"
-                                                        ></v-radio>
-                                                        <v-radio
-                                                            color="indigo"
-                                                            label="반시계 방향"
-                                                            value="ccw"
-                                                        ></v-radio>
-                                                        <v-row>
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '선회')">
+                                                        <v-row no-gutters>
                                                             <v-col cols="4">
                                                                 <v-select
-                                                                        dense outlined hide-details
-                                                                        :items="position_selections_items[d.name]" label="Center positions"
-                                                                        v-model="position_selections[d.name]"
-                                                                        @change="selectedPosition($event, d)"
-                                                                        class="ml-1 mt-4 mr-1"
+                                                                    @change="changeCircleType($event, d.name)"
+                                                                    dense outlined hide-details
+                                                                    :items="['시계방향', '반시계방향']"
+                                                                    label="선회방향"
+                                                                    v-model="circleType[d.name]"
+                                                                    class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
+<!--                                                            <v-col cols="4">-->
+<!--                                                                <v-select-->
+<!--                                                                    dense outlined hide-details-->
+<!--                                                                    :items="position_selections_items[d.name]" label="Center positions"-->
+<!--                                                                    v-model="position_selections[d.name]"-->
+<!--                                                                    @change="selectedPosition($event, d)"-->
+<!--                                                                    class="px-1"-->
+<!--                                                                ></v-select>-->
+<!--                                                            </v-col>-->
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="지형높이(m)"
-                                                                    class="mt-4 text-right"
+                                                                    class="pa-1 text-right"
                                                                     outlined dense hide-details
                                                                     :value="position_selections_elevation[d.name]"
                                                                     readonly
@@ -277,7 +231,7 @@
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="선회고도(m)"
-                                                                    class="mt-4 text-right"
+                                                                    class="pa-1 text-right"
                                                                     outlined dense hide-details
                                                                     v-model="targetAlt[d.name]"
                                                                     type="number"
@@ -286,7 +240,7 @@
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="반지름(m)"
-                                                                    class="mt-4 mr-2 text-right"
+                                                                    class="pa-1 text-right"
                                                                     outlined dense hide-details
                                                                     v-model="targetRadius[d.name]"
                                                                     type="number"
@@ -298,436 +252,475 @@
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="선회속도(m/s)"
-                                                                    class="mt-4 text-right"
+                                                                    class="pa-1 text-right"
                                                                     outlined dense hide-details
                                                                     v-model="targetTurningSpeed[d.name]"
                                                                     type="number"
                                                                 ></v-text-field>
                                                             </v-col>
                                                         </v-row>
-                                                    </v-radio-group>
-                                                </div>
-                                            </div>
-                                        </v-card>
-                                        <v-card tile flat v-if="(command.title === commands[6].title)">
-                                            <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'speed'+dIndex">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-slider
-                                                        v-model="targetSpeed[d.name]"
-                                                        class="align-center"
-                                                        :max="20"
-                                                        :min="1"
-                                                        hide-details :label="d.name+' 속도: '"
-                                                    >
-                                                        <template v-slot:append>
-                                                            <v-text-field
-                                                                v-model="targetSpeed[d.name]"
-                                                                class="mt-0 pt-0"
-                                                                hide-details
-                                                                label="m/s"
-                                                                type="number"
-                                                                style="width: 60px"
-                                                            ></v-text-field>
-                                                        </template>
-                                                    </v-slider>
-                                                </div>
-                                            </div>
-                                        </v-card>
-                                        <v-card tile flat v-if="(command.title === commands[9].title)">
-                                            <div v-for="(d, dName) in $store.state.drone_infos" :key="'rtl'+dName">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-row no-gutters>
-                                                        <v-col cols="12">
-                                                            <v-subheader>
-                                                                {{ d.name }} 귀환 속도
-                                                            </v-subheader>
-                                                        </v-col>
-                                                        <v-col cols="12">
-                                                            <v-slider
-                                                                v-model="rtlSpeed[d.name]"
-                                                                class="mx-2 my-3 align-center"
-                                                                :max="20"
-                                                                :min="5"
-                                                                hide-details
-                                                            >
-                                                                <template v-slot:append>
-                                                                    <v-text-field
-                                                                        v-model="rtlSpeed[d.name]"
-                                                                        class="mt-0 pt-0"
-                                                                        hide-details
-                                                                        type="number"
-                                                                        label="m/s"
-                                                                    ></v-text-field>
-                                                                </template>
-                                                            </v-slider>
-                                                        </v-col>
-                                                    </v-row>
-                                                </div>
-                                            </div>
-                                        </v-card>
-                                        <v-card tile flat v-if="(command.title === commands[10].title)">
-                                            <div v-for="(d, dName) in $store.state.drone_infos" :key="'control'+dName">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-row no-gutters>
-                                                        <v-col cols="12">
-                                                            <v-subheader>{{ d.name }} 임무제어(PWM):</v-subheader>
-                                                        </v-col>
-                                                        <v-col cols="3">
-                                                            <v-text-field
-                                                                label="CH9"
-                                                                class="mx-2 pt-0"
-                                                                outlined dense
-                                                                v-model="pwms.ch9[d.name]"
-                                                                type="number"
-                                                                min="1100" max="1900"
-                                                                hint="1100 ~ 1900"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                        <v-col cols="3">
-                                                            <v-text-field
-                                                                label="CH10"
-                                                                class="mx-2 pt-0"
-                                                                outlined dense
-                                                                v-model="pwms.ch10[d.name]"
-                                                                type="number"
-                                                                min="1100" max="1900"
-                                                                hint="1100 ~ 1900"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                        <v-col cols="3">
-                                                            <v-text-field
-                                                                label="CH11"
-                                                                class="mx-2 pt-0"
-                                                                outlined dense
-                                                                v-model="pwms.ch11[d.name]"
-                                                                type="number"
-                                                                min="1100" max="1900"
-                                                                hint="1100 ~ 1900"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                        <v-col cols="3">
-                                                            <v-text-field
-                                                                label="CH12"
-                                                                class="mx-2 pt-0"
-                                                                outlined dense
-                                                                v-model="pwms.ch12[d.name]"
-                                                                type="number"
-                                                                min="1100" max="1900"
-                                                                hint="1100 ~ 1900"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                    </v-row>
-                                                </div>
-                                            </div>
-                                        </v-card>
-                                        <v-card tile flat v-if="(command.title === commands[11].title)">
-                                            <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'autoIndex'+dIndex">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-row no-gutters>
-                                                        <v-col cols="12">
-                                                            <v-subheader>{{ d.name }} 자동:
-                                                                <v-spacer></v-spacer>
-                                                                <v-switch
-                                                                    v-show="d.curArmStatus==='DISARMED'"
-                                                                    v-model="takeoffInAuto"
-                                                                    :label="`takeoffInAuto: ${takeoffInAuto.toString()}`"
-                                                                ></v-switch>
-                                                            </v-subheader>
-
-                                                        </v-col>
-                                                        <v-col cols="3">
-                                                            <v-select
-                                                                dense outlined :items="Object.keys(position_selections_items[d.name])"
-                                                                label="Start Index" v-model="autoStartIndex[d.name]"
-                                                                class="mx-2"
-                                                                hide-details
-                                                            ></v-select>
-                                                        </v-col>
-                                                        <v-col cols="3">
-                                                            <v-select
-                                                                dense outlined :items="Object.keys(position_selections_items[d.name])"
-                                                                label="End Index" v-model="autoEndIndex[d.name]"
-                                                                hide-details
-                                                                class="mx-2"
-                                                            ></v-select>
-                                                        </v-col>
-                                                        <v-col cols="3">
-                                                            <v-text-field
-                                                                label="Speed"
-                                                                class="mx-2 pt-0"
-                                                                outlined dense hide-details
-                                                                v-model="autoSpeed[d.name]"
-                                                                type="number"
-                                                                min="1"
-                                                                max="15"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                        <v-col cols="3">
-                                                            <v-text-field
-                                                                label="Delay"
-                                                                class="mx-2 pt-0"
-                                                                outlined dense hide-details
-                                                                v-model="autoDelay[d.name]"
-                                                                type="number"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                    </v-row>
-                                                </div>
-                                            </div>
-                                        </v-card>
-                                        <v-card tile flat v-if="(command.title === commands[13].title)">
-                                            <div v-for="(d, dName) in $store.state.drone_infos" :key="'params'+dName">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-row no-gutters>
-                                                        <v-col cols="12">
-                                                            <v-subheader>{{ d.name }} 파라미터 설정:</v-subheader>
-                                                        </v-col>
-                                                        <v-col cols="2">
-                                                            <v-select
-                                                                    dense outlined :items="items_wp_yaw_behavior"
-                                                                    label="YAW_BEHAVIOR" v-model="params.wpYawBehavior[d.name]"
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '패턴')">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="Index"
+                                                                    class="text-right pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="targetSurveyMarkerIndex[d.name]"
+                                                                    type="number"
+                                                                    readonly
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="비행고도(m)"
+                                                                    class="text-right pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="targetAlt[d.name]"
+                                                                    type="number"
+                                                                    hint="3 ~ 2000 m"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="비행속도(m/s)"
+                                                                    class="text-right pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="targetSpeed[d.name]"
+                                                                    type="number"
+                                                                    hint="1 ~ 30 m/s"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="지점대기(sec)"
+                                                                    class="text-right pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="targetStayTime[d.name]"
+                                                                    type="number"
+                                                                    min="0" max="60"
+                                                                    hint="0 ~ 60초"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '속도')">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="12">
+                                                                <v-text-field
+                                                                    v-model="targetSpeed[d.name]"
+                                                                    dense outlined hide-details
+                                                                    label="비행속도(m/s)"
+                                                                    type="number"
+                                                                    class="pa-1"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+<!--                                                        <v-slider-->
+<!--                                                            v-model="targetSpeed[d.name]"-->
+<!--                                                            class="align-center"-->
+<!--                                                            :max="20"-->
+<!--                                                            :min="1"-->
+<!--                                                            hide-details :label="d.name+' 속도: '"-->
+<!--                                                        >-->
+<!--                                                            <template v-slot:append>-->
+<!--                                                                <v-text-field-->
+<!--                                                                    v-model="targetSpeed[d.name]"-->
+<!--                                                                    class="mt-0 pt-0"-->
+<!--                                                                    hide-details-->
+<!--                                                                    label="m/s"-->
+<!--                                                                    type="number"-->
+<!--                                                                    style="width: 60px"-->
+<!--                                                                ></v-text-field>-->
+<!--                                                            </template>-->
+<!--                                                        </v-slider>-->
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '귀환')">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="12">
+                                                                <v-text-field
+                                                                    v-model="rtlSpeed[d.name]"
+                                                                    dense outlined hide-details
+                                                                    label="귀환속도(m/s)"
+                                                                    type="number"
+                                                                    class="pa-1"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+<!--                                                        <v-row no-gutters>-->
+<!--                                                            <v-col cols="12">-->
+<!--                                                                <v-subheader>-->
+<!--                                                                    {{ d.name }} 귀환 속도-->
+<!--                                                                </v-subheader>-->
+<!--                                                            </v-col>-->
+<!--                                                            <v-col cols="12">-->
+<!--                                                                <v-slider-->
+<!--                                                                    v-model="rtlSpeed[d.name]"-->
+<!--                                                                    class="mx-2 my-3 align-center"-->
+<!--                                                                    :max="20"-->
+<!--                                                                    :min="5"-->
+<!--                                                                    hide-details-->
+<!--                                                                >-->
+<!--                                                                    <template v-slot:append>-->
+<!--                                                                        <v-text-field-->
+<!--                                                                            v-model="rtlSpeed[d.name]"-->
+<!--                                                                            class="mt-0 pt-0"-->
+<!--                                                                            hide-details-->
+<!--                                                                            type="number"-->
+<!--                                                                            label="m/s"-->
+<!--                                                                        ></v-text-field>-->
+<!--                                                                    </template>-->
+<!--                                                                </v-slider>-->
+<!--                                                            </v-col>-->
+<!--                                                        </v-row>-->
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '제어')">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="12">
+                                                                <v-subheader>{{ d.name }} 임무제어(PWM):</v-subheader>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="CH9"
+                                                                    class="mx-2 pt-0"
+                                                                    outlined dense
+                                                                    v-model="pwms.ch9[d.name]"
+                                                                    type="number"
+                                                                    min="1100" max="1900"
+                                                                    hint="1100 ~ 1900"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="CH10"
+                                                                    class="mx-2 pt-0"
+                                                                    outlined dense
+                                                                    v-model="pwms.ch10[d.name]"
+                                                                    type="number"
+                                                                    min="1100" max="1900"
+                                                                    hint="1100 ~ 1900"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="CH11"
+                                                                    class="mx-2 pt-0"
+                                                                    outlined dense
+                                                                    v-model="pwms.ch11[d.name]"
+                                                                    type="number"
+                                                                    min="1100" max="1900"
+                                                                    hint="1100 ~ 1900"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="CH12"
+                                                                    class="mx-2 pt-0"
+                                                                    outlined dense
+                                                                    v-model="pwms.ch12[d.name]"
+                                                                    type="number"
+                                                                    min="1100" max="1900"
+                                                                    hint="1100 ~ 1900"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '자동')">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="12">
+                                                                <v-subheader>{{ d.name }} 자동:
+                                                                    <v-spacer></v-spacer>
+                                                                    <v-switch
+                                                                        v-show="d.curArmStatus==='DISARMED'"
+                                                                        v-model="takeoffInAuto"
+                                                                        :label="`takeoffInAuto: ${takeoffInAuto.toString()}`"
+                                                                    ></v-switch>
+                                                                </v-subheader>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-select
+                                                                    dense outlined :items="Object.keys(position_selections_items[d.name])"
+                                                                    label="Start Index" v-model="autoStartIndex[d.name]"
+                                                                    class="pa-1"
                                                                     hide-details
-                                                                    class="mx-2"
-                                                            ></v-select>
-                                                        </v-col>
-                                                        <v-col cols="2">
-                                                            <v-text-field
-                                                                label="SLEW_YAW (meterdgrees/s), 5-180, 1"
-                                                                class="mx-1 pt-0"
-                                                                outlined dense
-                                                                v-model="params.atcSlewYaw[d.name]"
-                                                                placeholder="5"
-                                                                type="number"
-                                                                min="5"
-                                                                max="180"
-                                                                hint="Range:5~180, Increment:1"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                        <v-col cols="2">
-                                                            <v-text-field
-                                                                label="SPEED_UP (m/s), 0.1-10.0, 0.5"
-                                                                class="mx-1 pt-0"
-                                                                outlined dense
-                                                                v-model="params.wpnavSpeedUp[d.name]"
-                                                                placeholder="2.5"
-                                                                type="number"
-                                                                min="0.1"
-                                                                max="10.0"
-                                                                hint="Range:0.1~10.0, Increment:0.5"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                        <v-col cols="2">
-                                                            <v-text-field
-                                                                label="SPEED_DN (m/s), 0.1-5.0, 0.1"
-                                                                class="mx-1 pt-0"
-                                                                outlined dense
-                                                                v-model="params.wpnavSpeedDn[d.name]"
-                                                                placeholder="1.5"
-                                                                type="number"
-                                                                min="0.1"
-                                                                max="5.0"
-                                                                hint="Range:0.1~5.0, Increment:0.1"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                        <v-col cols="2">
-                                                            <v-text-field
-                                                                label="RTL_ALT (m), 2.0-80.0, 0.1"
-                                                                class="mx-1 pt-0"
-                                                                outlined dense
-                                                                v-model="params.rtlAlt[d.name]"
-                                                                placeholder="30.0"
-                                                                type="number"
-                                                                min="2.0"
-                                                                max="80.0"
-                                                                hint="The minimum alt above home"
-                                                            ></v-text-field>
-                                                        </v-col>
-                                                    </v-row>
-                                                </div>
-                                            </div>
-                                        </v-card>
-                                        <v-card tile flat v-if="(command.title === commands[14].title)">
-                                            <div v-for="(d, dName) in $store.state.drone_infos" :key="'params'+dName">
-                                                <div v-if="d.selected && d.targeted">
-                                                    <v-row no-gutters>
-                                                        <v-col cols="12">
-                                                            <v-subheader>{{ d.name }} 임무 장치 제어:</v-subheader>
-                                                        </v-col>
-                                                        <v-col cols="2">
-                                                            <v-row no-gutters align="center" justify="center">
-                                                                <v-col cols="6" class="text-center">
-                                                                    <v-icon small class="mb-1">mdi-arrow-left-right</v-icon>
-                                                                    <v-select
-                                                                        dense outlined hide-details
-                                                                        :items="channels"
-                                                                        label="CH01"
-                                                                        v-model="target_mission_num.targetCh1[d.name]"
-                                                                        class="ml-1"
-                                                                    ></v-select>
-                                                                </v-col>
-                                                                <v-col cols="6" class="text-center">
-                                                                    <v-icon small class="mb-1">mdi-arrow-up-down</v-icon>
-                                                                    <v-select
-                                                                        dense outlined hide-details
-                                                                        :items="channels"
-                                                                        label="CH02"
-                                                                        v-model="target_mission_num.targetCh2[d.name]"
-                                                                        class="ml-1"
-                                                                        prepend-icon=""
-                                                                    ></v-select>
-                                                                </v-col>
-                                                            </v-row>
-                                                            <v-row no-gutters align="center" justify="center">
-                                                                <v-col cols="12">
-                                                                    <v-card flat tile class="text-center">
-                                                                        <div>
-                                                                            <JoyStick v-bind:joystick_size="128" @change="handleLeftChange(dName, 'left', $event);" />
-                                                                            <div style="display: inline-block; margin: 8px">
-                                                                                <div>
-                                                                                    <span>X {{ leftStick.x[dName] }} </span>
-                                                                                    <span>Y {{ leftStick.y[dName] }} </span>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <span>Angle {{ leftStick.angle[dName] }} </span>
-                                                                                    <span>Speed {{ leftStick.speed[dName] }} </span>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </v-card>
-                                                                </v-col>
-                                                            </v-row>
-                                                        </v-col>
-                                                        <v-col cols="2">
-                                                            <v-row no-gutters align="center" justify="center">
-                                                                <v-col cols="6" class="text-center">
-                                                                    <v-icon small class="mb-1">mdi-arrow-left-right</v-icon>
-                                                                    <v-select
-                                                                        dense outlined hide-details
-                                                                        :items="channels"
-                                                                        label="CH03"
-                                                                        v-model="target_mission_num.targetCh3[d.name]"
-                                                                        class="ml-1"
-                                                                    ></v-select>
-                                                                </v-col>
-                                                                <v-col cols="6" class="text-center">
-                                                                    <v-icon small class="mb-1">mdi-arrow-up-down</v-icon>
-                                                                    <v-select
-                                                                        dense outlined hide-details
-                                                                        :items="channels"
-                                                                        label="CH04"
-                                                                        v-model="target_mission_num.targetCh4[d.name]"
-                                                                        class="ml-1"
-                                                                    ></v-select>
-                                                                </v-col>
-                                                            </v-row>
-                                                            <v-row no-gutters align="center" justify="center">
-                                                                <v-col cols="12">
-                                                                    <v-card flat tile class="text-center">
-                                                                        <div>
-                                                                            <JoyStick v-bind:joystick_size="128" @change="handleRightChange(dName, 'right', $event);" />
-                                                                            <div style="display: inline-block; margin: 8px">
-                                                                                <div>
-                                                                                    <span>X {{ rightStick.x[dName] }} </span>
-                                                                                    <span>Y {{ rightStick.y[dName] }} </span>
-                                                                                </div>
-                                                                                <div>
-                                                                                    <span>Angle {{ rightStick.angle[dName] }} </span>
-                                                                                    <span>Speed {{ rightStick.speed[dName] }} </span>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </v-card>
-                                                                </v-col>
-                                                            </v-row>
-                                                        </v-col>
-                                                        <v-col cols="8">
-                                                            <v-card flat tile outlined>
+                                                                ></v-select>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-select
+                                                                    dense outlined :items="Object.keys(position_selections_items[d.name])"
+                                                                    label="End Index" v-model="autoEndIndex[d.name]"
+                                                                    hide-details
+                                                                    class="pa-1"
+                                                                ></v-select>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="Speed"
+                                                                    class="pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="autoSpeed[d.name]"
+                                                                    type="number"
+                                                                    min="1"
+                                                                    max="15"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="Delay"
+                                                                    class="pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="autoDelay[d.name]"
+                                                                    type="number"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '설정')">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="3">
+                                                                <v-select
+                                                                    dense outlined hide-details
+                                                                    :items="items_wp_yaw_behavior"
+                                                                    label="YAW_BEHAVIOR"
+                                                                    v-model="params.wpYawBehavior[d.name]"
+                                                                    class="pa-1"
+                                                                ></v-select>
+                                                            </v-col>
+                                                            <v-col cols="3">
+                                                                <v-text-field
+                                                                    label="SLEW_YAW (meterdgrees/s), 5-180, 1"
+                                                                    class="pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="params.atcSlewYaw[d.name]"
+                                                                    placeholder="5"
+                                                                    type="number"
+                                                                    min="5"
+                                                                    max="180"
+                                                                    hint="Range:5~180, Increment:1"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="SPEED_UP (m/s), 0.1-10.0, 0.5"
+                                                                    class="pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="params.wpnavSpeedUp[d.name]"
+                                                                    placeholder="2.5"
+                                                                    type="number"
+                                                                    min="0.1"
+                                                                    max="10.0"
+                                                                    hint="Range:0.1~10.0, Increment:0.5"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="SPEED_DN (m/s), 0.1-5.0, 0.1"
+                                                                    class="pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="params.wpnavSpeedDn[d.name]"
+                                                                    placeholder="1.5"
+                                                                    type="number"
+                                                                    min="0.1"
+                                                                    max="5.0"
+                                                                    hint="Range:0.1~5.0, Increment:0.1"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="RTL_ALT (m), 2.0-80.0, 0.1"
+                                                                    class="pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="params.rtlAlt[d.name]"
+                                                                    placeholder="30.0"
+                                                                    type="number"
+                                                                    min="2.0"
+                                                                    max="80.0"
+                                                                    hint="The minimum alt above home"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '임무')">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="12">
+                                                                <v-subheader>{{ d.name }} 임무 장치 제어:</v-subheader>
+                                                            </v-col>
+                                                            <v-col cols="2">
                                                                 <v-row no-gutters align="center" justify="center">
-                                                                    <v-col class="my-2" cols="6">
-                                                                        <div v-for="(num) in channels" :key="num">
-                                                                            <div v-if="5 <= num && num <= 8">
-                                                                                <v-row no-gutters align="center" justify="center" class="text-center">
-                                                                                    <v-col cols="4">
-                                                                                        <v-select
-                                                                                            dense outlined hide-details
-                                                                                            :items="channels"
-                                                                                            :label="'CH'+num"
-                                                                                            v-model="target_mission_num[`targetCh${num}`][d.name]"
-                                                                                            class="ml-1 mx-1 mb-2"
-                                                                                        ></v-select>
-                                                                                    </v-col>
-                                                                                    <v-col cols="8">
-                                                                                        <v-btn-toggle
-                                                                                            v-model="mission_value[`ch${num}`][d.name]"
-                                                                                            mandatory
-                                                                                            class="text-center align-center mx-0"
-                                                                                        >
-                                                                                            <v-btn small>
-                                                                                                <v-icon small>mdi-format-align-left</v-icon>
-                                                                                            </v-btn>
-                                                                                            <v-btn small>
-                                                                                                <v-icon small>mdi-format-align-center</v-icon>
-                                                                                            </v-btn>
-                                                                                            <v-btn small>
-                                                                                                <v-icon small>mdi-format-align-right</v-icon>
-                                                                                            </v-btn>
-                                                                                        </v-btn-toggle>
-
-                                                                                        <v-btn small color="primary" class="mx-1 mb-1" @click="handlePwmClick(dName, num, $event);"><v-icon>mdi-send</v-icon></v-btn>
-                                                                                    </v-col>
-                                                                                </v-row>
-                                                                            </div>
-                                                                        </div>
+                                                                    <v-col cols="6" class="text-center">
+                                                                        <v-icon small class="mb-1">mdi-arrow-left-right</v-icon>
+                                                                        <v-select
+                                                                            dense outlined hide-details
+                                                                            :items="channels"
+                                                                            label="CH01"
+                                                                            v-model="target_mission_num.targetCh1[d.name]"
+                                                                            class="ml-1"
+                                                                        ></v-select>
                                                                     </v-col>
-                                                                    <v-col class="my-2" cols="6">
-                                                                        <div v-for="(num) in channels" :key="num">
-                                                                            <div v-if="9 <= num && num <= 12">
-                                                                                <v-row no-gutters align="center" justify="center" class="text-center">
-                                                                                    <v-col cols="4">
-                                                                                        <v-select
+                                                                    <v-col cols="6" class="text-center">
+                                                                        <v-icon small class="mb-1">mdi-arrow-up-down</v-icon>
+                                                                        <v-select
+                                                                            dense outlined hide-details
+                                                                            :items="channels"
+                                                                            label="CH02"
+                                                                            v-model="target_mission_num.targetCh2[d.name]"
+                                                                            class="ml-1"
+                                                                            prepend-icon=""
+                                                                        ></v-select>
+                                                                    </v-col>
+                                                                </v-row>
+                                                                <v-row no-gutters align="center" justify="center">
+                                                                    <v-col cols="12">
+                                                                        <v-card flat tile class="text-center">
+                                                                            <div>
+                                                                                <JoyStick v-bind:joystick_size="128" @change="handleLeftChange(d.name, 'left', $event);" />
+                                                                                <div style="display: inline-block; margin: 8px">
+                                                                                    <div>
+                                                                                        <span>X {{ leftStick.x[d.name] }} </span>
+                                                                                        <span>Y {{ leftStick.y[d.name] }} </span>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <span>Angle {{ leftStick.angle[d.name] }} </span>
+                                                                                        <span>Speed {{ leftStick.speed[d.name] }} </span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </v-card>
+                                                                    </v-col>
+                                                                </v-row>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-row no-gutters align="center" justify="center">
+                                                                    <v-col cols="6" class="text-center">
+                                                                        <v-icon small class="mb-1">mdi-arrow-left-right</v-icon>
+                                                                        <v-select
+                                                                            dense outlined hide-details
+                                                                            :items="channels"
+                                                                            label="CH03"
+                                                                            v-model="target_mission_num.targetCh3[d.name]"
+                                                                            class="ml-1"
+                                                                        ></v-select>
+                                                                    </v-col>
+                                                                    <v-col cols="6" class="text-center">
+                                                                        <v-icon small class="mb-1">mdi-arrow-up-down</v-icon>
+                                                                        <v-select
+                                                                            dense outlined hide-details
+                                                                            :items="channels"
+                                                                            label="CH04"
+                                                                            v-model="target_mission_num.targetCh4[d.name]"
+                                                                            class="ml-1"
+                                                                        ></v-select>
+                                                                    </v-col>
+                                                                </v-row>
+                                                                <v-row no-gutters align="center" justify="center">
+                                                                    <v-col cols="12">
+                                                                        <v-card flat tile class="text-center">
+                                                                            <div>
+                                                                                <JoyStick v-bind:joystick_size="128" @change="handleRightChange(d.name, 'right', $event);" />
+                                                                                <div style="display: inline-block; margin: 8px">
+                                                                                    <div>
+                                                                                        <span>X {{ rightStick.x[d.name] }} </span>
+                                                                                        <span>Y {{ rightStick.y[d.name] }} </span>
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <span>Angle {{ rightStick.angle[d.name] }} </span>
+                                                                                        <span>Speed {{ rightStick.speed[d.name] }} </span>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </v-card>
+                                                                    </v-col>
+                                                                </v-row>
+                                                            </v-col>
+                                                            <v-col cols="8">
+                                                                <v-card flat tile outlined>
+                                                                    <v-row no-gutters align="center" justify="center">
+                                                                        <v-col class="my-2" cols="6">
+                                                                            <div v-for="(num) in channels" :key="num">
+                                                                                <div v-if="5 <= num && num <= 8">
+                                                                                    <v-row no-gutters align="center" justify="center" class="text-center">
+                                                                                        <v-col cols="4">
+                                                                                            <v-select
+                                                                                                dense outlined hide-details
+                                                                                                :items="channels"
+                                                                                                :label="'CH'+num"
+                                                                                                v-model="target_mission_num[`targetCh${num}`][d.name]"
+                                                                                                class="ml-1 mx-1 mb-2"
+                                                                                            ></v-select>
+                                                                                        </v-col>
+                                                                                        <v-col cols="8">
+                                                                                            <v-btn-toggle
+                                                                                                v-model="mission_value[`ch${num}`][d.name]"
+                                                                                                mandatory
+                                                                                                class="text-center align-center mx-0"
+                                                                                            >
+                                                                                                <v-btn small>
+                                                                                                    <v-icon small>mdi-format-align-left</v-icon>
+                                                                                                </v-btn>
+                                                                                                <v-btn small>
+                                                                                                    <v-icon small>mdi-format-align-center</v-icon>
+                                                                                                </v-btn>
+                                                                                                <v-btn small>
+                                                                                                    <v-icon small>mdi-format-align-right</v-icon>
+                                                                                                </v-btn>
+                                                                                            </v-btn-toggle>
+
+                                                                                            <v-btn small color="primary" class="mx-1 mb-1" @click="handlePwmClick(d.name, num, $event);"><v-icon>mdi-send</v-icon></v-btn>
+                                                                                        </v-col>
+                                                                                    </v-row>
+                                                                                </div>
+                                                                            </div>
+                                                                        </v-col>
+                                                                        <v-col class="my-2" cols="6">
+                                                                            <div v-for="(num) in channels" :key="num">
+                                                                                <div v-if="9 <= num && num <= 12">
+                                                                                    <v-row no-gutters align="center" justify="center" class="text-center">
+                                                                                        <v-col cols="4">
+                                                                                            <v-select
                                                                                                 dense outlined hide-details
                                                                                                 :items="channels"
                                                                                                 :label="'CH'+num" v-model="target_mission_num[`targetCh${num}`][d.name]"
                                                                                                 class="ml-1 mx-1 mb-2"
-                                                                                        ></v-select>
-                                                                                    </v-col>
-                                                                                    <v-col cols="8">
-                                                                                        <v-btn-toggle
+                                                                                            ></v-select>
+                                                                                        </v-col>
+                                                                                        <v-col cols="8">
+                                                                                            <v-btn-toggle
                                                                                                 v-model="mission_value[`ch${num}`][d.name]"
                                                                                                 mandatory
                                                                                                 class="text-center align-center mx-0"
-                                                                                        >
-                                                                                            <v-btn small>
-                                                                                                <v-icon small>mdi-format-align-left</v-icon>
-                                                                                            </v-btn>
-                                                                                            <v-btn small>
-                                                                                                <v-icon small>mdi-format-align-center</v-icon>
-                                                                                            </v-btn>
-                                                                                            <v-btn small>
-                                                                                                <v-icon small>mdi-format-align-right</v-icon>
-                                                                                            </v-btn>
-                                                                                        </v-btn-toggle>
+                                                                                            >
+                                                                                                <v-btn small>
+                                                                                                    <v-icon small>mdi-format-align-left</v-icon>
+                                                                                                </v-btn>
+                                                                                                <v-btn small>
+                                                                                                    <v-icon small>mdi-format-align-center</v-icon>
+                                                                                                </v-btn>
+                                                                                                <v-btn small>
+                                                                                                    <v-icon small>mdi-format-align-right</v-icon>
+                                                                                                </v-btn>
+                                                                                            </v-btn-toggle>
 
-                                                                                        <v-btn small color="lime" class="mx-1 mb-1" @click="handlePwmClick(dName, num, $event);"><v-icon>mdi-send</v-icon></v-btn>
-                                                                                    </v-col>
-                                                                                </v-row>
+                                                                                            <v-btn small color="lime" class="mx-1 mb-1" @click="handlePwmClick(d.name, num, $event);"><v-icon>mdi-send</v-icon></v-btn>
+                                                                                        </v-col>
+                                                                                    </v-row>
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
-                                                                    </v-col>
-                                                                    <v-col class="my-2" cols="12">
-                                                                        <div v-for="(num) in channels" :key="num">
-                                                                            <div v-if="13 <= num && num <= 16">
-                                                                                <v-row no-gutters align="center" justify="center">
-                                                                                    <v-col cols="3">
-                                                                                        <v-select
+                                                                        </v-col>
+                                                                        <v-col class="my-2" cols="12">
+                                                                            <div v-for="(num) in channels" :key="num">
+                                                                                <div v-if="13 <= num && num <= 16">
+                                                                                    <v-row no-gutters align="center" justify="center">
+                                                                                        <v-col cols="3">
+                                                                                            <v-select
                                                                                                 dense outlined hide-details
                                                                                                 :items="channels"
                                                                                                 :label="'CH'+num" v-model="target_mission_num[`targetCh${num}`][d.name]"
                                                                                                 class="mx-1"
-                                                                                        ></v-select>
-                                                                                    </v-col>
-                                                                                    <v-col cols="7">
-                                                                                        <v-slider
+                                                                                            ></v-select>
+                                                                                        </v-col>
+                                                                                        <v-col cols="7">
+                                                                                            <v-slider
                                                                                                 v-model="mission_value[`ch${num}`][d.name]"
                                                                                                 class="mx-2 my-3 align-center"
                                                                                                 :min="mission_ch_min"
@@ -737,110 +730,61 @@
                                                                                                 step="1"
                                                                                                 color="indigo"
                                                                                                 track-color="orange"
-                                                                                                @input ="handlePwmSlide(dName, num, $event)"
-                                                                                        >
-<!--                                                                                            <template v-slot:append>-->
-<!--                                                                                                <v-text-field-->
-<!--                                                                                                        v-model="mission_value[`ch${num}`][d.name]"-->
-<!--                                                                                                        class="mt-0 pt-0"-->
-<!--                                                                                                        hide-details-->
-<!--                                                                                                        single-line-->
-<!--                                                                                                        type="number"-->
-<!--                                                                                                        style="width: 65px"-->
-<!--                                                                                                ></v-text-field>-->
-<!--                                                                                            </template>-->
-                                                                                        </v-slider>
-                                                                                    </v-col>
-                                                                                    <v-col cols="2">
-                                                                                        <v-text-field
+                                                                                                @input ="handlePwmSlide(d.name, num, $event)"
+                                                                                            >
+                                                                                            </v-slider>
+                                                                                        </v-col>
+                                                                                        <v-col cols="2">
+                                                                                            <v-text-field
                                                                                                 v-model="mission_value[`ch${num}`][d.name]"
                                                                                                 class="mt-0 pt-0"
                                                                                                 hide-details
                                                                                                 single-line
                                                                                                 type="number"
                                                                                                 style="width: 65px"
-                                                                                        ></v-text-field>
-                                                                                    </v-col>
-                                                                                </v-row>
+                                                                                            ></v-text-field>
+                                                                                        </v-col>
+                                                                                    </v-row>
+                                                                                </div>
                                                                             </div>
-                                                                        </div>
-                                                                    </v-col>
-                                                                </v-row>
-                                                            </v-card>
-                                                        </v-col>
-                                                        <!--                                                        <v-col cols="3">-->
-<!--                                                            <v-select-->
-<!--                                                                    dense outlined :items="items_wp_yaw_behavior"-->
-<!--                                                                    label="WP_YAW_BEHAVIOR" v-model="params.wpYawBehavior[d.name]"-->
-<!--                                                                    hide-details-->
-<!--                                                                    class="mx-2"-->
-<!--                                                            ></v-select>-->
-<!--                                                        </v-col>-->
-<!--                                                        <v-col cols="3">-->
-<!--                                                            <v-text-field-->
-<!--                                                                    label="ATC_SLEW_YAW (meterdgrees/s), 5-180, 1"-->
-<!--                                                                    class="mx-2 pt-0"-->
-<!--                                                                    outlined dense hide-details-->
-<!--                                                                    v-model="params.atcSlewYaw[d.name]"-->
-<!--                                                                    type="number"-->
-<!--                                                                    min="5"-->
-<!--                                                                    max="180"-->
-<!--                                                                    hint="Range:5~180, Increment:1"-->
-<!--                                                            ></v-text-field>-->
-<!--                                                        </v-col>-->
-<!--                                                        <v-col cols="3">-->
-<!--                                                            <v-text-field-->
-<!--                                                                    label="WPNAV_SPEED_UP (m/s), 0.1-10.0, 0.5"-->
-<!--                                                                    class="mx-2 pt-0"-->
-<!--                                                                    outlined dense hide-details-->
-<!--                                                                    v-model="params.wpnavSpeedUp[d.name]"-->
-<!--                                                                    placeholder="2.5"-->
-<!--                                                                    type="number"-->
-<!--                                                                    min="0.1"-->
-<!--                                                                    max="10.0"-->
-<!--                                                            ></v-text-field>-->
-<!--                                                        </v-col>-->
-<!--                                                        <v-col cols="3">-->
-<!--                                                            <v-text-field-->
-<!--                                                                    label="WPNAV_SPEED_DN (m/s), 0.1-5.0, 0.1"-->
-<!--                                                                    class="mx-2 pt-0"-->
-<!--                                                                    outlined dense hide-details-->
-<!--                                                                    v-model="params.wpnavSpeedDn[d.name]"-->
-<!--                                                                    placeholder="1.5"-->
-<!--                                                                    type="number"-->
-<!--                                                                    min="0.1"-->
-<!--                                                                    max="5.0"-->
-<!--                                                            ></v-text-field>-->
-<!--                                                        </v-col>-->
-                                                    </v-row>
-                                                </div>
-                                            </div>
-                                        </v-card>
-                                    </v-card>
+                                                                        </v-col>
+                                                                    </v-row>
+                                                                </v-card>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-card>
+                                                </v-col>
+                                            </v-row>
+                                        </div>
+                                    </div>
                                 </v-card>
                             </v-col>
-                            <v-col cols="1">
-                                <v-card class="pa-2 align-self-center text-center" outlined tile>
-                                    <v-btn v-if="command.title !== commands[15].title" color="blue" @click="curTab = command.title; mode_sheet = !mode_sheet;"
-                                           :disabled="(command.title === commands[14].title)"
+                            <v-col cols="2">
+                                <v-card class="pa-1 align-self-center text-center" outlined tile>
+                                    <v-btn
+                                        v-if="command.title !== '투하'" color="blue" @click="curTab = command.title; mode_sheet = !mode_sheet;"
+                                        :disabled="(command.title === '임무')"
                                     >
-                                        <span v-if="command.title === commands[0].title">모드확인</span>
-                                        <span v-else-if="command.title === commands[1].title">시동확인</span>
-                                        <span v-else-if="command.title === commands[2].title">이륙확인</span>
-                                        <span v-else-if="command.title === commands[3].title">고도확인</span>
-                                        <span v-else-if="command.title === commands[4].title">이동확인</span>
-                                        <span v-else-if="command.title === commands[5].title">선회확인</span>
-                                        <span v-else-if="command.title === commands[6].title">속도확인</span>
-                                        <span v-else-if="command.title === commands[7].title">정지확인</span>
-                                        <span v-else-if="command.title === commands[8].title">착륙확인</span>
-                                        <span v-else-if="command.title === commands[9].title">귀환확인</span>
-                                        <span v-else-if="command.title === commands[10].title">제어확인</span>
-                                        <span v-else-if="command.title === commands[11].title">자동확인</span>
-                                        <span v-else-if="command.title === commands[12].title">종료확인</span>
-                                        <span v-else-if="command.title === commands[13].title">설정확인</span>
+                                        <span v-if="command.title === '모드'">모드확인</span>
+                                        <span v-else-if="command.title === '시동'">시동확인</span>
+                                        <span v-else-if="command.title === '이륙'">이륙확인</span>
+                                        <span v-else-if="command.title === '고도'">고도확인</span>
+                                        <span v-else-if="command.title === '이동'">이동확인</span>
+                                        <span v-else-if="command.title === '패턴'">패턴확인</span>
+                                        <span v-else-if="command.title === '선회'">선회확인</span>
+                                        <span v-else-if="command.title === '속도'">속도확인</span>
+                                        <span v-else-if="command.title === '정지'">정지확인</span>
+                                        <span v-else-if="command.title === '착륙'">착륙확인</span>
+                                        <span v-else-if="command.title === '귀환'">귀환확인</span>
+                                        <span v-else-if="command.title === '제어'">제어확인</span>
+                                        <span v-else-if="command.title === '자동'">자동확인</span>
+                                        <span v-else-if="command.title === '종료'">종료확인</span>
+                                        <span v-else-if="command.title === '설정'">설정확인</span>
                                     </v-btn>
-                                    <v-btn v-else-if="command.title === commands[15].title" color="blue"
-                                           @click="setDropCommand()">
+                                    <v-btn
+                                        v-else-if="command.title === '투하'" color="blue"
+                                        @click="setDropCommand()"
+                                    >
                                         <span>투하확인</span>
                                     </v-btn>
                                 </v-card>
@@ -881,54 +825,54 @@
                             </span>
                         </div>
                     </div>
-                    <span v-if="curTab === commands[0].title">
+                    <span v-if="curTab === '모드'">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">모드 변경</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[1].title">
+                    <span v-else-if="curTab === '시동'">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">시동</span> 명령 전송.
                     </span>
-                    <div v-else-if="curTab === commands[2].title">
+                    <div v-else-if="curTab === '이륙'">
                         <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                             <span v-if="drone.selected && drone.targeted">
                                 {{i}} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{  targetTakeoffAlt[i] }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">이륙</span> 명령 전송.
                             </span>
                         </div>
                     </div>
-                    <div v-else-if="curTab === commands[3].title">
+                    <div v-else-if="curTab === '고도'">
                          <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                              <span v-if="drone.selected && drone.targeted">
                                  {{i}} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ targetAlt[i] }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">고도 변경</span> 명령 전송.
                              </span>
                          </div>
                     </div>
-                    <span v-else-if="curTab === commands[4].title">
+                    <span v-else-if="curTab === '이동'">
                         비행체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">이동</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[5].title">
+                    <span v-else-if="curTab === '선회'">
                         비행체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">선회</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[6].title">
+                    <span v-else-if="curTab === '속도'">
                         비행체에 설정한 속도로 <span class="ml-2 mr-2" style="font-size: 20px">속도 변경</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[7].title">
+                    <span v-else-if="curTab === '정지'">
                         비행체를 현재 위치에 <span class="ml-2 mr-2" style="font-size: 20px">정지</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[8].title">
+                    <span v-else-if="curTab === '착륙'">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">착륙</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[9].title">
+                    <span v-else-if="curTab === '귀환'">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">귀환</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[10].title">
+                    <span v-else-if="curTab === '제어'">
                         비행체에 각 채널로 <span class="ml-2 mr-2" style="font-size: 20px">PWM 제어</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[11].title">
+                    <span v-else-if="curTab === '자동'">
                         비행체에 비행경로 다운로드 후 <span class="ml-2 mr-2" style="font-size: 20px">자동 비행</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[12].title">
+                    <span v-else-if="curTab === '종료'">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">시동 끄기</span> 명령 전송.
                     </span>
-                    <span v-else-if="curTab === commands[13].title">
+                    <span v-else-if="curTab === '설정'">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
                     </span>
                 </div>
@@ -1097,7 +1041,7 @@ export default {
             ],
             commands: [
                 {
-                    title: '모드',
+                    title: '모드', //0
                     text: '선택한 비행체의 모드 변경'
                 },
                 {
@@ -1121,6 +1065,10 @@ export default {
                     text: '선택한 비행체에 설정한 반경과 속도로 선회 비행 명령'
                 },
                 {
+                    title: '패턴',
+                    text: '선택한 비행체에 설정한 패턴과 속도, 고도로 비행 명령'
+                },
+                {
                     title: '속도',
                     text: '선택한 비행체에 설정한 속도로 속도 변경 명령'
                 },
@@ -1137,7 +1085,7 @@ export default {
                     text: '선택한 비행체에 귀환 명령'
                 },
                 {
-                    title: '제어',
+                    title: '제어', //10
                     text: '선택한 비행체의 임무 장비 제어 명령'
                 },
                 {
@@ -1157,7 +1105,7 @@ export default {
                     text: '선택한 비행체의 임무 장비 제어 (16채널)'
                 },
                 {
-                    title: '투하',
+                    title: '투하', //15
                     text: '선택한 비행체의 투하장치 센서 투하 명령'
                 }
             ],
@@ -1186,6 +1134,8 @@ export default {
             targetTakeoffAlt: {},
             targetAlt: {},
             targetSpeed: {},
+            targetStayTime: {},
+            targetSurveyMarkerIndex: {},
             targetTurningSpeed: {},
             targetRadius: {},
             autoStartIndex: {},
@@ -1323,6 +1273,22 @@ export default {
     created() {
         this.context_left = this.$store.state.command_tab_left_x;
 
+        for (let dName in this.$store.state.drone_infos) {
+            if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                if (this.$store.state.drone_infos[dName].selected) {
+                    this.targetSurveyMarkerIndex[dName] = -1;
+                    for (let pIndex in this.$store.state.surveyMarkers[dName]) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName], pIndex)) {
+                            if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
+                                this.targetSurveyMarkerIndex[dName] = pIndex;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
         EventBus.$on('gcs-map-ready', () => {
             setTimeout(() => {
                 console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%DroneCommand', 'gcs-map-ready', this.$store.state.tempMarkers);
@@ -1365,6 +1331,7 @@ export default {
             this.targetAlt = {};
             this.targetSpeed = null;
             this.targetSpeed = {};
+            this.targetStayTime = {};
             this.targetTurningSpeed = null;
             this.targetTurningSpeed = {};
             this.targetRadius = null;
@@ -1389,14 +1356,22 @@ export default {
                         this.targetTakeoffAlt[name] = this.$store.state.drone_infos[name].targetTakeoffAlt;
                         this.targetAlt[name] = this.$store.state.drone_infos[name].targetAlt;
                         this.targetSpeed[name] = this.$store.state.drone_infos[name].targetSpeed;
+                        if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'targetStayTime')) {
+                            this.$store.state.drone_infos[name].targetStayTime = 1;
+                        }
+                        this.targetStayTime[name] = this.$store.state.drone_infos[name].targetStayTime;
                         this.targetTurningSpeed[name] = this.$store.state.drone_infos[name].targetTurningSpeed;
                         this.targetRadius[name] = this.$store.state.drone_infos[name].targetRadius;
                         this.autoStartIndex[name] = this.$store.state.drone_infos[name].autoStartIndex;
                         this.autoEndIndex[name] = this.$store.state.drone_infos[name].autoEndIndex;
                         this.autoSpeed[name] = this.$store.state.drone_infos[name].autoSpeed;
                         this.autoDelay[name] = this.$store.state.drone_infos[name].autoDelay;
+                        // if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'gotoType')) {
+                        //     this.$store.state.drone_infos[name].gotoType = '바로이동';
+                        // }
                         this.gotoType[name] = this.$store.state.drone_infos[name].gotoType;
-                        this.circleType[name] = this.$store.state.drone_infos[name].circleType;
+                        this.circleType[name] = (this.$store.state.drone_infos[name].circleType === 'cw')?'시계방향':'반시계방향';
+
                         this.prepared = true;
 
                         if (this.$cookies.isKey('target_mission_num')) {
@@ -1443,6 +1418,19 @@ export default {
             this.$forceUpdate();
         });
 
+        EventBus.$on('do-target-survey-marker', (payload) => {
+            console.log('do-selected-position', payload);
+
+            if(payload.targeted) {
+                this.targetSurveyMarkerIndex[payload.dName] = payload.pIndex;
+            }
+            else {
+                this.targetSurveyMarkerIndex[payload.dName] = -1;
+            }
+
+            this.$forceUpdate();
+        });
+
         // eslint-disable-next-line no-unused-vars
         // EventBus.$on('selected-drone', (payload) => {
         //
@@ -1465,6 +1453,16 @@ export default {
         // });
     },
     methods: {
+        changeGotoType(gotoType, dName) {
+            this.gotoType[dName] = gotoType;
+            this.$store.state.drone_infos[dName].gotoType = gotoType;
+        },
+
+        changeCircleType(circleType, dName) {
+            this.circleType[dName] = circleType;
+            this.$store.state.drone_infos[dName].circleType = (circleType === '시계방향') ? 'cw' : 'ccw';
+        },
+
         setPoint(point) {
             this.point = point
             console.log('setPoint', this.point);
@@ -1667,46 +1665,49 @@ export default {
         sendCommand() {
             this.loading = true;
             console.log(this.curTab);
-            if(this.curTab === this.commands[0].title) {
+            if(this.curTab === '모드') {
                 this.setMode();
             }
-            else if(this.curTab === this.commands[1].title) {
+            else if(this.curTab === '시동') {
                 this.setArm();
             }
-            else if(this.curTab === this.commands[2].title) {
+            else if(this.curTab === '이륙') {
                 this.setTakeoff();
             }
-            else if(this.curTab === this.commands[3].title) {
+            else if(this.curTab === '고도') {
                 this.setGotoAlt();
             }
-            else if(this.curTab === this.commands[4].title) {
+            else if(this.curTab === '이동') {
                 this.setGoto();
             }
-            else if(this.curTab === this.commands[5].title) {
+            else if(this.curTab === '패턴') {
+                this.setSurvey();
+            }
+            else if(this.curTab === '선회') {
                 this.setGotoCircle();
             }
-            else if(this.curTab === this.commands[6].title) {
+            else if(this.curTab === '속도') {
                 this.setChangeSpeed();
             }
-            else if(this.curTab === this.commands[7].title) {
+            else if(this.curTab === '정지') {
                 this.setStop();
             }
-            else if(this.curTab === this.commands[8].title) {
+            else if(this.curTab === '착륙') {
                 this.setLand();
             }
-            else if(this.curTab === this.commands[9].title) {
+            else if(this.curTab === '귀환') {
                 this.setRtl();
             }
-            else if(this.curTab === this.commands[10].title) {
+            else if(this.curTab === '제어') {
                 this.setPwms();
             }
-            else if(this.curTab === this.commands[11].title) {
+            else if(this.curTab === '자동') {
                 this.setAutoGoto();
             }
-            else if(this.curTab === this.commands[12].title) {
+            else if(this.curTab === '종료') {
                 this.setDisarm();
             }
-            else if(this.curTab === this.commands[13].title) {
+            else if(this.curTab === '설정') {
                 this.setParams();
             }
 
@@ -1976,6 +1977,52 @@ export default {
             }, 100);
         },
 
+        setSurvey() {
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        if(this.targetSurveyMarkerIndex[dName] !== -1) {
+                            this.$store.state.drone_infos[dName].autoStartIndex = 0;
+                            this.$store.state.drone_infos[dName].autoEndIndex = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines.length - 1;
+                            this.$store.state.drone_infos[dName].autoDelay = parseInt(this.targetStayTime[dName]);
+                            this.$store.state.drone_infos[dName].autoSpeed = parseInt(this.targetSpeed[dName]);
+
+                            this.position_selections_items[dName] = [];
+                            for (let idx in this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines, idx)) {
+                                    let strPos = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines[idx].lat + ':' +
+                                        this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines[idx].lng + ':' +
+                                        this.targetAlt[dName] + ':' +
+                                        this.targetSpeed[dName] + ':' +
+                                        '100:5:16:' +
+                                        this.targetStayTime[dName] + ':0';
+                                    this.position_selections_items[dName].push(strPos);
+                                }
+                            }
+
+                            console.log('setSurvey', parseInt(this.$store.state.drone_infos[dName].autoStartIndex), parseInt(this.$store.state.drone_infos[dName].autoEndIndex), this.$store.state.drone_infos[dName].autoDelay);
+                            if (parseInt(this.$store.state.drone_infos[dName].autoStartIndex) <= parseInt(this.$store.state.drone_infos[dName].autoEndIndex)) {
+                                let payload = {};
+                                payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
+                                EventBus.$emit('command-set-auto_goto-' + dName, payload);
+                            } else {
+                                console.log('setAutoGoto-', dName, 'auto index setting error!!!');
+                            }
+                        }
+                        else {
+                            console.error(dName, ' no targeting');
+                        }
+                    }
+                }
+            }
+
+            setTimeout(() => {
+                this.mode_sheet = !this.mode_sheet;
+                this.loading = false;
+                this.$forceUpdate();
+            }, 100);
+        },
+
         setDisarm() {
             for(let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
@@ -2024,6 +2071,8 @@ export default {
             EventBus.$off('do-targetDrone');
             EventBus.$off('do-selected-position');
             EventBus.$off('update-goto-positions');
+
+            EventBus.$off('do-target-survey-marker');
         }
     }
 </script>

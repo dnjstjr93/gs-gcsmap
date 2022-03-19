@@ -9,7 +9,7 @@
         <v-form ref="form" @submit.prevent="submit">
             <v-card tile flat>
                 <v-row align="center" justify="center">
-                    <v-col cols="8">
+                    <v-col cols="12">
                         <v-card flat tile>
                             <v-row align="center" justify="center">
                                 <v-col cols="2">
@@ -22,20 +22,22 @@
                                             dense
                                             hide-details
                                             single-line
+                                            class="pa-1"
                                     >
                                         <template v-slot:selection="data">
-                                            <v-chip class="ma-0"
-                                                    :key="JSON.stringify(data.item)"
-                                                    v-bind="data.attrs"
-                                                    :input-value="data.selected"
-                                                    :disabled="data.disabled"
-                                                    @click:close="data.parent.selectItem(data.item)"
+                                            <v-chip
+                                                :key="JSON.stringify(data.item)"
+                                                v-bind="data.attrs"
+                                                :input-value="data.selected"
+                                                :disabled="data.disabled"
+                                                @click:close="data.parent.selectItem(data.item)"
+                                                small
                                             >
                                                 <v-avatar
-                                                        class="white--text"
-                                                        left
-                                                        v-text="data.item.slice(0, 1).toUpperCase()"
-                                                        :color="curDroneColorMap"
+                                                    class="white--text"
+                                                    left
+                                                    v-text="data.item.slice(0, 1).toUpperCase()"
+                                                    :color="curDroneColorMap"
                                                 ></v-avatar>
                                                 {{ data.item }}
                                             </v-chip>
@@ -184,8 +186,6 @@
         name: "InfoMarker",
 
         props: [
-            'value',
-            'marker',
             'markerName',
             'markerIndex',
             'targets',
@@ -305,59 +305,6 @@
         },
 
         watch: {
-            // targetSelect: function (newVal, oldVal) {
-            //     console.log('targetSelect - watch', oldVal, ' -> ', newVal);
-            //     if(this.markerName !== newVal) {
-            //
-            //         this.oldTargetSelet = oldVal;
-            //
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-            //
-            // targetAlt: function (newVal, oldVal) {
-            //     console.log('targetAlt - watch', oldVal, ' -> ', newVal);
-            //     if(this.marker.alt !== newVal) {
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-            //
-            // targetSpeed: function (newVal, oldVal) {
-            //     console.log('targetSpeed - watch', oldVal, ' -> ', newVal);
-            //     if(this.marker.speed !== newVal) {
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-            //
-            // targetRadius: function (newVal, oldVal) {
-            //     console.log('targetRadius - watch', oldVal, ' -> ', newVal);
-            //     if(this.marker.radius !== newVal) {
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-            //
-            // targetTurningSpeed: function (newVal, oldVal) {
-            //     console.log('targetTurningSpeed - watch', oldVal, ' -> ', newVal);
-            //     if(this.marker.turningSpeed !== newVal) {
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-
             markerName: function (newVal) {
 
                 console.log('InfoMaker - watch', newVal);
@@ -401,9 +348,7 @@
             },
 
             conditions() {
-                return !((this.markerName !== this.targetSelect) || (this.marker.alt !== this.targetAlt) ||
-                    (this.marker.speed !== this.targetSpeed) || (this.marker.radius !== this.targetRadius) ||
-                    (this.marker.turningSpeed !== this.targetTurningSpeed) ||
+                return !((this.markerName !== this.targetSelect) ||
                     (String(this.markerIndex) !== this.targetSelectIndex));
             },
 
@@ -469,8 +414,6 @@
             },
 
             deleteMarker() {
-                console.log(this.markerName, this.markerIndex, this.marker);
-
                 let watchingPayload = {};
                 watchingPayload.payload = {
                     dName: this.markerName,
@@ -482,93 +425,19 @@
 
                     watchingPayload.broadcastMission = 'removeSurveyMarker';
 
-                    axios({
-                        validateStatus: function (status) {
-                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                            return status < 500;
-                        },
-                        method: 'post',
-                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + this.markerName,
-                        headers: {
-                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                            'X-M2M-Origin': 'SVue',
-                            'Content-Type': 'application/json;ty=4'
-                        },
-                        data: {
-                            'm2m:cin': {
-                                con: this.$store.state.surveyMarkers[this.markerName]
-                            }
-                        }
-                    }).then(
-                        function (res) {
-                            console.log('removeMarkerDroneInfo-axios', res.data);
-                        }
-                    ).catch(
-                        function (err) {
-                            console.log(err.message);
-                        }
-                    );
+                    this.postEachSurveyMarkerInfo(this.markerName);
                 }
                 else {
-                    let oldObj = JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[this.markerName][this.markerIndex]));
+                    this.$store.state.surveyMarkers.unknown.push(
+                        JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[this.markerName][this.markerIndex]))
+                    );
                     this.$store.state.surveyMarkers[this.markerName].splice(this.markerIndex, 1);
-                    this.$store.state.surveyMarkers.unknown.push(oldObj);
 
                     watchingPayload.broadcastMission = 'deleteSurveyMarker';
 
-                    axios({
-                        validateStatus: function (status) {
-                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                            return status < 500;
-                        },
-                        method: 'post',
-                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + this.markerName,
-                        headers: {
-                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                            'X-M2M-Origin': 'SVue',
-                            'Content-Type': 'application/json;ty=4'
-                        },
-                        data: {
-                            'm2m:cin': {
-                                con: this.$store.state.surveyMarkers[this.markerName]
-                            }
-                        }
-                    }).then(
-                        function (res) {
-                            console.log('deleteMarkerDroneInfo-axios', res.data);
-                        }
-                    ).catch(
-                        function (err) {
-                            console.log(err.message);
-                        }
-                    );
+                    this.postEachSurveyMarkerInfo(this.markerName);
 
-                    axios({
-                        validateStatus: function (status) {
-                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                            return status < 500;
-                        },
-                        method: 'post',
-                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + 'unknown',
-                        headers: {
-                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                            'X-M2M-Origin': 'SVue',
-                            'Content-Type': 'application/json;ty=4'
-                        },
-                        data: {
-                            'm2m:cin': {
-                                con: this.$store.state.surveyMarkers.unknown
-                            }
-                        }
-                    }).then(
-                        function (res) {
-                            console.log('deleteMarkerDroneInfo-axios', res.data);
-                        }
-                    ).catch(
-                        function (err) {
-                            console.log(err.message);
-                        }
-                    );
+                    this.postEachSurveyMarkerInfo('unknown');
 
                     // let temp = JSON.parse(JSON.stringify(state.tempMarkers));
                     // state.tempMarkers = null;
@@ -589,39 +458,121 @@
                 }, 100);
             },
 
+            doPublish(topic, payload) {
+                if (this.$store.state.client.connected) {
+                    this.$store.state.client.publish(topic, payload, 0, error => {
+                        if (error) {
+                            console.log('Publish error', error)
+                        }
+                    });
+                }
+            },
+
             resetForm() {
                 // this.form = Object.assign({}, this.defaultForm)
                 // this.$refs.form.reset()
 
                 this.$emit('input', false);
+
+                this.$store.state.surveyMarkers[this.markerName].forEach((marker) => {
+                    marker.selected = false;
+                });
             },
 
-            submit() {
-                let payload = {};
-                payload.pOldName = this.markerName;
-                payload.pName = this.targetSelect;
-                payload.pIndex = parseInt(this.targetSelectIndex);
-                payload.targetAlt = this.targetAlt;
-                payload.targetSpeed = this.targetSpeed;
-                payload.targetRadius = this.targetRadius;
-                payload.targetTurningSpeed = this.targetTurningSpeed;
-                payload.targetMavCmd = 16;
-                payload.paramAngle = this.paramAngle;
-                payload.pOldIndex = this.markerIndex;
-                payload.targetColor = this.curDroneColorMap;
+            createEachSurveyMarkerInfoToMobius(dName, callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            rn: dName,
+                            lbl: ['dName'],
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
 
-                this.$store.commit('registerMarker', payload);
+            postEachSurveyMarkerInfo(dName) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                    data: {
+                        'm2m:cin': {
+                            con: this.$store.state.surveyMarkers[dName]
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        console.log('++++++++ confirmAddSurveyMarker-axios', res.data);
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
 
-                EventBus.$emit('doBroadcastRegisterMaker', payload);
+            registerSurveyMarker(oldName, oldIndex, newName) {
 
-                payload = null;
+                this.$store.state.surveyMarkers[oldName][oldIndex].selected = false;
+
+                this.$store.state.surveyMarkers[newName].push(
+                    JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[oldName][oldIndex]))
+                );
+                this.$store.state.surveyMarkers[oldName].splice(oldIndex, 1);
+
+                this.postEachSurveyMarkerInfo(newName);
+
+                this.postEachSurveyMarkerInfo(oldName);
 
                 this.snackbar = true;
 
                 setTimeout(() => {
                     this.resetForm();
                 }, 100);
+            },
 
+            submit() {
+                console.log("999999999999999999999999999999999999999999999999999", this.targetSelect, this.$store.state.surveyMarkers[this.targetSelect]);
+
+                if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, this.targetSelect)) {
+                    this.$store.state.surveyMarkers[this.targetSelect] = [];
+
+                    this.createEachSurveyMarkerInfoToMobius(this.targetSelect, (res) => {
+                        console.log('InfoSurveyMarker', 'createEachSurveyMarkerInfoToMobius', res);
+
+                        this.registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelect);
+                    });
+                }
+                else {
+                    this.registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelect);
+                }
             },
             decrementAlt () {
                 this.targetAlt--;
@@ -689,22 +640,11 @@
         mounted() {
             this.targetSelect = this.markerName;
             this.targetSelectIndex = String(this.markerIndex);
-            this.targetLat = this.marker.lat;
-            this.targetLng = this.marker.lng;
-            this.targetAlt = this.marker.alt;
-            this.targetSpeed = this.marker.speed;
-            this.targetRadius = this.marker.radius;
-            this.targetTurningSpeed = this.marker.turningSpeed;
-
 
             this.paramAngle = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].angle;
             this.paramDir = (this.$store.state.surveyMarkers[this.markerName][this.markerIndex].dir === 1) ? 'cw' : 'ccw';
             this.paramGap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap;
             this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt;
-
-            this.elevation = this.marker.elevation;
-
-            this.targetType = this.marker.type;
 
             console.log('InfoSurveyMarker', this.$store.state.surveyMarkers[this.markerName]);
 
