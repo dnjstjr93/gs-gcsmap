@@ -216,17 +216,17 @@
                                     ></GmapCircle>
 
 <!--                                    drone circle -->
-                                    <GmapCircle
-                                            :center="{lat: drone.lat, lng: drone.lng}"
-                                            :radius="2"
-                                            :options="{fillOpacity: 0, strokeColor: '#D50000', strokeOpacity: 1, strokeWeight: 1, zIndex: 0}"
-                                    ></GmapCircle>
+<!--                                    <GmapCircle-->
+<!--                                            :center="{lat: drone.lat, lng: drone.lng}"-->
+<!--                                            :radius="2"-->
+<!--                                            :options="{fillOpacity: 0, strokeColor: '#D50000', strokeOpacity: 1, strokeWeight: 1, zIndex: 0}"-->
+<!--                                    ></GmapCircle>-->
 
-                                    <GmapCircle
-                                            :center="{lat: drone.lat, lng: drone.lng}"
-                                            :radius="5"
-                                            :options="{fillOpacity: 0, strokeColor: '#FF5252', strokeOpacity: 0.8, strokeWeight: 1, zIndex: 0}"
-                                    ></GmapCircle>
+<!--                                    <GmapCircle-->
+<!--                                            :center="{lat: drone.lat, lng: drone.lng}"-->
+<!--                                            :radius="5"-->
+<!--                                            :options="{fillOpacity: 0, strokeColor: '#FF5252', strokeOpacity: 0.8, strokeWeight: 1, zIndex: 0}"-->
+<!--                                    ></GmapCircle>-->
 
                                     <GmapCircle
                                             :center="{lat: drone.lat, lng: drone.lng}"
@@ -273,13 +273,13 @@
                                             :paths="survey.paths"
                                             :options="{
                                                 strokeColor: (survey.selected)?'#76FF03':((survey.targeted)?'#FFFF00':drone.color),
-                                                strokeOpacity: 1,
-                                                strokeWeight: (survey.selected)?4:((survey.targeted)?4:2),
+                                                strokeOpacity: (survey.selected)?0.8:((survey.targeted)?0.8:0.2),
+                                                strokeWeight: (survey.selected)?4:((survey.targeted)?4:1),
                                                 fillColor: drone.color,
-                                                fillOpacity: 0.25,
-                                                draggable: true,
+                                                fillOpacity: 0.1,
+                                                draggable: polygonDraggable,
                                                 geodesic: false,
-                                                editable: true,
+                                                editable: polygonEditable,
                                                 zIndex: 6,
                                             }"
                                         />
@@ -287,8 +287,8 @@
                                             :path.sync="survey.pathLines"
                                             :options="{
                                                 strokeColor: drone.color,
-                                                strokeOpacity: 0.5,
-                                                strokeWeight: 5,
+                                                strokeOpacity: 0.7,
+                                                strokeWeight: 4,
                                                 zIndex: 1
                                             }"
                                         />
@@ -420,6 +420,8 @@
 
         data () {
             return {
+                polygonDraggable: false,
+                polygonEditable: false,
                 turningDir: [90, 90, -90, -90],
                 idUpdateTimer: null,
                 idPostTimer: null,
@@ -1471,11 +1473,14 @@
 
                 this.curTempMarkerFlag = false;
                 this.curSurveyMarkerFlag = false;
-                //this.$store.commit('setAllTempMarker', false);
-
                 this.$store.state.surveyMarkers.unknown.forEach((marker) => {
                     marker.selected = false;
                 });
+
+                this.polygonDraggable = false;
+                this.polygonEditable = false;
+
+                //this.$store.commit('setAllTempMarker', false);
 
                 // console.log('addingMarker', e.domEvent);
                 //
@@ -1514,6 +1519,9 @@
                 this.$store.state.surveyMarkers[this.curNameMarker].forEach((marker) => {
                     marker.selected = false;
                 });
+
+                this.polygonDraggable = false;
+                this.polygonEditable = false;
 
                 this.cancelMarker();
             },
@@ -1561,9 +1569,9 @@
 
             updataSurveyParam(e, dName, pIndex) {
                 if(!this.$store.state.adding) {
-                    this.curSurveyMarkerFlag = false;
                     console.log('updataSurveyParam', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex]);
 
+                    this.curSurveyMarkerFlag = false;
                     this.$store.state.surveyMarkers[dName].forEach((marker) => {
                         marker.selected = false;
                     });
@@ -1576,6 +1584,8 @@
                         this.curIndexMarker = pIndex;
                         this.curNameMarker = dName;
                         this.curSurveyMarkerFlag = true;
+                        this.polygonDraggable = true;
+                        this.polygonEditable = true;
                     }, 10)
                 }
             },
