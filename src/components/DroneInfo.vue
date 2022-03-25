@@ -9,7 +9,7 @@
                                 <v-col cols="6">
                                     <v-card flat tile :color="$store.state.drone_infos[name].color">
                                         <v-checkbox dense @change="checkDroneSelected" class="pt-0 pl-2 ma-0 shadow"
-                                                    v-model="targeted"
+                                                    v-model="$store.state.drone_infos[name].targeted"
                                                     hide-details>
                                             <template v-slot:label>
                                                 <div>
@@ -893,8 +893,8 @@ export default {
             broadcast_topic: '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + this.name,
             droneSubscribeSuccess: {},
 
-            mavStrFromDrone: {},
-            mavStrFromDroneLength: {},
+            // mavStrFromDrone: {},
+            // mavStrFromDroneLength: {},
 
             pre_lat: 0,
             pre_lng: 0,
@@ -1708,9 +1708,9 @@ export default {
             // this.$store.state.dronesChecked = JSON.parse(JSON.stringify(temp));
             // temp = null;
 
-            EventBus.$emit('do-targetDroneMarker', this.name);
+            //EventBus.$emit('do-targetDroneMarker', this.name);
 
-            //EventBus.$emit('do-targetDrone');
+            EventBus.$emit('do-targetDrone');
         },
 
         onMessageBroadcast(message) {
@@ -1764,7 +1764,7 @@ export default {
 
             if (chkTopic === "/Mobius") {
                 this.strContentEach += message.toString('hex').toLowerCase();
-                while (this.strContentEach.length > 20) {
+                while (this.strContentEach.length > 12) {
                     if (this.mavVersion === 'v1' && this.strContentEach.substr(0, 2) === 'fe') {
                         var len = parseInt(this.strContentEach.substr(2, 2), 16);
                         var contentLenth = (6 * 2) + (len * 2) + (2 * 2);
@@ -2057,40 +2057,40 @@ export default {
             let sortie_name = arr_topic.pop();
             topic = arr_topic.join('/');
 
-            // eslint-disable-next-line no-prototype-builtins
-            if (!Object.prototype.hasOwnProperty.call(this.mavStrFromDrone, topic)) {
-                this.mavStrFromDrone[topic] = '';
-            }
+            // // eslint-disable-next-line no-prototype-builtins
+            // if (!Object.prototype.hasOwnProperty.call(this.mavStrFromDrone, topic)) {
+            //     this.mavStrFromDrone[topic] = '';
+            // }
 
             // eslint-disable-next-line no-prototype-builtins
-            if (!Object.prototype.hasOwnProperty.call(this.mavStrFromDroneLength, topic)) {
-                this.mavStrFromDroneLength[topic] = 0;
-            }
-
-            if (this.mavStrFromDroneLength[topic] > 0) {
-                this.mavStrFromDrone[topic] = this.mavStrFromDrone[topic].substr(this.mavStrFromDroneLength[topic]);
-                this.mavStrFromDroneLength[topic] = 0;
-            }
+            // if (!Object.prototype.hasOwnProperty.call(this.mavStrFromDroneLength, topic)) {
+            //     this.mavStrFromDroneLength[topic] = 0;
+            // }
+            //
+            // if (this.mavStrFromDroneLength[topic] > 0) {
+            //     this.mavStrFromDrone[topic] = this.mavStrFromDrone[topic].substr(this.mavStrFromDroneLength[topic]);
+            //     this.mavStrFromDroneLength[topic] = 0;
+            // }
 
             //this.mavStrFromDrone[topic] += this.hex(hex_content_each);
-            this.mavStrFromDrone[topic] = hex_content_each;
+            let mavPacket = hex_content_each;
             //var stx = this.mavStrFromDrone[topic].substr(0, 2);
             //if (stx === 'fe') {
-            var len = parseInt(this.mavStrFromDrone[topic].substr(2, 2), 16);
+            //var len = parseInt(mavPacket.substr(2, 2), 16);
 
             if(this.mavVersion === 'v1') {
-                var recv_sys_id = parseInt(this.mavStrFromDrone[topic].substr(6, 2), 16);
-                var mavLength = (6 * 2) + (len * 2) + (2 * 2);
+                var recv_sys_id = parseInt(mavPacket.substr(6, 2), 16);
+                //var mavLength = (6 * 2) + (len * 2) + (2 * 2);
             }
             else {
-                recv_sys_id = parseInt(this.mavStrFromDrone[topic].substr(10, 2), 16);
-                mavLength = (10 * 2) + (len * 2) + (2 * 2);
+                recv_sys_id = parseInt(mavPacket.substr(10, 2), 16);
+                //mavLength = (10 * 2) + (len * 2) + (2 * 2);
             }
 
             if (recv_sys_id === parseInt(this.ref_sys_id)) {
                 // if ((this.mavStrFromDrone[topic].length - this.mavStrFromDroneLength[topic]) >= mavLength) {
                 //     this.mavStrFromDroneLength[topic] += mavLength;
-                var mavPacket = this.mavStrFromDrone[topic].substr(0, mavLength);
+                // var mavPacket = this.mavStrFromDrone[topic].substr(0, mavLength);
                 //this.mavStrFromDrone[topic] = this.mavStrFromDrone[topic].substr(mavLength);
 
                 // let payload = {};
@@ -3765,6 +3765,11 @@ export default {
                     //
 
                     //console.log('this.gpi.hdg', (this.gpi.hdg / 100) % 360);
+
+                    this.$store.state.drone_infos[this.name].lat = (this.gpi.lat / 10000000);
+                    this.$store.state.drone_infos[this.name].lng = (this.gpi.lon / 10000000);
+                    this.$store.state.drone_infos[this.name].alt = (this.gpi.relative_alt / 1000);
+
 
                     let h_pos = get_point_dist((this.gpi.lat / 10000000), (this.gpi.lon / 10000000), 1, this.heading);
                     this.$store.state.drone_infos[this.name].headingLine = [];

@@ -476,6 +476,8 @@
 
                 this.$store.state.surveyMarkers[this.markerName].forEach((marker) => {
                     marker.selected = false;
+                    marker.polygonDraggable = false;
+                    marker.polygonEditable = false;
                 });
             },
 

@@ -1321,32 +1321,19 @@ export default {
 
             this.prepared = false;
 
-            this.tagetModeSelection = null;
             this.tagetModeSelection = {};
-            this.takeoffDelay = null;
             this.takeoffDelay = {};
-            this.targetTakeoffAlt = null;
             this.targetTakeoffAlt = {};
-            this.targetAlt = null;
             this.targetAlt = {};
-            this.targetSpeed = null;
             this.targetSpeed = {};
             this.targetStayTime = {};
-            this.targetTurningSpeed = null;
             this.targetTurningSpeed = {};
-            this.targetRadius = null;
             this.targetRadius = {};
-            this.autoStartIndex = null;
             this.autoStartIndex = {};
-            this.autoEndIndex = null;
             this.autoEndIndex = {};
-            this.autoSpeed = null;
             this.autoSpeed = {};
-            this.autoDelay = null;
             this.autoDelay = {};
-            this.gotoType = null;
             this.gotoType = {};
-            this.circleType = null;
             this.circleType = {};
             for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
@@ -1377,7 +1364,8 @@ export default {
                         if (this.$cookies.isKey('target_mission_num')) {
                             this.target_mission_num = this.$cookies.get('target_mission_num');
                             this.mission_value = this.$cookies.get('mission_value');
-                        } else {
+                        }
+                        else {
                             for (let i = 0; i < this.channels.length; i++) {
                                 let num = this.channels[i];
                                 this.mission_value[`ch${num}`][name] = (this.mission_ch_max + this.mission_ch_min) / 2;

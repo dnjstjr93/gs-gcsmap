@@ -352,6 +352,7 @@ const _defaultDroneInfo = {
 export default new Vuex.Store({
     state: {
         iconSource: faMapMarkerAlt,
+        iconSourceDrone: droneSvgPath,
 
         MOBIUS_CONNECTION_CONNECTED: false,
         VUE_APP_MOBIUS_HOST: '203.253.128.177',
@@ -1375,7 +1376,7 @@ export default new Vuex.Store({
             // state.dronesChecked = JSON.parse(JSON.stringify(temp));
             // temp = null;
 
-            EventBus.$emit('do-targetDroneMarker', payload.pName);
+            //EventBus.$emit('do-targetDroneMarker', payload.pName);
 
             axios({
                 validateStatus: function (status) {
@@ -1443,7 +1444,7 @@ export default new Vuex.Store({
             // state.dronesChecked = JSON.parse(JSON.stringify(temp));
             // temp = null;
 
-            EventBus.$emit('do-targetDroneMarker', payload.pName);
+            //EventBus.$emit('do-targetDroneMarker', payload.pName);
 
             axios({
                 validateStatus: function (status) {
@@ -1514,7 +1515,7 @@ export default new Vuex.Store({
             // state.dronesChecked = JSON.parse(JSON.stringify(temp));
             // temp = null;
 
-            EventBus.$emit('do-targetDroneMarker', payload.pName);
+            //EventBus.$emit('do-targetDroneMarker', payload.pName);
 
             axios({
                 validateStatus: function (status) {
@@ -1624,6 +1625,10 @@ export default new Vuex.Store({
 
                         if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetSpeed')) {
                             state.drone_infos[dName].targetSpeed = 5;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'alt')) {
+                            state.drone_infos[dName].alt = 0;
                         }
 
                         if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTurningSpeed')) {

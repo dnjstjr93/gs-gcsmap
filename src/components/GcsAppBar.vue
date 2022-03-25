@@ -1345,6 +1345,17 @@
                                     if(!Object.prototype.hasOwnProperty.call(pos, 'pathLines')) {
                                         pos.pathLines = [];
                                     }
+
+                                    if(!Object.prototype.hasOwnProperty.call(pos, 'polygonDraggable')) {
+                                        pos.polygonDraggable = false;
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(pos, 'polygonEditable')) {
+                                        pos.polygonEditable = false;
+                                    }
+
+                                    pos.polygonDraggable = false;
+                                    pos.polygonEditable = false;
                                 });
                             }
 

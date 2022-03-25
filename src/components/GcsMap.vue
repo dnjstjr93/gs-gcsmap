@@ -27,16 +27,16 @@
                 </v-card>
                 <v-card>
                     <GmapMap ref="mapRef" :center="center"
-                             :zoom="18"
-                             map-type-id="satellite"
-                             :restriction="{
-                                 strictBounds: false,
-                             }"
-                             :style="myGcsStyle"
-                             :options="{disableDefaultUI: true, gestureHandling: 'auto', disableDoubleClickZoom: true, minZoom: 3, maxZoom: 30}"
-                             @click="printPosClick"
-                             @dblclick="addingMarker"
-                             @dragstart="cancelMarker"
+                         :zoom="18"
+                         map-type-id="satellite"
+                         :restriction="{
+                             strictBounds: false,
+                         }"
+                         :style="myGcsStyle"
+                         :options="{disableDefaultUI: true, gestureHandling: 'auto', disableDoubleClickZoom: true, minZoom: 3, maxZoom: 30}"
+                         @click="printPosClick"
+                         @dblclick="addingMarker"
+                         @dragstart="cancelMarker"
                     >
 <!--                        <GmapMarker-->
 <!--                                :position="{lat: 37.40423134053018, lng: 127.16050533784832}"-->
@@ -46,16 +46,16 @@
 <!--                                :label="defaultDroneLabel"-->
 <!--                        />-->
 
-                        <GmapMarker
-                            v-for="(d, dIndex) in droneMarkers" :key="'targetDroneMarker_'+dIndex"
-                            :position="{lat: d.lat, lng: d.lng}"
-                            :clickable="true"
-                            :draggable="false"
-                            :icon="d.icon"
-                            :label="d.label"
-                            @click="targetDroneMarker($event, d, dIndex)"
-                            :title="d.name"
-                        />
+<!--                        <GmapMarker-->
+<!--                            v-for="(d, dIndex) in droneMarkers" :key="'targetDroneMarker_'+dIndex"-->
+<!--                            :position="{lat: d.lat, lng: d.lng}"-->
+<!--                            :clickable="true"-->
+<!--                            :draggable="false"-->
+<!--                            :icon="d.icon"-->
+<!--                            :label="d.label"-->
+<!--                            @click="targetDroneMarker($event, d, dIndex)"-->
+<!--                            :title="d.name"-->
+<!--                        />-->
 
                         <GmapMarker
                             v-for="(p, pIndex) in planeMarkers" :key="'targetPlaneMarker_'+pIndex"
@@ -168,6 +168,31 @@
 
                             <div v-for="drone in $store.state.drone_infos" :key="'guideCircles_'+drone.id">
                                 <div v-if="drone.selected">
+                                    <GmapMarker
+                                        @click="targetDrones(drone.name)"
+                                        :position="{lat: drone.lat, lng: drone.lng}"
+                                        :clickable="true"
+                                        :draggable="false"
+                                        :icon="{
+                                            path: $store.state.iconSourceDrone,
+                                            fillColor: drone.color,
+                                            fillOpacity: 0.8,
+                                            strokeWeight: (drone.targeted)?3:0.8,
+                                            strokeColor: (drone.targeted)?'springgreen':'grey',
+                                            rotation: drone.heading,
+                                            scale: scaleDroneIcon,
+                                            anchor: {x: 350, y: 351},
+                                            labelOrigin: {x: 350, y: 370}
+                                        }"
+                                        :label="{
+                                            text: drone.name.slice(0, 1).toUpperCase() + '(' + drone.system_id + ')' + ':' + drone.alt.toFixed(1),
+                                            color: 'white',
+                                            fontSize: '15px',
+                                            fontWeight: 'bold'
+                                        }"
+                                        :title="drone.name"
+                                    />
+
                                     <GmapPolyline
                                         :path.sync="$store.state.trackingLines[drone.name]"
                                         :options="trackingLineOptions"
@@ -277,9 +302,9 @@
                                                 strokeWeight: (survey.selected)?4:((survey.targeted)?4:1),
                                                 fillColor: drone.color,
                                                 fillOpacity: 0.1,
-                                                draggable: polygonDraggable,
+                                                draggable: survey.polygonDraggable,
                                                 geodesic: false,
-                                                editable: polygonEditable,
+                                                editable: survey.polygonEditable,
                                                 zIndex: 6,
                                             }"
                                         />
@@ -288,31 +313,73 @@
                                             :options="{
                                                 strokeColor: drone.color,
                                                 strokeOpacity: 0.7,
-                                                strokeWeight: 4,
+                                                strokeWeight: 3,
                                                 zIndex: 1
                                             }"
                                         />
-                                        <div v-for="(pos, pIndex) in survey.pathLines" :key="'survey'+pIndex">
-                                            <GmapMarker
-                                                :position="{lat:pos.lat, lng:pos.lng}"
-                                                :icon="{
-                                                    path: $store.state.iconSource.icon[4],
-                                                    fillColor: (pIndex===0)?'#FF5722':'#607D8B',
-                                                    fillOpacity: 0.6,
-                                                    strokeWeight: 0.8,
-                                                    strokeColor: 'black',
-                                                    rotation: 0,
-                                                    scale: 0.05,
-                                                    anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
-                                                    labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
-                                                }"
-                                                :label="{
-                                                    text: String(pIndex),
-                                                    color: 'white',
-                                                    fontSize: '14px',
-                                                    fontWeight: 'bold',
-                                                }"
-                                            />
+                                        <GmapMarker
+                                            :position="{lat:survey.pathLines[0].lat, lng:survey.pathLines[0].lng}"
+                                            :icon="{
+                                                path: $store.state.iconSource.icon[4],
+                                                fillColor: '#FF5722',
+                                                fillOpacity: 0.6,
+                                                strokeWeight: 0.8,
+                                                strokeColor: 'black',
+                                                rotation: 0,
+                                                scale: 0.05,
+                                                anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
+                                                labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                            }"
+                                            :label="{
+                                                text: '0',
+                                                color: 'white',
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                            }"
+                                        />
+                                        <GmapMarker
+                                            :position="{lat:survey.pathLines[survey.pathLines.length-1].lat, lng:survey.pathLines[survey.pathLines.length-1].lng}"
+                                            :icon="{
+                                                path: $store.state.iconSource.icon[4],
+                                                fillColor: '#607D8B',
+                                                fillOpacity: 0.6,
+                                                strokeWeight: 0.8,
+                                                strokeColor: 'black',
+                                                rotation: 0,
+                                                scale: 0.05,
+                                                anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
+                                                labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                            }"
+                                            :label="{
+                                                text: String(survey.pathLines.length-1),
+                                                color: 'white',
+                                                fontSize: '14px',
+                                                fontWeight: 'bold',
+                                            }"
+                                        />
+                                        <div v-if="false">
+                                            <div v-for="(pos, pIndex) in survey.pathLines" :key="'survey'+pIndex">
+                                                <GmapMarker
+                                                    :position="{lat:pos.lat, lng:pos.lng}"
+                                                    :icon="{
+                                                        path: $store.state.iconSource.icon[4],
+                                                        fillColor: (pIndex===0)?'#FF5722':'#607D8B',
+                                                        fillOpacity: 0.6,
+                                                        strokeWeight: 0.8,
+                                                        strokeColor: 'black',
+                                                        rotation: 0,
+                                                        scale: 0.05,
+                                                        anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
+                                                        labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                                    }"
+                                                    :label="{
+                                                        text: String(pIndex),
+                                                        color: 'white',
+                                                        fontSize: '14px',
+                                                        fontWeight: 'bold',
+                                                    }"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -420,8 +487,7 @@
 
         data () {
             return {
-                polygonDraggable: false,
-                polygonEditable: false,
+                scaleDroneIcon: 0.05,
                 turningDir: [90, 90, -90, -90],
                 idUpdateTimer: null,
                 idPostTimer: null,
@@ -1043,11 +1109,11 @@
 
                     this.updateSurveyPath(dName, pIndex, gap, angle, dir);
 
-                    if(this.idUpdateTimer !== null) {
-                        clearTimeout(this.idUpdateTimer);
+                    if(this.idPostTimer !== null) {
+                        clearTimeout(this.idPostTimer);
                     }
 
-                    this.idUpdateTimer = setTimeout((dName) => {
+                    this.idPostTimer = setTimeout((dName) => {
                         this.postEachSurveyMarkerInfo(dName);
                     }, 2000, dName);
                 }, 500, dName);
@@ -1475,10 +1541,9 @@
                 this.curSurveyMarkerFlag = false;
                 this.$store.state.surveyMarkers.unknown.forEach((marker) => {
                     marker.selected = false;
+                    marker.polygonDraggable = false;
+                    marker.polygonEditable = false;
                 });
-
-                this.polygonDraggable = false;
-                this.polygonEditable = false;
 
                 //this.$store.commit('setAllTempMarker', false);
 
@@ -1518,10 +1583,9 @@
                 this.curSurveyMarkerFlag = false;
                 this.$store.state.surveyMarkers[this.curNameMarker].forEach((marker) => {
                     marker.selected = false;
+                    marker.polygonDraggable = false;
+                    marker.polygonEditable = false;
                 });
-
-                this.polygonDraggable = false;
-                this.polygonEditable = false;
 
                 this.cancelMarker();
             },
@@ -1580,13 +1644,13 @@
 
                     setTimeout(() => {
                         this.$store.state.surveyMarkers[dName][pIndex].selected = true;
+                        this.$store.state.surveyMarkers[dName][pIndex].polygonDraggable = true;
+                        this.$store.state.surveyMarkers[dName][pIndex].polygonEditable = true;
                         this.curSelectedMarker = this.$store.state.surveyMarkers[dName][pIndex];
                         this.curIndexMarker = pIndex;
                         this.curNameMarker = dName;
                         this.curSurveyMarkerFlag = true;
-                        this.polygonDraggable = true;
-                        this.polygonEditable = true;
-                    }, 10)
+                    }, 50)
                 }
             },
 
@@ -1793,88 +1857,94 @@
                 // temp = null;
             },
 
-            targetDroneMarker(e, dMarker, dName) {
-
-                if(dName === 'unknown') {
-                    return;
-                }
-
-                console.log('targetDroneMarker - dMarker', dMarker);
-                console.log('targetDroneMarker - dName', dName);
-
-                if(!Object.prototype.hasOwnProperty.call(dMarker, 'icon')) {
-                    dMarker.icon = JSON.parse(JSON.stringify(this.$store.state.defaultDroneIcon));
-                }
-
-                let temp = JSON.parse(JSON.stringify(dMarker.icon));
-                if (!dMarker.selected) {
-                    dMarker.selected = true;
-                    dMarker.icon = null;
-                    dMarker.icon = JSON.parse(JSON.stringify(temp));
-                    dMarker.icon.strokeWeight = 3;
-                    dMarker.icon.strokeOpacity = 0.5
-                    dMarker.icon.strokeColor = 'springgreen';
-                }
-                else {
-                    dMarker.selected = false;
-                    dMarker.icon = null;
-                    dMarker.icon = JSON.parse(JSON.stringify(temp));
-                    dMarker.icon.strokeWeight = 1;
-                    dMarker.icon.strokeOpacity = 1
-                    dMarker.icon.strokeColor = 'grey';
-
-                    this.deleteLineTarget(dName);
-                }
-
-                //if(this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회') {
-                for(let pIndex in this.$store.state.tempMarkers[dName]) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
-                        if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
-                            let payload = {};
-                            payload.pName = dName;
-                            payload.pIndex = pIndex;
-
-                            this.drawLineTarget(payload);
-
-                        //payload = null;
-
-                        // this.$store.state.targetLines[dName] = null;
-                        // this.$store.state.targetLines[dName] = [];
-                        // this.targetLinesOptions[dName] = null;
-                        // this.targetLinesOptions[dName] = {};
-                        // let _options = {};
-                        // _options.strokeColor = dMarker.color;
-                        // _options.strokeOpacity = 0.9;
-                        // _options.strokeWeight = 5;
-                        // this.targetLinesOptions[dName] = JSON.parse(JSON.stringify(_options));
-                        // _options = null;
-                        //
-                        // this.$store.state.targetLines[dName].push(dMarker);
-                        // this.$store.state.targetLines[dName].push(this.$store.state.tempMarkers[dName][pIndex]);
-                        //
-                        // this.$store.state.targetLines = this.clone(this.$store.state.targetLines);
-
-                        //break;
-                        }
-                    }
-                }
-                //}
-
-                EventBus.$emit('do-drone-selected' + dName, dMarker.selected);
-
-                dMarker = this.clone(dMarker);
-
-                temp = null;
-
-                this.$store.state.drone_infos[dName].targeted = dMarker.selected;
+            targetDrones(dName) {
+                this.$store.state.drone_infos[dName].targeted = !this.$store.state.drone_infos[dName].targeted;
 
                 EventBus.$emit('do-targetDrone');
-
-                // temp = JSON.parse(JSON.stringify(this.$store.state.dronesChecked));
-                // this.$store.state.dronesChecked = null;
-                // this.$store.state.dronesChecked = JSON.parse(JSON.stringify(temp));
-                // temp = null;
             },
+
+            // targetDroneMarker(e, dMarker, dName) {
+            //
+            //     if(dName === 'unknown') {
+            //         return;
+            //     }
+            //
+            //     console.log('targetDroneMarker - dMarker', dMarker);
+            //     console.log('targetDroneMarker - dName', dName);
+            //
+            //     if(!Object.prototype.hasOwnProperty.call(dMarker, 'icon')) {
+            //         dMarker.icon = JSON.parse(JSON.stringify(this.$store.state.defaultDroneIcon));
+            //     }
+            //
+            //     let temp = JSON.parse(JSON.stringify(dMarker.icon));
+            //     if (!dMarker.selected) {
+            //         dMarker.selected = true;
+            //         dMarker.icon = null;
+            //         dMarker.icon = JSON.parse(JSON.stringify(temp));
+            //         dMarker.icon.strokeWeight = 3;
+            //         dMarker.icon.strokeOpacity = 0.5
+            //         dMarker.icon.strokeColor = 'springgreen';
+            //     }
+            //     else {
+            //         dMarker.selected = false;
+            //         dMarker.icon = null;
+            //         dMarker.icon = JSON.parse(JSON.stringify(temp));
+            //         dMarker.icon.strokeWeight = 1;
+            //         dMarker.icon.strokeOpacity = 1
+            //         dMarker.icon.strokeColor = 'grey';
+            //
+            //         this.deleteLineTarget(dName);
+            //     }
+            //
+            //     //if(this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회') {
+            //     for(let pIndex in this.$store.state.tempMarkers[dName]) {
+            //         if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
+            //             if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+            //                 let payload = {};
+            //                 payload.pName = dName;
+            //                 payload.pIndex = pIndex;
+            //
+            //                 this.drawLineTarget(payload);
+            //
+            //             //payload = null;
+            //
+            //             // this.$store.state.targetLines[dName] = null;
+            //             // this.$store.state.targetLines[dName] = [];
+            //             // this.targetLinesOptions[dName] = null;
+            //             // this.targetLinesOptions[dName] = {};
+            //             // let _options = {};
+            //             // _options.strokeColor = dMarker.color;
+            //             // _options.strokeOpacity = 0.9;
+            //             // _options.strokeWeight = 5;
+            //             // this.targetLinesOptions[dName] = JSON.parse(JSON.stringify(_options));
+            //             // _options = null;
+            //             //
+            //             // this.$store.state.targetLines[dName].push(dMarker);
+            //             // this.$store.state.targetLines[dName].push(this.$store.state.tempMarkers[dName][pIndex]);
+            //             //
+            //             // this.$store.state.targetLines = this.clone(this.$store.state.targetLines);
+            //
+            //             //break;
+            //             }
+            //         }
+            //     }
+            //     //}
+            //
+            //     EventBus.$emit('do-drone-selected' + dName, dMarker.selected);
+            //
+            //     dMarker = this.clone(dMarker);
+            //
+            //     temp = null;
+            //
+            //     this.$store.state.drone_infos[dName].targeted = dMarker.selected;
+            //
+            //     EventBus.$emit('do-targetDrone');
+            //
+            //     // temp = JSON.parse(JSON.stringify(this.$store.state.dronesChecked));
+            //     // this.$store.state.dronesChecked = null;
+            //     // this.$store.state.dronesChecked = JSON.parse(JSON.stringify(temp));
+            //     // temp = null;
+            // },
 
             clone(obj) {
                 let temp = null;
@@ -2387,6 +2457,8 @@
 
                 // this.$refs.mapRef.$mapPromise.then((map) => {
                     this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                    this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+
                 // });
             });
 
@@ -2498,10 +2570,10 @@
                 this.targetTempMarker('', payload.pName, payload.pIndex, payload.targeted);
             });
 
-            EventBus.$on('do-targetDroneMarker', (pName) => {
-                let dMarker = this.droneMarkers[pName];
-                this.targetDroneMarker('', dMarker, pName);
-            });
+            // EventBus.$on('do-targetDroneMarker', (pName) => {
+            //     let dMarker = this.droneMarkers[pName];
+            //     this.targetDroneMarker('', dMarker, pName);
+            // });
 
             EventBus.$on('do-targetPlaneMarker', (pName) => {
                 let pMarker = this.planeMarkers[pName];
@@ -2553,6 +2625,7 @@
             EventBus.$on('updatePlaneMarker', (payload) => {
                 this.$refs.mapRef.$mapPromise.then((map) => {
                     this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                    this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
                 });
 
                 if(!Object.prototype.hasOwnProperty.call(this.planeMarkers, payload.ICAO_address)) {
@@ -2653,6 +2726,7 @@
                 //this.droneMarkers[payload.name] = null;
                 this.$refs.mapRef.$mapPromise.then((map) => {
                     this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                    this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
                 });
 
                 if(!Object.prototype.hasOwnProperty.call(this.droneMarkers, payload.name)) {
@@ -2756,7 +2830,7 @@
             EventBus.$off('do-drawLineAllTarget');
             EventBus.$off('do-drawMovingLines');
             EventBus.$off('do-targetTempMarker');
-            EventBus.$off('do-targetDroneMarker');
+            //EventBus.$off('do-targetDroneMarker');
             EventBus.$off('gcs-map-ready');
             EventBus.$off('updateDroneMarker');
             EventBus.$off('clearDroneMarker');
