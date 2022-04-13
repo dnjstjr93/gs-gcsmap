@@ -1302,7 +1302,7 @@
                 if(markers.length > count) {
                     let dName = markers[count].split('/')[3];
                     this.getEachSurveyMarkerInfoFromMobius(dName, (status, con) => {
-                        if(status === 200) {
+                        if(status === 200 || status === 404 || con === '') {
                             if(con === undefined) {
                                 con = [];
                             }
