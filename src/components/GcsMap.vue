@@ -181,13 +181,13 @@
                                         :options="{fillOpacity: 1, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 1, strokeWeight: 1}"
                                     ></GmapCircle>
 
-<!--                                    <GmapCircle-->
-<!--                                        :center="{lat: drone.home_position.lat, lng: drone.home_position.lng}"-->
-<!--                                        :radius="500"-->
-<!--                                        :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"-->
-<!--                                        @dblclick="addingMarker"-->
-<!--                                        @click="printPosClick"-->
-<!--                                    ></GmapCircle>-->
+                                    <GmapCircle
+                                        :center="{lat: drone.home_position.lat, lng: drone.home_position.lng}"
+                                        :radius="500"
+                                        :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"
+                                        @dblclick="addingMarker"
+                                        @click="printPosClick"
+                                    ></GmapCircle>
 
 <!--                                    drone circle -->
 <!--                                    <GmapCircle-->
