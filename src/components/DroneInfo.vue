@@ -8,9 +8,11 @@
                             <v-row no-gutters align="center" justify="center">
                                 <v-col cols="6">
                                     <v-card flat tile :color="$store.state.drone_infos[name].color">
-                                        <v-checkbox dense @change="checkDroneSelected" class="pt-0 pl-2 ma-0 shadow"
-                                                    v-model="$store.state.drone_infos[name].targeted"
-                                                    hide-details>
+                                        <v-checkbox
+                                            dense hide-details
+                                            @change="checkDroneSelected" class="pt-0 pl-1 ma-0 shadow"
+                                            v-model="$store.state.drone_infos[name].targeted"
+                                        >
                                             <template v-slot:label>
                                                 <div>
                                                     <span :class="statusTextColor">{{name + '(' + sys_id + ')' }}</span>
@@ -37,11 +39,9 @@
                                 </v-col>
                                 <v-col cols="2">
                                     <v-switch
-                                        dark
+                                        dark dense hide-details flat
                                         prepend-icon="mdi-video"
-                                        :color="$store.state.drone_infos[name].color"
-                                        class="ma-0 pa-0 pl-2"
-                                        hide-details
+                                        class="ma-0 pa-0 pl-0"
                                         v-model="info.isVideo"
                                         @change="onVideoHandler(name)"
                                         :disabled="!$store.state.enableVideo"
@@ -50,22 +50,32 @@
                                 </v-col>
                                 <v-col cols="1">
                                     <v-btn
-                                        class="mx-2 my-1" small text outlined
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="setHomePosition"
+                                    >
+                                        <v-icon small>
+                                            mdi-home
+                                        </v-icon>
+                                    </v-btn>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-btn
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
                                         @click.stop="clearTrackingLines"
                                     >
-                                        <v-icon>
+                                        <v-icon small>
                                             mdi-layers-off
                                         </v-icon>
                                     </v-btn>
                                 </v-col>
-                                <v-col cols="2">
+                                <v-col cols="1">
                                     <div class="text-right">
                                         <v-btn
-                                            class="mr-1" dark small elevation="10"
+                                            class="mr-1 my-1" dark x-small elevation="5"
                                             :color="$store.state.drone_infos[name].color"
                                             @click.stop="showMyDroneInfoDialog"
                                         >
-                                            <v-icon dark>
+                                            <v-icon small>
                                                 mdi-text-box-check-outline
                                             </v-icon>
                                         </v-btn>
@@ -4964,6 +4974,15 @@ export default {
             delete this.$store.state.trackingLines[this.name];
             this.$store.state.trackingLines[this.name] = [];
         },
+
+        setHomePosition() {
+            this.$store.state.drone_infos[this.name].home_position = null;
+            delete this.$store.state.drone_infos[this.name].home_position;
+            this.$store.state.drone_infos[this.name].home_position = {
+                lat: (this.gpi.lat / 10000000),
+                lng: (this.gpi.lon / 10000000)
+            };
+        }
     },
 
     created() {

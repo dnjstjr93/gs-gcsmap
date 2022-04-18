@@ -37,6 +37,7 @@
                          @click="printPosClick"
                          @dblclick="addingMarker"
                          @dragstart="cancelMarker"
+                         @mousemove="calcDistance"
                     >
 <!--                        <GmapMarker-->
 <!--                                :position="{lat: 37.40423134053018, lng: 127.16050533784832}"-->
@@ -187,6 +188,7 @@
                                         :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6}"
                                         @dblclick="addingMarker"
                                         @click="printPosClick"
+                                        @mousemove="calcDistance"
                                     ></GmapCircle>
 
 <!--                                    drone circle -->
@@ -203,9 +205,10 @@
 <!--                                    ></GmapCircle>-->
 
                                     <GmapCircle
-                                            :center="{lat: drone.lat, lng: drone.lng}"
-                                            :radius="10"
-                                            :options="{fillOpacity: 0, strokeColor: '#FFCDD2', strokeOpacity: 0.6, strokeWeight: 1, zIndex: 0}"
+                                        :center="{lat: drone.lat, lng: drone.lng}"
+                                        :radius="10"
+                                        :options="{fillOpacity: 0, strokeColor: '#FFCDD2', strokeOpacity: 0.6, strokeWeight: 1, zIndex: 0}"
+                                        @mousemove="calcDistance"
                                     ></GmapCircle>
 
                                     <GmapCircle
@@ -214,6 +217,7 @@
                                         :options="{fillOpacity: 0, fillColor: drone.color, strokeColor: drone.color, strokeOpacity: 0.15, strokeWeight: 6, zIndex: 0}"
                                         @dblclick="addingMarker"
                                         @click="printPosClick"
+                                        @mousemove="calcDistance"
                                     ></GmapCircle>
 
 
@@ -244,6 +248,7 @@
                                             @paths_changed="showNewPolygon($event, drone.name, pIndex)"
                                             @dblclick="updataSurveyParam($event, drone.name, pIndex)"
                                             @click="targetSurveyPolygon($event, drone.name, pIndex)"
+                                            @mousemove="calcDistance"
                                             :paths="survey.paths"
                                             :options="{
                                                 strokeColor: (survey.selected)?'#76FF03':((survey.targeted)?'#FFFF00':drone.color),
@@ -342,6 +347,7 @@
                                         :options="circle.options"
                                         @dblclick="addingMarker"
                                         @click="printPosClick"
+                                        @mousemove="calcDistance"
                                     ></GmapCircle>
                                 </div>
                             </div>
@@ -370,6 +376,7 @@
                                         :center="circle"
                                         :radius="circle.radius"
                                         :options="circle.options"
+                                        @mousemove="calcDistance"
                                     ></GmapCircle>
                                 </div>
                             </div>
@@ -388,6 +395,7 @@
                                 <GmapPolygon
                                     @paths_changed="showNewPolygon($event, 'unknown', pIndex)"
                                     @dblclick="updataSurveyParam($event, 'unknown', pIndex)"
+                                    @mousemove="calcDistance"
                                     :paths="survey.paths"
                                     :options="{
                                         strokeColor: (survey.selected)?'#76FF03':'black',
@@ -528,6 +536,7 @@
 
         data () {
             return {
+                datum: {targeted: false, lat:0.0, lng:0.0},
                 scaleDroneIcon: 0.05,
                 turningDir: [90, 90, -90, -90],
                 idUpdateTimer: null,
@@ -1113,7 +1122,7 @@
             },
 
             showNewPolygon(e, dName, pIndex) {
-                console.log(e);
+                //console.log(e);
 
                 this.$store.state.surveyMarkers[dName][pIndex].paths = [];
 
@@ -1665,6 +1674,14 @@
                 this.cancelMarker();
             },
 
+            calcDistance(e) {
+                if(this.datum.targeted) {
+                    this.datum.curLat = e.latLng.lat();
+                    this.datum.curLng = e.latLng.lng();
+                    EventBus.$emit('do-calcDistance', this.datum);
+                }
+            },
+
             targetSurveyPolygon(e, dName, pIndex) {
                 this.curSurveyMarkerFlag = false;
                 this.$store.state.surveyMarkers[dName].forEach((marker) => {
@@ -1880,7 +1897,19 @@
 
                         this.drawLineTarget(payload);
 
-                        console.log('target', this.$store.state.tempMarkers[pName][pIndex].targeted)
+                        console.log('target', this.$store.state.tempMarkers[pName][pIndex].targeted);
+
+                        if(pName === 'unknown') {
+                            this.datum.targeted = targeted;
+                            this.datum.lat = this.$store.state.tempMarkers[pName][pIndex].lat;
+                            this.datum.lng = this.$store.state.tempMarkers[pName][pIndex].lng;
+
+                            console.log('datum', this.datum);
+
+                            if(targeted === false) {
+                                EventBus.$emit('do-calcDistance', this.datum);
+                            }
+                        }
                     }
                     this.$forceUpdate();
                 }

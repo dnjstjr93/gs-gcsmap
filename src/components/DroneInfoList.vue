@@ -6,32 +6,37 @@
                     <v-card ref="prev" flat tile class="overflow-y-auto" :style="listHeight" :min-width="myMinWidth+'px'" :width="myMinWidth+'px'">
                         <v-card flat tile outlined>
                             <v-row no-gutters justify="center" align="center">
-                                <v-col cols="5">
+                                <v-col cols="4">
                                     <v-switch
+                                        dense hide-details
                                         v-model="distanceMonitor"
-                                        label="드론간 근접감시"
+                                        label="드론근접감시"
                                         color="warning"
-                                        class="ma-0 pa-0 pl-2 py-2"
-                                        hide-details
+                                        class="ma-0 pa-0 pl-1 py-1"
                                     ></v-switch>
                                 </v-col>
                                 <v-col cols="3">
-                                        <v-switch
+                                    <v-switch
+                                        dense hide-details
                                         v-model="ADSBMonitor"
                                         label="ADS-B"
                                         color="warning"
-                                        class="ma-0 pa-0 pl-2 py-2"
-                                        hide-details
+                                        class="ma-0 pa-0 pl-1 py-1"
                                     ></v-switch>
                                 </v-col>
-                                <v-col cols="4" class="text-right" >
-                                    <v-btn class="mr-2" small @click.stop="zoomDouble">
-                                        <v-icon>
+                                <v-col cols="2" class="text-right pr-1" >
+                                    <v-card class="pr-1" outlined tile>
+                                        <span style="font-size: 14px">{{ strMouse }}</span>
+                                    </v-card>
+                                </v-col>
+                                <v-col cols="3" class="text-right" >
+                                    <v-btn class="mr-2" x-small @click.stop="zoomDouble">
+                                        <v-icon small>
                                             mdi-magnify-plus-outline
                                         </v-icon>
                                     </v-btn>
-                                    <v-btn class="mr-2" small @click.stop="zoomNormal">
-                                        <v-icon>
+                                    <v-btn class="mr-2" x-small @click.stop="zoomNormal">
+                                        <v-icon small>
                                             mdi-magnify-minus-outline
                                         </v-icon>
                                     </v-btn>
@@ -161,6 +166,7 @@
 
         data: function() {
             return {
+                strMouse: 'NaN',
                 myHeight: window.innerHeight-50,
                 myWidth: 480,
                 drones_selected: [],
@@ -183,7 +189,7 @@
                 broadcast_topic: {},
                 droneSubscribeSuccess: {},
                 //wsUrl: 'wss://' + 'webrtc.intellicode.info:443' + '/webRTC',
-                wsUrl: 'wss://' + 'webrtc.iotocean.org:7598' + '/webRTC',
+                wsUrl: 'wss://' + 'gcs.iotocean.org:7598' + '/webRTC',
                 ws: null,
             };
         },
@@ -661,6 +667,33 @@
                 }
             });
 
+            EventBus.$on('do-calcDistance', (datum) => {
+                if(datum.targeted) {
+                    console.log(datum);
+
+                    var cur_lat = datum.lat;
+                    var cur_lon = datum.lng;
+
+                    var result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
+
+                    var tar_lat = datum.curLat;
+                    var tar_lon = datum.curLng;
+
+                    var result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
+
+                    let dist = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2));
+
+                    if (dist > 1000) {
+                        this.strMouse = 'd: ' + (dist / 1000).toFixed(1) + ' km';
+                    } else {
+                        this.strMouse = 'd: ' + dist.toFixed(1) + ' m';
+                    }
+                }
+                else {
+                    this.strMouse = 'NaN';
+                }
+            });
+
             EventBus.$emit('ws-connect');
         },
 
@@ -673,6 +706,7 @@
             EventBus.$off('gcs-map-ready');
             EventBus.$off('confirm_selected');
             EventBus.$off('ws-send-message');
+            EventBus.$off('do-calcDistance');
         }
     }
 </script>

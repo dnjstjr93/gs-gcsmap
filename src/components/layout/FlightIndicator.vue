@@ -31,12 +31,15 @@ export default {
     },
     computed: {
         setRoll () {
-            let value = Math.floor(this.data.bankAngle);
+            let value = Math.floor(this.data.bankAngle*10)/10;
+
+            //console.log(value);
 
             return `rotate(${value}deg)`;
         }
     }
 }
+
 </script>
 
 <style lang="scss">
