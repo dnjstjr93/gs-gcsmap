@@ -4,8 +4,8 @@
         class="canvas"
         :style="{
             top: ($store.state.command_tab_max_height-120)+'px',
-            left: (context_left+18)+'px',
-            width: ($store.state.command_tab_max_width-39)+'px',
+            left: (context_left+19)+'px',
+            width: ($store.state.command_tab_max_width-40)+'px',
         }"
         v-if="refreshCanvas"
     >
@@ -20,6 +20,9 @@
                     class="altcanvas large-slider ma-0 pa-0"
                     height="0px"
                     :color="drone.color"
+                    thumb-label="always"
+                    track-color="#E0E0E0"
+                    :thumb-color="drone.color"
                 />
             </div>
         </div>
@@ -204,8 +207,9 @@ export default {
 
     .canvas {
         border: 2px solid #ffffff;
+        background-color: ghostwhite;
         position: absolute;
-        opacity: 1; /* for demo purpose  */
+        opacity: 0.9; /* for demo purpose  */
         z-index: 7;
         height: 155px;
     }

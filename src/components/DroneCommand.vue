@@ -1,14 +1,14 @@
 <template>
     <v-container fluid class="mx-1 tab_position" :style="{top:context_top + 'px', left:(context_left+8)+'px', width: ($store.state.command_tab_max_width-48)+'px'}">
         <v-tabs v-if="prepared"
-                background-color="deep-blue accent-4"
-                center-active
-                dark
-                color="cyan" slider-color="purple darken-4"
-                next-icon="mdi-arrow-right-bold-box-outline"
-                prev-icon="mdi-arrow-left-bold-box-outline"
-                show-arrows
-                v-model="active_tab"
+            background-color="deep-blue accent-4"
+            center-active
+            dark
+            color="cyan" slider-color="purple darken-4"
+            next-icon="mdi-arrow-right-bold-box-outline"
+            prev-icon="mdi-arrow-left-bold-box-outline"
+            show-arrows
+            v-model="active_tab"
         >
             <v-tabs-slider></v-tabs-slider>
             <v-tab class="pa-0 ma-0" style="min-width:0" href="virtual"></v-tab>
