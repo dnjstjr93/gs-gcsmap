@@ -127,7 +127,7 @@
                                             path: $store.state.iconSourceDrone.icon[4],
                                             fillColor: drone.color,
                                             fillOpacity: 1,
-                                            strokeWeight: (drone.targeted)?3:1,
+                                            strokeWeight: (drone.targeted)?3:3,
                                             strokeColor: (drone.targeted)?'springgreen':'white',
                                             rotation: (360 + drone.heading - 45)%360,
                                             scale: scaleDroneIcon,
