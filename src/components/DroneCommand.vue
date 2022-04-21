@@ -1346,6 +1346,12 @@ export default {
                         if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'targetStayTime')) {
                             this.$store.state.drone_infos[name].targetStayTime = 1;
                         }
+                        if(!Object.prototype.hasOwnProperty.call(this.rtlSpeed, name)) {
+                            this.rtlSpeed[name] = 5;
+                        }
+                        if(!Object.prototype.hasOwnProperty.call(this.takeoffDelay, name)) {
+                            this.takeoffDelay[name] = 6;
+                        }
                         this.targetStayTime[name] = this.$store.state.drone_infos[name].targetStayTime;
                         this.targetTurningSpeed[name] = this.$store.state.drone_infos[name].targetTurningSpeed;
                         this.targetRadius[name] = this.$store.state.drone_infos[name].targetRadius;
@@ -2050,19 +2056,18 @@ export default {
                     wpnavSpeedDn: {},
                     rtlAlt: {}
                 };
-
-                }, 100);
-            },
+            }, 100);
         },
-        beforeDestroy() {
-            EventBus.$off('gcs-map-ready');
-            EventBus.$off('do-targetDrone');
-            EventBus.$off('do-selected-position');
-            EventBus.$off('update-goto-positions');
+    },
+    beforeDestroy() {
+        EventBus.$off('gcs-map-ready');
+        EventBus.$off('do-targetDrone');
+        EventBus.$off('do-selected-position');
+        EventBus.$off('update-goto-positions');
 
-            EventBus.$off('do-target-survey-marker');
-        }
+        EventBus.$off('do-target-survey-marker');
     }
+}
 </script>
 
 <style scoped>
@@ -2097,5 +2102,4 @@ export default {
     body {
         padding: 1rem;
     }
-
 </style>

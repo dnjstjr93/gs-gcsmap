@@ -74,6 +74,11 @@
                     <DroneCommand></DroneCommand>
                 </v-card>
             </v-col>
+            <v-col cols="12" sm="6" md="9">
+                <v-card flat tile outlined color="#E8F5E9">
+                    <DroneAlt></DroneAlt>
+                </v-card>
+            </v-col>
         </v-row>
     </div>
 </template>
@@ -82,6 +87,7 @@
     // import MuvMqtt from "./MuvMqtt";
     import DroneInfo from "./DroneInfo";
     import DroneCommand from "./DroneCommand";
+    import DroneAlt from "@/components/DroneAlt";
     import EventBus from "@/EventBus";
     import {nanoid} from "nanoid";
     import mqtt from "mqtt";
@@ -161,7 +167,8 @@
         components: {
             // MuvMqtt,
             DroneInfo,
-            DroneCommand
+            DroneCommand,
+            DroneAlt
         },
 
         data: function() {

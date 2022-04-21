@@ -124,15 +124,15 @@
                                         :clickable="true"
                                         :draggable="false"
                                         :icon="{
-                                            path: $store.state.iconSourceDrone,
+                                            path: $store.state.iconSourceDrone.icon[4],
                                             fillColor: drone.color,
-                                            fillOpacity: 0.8,
-                                            strokeWeight: (drone.targeted)?3:0.8,
-                                            strokeColor: (drone.targeted)?'springgreen':'grey',
-                                            rotation: drone.heading,
+                                            fillOpacity: 1,
+                                            strokeWeight: (drone.targeted)?3:1,
+                                            strokeColor: (drone.targeted)?'springgreen':'white',
+                                            rotation: (360 + drone.heading - 45)%360,
                                             scale: scaleDroneIcon,
-                                            anchor: {x: 350, y: 351},
-                                            labelOrigin: {x: 350, y: 370}
+                                            anchor: {x: $store.state.iconSourceDrone.icon[0] / 2, y: $store.state.iconSourceDrone.icon[1] / 2},
+                                            labelOrigin: {x: $store.state.iconSourceDrone.icon[0] / 2, y: 0},
                                         }"
                                         :label="{
                                             text: drone.name.slice(0, 1).toUpperCase() + '(' + drone.system_id + ')' + ':' + drone.alt.toFixed(1),
@@ -141,6 +141,7 @@
                                             fontWeight: 'bold'
                                         }"
                                         :title="drone.name"
+                                        :options="{zIndex: 3}"
                                     />
 
                                     <GmapPolyline
@@ -240,7 +241,7 @@
 
                                     <GmapPolyline
                                         :path.sync="drone.directionLine"
-                                        :options="{strokeColor: drone.color, strokeOpacity: 0.95, strokeWeight: 5, zIndex: 5, icons: [{icon: lineArrow, offset: '100%'}]}"
+                                        :options="{strokeColor: 'black', strokeOpacity: 1, strokeWeight: 4, zIndex: 6, icons: [{icon: lineArrow, offset: '100%'}]}"
                                     ></GmapPolyline>
 
                                     <div v-for="(survey, pIndex) in $store.state.surveyMarkers[drone.name]" :key="'survey'+pIndex">
@@ -537,7 +538,7 @@
         data () {
             return {
                 datum: {targeted: false, lat:0.0, lng:0.0},
-                scaleDroneIcon: 0.05,
+                scaleDroneIcon: 0.09,
                 turningDir: [90, 90, -90, -90],
                 idUpdateTimer: null,
                 idPostTimer: null,
@@ -2806,6 +2807,20 @@
             });
 
             EventBus.$on('updateDroneMarker', (payload) => {
+
+                var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
+                var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
+                var scale = Math.pow(2, this.map.getZoom());
+                var worldPoint = this.map.getProjection().fromLatLngToPoint({lat:payload.lat, lng:payload.lng});
+                //console.log(new this.google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale));
+
+                let _payload = {};
+                _payload.name = payload.name;
+                _payload.scale = scale;
+                _payload.x = (worldPoint.x - bottomLeft.x) * scale;
+                _payload.y = (worldPoint.y - topRight.y) * scale;
+                _payload.alt = payload.alt
+                EventBus.$emit('do-draw-DroneCommand', _payload);
 
                 // if(!Object.hasOwnProperty.call(this.boundaryCircles,  payload.name)) {
                 //     this.boundaryCircles[payload.name] = {};
