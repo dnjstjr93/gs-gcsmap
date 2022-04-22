@@ -2819,7 +2819,7 @@
                 _payload.scale = scale;
                 _payload.x = (worldPoint.x - bottomLeft.x) * scale;
                 _payload.y = (worldPoint.y - topRight.y) * scale;
-                _payload.alt = payload.alt
+                _payload.alt = payload.alt;
                 EventBus.$emit('do-draw-DroneCommand', _payload);
 
                 // if(!Object.hasOwnProperty.call(this.boundaryCircles,  payload.name)) {
