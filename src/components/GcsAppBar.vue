@@ -24,19 +24,29 @@
                         :disabled="MOBIUS_CONNECTION_CONNECTED"
                 ></v-text-field>
             </v-col>
+            <v-col cols="1" class="text-right">
+                <v-btn
+                    class="mr-1 mt-1 py-5" dark text outlined elevation="2"
+                    @click.stop="setGCSHomePosition"
+                >
+                    <v-icon>
+                        mdi-home
+                    </v-icon>
+                </v-btn>
+            </v-col>
             <v-col cols="3">
                 <v-text-field
-                        class="mx-2 mt-1"
-                        dense hide-details outlined
-                        ref="gcs"
-                        v-model="gcs" :rules="gcs_rule"
-                        placeholder="KETI_GCS"
-                        label="GCS*"
-                        required
-                        :disabled="MOBIUS_CONNECTION_CONNECTED"
+                    class="mr-2 mt-1"
+                    dense hide-details outlined
+                    ref="gcs"
+                    v-model="gcs" :rules="gcs_rule"
+                    placeholder="KETI_GCS"
+                    label="GCS*"
+                    required
+                    :disabled="MOBIUS_CONNECTION_CONNECTED"
                 ></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="5">
                 <v-btn
                         class="mx-2 mt-1"
                         tile @click="GcsAppBarCreated"
@@ -657,6 +667,10 @@
         },
 
         methods: {
+            setGCSHomePosition() {
+                // EventBus.$emit('do-setGCSHomePosition');
+            },
+
             createDroneInfoToMobius(callback) {
                 axios({
                     validateStatus: function (status) {
