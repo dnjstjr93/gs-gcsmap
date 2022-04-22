@@ -1,11 +1,12 @@
 <template>
     <div
         ref="alt"
-        class="canvas"
+        class="ma-0 canvas"
         :style="{
-            top: ($store.state.command_tab_max_height-120)+'px',
-            left: (context_left+19)+'px',
+            top: ($store.state.command_tab_max_height-122)+'px',
+            left: (context_left+21)+'px',
             width: ($store.state.command_tab_max_width-40)+'px',
+            height: 156+'px'
         }"
         v-if="refreshCanvas"
     >
@@ -206,12 +207,10 @@ export default {
     }
 
     .canvas {
-        border: 2px solid #ffffff;
         background-color: ghostwhite;
         position: absolute;
         opacity: 0.9; /* for demo purpose  */
         z-index: 7;
-        height: 155px;
     }
 
     .altcanvas {

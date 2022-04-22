@@ -70,12 +70,12 @@
                 </v-card>
             </v-col>
             <v-col cols="12" sm="6" md="9">
-                <v-card flat tile outlined color="#E8F5E9">
+                <v-card flat tile color="#E8F5E9">
                     <DroneCommand></DroneCommand>
                 </v-card>
             </v-col>
             <v-col cols="12" sm="6" md="9">
-                <v-card flat tile outlined color="#E8F5E9">
+                <v-card flat tile>
                     <DroneAlt></DroneAlt>
                 </v-card>
             </v-col>
@@ -218,7 +218,7 @@
 
                 this.$store.commit('setCommandTabLeftX', this.myWidth);
 
-                this.myHeight = window.innerHeight-50;
+                this.myHeight = window.innerHeight-51;
 
                 this.$store.state.command_tab_max_height = this.myHeight-50;
                 this.$store.state.command_tab_max_width = window.innerWidth-this.myWidth;
