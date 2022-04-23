@@ -111,9 +111,24 @@
                                 @dblclick="selectTempMarker($event, 'unknown', pIndex)"
                                 @click="targetTempMarker($event, 'unknown', pIndex, pos.targeted)"
                                 @dragend="updateTempPosition($event, 'unknown', pIndex)"
-                                :icon="pos.m_icon"
-                                :label="pos.m_label"
-                                :title="'unknown'  + ':' + pos.alt  + ':' + pos.speed  + ':' + pos.radius"
+                                :title="'unknown'  + ':' + pos.alt"
+                                :icon="{
+                                    path: $store.state.iconSourceMarker.icon[4],
+                                    fillColor: 'grey',
+                                    fillOpacity: 1,
+                                    strokeWeight: pos.selected ? 3 : (pos.targeted ? 3 : 1),
+                                    strokeColor: pos.selected ? 'springgreen' : (pos.targeted ? 'yellow' : 'white'),
+                                    rotation: 0,
+                                    scale: 0.07,
+                                    anchor: {x: $store.state.iconSourceMarker.icon[0] / 2, y: $store.state.iconSourceMarker.icon[1]},
+                                    labelOrigin: {x: $store.state.iconSourceMarker.icon[0] / 2, y: 0},
+                                }"
+                                :label="{
+                                    text: 'T:' + pos.alt,
+                                    color: 'white',
+                                    fontSize: '14px',
+                                    fontWeight: 'normal'
+                                }"
                             />
 
                             <div v-for="drone in $store.state.drone_infos" :key="'guideCircles_'+drone.id">
@@ -127,21 +142,21 @@
                                             path: $store.state.iconSourceDrone.icon[4],
                                             fillColor: drone.color,
                                             fillOpacity: 1,
-                                            strokeWeight: (drone.targeted)?3:3,
-                                            strokeColor: (drone.targeted)?'springgreen':'white',
+                                            strokeWeight: (drone.targeted)?3:2,
+                                            strokeColor: (drone.targeted)?'springgreen':'#1A237E',
                                             rotation: (360 + drone.heading - 45)%360,
-                                            scale: scaleDroneIcon,
+                                            scale: 0.1,
                                             anchor: {x: $store.state.iconSourceDrone.icon[0] / 2, y: $store.state.iconSourceDrone.icon[1] / 2},
-                                            labelOrigin: {x: $store.state.iconSourceDrone.icon[0] / 2, y: 0},
+                                            labelOrigin: {x: $store.state.iconSourceDrone.icon[0] / 2, y: $store.state.iconSourceDrone.icon[1] / 2},
                                         }"
                                         :label="{
                                             text: drone.name.slice(0, 1).toUpperCase() + '(' + drone.system_id + ')' + ':' + drone.alt.toFixed(1),
                                             color: 'white',
-                                            fontSize: '15px',
-                                            fontWeight: 'bold'
+                                            fontSize: '14px',
+                                            fontWeight: 'normal'
                                         }"
                                         :title="drone.name"
-                                        :options="{zIndex: 3}"
+                                        :options="{zIndex: 1}"
                                     />
 
                                     <GmapPolyline
@@ -162,18 +177,33 @@
                                             @dblclick="selectTempMarker($event, drone.name, pIndex)"
                                             @click="targetTempMarker($event, drone.name, pIndex, pos.targeted)"
                                             @dragend="updateTempPosition($event, drone.name, pIndex)"
-                                            :icon="pos.m_icon"
-                                            :label="pos.m_label"
                                             :title="drone.name  + ':' + pos.alt  + ':' + pos.speed  + ':' + pos.radius"
+                                            :icon="{
+                                                path: $store.state.iconSourceMarker.icon[4],
+                                                fillColor: drone.color,
+                                                fillOpacity: 1,
+                                                strokeWeight: pos.selected ? 3 : (pos.targeted ? 3 : 0.5),
+                                                strokeColor: pos.selected ? 'springgreen' : (pos.targeted ? 'yellow' : 'white'),
+                                                rotation: 0,
+                                                scale: 0.07,
+                                                anchor: {x: $store.state.iconSourceMarker.icon[0] / 2, y: $store.state.iconSourceMarker.icon[1]},
+                                                labelOrigin: {x: $store.state.iconSourceMarker.icon[0] / 2, y: 0},
+                                            }"
+                                            :label="{
+                                                text: pIndex + ':' + pos.alt,
+                                                color: 'white',
+                                                fontSize: '14px',
+                                                fontWeight: 'normal'
+                                            }"
                                         />
 
-                                      <div v-if="$store.state.tempMarkers[drone.name][pIndex].type === 'Circle'">
-                                        <GmapCircle
-                                            :center="{lat: $store.state.tempMarkers[drone.name][pIndex].lat, lng: $store.state.tempMarkers[drone.name][pIndex].lng}"
-                                            :radius="50"
-                                            :options="{fillOpacity: 0, strokeColor: '#D50000', strokeOpacity: 1, strokeWeight: 1}"
-                                        ></GmapCircle>
-                                      </div>
+<!--                                        <div v-if="$store.state.tempMarkers[drone.name][pIndex].type === 'Circle'">-->
+<!--                                            <GmapCircle-->
+<!--                                                :center="{lat: $store.state.tempMarkers[drone.name][pIndex].lat, lng: $store.state.tempMarkers[drone.name][pIndex].lng}"-->
+<!--                                                :radius="50"-->
+<!--                                                :options="{fillOpacity: 0, strokeColor: '#D50000', strokeOpacity: 1, strokeWeight: 1}"-->
+<!--                                            ></GmapCircle>-->
+<!--                                        </div>-->
                                     </div>
 
 <!--                                    home_position circle-->
@@ -275,15 +305,15 @@
                                         <GmapMarker
                                             :position="{lat:survey.pathLines[0].lat, lng:survey.pathLines[0].lng}"
                                             :icon="{
-                                                path: $store.state.iconSource.icon[4],
+                                                path: $store.state.iconSourceSurveyMarker.icon[4],
                                                 fillColor: '#FF5722',
                                                 fillOpacity: 0.6,
                                                 strokeWeight: 0.8,
                                                 strokeColor: 'black',
                                                 rotation: 0,
                                                 scale: 0.05,
-                                                anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
-                                                labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                                anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},
+                                                labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},
                                             }"
                                             :label="{
                                                 text: '0',
@@ -295,15 +325,15 @@
                                         <GmapMarker
                                             :position="{lat:survey.pathLines[survey.pathLines.length-1].lat, lng:survey.pathLines[survey.pathLines.length-1].lng}"
                                             :icon="{
-                                                path: $store.state.iconSource.icon[4],
+                                                path: $store.state.iconSourceSurveyMarker.icon[4],
                                                 fillColor: '#607D8B',
                                                 fillOpacity: 0.6,
                                                 strokeWeight: 0.8,
                                                 strokeColor: 'black',
                                                 rotation: 0,
                                                 scale: 0.05,
-                                                anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
-                                                labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                                anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},
+                                                labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},
                                             }"
                                             :label="{
                                                 text: String(survey.pathLines.length-1),
@@ -317,15 +347,15 @@
                                                 <GmapMarker
                                                     :position="{lat:pos.lat, lng:pos.lng}"
                                                     :icon="{
-                                                        path: $store.state.iconSource.icon[4],
+                                                        path: $store.state.iconSourceSurveyMarker.icon[4],
                                                         fillColor: (pIndex===0)?'#FF5722':'#607D8B',
                                                         fillOpacity: 0.6,
                                                         strokeWeight: 0.8,
                                                         strokeColor: 'black',
                                                         rotation: 0,
                                                         scale: 0.05,
-                                                        anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
-                                                        labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                                        anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},
+                                                        labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},
                                                     }"
                                                     :label="{
                                                         text: String(pIndex),
@@ -422,15 +452,15 @@
                                 <GmapMarker
                                     :position="{lat:survey.pathLines[0].lat, lng:survey.pathLines[0].lng}"
                                     :icon="{
-                                                path: $store.state.iconSource.icon[4],
+                                                path: $store.state.iconSourceSurveyMarker.icon[4],
                                                 fillColor: '#FF5722',
                                                 fillOpacity: 0.6,
                                                 strokeWeight: 0.8,
                                                 strokeColor: 'black',
                                                 rotation: 0,
                                                 scale: 0.05,
-                                                anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
-                                                labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                                anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},
+                                                labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},
                                             }"
                                     :label="{
                                                 text: '0',
@@ -442,15 +472,15 @@
                                 <GmapMarker
                                     :position="{lat:survey.pathLines[survey.pathLines.length-1].lat, lng:survey.pathLines[survey.pathLines.length-1].lng}"
                                     :icon="{
-                                        path: $store.state.iconSource.icon[4],
+                                        path: $store.state.iconSourceSurveyMarker.icon[4],
                                         fillColor: '#607D8B',
                                         fillOpacity: 0.6,
                                         strokeWeight: 0.8,
                                         strokeColor: 'black',
                                         rotation: 0,
                                         scale: 0.05,
-                                        anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
-                                        labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                        anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},
+                                        labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},
                                     }"
                                     :label="{
                                         text: String(survey.pathLines.length-1),
@@ -464,15 +494,15 @@
                                         <GmapMarker
                                             :position="{lat:pos.lat, lng:pos.lng}"
                                             :icon="{
-                                                path: $store.state.iconSource.icon[4],
+                                                path: $store.state.iconSourceSurveyMarker.icon[4],
                                                 fillColor: (pIndex===0)?'#FF5722':'#607D8B',
                                                 fillOpacity: 0.6,
                                                 strokeWeight: 0.8,
                                                 strokeColor: 'black',
                                                 rotation: 0,
                                                 scale: 0.05,
-                                                anchor: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]},
-                                                labelOrigin: {x: $store.state.iconSource.icon[0]/2, y: $store.state.iconSource.icon[1]/2},
+                                                anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},
+                                                labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},
                                             }"
                                             :label="{
                                                 text: String(pIndex),
@@ -673,7 +703,7 @@
                                         this.gotoLinesOptions[pName] = {};
 
                                         let _options = {};
-                                        _options.strokeColor = pos.m_icon.fillColor;
+                                        _options.strokeColor = this.$store.state.drone_infos[pName].color;
                                         _options.strokeOpacity = 0.2;
                                         _options.strokeWeight = 10;
 
@@ -1323,9 +1353,6 @@
                     marker.targetStayTime = 1;
                     marker.elevation = val;
                     marker.type = 'Goto';
-                    marker.m_icon.fillColor = 'grey';
-                    marker.m_label.fontSize = '14px';
-                    marker.m_label.text = 'T:' + String(marker.alt);
                     marker.type = 0;
 
                     this.$store.state.tempMarkers.unknown.push(marker);
@@ -1521,11 +1548,6 @@
                 // survey.elevation = val;
                 survey.type = 'Survey';
                 survey.color = 'orange';
-                survey.m_icon.fillColor = 'grey';
-                survey.m_icon.scale = 0.04;
-                survey.m_label.fontSize = '14px';
-                survey.m_label.text = 'T:' + String(survey.alt);
-                survey.m_label.labelOrigin = {x: 0, y: 0};
                 survey.type = 0;
                 survey.options = {
                     strokeColor: "#0000FF",

@@ -336,6 +336,29 @@
 <!--                                                            </template>-->
 <!--                                                        </v-slider>-->
                                                     </v-card>
+                                                    <v-card tile flat v-if="(command.title === '관심')">
+                                                        <v-row no-gutters>
+                                                            <v-col cols="6">
+                                                                <v-text-field
+                                                                    label="지형높이(m)"
+                                                                    class="pa-1 text-right"
+                                                                    outlined dense hide-details
+                                                                    :value="parseFloat(position_selections_elevation[d.name]).toFixed(1)"
+                                                                    readonly
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="6">
+                                                                <v-text-field
+                                                                    label="지점거리(m)"
+                                                                    class="pa-1 text-right"
+                                                                    outlined dense hide-details
+                                                                    :value="isNaN(Math.ceil($store.state.distanceTarget[d.name]))?0:Math.ceil($store.state.distanceTarget[d.name])"
+                                                                    type="number"
+                                                                    readonly
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-card>
                                                     <v-card tile flat v-if="(command.title === '귀환')">
                                                         <v-row no-gutters>
                                                             <v-col cols="12">
@@ -773,6 +796,7 @@
                                         <span v-else-if="command.title === '패턴'">패턴확인</span>
                                         <span v-else-if="command.title === '선회'">선회확인</span>
                                         <span v-else-if="command.title === '속도'">속도확인</span>
+                                        <span v-else-if="command.title === '관심'">관심확인</span>
                                         <span v-else-if="command.title === '정지'">정지확인</span>
                                         <span v-else-if="command.title === '착륙'">착륙확인</span>
                                         <span v-else-if="command.title === '귀환'">귀환확인</span>
@@ -853,6 +877,9 @@
                     </span>
                     <span v-else-if="curTab === '속도'">
                         비행체에 설정한 속도로 <span class="ml-2 mr-2" style="font-size: 20px">속도 변경</span> 명령 전송.
+                    </span>
+                    <span v-else-if="curTab === '관심'">
+                        비행체에 지정된 위치로 <span class="ml-2 mr-2" style="font-size: 20px">관심 설정</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '정지'">
                         비행체를 현재 위치에 <span class="ml-2 mr-2" style="font-size: 20px">정지</span> 명령 전송.
@@ -1069,8 +1096,16 @@ export default {
                     text: '선택한 비행체에 설정한 패턴과 속도, 고도로 비행 명령'
                 },
                 {
+                    title: '자동',
+                    text: '선택한 비행체에 설정한 비행좌표 리스트를 다운로드하고 자동 비행 명령'
+                },
+                {
                     title: '속도',
                     text: '선택한 비행체에 설정한 속도로 속도 변경 명령'
+                },
+                {
+                    title: '관심',
+                    text: '선택한 비행체에 ROI(Region Of Interest) 설정 명령'
                 },
                 {
                     title: '정지',
@@ -1087,10 +1122,6 @@ export default {
                 {
                     title: '제어', //10
                     text: '선택한 비행체의 임무 장비 제어 명령'
-                },
-                {
-                    title: '자동',
-                    text: '선택한 비행체에 설정한 비행좌표 리스트를 다운로드하고 자동 비행 명령'
                 },
                 {
                     title: '종료',
@@ -1683,6 +1714,9 @@ export default {
             else if(this.curTab === '속도') {
                 this.setChangeSpeed();
             }
+            else if(this.curTab === '관심') {
+                this.setRoi();
+            }
             else if(this.curTab === '정지') {
                 this.setStop();
             }
@@ -1864,6 +1898,28 @@ export default {
                 self.mode_sheet = !self.mode_sheet;
                 self.loading = false;
                 self.$forceUpdate();
+            }, 100);
+        },
+
+        setRoi() {
+            for(let name in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                        console.log('DroneCommand-setRoi', this.position_selections[name]);
+                        if(this.position_selections[name] && this.position_selections[name] !== '' && this.position_selections[name] !== "") {
+                            this.$store.state.drone_infos[name].gotoType = this.gotoType[name];
+                            this.$store.state.drone_infos[name].targetSpeed = parseInt(this.targetSpeed[name]);
+                            this.$store.state.drone_infos[name].targetAlt = parseInt(this.targetAlt[name]);
+                            EventBus.$emit('command-set-roi-' + name, this.position_selections[name]);
+                        }
+                    }
+                }
+            }
+
+            setTimeout(() => {
+                this.mode_sheet = !this.mode_sheet;
+                this.loading = false;
+                this.$forceUpdate();
             }, 100);
         },
 

@@ -23,7 +23,7 @@ Vue.use(Vuex)
 // <v-row justify="space-around"></v-row> // centered - spaced evenly around
 // <v-row justify="space-between"></v-row> // not centered - spaced evenly between
 
-import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import { faMapMarkerAlt, faMapPin } from "@fortawesome/free-solid-svg-icons";
 import { faDotCircle, faLocationArrow } from "@fortawesome/free-solid-svg-icons";
 //import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 
@@ -40,26 +40,6 @@ const _defaultPosition = Object(
     {
         type: 'Goto',
         owner: 'unknown',
-        m_icon: {
-            //path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
-            path: faMapMarkerAlt.icon[4],
-            fillColor: "grey",
-            fillOpacity: 0.9,
-            strokeWeight: 0.9,
-            strokeColor: 'grey',
-            rotation: 0,
-            scale: 0.07,
-            // anchor: {x: 12, y: 24},
-            anchor: {x: faMapMarkerAlt.icon[0] / 2, y: faMapMarkerAlt.icon[1]},
-            labelOrigin: {x: faMapMarkerAlt.icon[0] / 2, y: 0},
-            // labelOrigin: {x: 12, y: 12}
-        },
-        m_label: {
-            text: 'T',
-            color: 'white',
-            fontSize: '26px',
-            fontWeight: 'bold'
-        },
         selected: false,
         targeted: false,
         lat: 37.404523241167965,
@@ -351,7 +331,8 @@ const _defaultDroneInfo = {
 
 export default new Vuex.Store({
     state: {
-        iconSource: faMapMarkerAlt,
+        iconSourceMarker: faMapPin, //faMapMarkerAlt,
+        iconSourceSurveyMarker: faMapMarkerAlt,
         // iconSourceDrone: droneSvgPath,
         iconSourceDrone: faLocationArrow,
 
@@ -669,17 +650,6 @@ export default new Vuex.Store({
             state.gotoMarkers[payload.mIndex].positions[payload.pIndex].lng = payload.lng;
         },
 
-        updateFillColor(state, payload) {
-            console.log(payload);
-            state.gotoMarkers[payload.mIndex].m_icon.fillColor = payload.fillColor;
-        },
-
-        updateLabelText(state, payload) {
-            console.log(payload);
-            state.gotoMarkers[payload.mIndex].positions[payload.pIndex].m_label.fontSize = '14px';
-            state.gotoMarkers[payload.mIndex].positions[payload.pIndex].m_label.text = String(payload.text) + ':' + String(state.gotoMarkers[payload.mIndex].positions[payload.pIndex].alt);
-        },
-
         // initUnknownInfo(state, unknown) {
         //     state.unknown_info = null;
         //     state.unknown_info = {};
@@ -807,12 +777,6 @@ export default new Vuex.Store({
                         state.tempMarkers[pName].forEach((pos) => {
                             if (!pos.selected) {
                                 pos.selected = true;
-                                let temp = JSON.parse(JSON.stringify(pos.m_icon));
-                                pos.m_icon = null;
-                                pos.m_icon = JSON.parse(JSON.stringify(temp));
-                                temp = null;
-                                pos.m_icon.strokeWeight = 5;
-                                pos.m_icon.strokeColor = 'springgreen';
                             }
                         });
                     }
@@ -824,12 +788,6 @@ export default new Vuex.Store({
                         state.tempMarkers[pName].forEach((pos) => {
                             if (pos.selected) {
                                 pos.selected = false;
-                                let temp = JSON.parse(JSON.stringify(pos.m_icon));
-                                pos.m_icon = null;
-                                pos.m_icon = JSON.parse(JSON.stringify(temp));
-                                temp = null
-                                pos.m_icon.strokeWeight = 1;
-                                pos.m_icon.strokeColor = 'grey';
                             }
                         });
                     }
@@ -843,13 +801,6 @@ export default new Vuex.Store({
                     state.tempMarkers[pName].forEach((pos) => {
                         if (pos.selected) {
                             pos.selected = false;
-                            let temp = JSON.parse(JSON.stringify(pos.m_icon));
-                            pos.m_icon = null;
-                            pos.m_icon = JSON.parse(JSON.stringify(temp));
-                            temp = null
-                            pos.m_icon.strokeWeight = 1;
-                            pos.m_icon.strokeColor = 'grey';
-
                             pos.targeted = false;
                             state.curTargetedTempMarkerIndex[pName] = null;
                         }
@@ -872,13 +823,6 @@ export default new Vuex.Store({
                     if (!pos.selected) {
                         if (!pos.targeted) {
                             pos.targeted = true;
-                            let temp = JSON.parse(JSON.stringify(pos.m_icon));
-                            pos.m_icon = null;
-                            pos.m_icon = JSON.parse(JSON.stringify(temp));
-                            temp = null;
-                            pos.m_icon.strokeWeight = 4;
-                            pos.m_icon.strokeColor = '#FFFF8D';
-
                             state.curTargetedTempMarkerIndex[payload.pName] = pIndex;
                         }
                     }
@@ -889,13 +833,6 @@ export default new Vuex.Store({
                     if (!pos.selected) {
                         if (pos.targeted) {
                             pos.targeted = false;
-                            let temp = JSON.parse(JSON.stringify(pos.m_icon));
-                            pos.m_icon = null;
-                            pos.m_icon = JSON.parse(JSON.stringify(temp));
-                            temp = null;
-                            pos.m_icon.strokeWeight = 1;
-                            pos.m_icon.strokeColor = 'grey';
-
                             state.curTargetedTempMarkerIndex[payload.pName] = null;
                         }
                     }
@@ -910,26 +847,14 @@ export default new Vuex.Store({
             let pName = payload.pName;
             let pIndex = payload.pIndex;
 
-            let temp = JSON.parse(JSON.stringify(state.tempMarkers[pName][pIndex].m_icon));
-
             if (value) {
                 if (!state.tempMarkers[pName][pIndex].selected) {
                     state.tempMarkers[pName][pIndex].selected = true;
-                    state.tempMarkers[pName][pIndex].m_icon = null;
-                    state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
-                    temp = null;
-                    state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 5;
-                    state.tempMarkers[pName][pIndex].m_icon.strokeColor = 'springgreen';
                 }
             }
             else {
                 if (state.tempMarkers[pName][pIndex].selected) {
                     state.tempMarkers[pName][pIndex].selected = false;
-                    state.tempMarkers[pName][pIndex].m_icon = null;
-                    state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
-                    temp = null;
-                    state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 1;
-                    state.tempMarkers[pName][pIndex].m_icon.strokeColor = 'grey';
                 }
             }
         },
@@ -941,29 +866,15 @@ export default new Vuex.Store({
             let pName = payload.pName;
             let pIndex = payload.pIndex;
 
-            let temp = JSON.parse(JSON.stringify(state.tempMarkers[pName][pIndex].m_icon));
-
             if (value) {
                 if (!state.tempMarkers[pName][pIndex].targeted) {
                     state.tempMarkers[pName][pIndex].targeted = true;
-                    state.tempMarkers[pName][pIndex].m_icon = null;
-                    state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
-                    temp = null;
-                    state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 4;
-                    state.tempMarkers[pName][pIndex].m_icon.strokeColor = '#FFFF8D';
-
                     state.curTargetedTempMarkerIndex[pName] = pIndex;
                 }
             }
             else {
                 if (state.tempMarkers[pName][pIndex].targeted) {
                     state.tempMarkers[pName][pIndex].targeted = false;
-                    state.tempMarkers[pName][pIndex].m_icon = null;
-                    state.tempMarkers[pName][pIndex].m_icon = JSON.parse(JSON.stringify(temp));
-                    temp = null;
-                    state.tempMarkers[pName][pIndex].m_icon.strokeWeight = 1;
-                    state.tempMarkers[pName][pIndex].m_icon.strokeColor = 'grey';
-
                     state.curTargetedTempMarkerIndex[pName] = null;
                 }
             }
@@ -994,10 +905,6 @@ export default new Vuex.Store({
             marker.targetMavCmd = payload.targetMavCmd;
             marker.targetStayTime = payload.targetStayTime;
             marker.type = 'Goto';
-
-            marker.m_icon.fillColor = payload.color;
-            marker.m_label.fontSize = '14px';
-            marker.m_label.text = ((payload.pName === 'unknown') ? 'T' : String(state.tempMarkers[payload.pName].length)) + ':' + String(marker.alt);
 
             state.tempMarkers[payload.pName].push(marker);
 
@@ -1085,14 +992,6 @@ export default new Vuex.Store({
 
             state.tempMarkers[payload.pName].splice(payload.pIndex, 1);
 
-            state.tempMarkers[payload.pName].forEach((pos, pIndex) => {
-                pos.m_label.fontSize = '14px';
-                pos.m_label.text = ((payload.pName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
-            });
-
-            oldPos.m_icon.fillColor = 'grey';
-            oldPos.m_label.text = 'T:' + String(oldPos.alt);
-
             let count = state.tempMarkers.unknown.push(oldPos);
 
             oldPos = null;
@@ -1164,27 +1063,13 @@ export default new Vuex.Store({
             if (payload.pOldName !== payload.pName) {
                 state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
 
-                state.tempMarkers[payload.pOldName].forEach((pos, pIndex) => {
-                    pos.m_label.fontSize = '14px';
-                    pos.m_label.text = ((payload.pOldName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
-                });
-
                 state.drone_infos[payload.pName].color = (payload.pName === 'unknown') ? 'grey' : payload.targetColor;
-                oldPos.m_icon.fillColor = state.drone_infos[payload.pName].color;
 
                 console.log('+++++++++++++++++++++++++++++++++++++++++ registerMarker', state.tempMarkers);
                 console.log('+++++++++++++++++++++++++++++++++++++++++ registerMarker', state.tempMarkers[payload.pName]);
 
                 let count = state.tempMarkers[payload.pName].push(oldPos);
                 payload.pIndex = count - 1;
-
-                oldPos.m_label.fontSize = '14px';
-                if (payload.pName === 'unknown') {
-                    oldPos.m_label.text = 'T' + ':' + String(oldPos.alt);
-                }
-                else {
-                    oldPos.m_label.text = String(count - 1) + ':' + String(oldPos.alt);
-                }
 
                 // state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
                 this.commit('regMarkerNameDroneInfo', payload);
@@ -1200,11 +1085,6 @@ export default new Vuex.Store({
                 console.log(state.tempMarkers[payload.pOldName]);
 
                 state.tempMarkers[payload.pOldName].splice(payload.pIndex, 0, oldPos);
-
-                state.tempMarkers[payload.pOldName].forEach((pos, pIndex) => {
-                    pos.m_label.fontSize = '14px';
-                    pos.m_label.text = ((payload.pOldName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
-                });
 
                 // state.drone_infos[payload.pName].goto_positions.splice(payload.pOldIndex, 1);
                 this.commit('regMarkerIndexDroneInfo', payload);
@@ -1222,21 +1102,12 @@ export default new Vuex.Store({
 
                 state.tempMarkers[payload.pOldName].splice(payload.pIndex, 0, oldPos);
 
-                state.tempMarkers[payload.pOldName].forEach((pos, pIndex) => {
-                    pos.m_label.fontSize = '14px';
-                    pos.m_label.text = ((payload.pOldName === 'unknown') ? 'T' : String(pIndex)) + ':' + String(pos.alt);
-                });
-
                 // state.drone_infos[payload.pName].goto_positions.splice(payload.pOldIndex, 1);
                 this.commit('regMarkerIndexDroneInfo', payload);
 
                 let payload2 = {};
                 payload2.pName = payload.pOldName;
                 this.commit('regMarkerNameDroneInfo', payload2);
-            }
-
-            if(payload.pOldName === payload.pName && payload.pOldName === 'unknown') {
-                state.tempMarkers[payload.pOldName][payload.pOldIndex].m_label.text = 'T:' + String(state.tempMarkers[payload.pOldName][payload.pOldIndex].alt);
             }
 
             oldPos = null;

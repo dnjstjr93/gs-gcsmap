@@ -2,8 +2,8 @@
     <div>
         <v-row no-gutters>
             <v-col cols="12" sm="6" md="2" class="drone_list">
-                <v-card flat tile outlined color="#E8F5E9" :min-width="myMinWidth+'px'" :width="myMinWidth+'px'" :max-width="myMinWidth+'px'">
-                    <v-card ref="prev" flat tile class="overflow-y-auto" :style="listHeight" :min-width="myMinWidth+'px'" :width="myMinWidth+'px'" :max-width="myMinWidth+'px'">
+                <v-card flat tile outlined color="#E8F5E9" :min-width="(myMinWidth+1)+'px'" :width="myMinWidth+'px'" :max-width="myMinWidth+'px'">
+                    <v-card ref="prev" flat tile class="overflow-y-auto" :style="listHeight" :min-width="(myMinWidth+1)+'px'" :width="myMinWidth+'px'" :max-width="myMinWidth+'px'">
                         <v-card flat tile outlined>
                             <v-row no-gutters justify="center" align="center">
                                 <v-col cols="4">
@@ -676,7 +676,7 @@
 
             EventBus.$on('do-calcDistance', (datum) => {
                 if(datum.targeted) {
-                    console.log(datum);
+                    //console.log(datum);
 
                     var cur_lat = datum.lat;
                     var cur_lon = datum.lng;

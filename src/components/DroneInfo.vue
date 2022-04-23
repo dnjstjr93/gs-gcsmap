@@ -490,22 +490,21 @@
                                 <!--                                    max-height="135"-->
                                 <!--                                    min-height="135"-->
                                 <v-sheet
-                                    elevation="10"
-                                    class="px-1"
+                                    elevation="5"
+                                    class="px-0"
                                 >
                                     <v-chip-group
                                         v-model="selectedItem"
                                         active-class="primary--text"
                                         :center-active="true"
                                         show-arrows
-                                        class="px-3"
+                                        class="ma-0 px-0 py-0"
                                     >
                                         <draggable v-model="positions">
                                             <v-chip
                                                 v-for="(position, i) in positions" :key="'pos_chip'+i"
                                                 @click="selectedPosition(i)"
-                                                label
-                                                outlined
+                                                label outlined class="ma-0 pa-0 mx-1 px-1"
                                             >
                                                 {{ String(i) }}
                                                 <v-icon :color="evalAltColor[i]" class="ml-1">mdi-altimeter</v-icon>
@@ -1586,9 +1585,6 @@ export default {
                     marker.type = 'Goto';
 
                     marker.color = this.$store.state.drone_infos[this.name].color;
-                    marker.m_icon.fillColor = this.$store.state.drone_infos[this.name].color;
-                    marker.m_label.fontSize = '14px';
-                    marker.m_label.text = String(this.$store.state.tempMarkers[this.name].length) + ':' + String(marker.alt);
 
                     this.$store.state.tempMarkers[this.name].push(marker);
                 });
@@ -2693,6 +2689,35 @@ export default {
         //         }
         //     }
         // },
+
+        send_set_roi_command(target_name, pub_topic, target_sys_id, target_lat, target_lon, target_alt) {
+            var btn_params = {};
+            btn_params.target_system = target_sys_id;
+            btn_params.target_component = 1;
+            btn_params.command = mavlink.MAV_CMD_DO_SET_ROI;
+            btn_params.confirmation = 0;
+            btn_params.param1 = 0; //
+            btn_params.param2 = 0; //
+            btn_params.param3 = 0; //
+            btn_params.param4 = 0; //
+            btn_params.param5 = target_lat; // Latitude (x) of the fixed ROI
+            btn_params.param6 = target_lon; // Longitude (y) of the fixed ROI
+            btn_params.param7 = target_alt; // Altitude of the fixed ROI
+
+            try {
+                var msg = this.mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_COMMAND_LONG, btn_params);
+                if (msg == null) {
+                    console.log("mavlink message is null");
+                }
+                else {
+                    console.log('Send Set ROI command to %s, ' + 'msg: ' + msg.toString('hex') + '\n', target_name);
+                    this.doPublish(pub_topic, msg);
+                }
+            }
+            catch (ex) {
+                console.log('[ERROR] ' + ex);
+            }
+        },
 
         send_auto_mission_protocol(target_name, pub_topic, target_sys_id, goto_each_position, start_idx, end_idx, delay, cur_idx, seq) {
             var btn_params = {};
@@ -4056,7 +4081,7 @@ export default {
                             }
                         }
 
-                        if (this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회') {
+                        if (this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회' || this.$store.state.currentCommandTab === '관심') {
                             if (this.$store.state.drone_infos[this.name].selected && this.$store.state.drone_infos[this.name].targeted) {
                                 if (Object.prototype.hasOwnProperty.call(this.$store.state.curTargetedTempMarkerIndex, this.name)) {
                                     if (this.$store.state.curTargetedTempMarkerIndex[this.name] !== null) {
@@ -5365,6 +5390,24 @@ export default {
             //this.watchingMission = 'pwms';
         });
 
+        EventBus.$on('command-set-roi-' + this.name, (position) => {
+            let target_mode = 'GUIDED';
+            if(this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+            var arr_cur_goto_position = position.split(':');
+            var lat = parseFloat(arr_cur_goto_position[0]);
+            var lng = parseFloat(arr_cur_goto_position[1]);
+            let alt = this.$store.state.drone_infos[this.name].targetAlt;
+
+            console.log('send_set_roi_command - lat: ', lat, ', lng: ', lng, ', alt: ', alt);
+            setTimeout(this.send_set_roi_command, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lng, alt);
+
+            delete this.$store.state.targetLines[this.name];
+        });
+
         EventBus.$on('command-set-rtl-' + this.name, (rtl_speed) => {
             setTimeout((name, target_pub_topic, sys_id, rtl_speed) => {
                 this.send_rtl_speed_param_set_command(name, target_pub_topic, sys_id, rtl_speed);
@@ -6023,6 +6066,7 @@ export default {
         EventBus.$off('command-set-mode-' + this.name);
         EventBus.$off('command-set-arm-' + this.name);
         EventBus.$off('on-message-handler-' + this.name);
+        EventBus.$off('command-set-roi-' + this.name);
 
         EventBus.$off('ClickADSBMonitor');
         EventBus.$off('do-positions-elevation-' + this.name);

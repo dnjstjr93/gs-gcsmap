@@ -1218,9 +1218,6 @@
                         pos.elevation = (typeof pos_arr[8] === 'undefined') ? 0.0 : parseInt(pos_arr[8]);
                         pos.type = (typeof pos_arr[9] === 'undefined') ? 0 : parseInt(pos_arr[9]);
                         pos.color = 'grey';
-                        pos.m_icon.fillColor = 'grey';
-                        pos.m_label.fontSize = '14px';
-                        pos.m_label.text = 'T:' + String(pos.alt);
 
                         unknownMarkers.push(pos);
                         pos = null;
@@ -1282,14 +1279,8 @@
                                 this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(con));
 
                                 this.$store.state.tempMarkers[dName].forEach((pos) => {
-                                    let temp = JSON.parse(JSON.stringify(pos.m_icon));
                                     pos.targeted = false;
                                     pos.selected = false;
-                                    pos.m_icon = null;
-                                    pos.m_icon = JSON.parse(JSON.stringify(temp));
-                                    temp = null;
-                                    pos.m_icon.strokeWeight = 1;
-                                    pos.m_icon.strokeColor = 'grey';
 
                                     this.$store.state.curTargetedTempMarkerIndex[dName] = null;
                                 });
@@ -1330,14 +1321,8 @@
                                 this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(con));
 
                                 this.$store.state.surveyMarkers[dName].forEach((pos) => {
-                                    let temp = JSON.parse(JSON.stringify(pos.m_icon));
                                     pos.targeted = false;
                                     pos.selected = false;
-                                    pos.m_icon = null;
-                                    pos.m_icon = JSON.parse(JSON.stringify(temp));
-                                    temp = null;
-                                    pos.m_icon.strokeWeight = 1;
-                                    pos.m_icon.strokeColor = 'grey';
                                     pos.options.zIndex = 5;
 
                                     if(!Object.prototype.hasOwnProperty.call(pos, 'angleStart')) {

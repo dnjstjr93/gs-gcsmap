@@ -604,27 +604,6 @@
             selectTargetType(event) {
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type = event;
 
-                var m_icon = JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].m_icon));
-
-                if(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type === 'Goto') {
-                    m_icon.path = this.$store.state.defaultGotoMarkerIcon.path;
-                    m_icon.anchor = this.$store.state.defaultGotoMarkerIcon.anchor;
-                    m_icon.labelOrigin = this.$store.state.defaultGotoMarkerIcon.labelOrigin;
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].m_icon = JSON.parse(JSON.stringify(m_icon));
-                }
-                else if(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type === 'Circle') {
-                    m_icon.path = this.$store.state.defaultCircleMarkerIcon.path;
-                    m_icon.anchor = this.$store.state.defaultCircleMarkerIcon.anchor;
-                    m_icon.labelOrigin = this.$store.state.defaultCircleMarkerIcon.labelOrigin;
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].m_icon = JSON.parse(JSON.stringify(m_icon));
-                }
-                else {
-                    m_icon.path = this.$store.state.defaultGotoMarkerIcon.path;
-                    m_icon.anchor = this.$store.state.defaultGotoMarkerIcon.anchor;
-                    m_icon.labelOrigin = this.$store.state.defaultGotoMarkerIcon.labelOrigin;
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].m_icon = JSON.parse(JSON.stringify(m_icon));
-                }
-
                 console.log('InfoMarker:selectTargetType - ' + this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type);
 
                 let temp = JSON.parse(JSON.stringify(this.$store.state.surveyMarkers));
