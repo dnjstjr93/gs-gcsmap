@@ -54,10 +54,7 @@
                                   :items="targetIndexList"
                                   color="black"
                                   label="Index"
-                                  required
-                                  outlined
-                                  dense
-                                  hide-details
+                                  required outlined dense hide-details
                                   :disabled="disableTargetSelectIndex"
                         >
                         </v-select>
@@ -67,47 +64,37 @@
                             label="stayTime"
                             v-model="targetStayTime"
                             class="mt-0 pt-0"
-                            hide-details
+                            hide-details outlined dense
                             type="number"
-                            outlined dense
                             color="amber"
                             min="0"
                         ></v-text-field>
                     </v-col>
                     <v-col cols="2">
-                        <v-text-field class="px-1"
-                                      v-model.number="targetLat"
-                                      color="purple darken-2"
-                                      label="Latitude"
-                                      readonly
-                                      filled
-                                      dense
-                                      hide-details
-                                      outlined
+                        <v-text-field
+                            class="px-1"
+                            v-model.number="targetLat"
+                            color="purple darken-2"
+                            label="Latitude"
+                            readonly filled dense hide-details outlined
                         ></v-text-field>
                     </v-col>
                     <v-col cols="2">
-                        <v-text-field class="px-1"
-                                      v-model.number="targetLng"
-                                      color="blue darken-2"
-                                      label="Longitude"
-                                      readonly
-                                      filled
-                                      dense
-                                      hide-details
-                                      outlined
+                        <v-text-field
+                            class="px-1"
+                            v-model.number="targetLng"
+                            color="blue darken-2"
+                            label="Longitude"
+                            readonly filled dense hide-details outlined
                         ></v-text-field>
                     </v-col>
                     <v-col cols="1">
-                        <v-text-field class="px-1"
-                                      v-model.number="elevation"
-                                      color="blue darken-2"
-                                      label="Elevation"
-                                      readonly
-                                      filled
-                                      dense
-                                      hide-details
-                                      outlined
+                        <v-text-field
+                            class="px-1"
+                            v-model.number="elevation"
+                            color="blue darken-2"
+                            label="Elevation"
+                            readonly filled dense hide-details outlined
                         ></v-text-field>
                     </v-col>
                     <v-col cols="1" class="text-center">

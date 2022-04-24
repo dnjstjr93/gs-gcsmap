@@ -59,10 +59,21 @@
                                         :value="area"
                                         class="mt-0 pt-0"
                                         type="number"
-                                        outlined dense hide-details readonly
+                                        outlined dense hide-details readonly filled
                                         color="amber"
                                     ></v-text-field>
                                 </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="루트(m)"
+                                        :value="Math.sqrt(area).toFixed(1)"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details readonly filled
+                                        color="amber"
+                                    ></v-text-field>
+                                </v-col>
+
                                 <v-col cols="1">
                                     <v-select
                                         label="direction"

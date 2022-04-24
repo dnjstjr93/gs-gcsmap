@@ -2811,7 +2811,7 @@ export default {
                     this.droneStatus.radius = radius;
                     this.droneStatus.startCount = 0;
 
-                    this.watchingMissionStatus = 0;
+                    //this.watchingMissionStatus = 0;
 
                     this.droneStatus.objTimeout = setTimeout(() => {
                         this.droneStatus.curCommand = '';
@@ -4583,6 +4583,10 @@ export default {
 
                     console.log(this.name, sys_id, 'MAVLINK_MSG_ID_MISSION_REQUEST', '-', this.mission_request[sys_id].target_system, this.mission_request[sys_id].seq_requested);
 
+                    this.watchingMissionStatus = parseInt((this.mission_request[sys_id].seq_requested) / (this.droneStatus.mission_count-1) * 100);
+
+                    console.log(this.watchingMissionStatus);
+
                     if((this.droneStatus.curCommand === 'auto_mission_count') || (this.droneStatus.curCommand === 'auto_mission_item')) {
                         clearTimeout(this.droneStatus.objTimeout);
 
@@ -4638,6 +4642,8 @@ export default {
                         this.droneStatus.curCommand = '';
 
                         console.log('Auto Mission Upload Complete to %s', this.droneStatus.target_name);
+
+                        this.watchingMissionStatus = 0;
 
                         if(this.watchingMission === 'goto-circle') {
                             delete this.$store.state.missionLines[this.droneStatus.target_name];
