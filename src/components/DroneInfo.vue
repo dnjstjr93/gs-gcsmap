@@ -39,9 +39,10 @@
                                 </v-col>
                                 <v-col cols="2">
                                     <v-switch
-                                        dark dense hide-details flat
-                                        prepend-icon="mdi-video"
-                                        class="ma-0 pa-0 pl-0"
+                                        dense hide-details flat inset
+                                        prepend-icon="mdi-video-outline"
+                                        color="white"
+                                        class="ma-0 pa-0 pr-1"
                                         v-model="info.isVideo"
                                         @change="onVideoHandler(name)"
                                         :disabled="!$store.state.enableVideo"

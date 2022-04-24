@@ -1221,7 +1221,14 @@
                     }
 
                     this.idPostTimer = setTimeout((dName) => {
+                        let area = this.google.maps.geometry.spherical.computeArea(this.$store.state.surveyMarkers[dName][pIndex].paths);
+                        this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
+                        console.log('computeArea = ', area.toFixed(1), '㎡');
+
                         this.postEachSurveyMarkerInfo(dName);
+
+                        EventBus.$emit('on-update-survey-infomarker');
+
                     }, 2000, dName);
                 }, 500, dName);
 
@@ -1579,6 +1586,9 @@
                 survey.gap = 20;
                 survey.dir = 1;
                 survey.angle = 0;
+
+                let area = this.google.maps.geometry.spherical.computeArea(survey.paths);
+                survey.area = area.toFixed(1);
 
                 this.$store.state.surveyMarkers.unknown.push(survey);
                 console.log('elevation-confirmAddSurveyMarker', this.$store.state.surveyMarkers);

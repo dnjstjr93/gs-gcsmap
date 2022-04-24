@@ -57,13 +57,22 @@
                                                 </v-col>
                                                 <v-col cols="10">
                                                     <v-card v-if="command.title === '모드'">
-                                                        <v-select
-                                                            dense hide-details outlined
-                                                            v-if="command.title === '모드'" :items="$store.state[d.type + '_mode_items']"
-                                                            :label="d.name+' 모드: '"
+                                                        <v-chip-group
                                                             v-model="targetModeSelection[d.name]"
-                                                            class="pa-1"
-                                                        ></v-select>
+                                                            mandatory show-arrows
+                                                            active-class="deep-purple--text text--accent-5"
+                                                            :center-active="true"
+                                                            class="ma-0 px-0 py-0"
+                                                        >
+                                                            <v-chip
+                                                                v-for="(item, idx) in $store.state[d.type + '_mode_items']" :key="'mode_items_'+idx"
+                                                                label outlined
+                                                                :color="d.color"
+                                                                :value="item"
+                                                            >
+                                                                {{ item }}
+                                                            </v-chip>
+                                                        </v-chip-group>
                                                     </v-card>
                                                     <v-card v-if="command.title === '이륙'">
                                                         <v-row no-gutters>
@@ -175,6 +184,7 @@
                                                                     outlined dense hide-details
                                                                     v-model="targetAlt[d.name]"
                                                                     type="number"
+                                                                    :class="parseFloat(position_selections_elevation[d.name])>targetAlt[d.name] ? 'red' : ''"
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
@@ -235,6 +245,7 @@
                                                                     outlined dense hide-details
                                                                     v-model="targetAlt[d.name]"
                                                                     type="number"
+                                                                    :class="parseFloat(position_selections_elevation[d.name])>targetAlt[d.name] ? 'red' : ''"
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">

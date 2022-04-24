@@ -17,11 +17,8 @@
                                             v-model="targetSelect"
                                             :items="targets"
                                             label="Target"
-                                            chips
+                                            chips dense hide-details single-line
                                             :disabled="disableTargetSelect"
-                                            dense
-                                            hide-details
-                                            single-line
                                             class="pa-1"
                                     >
                                         <template v-slot:selection="data">
@@ -44,72 +41,73 @@
                                         </template>
                                     </v-combobox>
                                 </v-col>
-                                <v-col cols="2">
+                                <v-col cols="1">
                                     <v-select
                                         class="py-3 pr-2"
                                         v-model="targetSelectIndex"
                                         :items="targetIndexList"
                                         color="black"
                                         label="Index"
-                                        required
-                                        outlined
-                                        dense
-                                        hide-details
+                                        required outlined dense hide-details readonly
                                         :disabled="disableTargetSelectIndex"
                                     >
                                     </v-select>
                                 </v-col>
                                 <v-col cols="2">
+                                    <v-text-field
+                                        label="면적(㎡)"
+                                        :value="area"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details readonly
+                                        color="amber"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
                                     <v-select
+                                        label="direction"
                                         class="py-3 pr-2"
                                         :items="['cw', 'ccw']"
                                         v-model="paramDir"
                                         color="black"
-                                        label="direction"
-                                        required
-                                        outlined
-                                        dense
-                                        hide-details
+                                        required outlined dense hide-details
                                         @change="changeDirSurveyPath($event)"
                                     >
                                     </v-select>
                                 </v-col>
-                                <v-col cols="2">
+                                <v-col cols="1">
                                     <v-text-field
-                                        label="angle"
+                                        label="angle(°)"
                                         v-model="paramAngle"
                                         class="mt-0 pt-0"
-                                        hide-details
                                         type="number"
-                                        outlined dense
+                                        outlined dense hide-details
                                         color="amber"
                                         min="-360"
                                         max="360"
                                         @input="changeAngleSurveyPath($event)"
                                     ></v-text-field>
                                 </v-col>
-                                <v-col cols="2">
+                                <v-col cols="1">
                                     <v-text-field
-                                        label="gap"
+                                        label="gap(m)"
                                         v-model="paramGap"
                                         class="mt-0 pt-0"
-                                        hide-details
                                         type="number"
-                                        outlined dense
+                                        outlined dense hide-details
                                         color="amber"
                                         min="1"
                                         max="500"
                                         @input="changeGapSurveyPath($event)"
                                     ></v-text-field>
                                 </v-col>
-                                <v-col cols="2">
+                                <v-col cols="1">
                                     <v-text-field
-                                        label="비행고도"
+                                        label="비행고도(m)"
                                         v-model="paramAlt"
                                         class="mt-0 pt-0"
-                                        hide-details
                                         type="number"
-                                        outlined dense
+                                        outlined dense hide-details
                                         color="amber"
                                         min="3"
                                         max="500"
@@ -202,6 +200,7 @@
             });
 
             return {
+                area: 0,
                 select: 'Vuetify',
                 items: [
                     'Programming',
@@ -627,20 +626,21 @@
             this.paramGap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap;
             this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt;
 
+            if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'area')) {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area = 0;
+            }
+            this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
+
             console.log('InfoSurveyMarker', this.$store.state.surveyMarkers[this.markerName]);
 
-            EventBus.$on('on-update-infomarker', () => {
-                this.targetLat = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].lat;
-                this.targetLng = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].lng;
-                this.targetAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt;
-                this.elevation = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevation;
-
+            EventBus.$on('on-update-survey-infomarker', () => {
+                this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
                 this.$forceUpdate();
             });
         },
 
         beforeDestroy() {
-            EventBus.$off('on-update-infomarker');
+            EventBus.$off('on-update-survey-infomarker');
         }
     }
 </script>
