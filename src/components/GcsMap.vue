@@ -33,7 +33,7 @@
                              strictBounds: false,
                          }"
                          :style="myGcsStyle"
-                         :options="{disableDefaultUI: true, gestureHandling: 'auto', disableDoubleClickZoom: true, minZoom: 3, maxZoom: 30}"
+                         :options="{disableDefaultUI: true, gestureHandling: 'greedy', disableDoubleClickZoom: true, minZoom: 1, maxZoom: 30}"
                          @click="printPosClick"
                          @dblclick="addingMarker"
                          @dragstart="cancelMarker"
@@ -522,7 +522,7 @@
     </div>
 </template>
 
-<script src="../../../gmap/src/main.js"></script>
+<!--<script src="../../../gmap/src/main.js"></script>-->
 
 <script>
 
@@ -532,9 +532,9 @@
     import {nanoid} from "nanoid";
     import {gmapApi} from 'vue2-google-maps';
     import axios from "axios";
-    import {faMapMarkerAlt} from "@fortawesome/free-solid-svg-icons";
+    // import {faMapMarkerAlt} from "@fortawesome/free-solid-svg-icons";
 
-    var curElevationVal = 0;
+    // var curElevationVal = 0;
 
     const get_point_dist = (latitude, longitude, distanceInKm, bearingInDegrees) => {
         const R = 6378.1;
@@ -782,7 +782,7 @@
         methods: {
             line_intersect(x1, y1, x2, y2, x3, y3, x4, y4)
             {
-                var ua, ub, denom = (y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1);
+                let ua, ub, denom = (y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1);
                 if (denom === 0) {
                     return null;
                 }
