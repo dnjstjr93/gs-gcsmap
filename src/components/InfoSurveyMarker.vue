@@ -195,9 +195,9 @@
         name: "InfoMarker",
 
         props: [
+            'value',
             'markerName',
             'markerIndex',
-            'targets',
         ],
 
         data() {
@@ -211,6 +211,8 @@
             });
 
             return {
+                targets: [],
+
                 area: 0,
                 select: 'Vuetify',
                 items: [
@@ -626,6 +628,15 @@
         },
 
         created() {
+            this.targets = [];
+
+            for (var dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
+                        this.targets.push(dName);
+                    }
+                }
+            }
         },
 
         mounted() {

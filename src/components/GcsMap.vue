@@ -7,7 +7,6 @@
                                 :marker-name="curNameMarker"
                                 :marker-index="curIndexMarker"
                                 :marker="curSelectedMarker"
-                                :targets="curTargets"
                     ></InfoMarker>
                 </v-card>
                 <v-card flat tile class="info_markers" v-if="curSurveyMarkerFlag">
@@ -15,7 +14,6 @@
                         v-model="curSurveyMarkerFlag"
                         :marker-name="curNameMarker"
                         :marker-index="curIndexMarker"
-                        :targets="curTargets"
                     ></InfoSurveyMarker>
                 </v-card>
                 <v-card flat tile class="context-menu" :style="{top:context.top + 'px',left:context.left+'px'}"
@@ -156,17 +154,26 @@
                                             fontWeight: 'normal'
                                         }"
                                         :title="drone.name"
-                                        :options="{zIndex: 1}"
+                                        :options="{zIndex: 0}"
                                     />
 
                                     <GmapPolyline
                                         :path.sync="$store.state.trackingLines[drone.name]"
-                                        :options="trackingLineOptions"
+                                        :options="{
+                                            strokeColor: '#FF6D00',
+                                            strokeOpacity: 0.9,
+                                            strokeWeight: 2,
+                                            zIndex: 0
+                                        }"
                                     ></GmapPolyline>
 
                                     <GmapPolyline
-                                        :path.sync="gotoLines[drone.name]"
-                                        :options="gotoLinesOptions[drone.name]"
+                                        :path.sync="$store.state.tempMarkers[drone.name]"
+                                        :options="{
+                                            strokeColor: drone.color,
+                                            strokeOpacity: 0.2,
+                                            strokeWeight: 10,
+                                        }"
                                     ></GmapPolyline>
 
                                     <div v-for="(pos, pIndex) in $store.state.tempMarkers[drone.name]" :key="'marker'+pIndex">
@@ -271,7 +278,7 @@
 
                                     <GmapPolyline
                                         :path.sync="drone.directionLine"
-                                        :options="{strokeColor: 'black', strokeOpacity: 1, strokeWeight: 4, zIndex: 6, icons: [{icon: lineArrow, offset: '100%'}]}"
+                                        :options="{strokeColor: 'black', strokeOpacity: 1, strokeWeight: 4, zIndex: 5, icons: [{icon: lineArrow, offset: '100%'}]}"
                                     ></GmapPolyline>
 
                                     <div v-for="(survey, pIndex) in $store.state.surveyMarkers[drone.name]" :key="'survey'+pIndex">
@@ -290,7 +297,7 @@
                                                 draggable: survey.polygonDraggable,
                                                 geodesic: false,
                                                 editable: survey.polygonEditable,
-                                                zIndex: 6,
+                                                zIndex: 2,
                                             }"
                                         />
                                         <GmapPolyline
@@ -299,7 +306,7 @@
                                                 strokeColor: drone.color,
                                                 strokeOpacity: 0.7,
                                                 strokeWeight: 3,
-                                                zIndex: 1
+                                                zIndex: 0
                                             }"
                                         />
                                         <GmapMarker
@@ -437,7 +444,7 @@
                                         draggable: survey.polygonDraggable,
                                         geodesic: false,
                                         editable: survey.polygonEditable,
-                                        zIndex: 6,
+                                        zIndex: 2,
                                     }"
                                 />
                                 <GmapPolyline
@@ -446,7 +453,7 @@
                                         strokeColor: '#607D8B',
                                         strokeOpacity: 0.95,
                                         strokeWeight: 4,
-                                        zIndex: 1
+                                        zIndex: 0
                                     }"
                                 />
                                 <GmapMarker
@@ -572,23 +579,6 @@
                 turningDir: [90, 90, -90, -90],
                 idUpdateTimer: null,
                 idPostTimer: null,
-                blueCoords: [
-                    { lat: 25.774, lng: -60.19 },
-                    { lat: 18.466, lng: -46.118 },
-                    { lat: 32.321, lng: -44.757 },
-                ],
-                blueCoordsOptions: {
-                    strokeColor: "#0000FF",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: "#0000FF",
-                    fillOpacity: 0.35,
-                    draggable: true,
-                    geodesic: false,
-                    editable: true,
-                    zIndex: 5,
-                },
-
                 lineArrow: null,
                 curElevation: 0,
                 zoom: 18,
@@ -618,7 +608,6 @@
                     lat: 37.40423134053018,
                     lng: 127.16050533784832
                 },
-                curTargets: [],
                 myHeight: window.innerHeight-50,
                 myWidth: window.innerWidth,
                 readyFlagGcsMap: false,
@@ -627,13 +616,6 @@
 
                 map: null,
                 // targetCirclesOptions: {},
-
-                trackingLineOptions: {
-                    strokeColor: '#FF6D00',
-                    strokeOpacity: 0.9,
-                    strokeWeight: 2,
-                    zIndex: 0
-                },
 
                 boundaryCircles: {},
                 curBoundaryRadius: 100,
@@ -685,73 +667,35 @@
                 }
             },
 
-            ['$store.state.tempMarkers']: {
-                deep: true,
-                handler: function (newVal) {
-                    console.log('watch-tempMakers', newVal);
-
-                    this.gotoLines = {};
-                    for (let pName in newVal) {
-                        if(Object.prototype.hasOwnProperty.call(newVal, pName)) {
-                            if (pName !== 'unknown') {
-                                console.log('***************************************************', newVal)
-                                newVal[pName].forEach((pos) => {
-                                    if (!Object.prototype.hasOwnProperty.call(this.gotoLines, pName)) {
-                                        this.gotoLines[pName] = null;
-                                        this.gotoLines[pName] = [];
-                                        this.gotoLinesOptions[pName] = null;
-                                        this.gotoLinesOptions[pName] = {};
-
-                                        let _options = {};
-                                        _options.strokeColor = this.$store.state.drone_infos[pName].color;
-                                        _options.strokeOpacity = 0.2;
-                                        _options.strokeWeight = 10;
-
-                                        this.gotoLinesOptions[pName] = JSON.parse(JSON.stringify(_options));
-                                    }
-
-                                    this.gotoLines[pName].push(pos);
+            curTempMarkerFlag: function (newVal, oldVal) {
+                if(oldVal) {
+                    console.log('curTempMarkerFlag', oldVal, '->', newVal);
+                    for(let dName in this.$store.state.drone_infos) {
+                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
+                                this.$store.state.tempMarkers[dName].forEach((marker) => {
+                                    marker.selected = false;
+                                    marker.targeted = false;
                                 });
                             }
                         }
                     }
-
-                    this.curTargets = [];
-                    for(var dName in this.$store.state.drone_infos) {
-                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                            if(dName === 'unknown') {
-                                this.curTargets.push(dName);
-                            }
-                            else {
-                                if(this.$store.state.drone_infos[dName].selected) {
-                                    this.curTargets.push(dName);
-                                }
-                            }
-                        }
-                    }
-
-                    //this.curTargets = Object.keys(this.$store.state.drone_infos);
-
-                    console.log('curTargets', this.curTargets);
-
-                    // newVal.positions.forEach((pos) => {
-                    //     if(pos.selected) {
-                    //         pos.m_icon.strokeWeight = 7;
-                    //     }
-                    //     else {
-                    //         pos.m_icon.strokeWeight = 1;
-                    //     }
-                    // });
-                    //
-
-                    this.$forceUpdate();
                 }
             },
 
-            curTempMarkerFlag: function (newVal, oldVal) {
+            curSurveyMarkerFlag: function (newVal, oldVal) {
                 if(oldVal) {
-                    console.log('curTempMarkerFlag', oldVal, '->', newVal);
-                    this.$store.commit('setAllTempMarker', false);
+                    console.log('curSurveyMarkerFlag', oldVal, '->', newVal);
+                    for(let dName in this.$store.state.drone_infos) {
+                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
+                                this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                                    marker.selected = false;
+                                    marker.targeted = false;
+                                });
+                            }
+                        }
+                    }
                 }
             },
         },
@@ -1581,7 +1525,6 @@
                 paths.push({lat: pointL.lat, lng: pointL.lon});
 
                 survey.paths = JSON.parse(JSON.stringify(paths));
-                this.blueCoords = JSON.parse(JSON.stringify(paths));
 
                 survey.gap = 20;
                 survey.dir = 1;
@@ -1652,11 +1595,30 @@
 
                 this.curTempMarkerFlag = false;
                 this.curSurveyMarkerFlag = false;
-                this.$store.state.surveyMarkers.unknown.forEach((marker) => {
-                    marker.selected = false;
-                    marker.polygonDraggable = false;
-                    marker.polygonEditable = false;
-                });
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
+                            this.$store.state.tempMarkers[dName].forEach((marker) => {
+                                marker.selected = false;
+                                marker.targeted = false;
+                            });
+                        }
+                    }
+                }
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
+                            this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                                marker.selected = false;
+                                marker.targeted = false;
+                                marker.polygonDraggable = false;
+                                marker.polygonEditable = false;
+                            });
+                        }
+                    }
+                }
 
                 //this.$store.commit('setAllTempMarker', false);
 
@@ -1678,6 +1640,8 @@
                 console.log(e);
                 console.log('click-pos', e.latLng.lat(), e.latLng.lng());
 
+                console.log('this.$store.state.iconSourceDrone.icon[0]', this.$store.state.iconSourceDrone.icon[0]);
+
                 //this.center = {lat: e.latLng.lat(), lng: e.latLng.lng()};
 
                 this.click_x = e.domEvent.clientX;
@@ -1691,18 +1655,39 @@
                 console.log('context', this.context);
 
                 this.curTempMarkerFlag = false;
-                //this.$store.commit('setAllTempMarker', false);
-
                 this.curSurveyMarkerFlag = false;
 
 
                 console.log('curNameMarker', this.curNameMarker);
                 console.log('this.$store.state.surveyMarkers', this.$store.state.surveyMarkers);
-                this.$store.state.surveyMarkers[this.curNameMarker].forEach((marker) => {
-                    marker.selected = false;
-                    marker.polygonDraggable = false;
-                    marker.polygonEditable = false;
-                });
+
+                this.curTempMarkerFlag = false;
+                this.curSurveyMarkerFlag = false;
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
+                            this.$store.state.tempMarkers[dName].forEach((marker) => {
+                                marker.selected = false;
+                                marker.targeted = false;
+                            });
+                            this.$store.state.drone_infos[dName].targeted = false;
+                        }
+                    }
+                }
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
+                            this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                                marker.selected = false;
+                                marker.targeted = false;
+                                marker.polygonDraggable = false;
+                                marker.polygonEditable = false;
+                            });
+                        }
+                    }
+                }
 
                 this.cancelMarker();
             },
@@ -1761,9 +1746,19 @@
                     console.log('updataSurveyParam', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex]);
 
                     this.curSurveyMarkerFlag = false;
-                    this.$store.state.surveyMarkers[dName].forEach((marker) => {
-                        marker.selected = false;
-                    });
+
+                    for(let dName in this.$store.state.drone_infos) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if (dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
+                                this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                                    marker.selected = false;
+                                    marker.targeted = false;
+                                    marker.polygonDraggable = false;
+                                    marker.polygonEditable = false;
+                                });
+                            }
+                        }
+                    }
 
                     this.$forceUpdate();
 
@@ -1775,7 +1770,7 @@
                         this.curIndexMarker = pIndex;
                         this.curNameMarker = dName;
                         this.curSurveyMarkerFlag = true;
-                    }, 50)
+                    }, 10)
                 }
             },
 

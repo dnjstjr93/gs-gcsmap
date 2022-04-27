@@ -1320,41 +1320,41 @@
                             else {
                                 this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(con));
 
-                                this.$store.state.surveyMarkers[dName].forEach((pos) => {
-                                    pos.targeted = false;
-                                    pos.selected = false;
-                                    pos.options.zIndex = 5;
+                                this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                                    marker.targeted = false;
+                                    marker.selected = false;
+                                    marker.options.zIndex = 5;
 
-                                    if(!Object.prototype.hasOwnProperty.call(pos, 'angleStart')) {
-                                        pos.angleStart = 0;
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'angleStart')) {
+                                        marker.angleStart = 0;
                                     }
 
-                                    if(!Object.prototype.hasOwnProperty.call(pos, 'dir')) {
-                                        pos.dir = 'cw';
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'dir')) {
+                                        marker.dir = 'cw';
                                     }
 
-                                    if(!Object.prototype.hasOwnProperty.call(pos, 'color')) {
-                                        pos.color = 'orange';
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'color')) {
+                                        marker.color = 'orange';
                                     }
 
-                                    if(!Object.prototype.hasOwnProperty.call(pos, 'gap')) {
-                                        pos.gap = 10;
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'gap')) {
+                                        marker.gap = 10;
                                     }
 
-                                    if(!Object.prototype.hasOwnProperty.call(pos, 'pathLines')) {
-                                        pos.pathLines = [];
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'pathLines')) {
+                                        marker.pathLines = [];
                                     }
 
-                                    if(!Object.prototype.hasOwnProperty.call(pos, 'polygonDraggable')) {
-                                        pos.polygonDraggable = false;
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'polygonDraggable')) {
+                                        marker.polygonDraggable = false;
                                     }
 
-                                    if(!Object.prototype.hasOwnProperty.call(pos, 'polygonEditable')) {
-                                        pos.polygonEditable = false;
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'polygonEditable')) {
+                                        marker.polygonEditable = false;
                                     }
 
-                                    pos.polygonDraggable = false;
-                                    pos.polygonEditable = false;
+                                    marker.polygonDraggable = false;
+                                    marker.polygonEditable = false;
                                 });
                             }
 
