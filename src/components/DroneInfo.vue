@@ -4173,7 +4173,9 @@ export default {
                     }
                     this.roll = this.arrRoll.reduce( ( p, c ) => p + c, 0 ) / this.arrRoll.length;
                     this.roll = this.att.roll * (180/3.14);
-                    this.info.bankAngle = this.roll;
+                    this.info.bankAngle = (-1) * this.roll ;
+
+                    // console.log('roll(rad): ' + (this.att.roll));
 
                     this.arrPitch.push(this.att.pitch * 100);
                     while(this.arrPitch.length > 3) {
@@ -4181,7 +4183,7 @@ export default {
                     }
                     this.pitch = this.arrPitch.reduce( ( p, c ) => p + c, 0 ) / this.arrPitch.length;
                     this.pitch = this.att.pitch * (180/3.14);
-                    this.info.anglePitch = this.pitch * -1;
+                    this.info.anglePitch = this.pitch;
 
                     // console.log('pitch(rad): ' + (this.att.pitch));
                     // console.log('pitch(deg): ' + (this.att.pitch * (180/3.14)));
