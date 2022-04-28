@@ -1285,9 +1285,9 @@
                                     this.$store.state.curTargetedTempMarkerIndex[dName] = null;
                                 });
 
-                                let payload = {};
-                                payload.dName = dName;
-                                EventBus.$emit('draw-gotoLines', payload);
+                                // let payload = {};
+                                // payload.dName = dName;
+                                // EventBus.$emit('draw-gotoLines', payload);
 
                                 EventBus.$emit('do-positions-elevation-' + dName);
                             }

@@ -4171,15 +4171,20 @@ export default {
                     while(this.arrRoll.length > 3) {
                         this.arrRoll.shift();
                     }
-                    this.roll = this.arrRoll.reduce( ( p, c ) => p + c, 0 ) / this.arrRoll.length
+                    this.roll = this.arrRoll.reduce( ( p, c ) => p + c, 0 ) / this.arrRoll.length;
+                    this.roll = this.att.roll * (180/3.14);
                     this.info.bankAngle = this.roll;
 
                     this.arrPitch.push(this.att.pitch * 100);
                     while(this.arrPitch.length > 3) {
                         this.arrPitch.shift();
                     }
-                    this.pitch = this.arrPitch.reduce( ( p, c ) => p + c, 0 ) / this.arrPitch.length
+                    this.pitch = this.arrPitch.reduce( ( p, c ) => p + c, 0 ) / this.arrPitch.length;
+                    this.pitch = this.att.pitch * (180/3.14);
                     this.info.anglePitch = this.pitch;
+
+                    // console.log('pitch(rad): ' + (this.att.pitch));
+                    // console.log('pitch(deg): ' + (this.att.pitch * (180/3.14)));
 
                     // console.log('roll: ' + this.roll, 'pitch: ' + this.pitch);
 

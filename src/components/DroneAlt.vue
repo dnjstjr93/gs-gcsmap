@@ -25,7 +25,7 @@
             <div v-for="drone in $store.state.drone_infos" :key="drone.id">
                 <div v-if="drone.selected">
                     <v-slider
-                        v-show="showSlider[drone.name].enabled"
+                        v-show="showSlider[drone.name]"
                         :style="styleAlt[drone.name]"
                         vertical hide-details dense readonly
                         min="0" max="150"
@@ -88,18 +88,38 @@ export default {
         this.context_left = this.$store.state.command_tab_left_x;
 
         EventBus.$on('gcs-map-ready', () => {
+            for(let dName in this.$store.state.drone_infos) {
+                if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected) {
+                        this.showSlider[dName] = true;
+                    }
+                }
+            }
+
             setTimeout(() => {
                 this.refreshCanvas = true;
             }, 2000);
+        });
+
+        EventBus.$on('do-refresh-DroneAlt', () => {
+            for(let dName in this.$store.state.drone_infos) {
+                if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected) {
+                        this.showSlider[dName] = true;
+                    }
+                }
+            }
+
+            setTimeout(() => {
+                this.refreshCanvas = true;
+            }, 50);
         });
 
         EventBus.$on('do-draw-DroneCommand', (payload) => {
             //console.log(payload);
 
             if(!Object.prototype.hasOwnProperty.call(this.showSlider, payload.name)) {
-                this.showSlider[payload.name] = {};
-                this.showSlider[payload.name].enabled = true;
-                this.showSlider[payload.name].x = 0;
+                this.showSlider[payload.name] = true;
             }
 
             if(!Object.prototype.hasOwnProperty.call(this.styleAlt, payload.name)) {
@@ -118,21 +138,21 @@ export default {
                 //console.log(this.$refs.alt.getBoundingClientRect());
                 let clientRect = this.$refs.alt.getBoundingClientRect();
 
-                this.showSlider[payload.name].x = payload.x - clientRect.x;
+                let diff = payload.x - clientRect.x;
                 let temp = JSON.parse(JSON.stringify(this.sliderAlt));
                 this.sliderAlt = null;
                 this.sliderAlt = JSON.parse(JSON.stringify(temp));
                 this.sliderAlt[payload.name] = payload.alt;
                 // this.draw(x, y);
 
-                this.showSlider[payload.name].enabled = (0 <= this.showSlider[payload.name].x);
+                this.showSlider[payload.name] = (0 <= diff);
 
                 //console.log('scale', payload.scale);
                 //console.log('$store.state.command_tab_max_width', this.$store.state.command_tab_max_width);
                 //console.log('draw', this.showSlider[payload.name].x, y);
 
                 this.styleAlt[payload.name] = {
-                    left: this.showSlider[payload.name].x + 'px',
+                    left: diff + 'px',
                     top: 76 + 'px',
                     opacity: 1
                 }
@@ -157,6 +177,8 @@ export default {
     },
 
     beforeDestroy() {
+        EventBus.$off('gcs-map-ready');
+        EventBus.$off('do-refresh-DroneAlt');
         EventBus.$off('do-draw-DroneCommand');
     }
 }

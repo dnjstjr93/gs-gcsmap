@@ -1572,7 +1572,7 @@ export default {
         drawRadius(dName) {
             this.$store.state.drone_infos[dName].targetRadius = parseInt(this.targetRadius[dName]);
 
-            EventBus.$emit('do-drawLineAllTarget');
+            //EventBus.$emit('do-drawLineAllTarget');
         },
         handleLeftChange(dName, id, {x, y, speed, angle}) {
             const stick = this[`${id}Stick`];
@@ -1690,8 +1690,9 @@ export default {
             EventBus.$emit('do-deleteLineAllTarget');
 
             if (this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회') {
-                EventBus.$emit('do-drawLineAllTarget');
-            } else if (this.$store.state.currentCommandTab === '모드') {
+                //EventBus.$emit('do-drawLineAllTarget');
+            }
+            else if (this.$store.state.currentCommandTab === '모드') {
                 for (let dName in this.$store.state.drone_infos) {
                     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {

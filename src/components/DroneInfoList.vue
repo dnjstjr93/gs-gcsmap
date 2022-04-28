@@ -575,6 +575,8 @@
 
                 EventBus.$emit('clearDroneMarker', '');
 
+                EventBus.$emit('do-refresh-DroneAlt');
+
                 this.drones_selected = null;
                 this.drones_selected = [];
                 for(let idx in selected) {
