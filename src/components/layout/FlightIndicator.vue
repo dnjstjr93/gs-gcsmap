@@ -71,7 +71,7 @@ export default {
     .arrowWrap {
         position: absolute;
         left: 50%;
-        top: 50%;
+        top: 51.5%;
         transform: translate(-50%, -50%);
         width: 70%;
         transition: all 0.3s;
