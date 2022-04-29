@@ -13,6 +13,7 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 async function createWindow() {
   // Create the browser window.
