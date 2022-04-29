@@ -3726,11 +3726,13 @@ export default {
                     this.info.text = Buffer.from(text, 'hex').toString('ASCII').replace(/\0/g, '').replace('  ', '');
 
                     // console.log('text\n', mavPacket, '\n', this.info.text)
-                    this.speak(this.info.text, {
-                        rate: 1,
-                        pitch: 1.2,
-                        lang: "en-US"
-                    })
+                    if (this.info.severity < 4) {
+                        this.speak(this.info.text, {
+                            rate: 1,
+                            pitch: 1.2,
+                            lang: "en-US"
+                        })
+                    }
                 }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_SYS_STATUS && ((ver === 'fd') || (ver === 'fe' && mavPacket.length === 78))) {
