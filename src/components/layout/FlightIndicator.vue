@@ -47,7 +47,7 @@ export default {
 #view-port {
     position: absolute;
     left: 0;
-    top: 0;
+    top: 10px;
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -71,10 +71,10 @@ export default {
     .arrowWrap {
         position: absolute;
         left: 50%;
-        top: 51.5%;
+        top: 53%;
         transform: translate(-50%, -50%);
         width: 70%;
-        transition: all 0.3s;
+        transition: all 0.2s;
         z-index: 1;
 
         p {

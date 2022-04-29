@@ -10,68 +10,13 @@
 
         <v-spacer></v-spacer>
 
-        <v-row no-gutters>
-            <v-col cols="3">
-                <!--                            <v-text-field hide-details ref="host" v-model="host" :rules="host_rule" placeholder="203.253.128.177" label="Host*" required></v-text-field>-->
-                <v-text-field
-                        class="mx-2 mt-1"
-                        dense hide-details outlined
-                        ref="host"
-                        v-model="host" :rules="host_rule"
-                        placeholder="203.253.128.177"
-                        label="HOST*"
-                        required
-                        :disabled="MOBIUS_CONNECTION_CONNECTED"
-                ></v-text-field>
-            </v-col>
-            <v-col cols="1" class="text-right">
-                <v-btn
-                    class="mr-1 mt-1 py-5" dark text outlined elevation="2"
-                    @click.stop="setGCSHomePosition"
-                >
-                    <v-icon>
-                        mdi-home
-                    </v-icon>
-                </v-btn>
-            </v-col>
-            <v-col cols="3">
-                <v-text-field
-                    class="mr-2 mt-1"
-                    dense hide-details outlined
-                    ref="gcs"
-                    v-model="gcs" :rules="gcs_rule"
-                    placeholder="KETI_GCS"
-                    label="GCS*"
-                    required
-                    :disabled="MOBIUS_CONNECTION_CONNECTED"
-                ></v-text-field>
-            </v-col>
-            <v-col cols="5">
-                <v-btn
-                        class="mx-2 mt-1"
-                        tile @click="GcsAppBarCreated"
-                        elevation="5"
-                        color="primary"
-                        :disabled="MOBIUS_CONNECTION_CONNECTED"
-                > {{ MOBIUS_CONNECTION_TEXT }}
-                </v-btn>
-<!--            </v-col>-->
-<!--            <v-col cols="2">-->
-                <v-btn
-                        class="mx-2 mt-1"
-                        tile @click="GcsAppBarReseted"
-                        elevation="2"
-                        color="primary"
-                        :disabled="!MOBIUS_CONNECTION_CONNECTED"
-                > {{ MOBIUS_DISCONNECTION_TEXT }}
-                </v-btn>
-            </v-col>
-        </v-row>
+        <v-btn text :disabled="!MOBIUS_CONNECTION_CONNECTED">
+            <v-icon>mdi-crosshairs-gps</v-icon>
+        </v-btn>
 
-        <v-spacer></v-spacer>
-
-        <v-btn text @click.stop="dialogProfile" :disabled="!MOBIUS_CONNECTION_CONNECTED">
-            <v-icon>mdi-quadcopter</v-icon>
+        <v-btn text @click.stop="dialogProfile">
+<!--            <v-icon>mdi-quadcopter</v-icon>-->
+            <v-icon>mdi-cog-transfer</v-icon>
         </v-btn>
 
 
@@ -101,10 +46,6 @@
                 <v-toolbar color="teal" dark>
                     <v-icon left>mdi-quadcopter</v-icon>
                     <v-toolbar-title>Settings</v-toolbar-title>
-                    <v-spacer></v-spacer>
-                    <v-btn text outlined @click.stop="confirmSelected">
-                        <v-icon left>mdi-ticket-confirmation-outline</v-icon> 확인
-                    </v-btn>
                     <template v-slot:extension>
                         <v-speed-dial
                             v-model="fab"
@@ -132,6 +73,54 @@
                                 <v-icon>mdi-delete</v-icon>
                             </v-btn>
                         </v-speed-dial>
+
+                        <v-row no-gutters class="text-right justify-end mb-2">
+                            <v-col cols="4">
+                                <!--                            <v-text-field hide-details ref="host" v-model="host" :rules="host_rule" placeholder="203.253.128.177" label="Host*" required></v-text-field>-->
+                                <v-text-field
+                                    class="pl-16 mx-2 mt-1"
+                                    dense hide-details outlined
+                                    ref="host"
+                                    v-model="host" :rules="host_rule"
+                                    placeholder="203.253.128.177"
+                                    label="HOST*"
+                                    required
+                                    :disabled="MOBIUS_CONNECTION_CONNECTED"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col cols="3">
+                                <v-text-field
+                                    class="mt-1"
+                                    dense hide-details outlined
+                                    ref="gcs"
+                                    v-model="gcs" :rules="gcs_rule"
+                                    placeholder="KETI_GCS"
+                                    label="GCS*"
+                                    required
+                                    :disabled="MOBIUS_CONNECTION_CONNECTED"
+                                ></v-text-field>
+                            </v-col>
+                            <v-col cols="4">
+                                <v-btn
+                                    class="mx-2 mt-1"
+                                    tile @click="GcsAppBarCreated"
+                                    elevation="5"
+                                    color="primary"
+                                    :disabled="MOBIUS_CONNECTION_CONNECTED"
+                                > {{ MOBIUS_CONNECTION_TEXT }}
+                                </v-btn>
+                                <!--            </v-col>-->
+                                <!--            <v-col cols="2">-->
+                                <v-btn
+                                    class="mx-2 mt-1"
+                                    tile @click="GcsAppBarReseted"
+                                    elevation="2"
+                                    color="primary"
+                                    :disabled="!MOBIUS_CONNECTION_CONNECTED"
+                                > {{ MOBIUS_DISCONNECTION_TEXT }}
+                                </v-btn>
+                            </v-col>
+                        </v-row>
                     </template>
                 </v-toolbar>
 
@@ -215,8 +204,12 @@
                             </v-btn>
                         </template>
                     </v-data-table>
-
                 </v-container>
+                <v-row no-gutters class="justify-end pb-3 pr-3">
+                    <v-btn text outlined @click.stop="confirmSelected(false)">
+                        <v-icon left>mdi-ticket-confirmation-outline</v-icon> 확인
+                    </v-btn>
+                </v-row>
             </v-card>
 
             <v-dialog v-model="add_dialog" persistent max-width="600px">
@@ -1677,7 +1670,7 @@
                 //this.$cookies.set('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED);
                 localStorage.setItem('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED);
 
-                this.confirmSelected();
+                this.confirmSelected(true);
             },
 
             dialogProfile() {
@@ -1798,7 +1791,7 @@
                 );
             },
 
-            confirmSelected() {
+            confirmSelected(dialog) {
                 console.log('confirmSelected', this.selected);
 
                 if(Object.keys(this.$store.state.drone_infos).length <= 1) {
@@ -1833,7 +1826,7 @@
                 });
 
                 this.$store.commit('updateDroneInfosSelected');
-                this.dialog = false;
+                this.dialog = dialog;
 
                 EventBus.$emit('confirm_selected', JSON.parse(JSON.stringify(this.selected)));
 
