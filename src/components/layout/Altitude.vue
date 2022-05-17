@@ -4,14 +4,14 @@
             <div class="r0"></div>
         </div>
         <div :id="`number_alt_${this.data.no}`" class="alt-wrapper swiper-container">
-      <span class="alt-indicator d-flex justify-center align-center">
-        {{ Math.floor(this.data.altitude) }}
-      </span>
-            <div class="swiper-wrapper alt">
-                <div v-for="n in 100" :key="n" class="alt-item swiper-slide">
-                    <span class="pr-1" :class="{ 'pr-4': data.fs }">{{ n % 5 === 0 ? n : null }}</span>
-                </div>
+        <span class="alt-indicator d-flex justify-center align-center">
+            {{ Math.floor(this.data.altitude) }}
+        </span>
+        <div class="swiper-wrapper alt">
+            <div v-for="n in 100" :key="n" class="alt-item swiper-slide">
+                <span class="pr-1" :class="{ 'pr-4': data.fs }">{{ n % 5 === 0 ? n : null }}</span>
             </div>
+        </div>
         </div>
     </div>
 </template>
@@ -69,7 +69,8 @@ export default {
                 let nextValue = datas - i + 49
                 if (nextValue % 5 === 0) {
                     slides[i].innerHTML = JSON.stringify(nextValue)
-                } else {
+                }
+                else {
                     slides[i].innerHTML = ''
                 }
             }
@@ -140,7 +141,7 @@ export default {
             background-color:rgba(0,0,0,0.6);
             box-sizing:border-box;
             z-index: 3;
-            font-size: 85%;
+            font-size: 100%;
         }
 
         .alt {

@@ -112,19 +112,19 @@
                                         @input="changeGapSurveyPath($event)"
                                     ></v-text-field>
                                 </v-col>
-                                <v-col cols="1">
-                                    <v-text-field
-                                        label="비행고도(m)"
-                                        v-model="paramAlt"
-                                        class="mt-0 pt-0"
-                                        type="number"
-                                        outlined dense hide-details
-                                        color="amber"
-                                        min="3"
-                                        max="500"
-                                        @input="changeAltSurveyPath($event)"
-                                    ></v-text-field>
-                                </v-col>
+<!--                                <v-col cols="1">-->
+<!--                                    <v-text-field-->
+<!--                                        label="비행고도(m)"-->
+<!--                                        v-model="paramAlt"-->
+<!--                                        class="mt-0 pt-0"-->
+<!--                                        type="number"-->
+<!--                                        outlined dense hide-details-->
+<!--                                        color="amber"-->
+<!--                                        min="3"-->
+<!--                                        max="500"-->
+<!--                                        @input="changeAltSurveyPath($event)"-->
+<!--                                    ></v-text-field>-->
+<!--                                </v-col>-->
                             </v-row>
 <!--                            <v-row align="center" justify="center">-->
 <!--                                <v-col cols="4">-->
@@ -391,23 +391,35 @@
             },
 
             changeGapSurveyPath(gap) {
-                if(this.idGapUpdateTimer !== null) {
-                    clearTimeout(this.idGapUpdateTimer);
-                }
+                if(gap !== '') {
+                    if (this.idGapUpdateTimer !== null) {
+                        clearTimeout(this.idGapUpdateTimer);
+                    }
 
-                this.idGapUpdateTimer = setTimeout((dName, pIndex) => {
-                    EventBus.$emit('do-update-survey-gap-GcsMap', {dName: dName, pIndex: pIndex, gap: parseInt(gap)});
-                }, 500, this.markerName, this.markerIndex);
+                    this.idGapUpdateTimer = setTimeout((dName, pIndex) => {
+                        EventBus.$emit('do-update-survey-gap-GcsMap', {
+                            dName: dName,
+                            pIndex: pIndex,
+                            gap: parseInt(gap)
+                        });
+                    }, 500, this.markerName, this.markerIndex);
+                }
             },
 
             changeAngleSurveyPath(angle) {
-                if(this.idAngleUpdateTimer !== null) {
-                    clearTimeout(this.idAngleUpdateTimer);
-                }
+                if(angle !== '') {
+                    if (this.idAngleUpdateTimer !== null) {
+                        clearTimeout(this.idAngleUpdateTimer);
+                    }
 
-                this.idAngleUpdateTimer = setTimeout((dName, pIndex) => {
-                    EventBus.$emit('do-update-survey-angle-GcsMap', {dName: dName, pIndex: pIndex, angle: parseInt(angle)});
-                }, 500, this.markerName, this.markerIndex);
+                    this.idAngleUpdateTimer = setTimeout((dName, pIndex) => {
+                        EventBus.$emit('do-update-survey-angle-GcsMap', {
+                            dName: dName,
+                            pIndex: pIndex,
+                            angle: parseInt(angle)
+                        });
+                    }, 500, this.markerName, this.markerIndex);
+                }
             },
 
             changeDirSurveyPath(strDir) {

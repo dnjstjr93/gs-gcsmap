@@ -633,7 +633,7 @@
                 this.ws = new WebSocket(this.wsUrl);
 
                 this.ws.onopen = () => {
-                    this.$store.state.enableVideo = true;
+                    console.log('WebRTC server connected');
                 };
 
                 this.ws.onclose = () => {
@@ -650,8 +650,6 @@
                             }
                         }
                     }
-
-                    this.$store.state.enableVideo = false;
 
                     this.ws.close();
                     this.ws = null;

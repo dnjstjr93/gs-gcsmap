@@ -2067,6 +2067,14 @@ export default {
                                 }
                             }
 
+                            let strPos = this.$store.state.drone_infos[dName].home_position.lat + ':' +
+                                this.$store.state.drone_infos[dName].home_position.lng + ':' +
+                                '50:' +
+                                '5:' +
+                                '100:5:16:' +
+                                '1:0';
+                            this.position_selections_items[dName].push(strPos);
+
                             console.log('setSurvey', parseInt(this.$store.state.drone_infos[dName].autoStartIndex), parseInt(this.$store.state.drone_infos[dName].autoEndIndex), this.$store.state.drone_infos[dName].autoDelay);
                             if (parseInt(this.$store.state.drone_infos[dName].autoStartIndex) <= parseInt(this.$store.state.drone_infos[dName].autoEndIndex)) {
                                 let payload = {};

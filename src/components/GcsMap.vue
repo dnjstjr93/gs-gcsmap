@@ -230,7 +230,7 @@
                                                 strokeWeight: 2,
                                                 strokeColor: 'white',
                                                 rotation: 0,
-                                                scale: 0.07,
+                                                scale: 0.05,
                                                 anchor: {x: 50, y: $store.state.iconSourceDroneHome.icon[1]},
                                                 zIndex: 0
                                         }"
@@ -2744,9 +2744,9 @@
             EventBus.$on('gcs-map-ready', () => {
                 this.readyFlagGcsMap = true;
 
-                this.$refs.mapRef.$mapPromise.then((map) => {
-                    map.setTilt(45);
-                });
+                // this.$refs.mapRef.$mapPromise.then((map) => {
+                //     map.setTilt(45);
+                // });
 
                 this.lineArrow = {
                     path: this.google.maps.SymbolPath.FORWARD_CLOSED_ARROW
@@ -2784,10 +2784,10 @@
             });
 
             EventBus.$on('updatePlaneMarker', (payload) => {
-                this.$refs.mapRef.$mapPromise.then((map) => {
-                    this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
-                    this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
-                });
+                // this.$refs.mapRef.$mapPromise.then((map) => {
+                //     this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                //     this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                // });
 
                 if(!Object.prototype.hasOwnProperty.call(this.planeMarkers, payload.ICAO_address)) {
                     this.planeMarkers[payload.ICAO_address] = {};
@@ -2899,10 +2899,12 @@
                 //this.drawBoundaryCircles(100);
 
                 //this.droneMarkers[payload.name] = null;
-                this.$refs.mapRef.$mapPromise.then((map) => {
-                    this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
-                    this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
-                });
+
+
+                // this.$refs.mapRef.$mapPromise.then((map) => {
+                //     this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                //     this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                // });
 
                 // if(!Object.prototype.hasOwnProperty.call(this.droneMarkers, payload.name)) {
                 //     this.droneMarkers[payload.name] = {};

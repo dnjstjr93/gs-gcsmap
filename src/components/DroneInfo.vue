@@ -45,14 +45,13 @@
                                         class="ma-0 pa-0 pr-1"
                                         v-model="info.isVideo"
                                         @change="onVideoHandler(name)"
-                                        :disabled="!$store.state.enableVideo"
                                     >
                                     </v-switch>
                                 </v-col>
                                 <v-col cols="1">
                                     <v-btn
                                         class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                        @click.stop="setHomePosition"
+                                        @click.stop="gotoHomePosition"
                                     >
                                         <v-icon small>
                                             mdi-home
@@ -4619,7 +4618,7 @@ export default {
 
                     this.watchingMissionStatus = parseInt((this.mission_request[sys_id].seq_requested) / (this.droneStatus.mission_count-1) * 100);
 
-                    console.log(this.watchingMissionStatus);
+                    console.log('downloading ' + this.watchingMissionStatus + '%');
 
                     if((this.droneStatus.curCommand === 'auto_mission_count') || (this.droneStatus.curCommand === 'auto_mission_item')) {
                         clearTimeout(this.droneStatus.objTimeout);
@@ -5041,13 +5040,23 @@ export default {
             this.$store.state.trackingLines[this.name] = [];
         },
 
-        setHomePosition() {
-            this.$store.state.drone_infos[this.name].home_position = null;
-            delete this.$store.state.drone_infos[this.name].home_position;
-            this.$store.state.drone_infos[this.name].home_position = {
-                lat: (this.gpi.lat / 10000000),
-                lng: (this.gpi.lon / 10000000)
-            };
+        gotoHomePosition() {
+            // this.$store.state.drone_infos[this.name].home_position = null;
+            // delete this.$store.state.drone_infos[this.name].home_position;
+            // this.$store.state.drone_infos[this.name].home_position = {
+            //     lat: (this.gpi.lat / 10000000),
+            //     lng: (this.gpi.lon / 10000000)
+            // };
+
+            let strPos = this.$store.state.drone_infos[this.name].home_position.lat + ':' +
+                this.$store.state.drone_infos[this.name].home_position.lng + ':' +
+                '20:5:50:5:16:1:0';
+
+            console.log('gotoHomePosition-', strPos);
+            this.$store.state.drone_infos[this.name].gotoType = 'goto';
+            this.$store.state.drone_infos[this.name].targetSpeed = 5;
+            this.$store.state.drone_infos[this.name].targetAlt = 30;
+            EventBus.$emit('command-set-goto-' + this.name, strPos);
         }
     },
 
