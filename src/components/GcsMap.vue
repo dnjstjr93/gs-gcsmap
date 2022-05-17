@@ -450,12 +450,16 @@
                                 <GmapPolygon
                                     @paths_changed="showNewPolygon($event, 'unknown', pIndex)"
                                     @dblclick="updataSurveyParam($event, 'unknown', pIndex)"
+                                    @click="targetSurveyPolygon($event, 'unknown', pIndex)"
                                     @mousemove="calcDistance"
                                     :paths="survey.paths"
                                     :options="{
-                                        strokeColor: (survey.selected)?'#76FF03':'black',
-                                        strokeOpacity: 0.8,
-                                        strokeWeight: (survey.selected)?4:2,
+                                        strokeColor: (survey.selected)?'#76FF03':((survey.targeted)?'#FFFF00':'black'),
+                                        strokeOpacity: (survey.selected)?0.8:((survey.targeted)?0.8:0.2),
+                                        strokeWeight: (survey.selected)?4:((survey.targeted)?4:1),
+                                        // strokeColor: (survey.selected)?'#76FF03':'black',
+                                        // strokeOpacity: 0.8,
+                                        // strokeWeight: (survey.selected)?4:2,
                                         fillColor: 'black',
                                         fillOpacity: 0.3,
                                         draggable: survey.polygonDraggable,
@@ -690,10 +694,12 @@
                     for(let dName in this.$store.state.drone_infos) {
                         if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                             if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
-                                this.$store.state.tempMarkers[dName].forEach((marker) => {
-                                    marker.selected = false;
-                                    marker.targeted = false;
-                                });
+                                if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
+                                    this.$store.state.tempMarkers[dName].forEach((marker) => {
+                                        marker.selected = false;
+                                        marker.targeted = false;
+                                    });
+                                }
                             }
                         }
                     }
@@ -706,10 +712,12 @@
                     for(let dName in this.$store.state.drone_infos) {
                         if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                             if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
-                                this.$store.state.surveyMarkers[dName].forEach((marker) => {
-                                    marker.selected = false;
-                                    marker.targeted = false;
-                                });
+                                if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, dName)) {
+                                    this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                                        marker.selected = false;
+                                        marker.targeted = false;
+                                    });
+                                }
                             }
                         }
                     }
@@ -1616,23 +1624,27 @@
                 for(let dName in this.$store.state.drone_infos) {
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
-                            this.$store.state.tempMarkers[dName].forEach((marker) => {
-                                marker.selected = false;
-                                marker.targeted = false;
-                            });
+                            if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
+                                this.$store.state.tempMarkers[dName].forEach((marker) => {
+                                    marker.selected = false;
+                                    marker.targeted = false;
+                                });
+                            }
                         }
                     }
                 }
 
                 for(let dName in this.$store.state.drone_infos) {
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
-                            this.$store.state.surveyMarkers[dName].forEach((marker) => {
-                                marker.selected = false;
-                                marker.targeted = false;
-                                marker.polygonDraggable = false;
-                                marker.polygonEditable = false;
-                            });
+                        if(dName === 'unknown' && this.$store.state.drone_infos[dName].selected) {
+                            if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, dName)) {
+                                this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                                    marker.selected = false;
+                                    marker.targeted = false;
+                                    marker.polygonDraggable = false;
+                                    marker.polygonEditable = false;
+                                });
+                            }
                         }
                     }
                 }
@@ -1696,12 +1708,14 @@
                 for(let dName in this.$store.state.drone_infos) {
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
-                            this.$store.state.surveyMarkers[dName].forEach((marker) => {
-                                marker.selected = false;
-                                marker.targeted = false;
-                                marker.polygonDraggable = false;
-                                marker.polygonEditable = false;
-                            });
+                            if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, dName)) {
+                                this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                                    marker.selected = false;
+                                    marker.targeted = false;
+                                    marker.polygonDraggable = false;
+                                    marker.polygonEditable = false;
+                                });
+                            }
                         }
                     }
                 }
@@ -1767,12 +1781,14 @@
                     for(let dName in this.$store.state.drone_infos) {
                         if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                             if (dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
-                                this.$store.state.surveyMarkers[dName].forEach((marker) => {
-                                    marker.selected = false;
-                                    marker.targeted = false;
-                                    marker.polygonDraggable = false;
-                                    marker.polygonEditable = false;
-                                });
+                                if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, dName)) {
+                                    this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                                        marker.selected = false;
+                                        marker.targeted = false;
+                                        marker.polygonDraggable = false;
+                                        marker.polygonEditable = false;
+                                    });
+                                }
                             }
                         }
                     }
