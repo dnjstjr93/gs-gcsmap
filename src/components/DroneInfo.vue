@@ -6,7 +6,7 @@
                     <v-row no-gutters class="d-flex justify-center" align="center">
                         <v-col cols="12">
                             <v-row no-gutters align="center" justify="center">
-                                <v-col cols="6">
+                                <v-col cols="5">
                                     <v-card flat tile :color="$store.state.drone_infos[name].color">
                                         <v-checkbox
                                             dense hide-details
@@ -29,7 +29,7 @@
                                             :color="bpm_color"
                                             :style="{animationDuration: animationDuration}"
                                             class="v-avatar--metronome"
-                                            size="24"
+                                            size="18"
                                         >
                                             <v-icon dark>
                                                 mdi-heart-circle
@@ -37,16 +37,27 @@
                                         </v-avatar>
                                     </v-fade-transition>
                                 </v-col>
-                                <v-col cols="2">
-                                    <v-switch
-                                        dense hide-details flat inset
-                                        prepend-icon="mdi-video-outline"
-                                        color="white"
-                                        class="ma-0 pa-0 pr-1"
-                                        v-model="info.isVideo"
-                                        @change="onVideoHandler(name)"
+                                <v-col cols="1">
+<!--                                    <v-switch-->
+<!--                                        dense hide-details flat inset-->
+<!--                                        prepend-icon="mdi-video-outline"-->
+<!--                                        color="white"-->
+<!--                                        class="ma-0 pa-0 pr-1"-->
+<!--                                        v-model="info.isVideo"-->
+<!--                                        @change="onVideoHandler(name)"-->
+<!--                                    >-->
+<!--                                    </v-switch>-->
+                                    <v-btn-toggle
+                                        dense dark
+                                        v-model="toggle_exclusive"
+                                        :background-color="$store.state.drone_infos[name].color"
+                                        @change="onVideoHandler($event, name)"
+                                        active-class="deep-purple--text text--accent-5"
                                     >
-                                    </v-switch>
+                                        <v-btn class="mr-1 my-1" dark x-small text outlined elevation="5">
+                                            <v-icon small>mdi-video-outline</v-icon>
+                                        </v-btn>
+                                    </v-btn-toggle>
                                 </v-col>
                                 <v-col cols="1">
                                     <v-btn
@@ -55,6 +66,26 @@
                                     >
                                         <v-icon small>
                                             mdi-home
+                                        </v-icon>
+                                    </v-btn>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-btn
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="returnToLaunch"
+                                    >
+                                        <v-icon small>
+                                            mdi-backup-restore
+                                        </v-icon>
+                                    </v-btn>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-btn
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="pauseCurPosition"
+                                    >
+                                        <v-icon small>
+                                            mdi-close-octagon-outline
                                         </v-icon>
                                     </v-btn>
                                 </v-col>
@@ -702,6 +733,7 @@ export default {
 
     data() {
         return {
+            toggle_exclusive: undefined,
             itemsWpYawBehavior: [
                 '0 = Never change Yaw.',
                 '1 = Face Next Waypoint including facing home during RTL.',
@@ -1272,7 +1304,10 @@ export default {
             localStorage.setItem(this.name + '_mavVersion', this.mavVersion);
         },
 
-        onVideoHandler(drone_name) {
+        onVideoHandler(e, drone_name) {
+            this.info.isVideo = e === 0;
+
+            console.log('>>>>>>>>>>>>>>>>>>>>>>', this.info.isVideo, drone_name,)
             EventBus.$emit('do-video-on-' + drone_name, {});
             //EventBus.$emit('hud-data-' + drone_name, this.info);
         },
@@ -5136,6 +5171,16 @@ export default {
             this.$store.state.drone_infos[this.name].targetSpeed = 5;
             this.$store.state.drone_infos[this.name].targetAlt = 30;
             EventBus.$emit('command-set-goto-' + this.name, strPos);
+        },
+
+        returnToLaunch() {
+            this.setWpYawBehavior(1);
+
+            EventBus.$emit('command-set-rtl-' + this.name, 5);
+        },
+
+        pauseCurPosition() {
+            EventBus.$emit('command-set-stop-' + this.name);
         },
 
         setWpYawBehavior(param_value) {
