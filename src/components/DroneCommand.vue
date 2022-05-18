@@ -522,7 +522,7 @@
                                                                     dense outlined hide-details
                                                                     :items="items_wp_yaw_behavior"
                                                                     label="YAW_BEHAVIOR"
-                                                                    v-model="params.wpYawBehavior[d.name]"
+                                                                    v-model="$store.state.params.wpYawBehavior[d.name]"
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
@@ -531,7 +531,7 @@
                                                                     label="SLEW_YAW (meterdgrees/s), 5-180, 1"
                                                                     class="pa-1"
                                                                     outlined dense hide-details
-                                                                    v-model="params.atcSlewYaw[d.name]"
+                                                                    v-model="$store.state.params.atcSlewYaw[d.name]"
                                                                     placeholder="5"
                                                                     type="number"
                                                                     min="5"
@@ -544,7 +544,7 @@
                                                                     label="SPEED_UP (m/s), 0.1-10.0, 0.5"
                                                                     class="pa-1"
                                                                     outlined dense hide-details
-                                                                    v-model="params.wpnavSpeedUp[d.name]"
+                                                                    v-model="$store.state.params.wpnavSpeedUp[d.name]"
                                                                     placeholder="2.5"
                                                                     type="number"
                                                                     min="0.1"
@@ -557,7 +557,7 @@
                                                                     label="SPEED_DN (m/s), 0.1-5.0, 0.1"
                                                                     class="pa-1"
                                                                     outlined dense hide-details
-                                                                    v-model="params.wpnavSpeedDn[d.name]"
+                                                                    v-model="$store.state.params.wpnavSpeedDn[d.name]"
                                                                     placeholder="1.5"
                                                                     type="number"
                                                                     min="0.1"
@@ -570,7 +570,7 @@
                                                                     label="RTL_ALT (m), 2.0-80.0, 0.1"
                                                                     class="pa-1"
                                                                     outlined dense hide-details
-                                                                    v-model="params.rtlAlt[d.name]"
+                                                                    v-model="$store.state.params.rtlAlt[d.name]"
                                                                     placeholder="30.0"
                                                                     type="number"
                                                                     min="2.0"
@@ -1195,13 +1195,13 @@ export default {
 
             rtlSpeed: {},
 
-            params: {
-                wpYawBehavior: {},
-                atcSlewYaw: {},
-                wpnavSpeedUp: {},
-                wpnavSpeedDn: {},
-                rtlAlt: {}
-            },
+            // params: {
+            //     wpYawBehavior: {},
+            //     atcSlewYaw: {},
+            //     wpnavSpeedUp: {},
+            //     wpnavSpeedDn: {},
+            //     rtlAlt: {}
+            // },
 
             pwms: {
                 ch9: {},
@@ -2158,11 +2158,11 @@ export default {
         },
 
         setParams() {
-            console.log(this.params);
+            console.log(this.$store.state.params);
             for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        EventBus.$emit('command-set-params-' + name, this.params);
+                        EventBus.$emit('command-set-params-' + name, this.$store.state.params);
                     }
                 }
             }
@@ -2172,13 +2172,13 @@ export default {
                 this.loading = false;
                 this.$forceUpdate();
 
-                this.params = {
-                    wpYawBehavior: {},
-                    atcSlewYaw: {},
-                    wpnavSpeedUp: {},
-                    wpnavSpeedDn: {},
-                    rtlAlt: {}
-                };
+                // this.params = {
+                //     wpYawBehavior: {},
+                //     atcSlewYaw: {},
+                //     wpnavSpeedUp: {},
+                //     wpnavSpeedDn: {},
+                //     rtlAlt: {}
+                // };
             }, 100);
         },
     },

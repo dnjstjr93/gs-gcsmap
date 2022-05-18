@@ -331,6 +331,14 @@ const _defaultDroneInfo = {
 
 export default new Vuex.Store({
     state: {
+        params: {
+            wpYawBehavior: {},
+            atcSlewYaw: {},
+            wpnavSpeedUp: {},
+            wpnavSpeedDn: {},
+            rtlAlt: {}
+        },
+
         active_tab: 'virtual',
 
         iconSourceMarker: faMapPin, //faMapMarkerAlt,

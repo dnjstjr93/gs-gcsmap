@@ -702,6 +702,11 @@ export default {
 
     data() {
         return {
+            itemsWpYawBehavior: [
+                '0 = Never change Yaw.',
+                '1 = Face Next Waypoint including facing home during RTL.',
+                '2 = Face Next Waypoint except for RTL (i.e. during RTL vehicle will remain pointed at its last heading)'
+            ],
             mavVersion: 'v1',
             mavVersions: ['v1', 'v2'],
             evalAltColor: [],
@@ -878,6 +883,7 @@ export default {
             rc2: {},
             rc3: {},
             rc4: {},
+            params: {},
 
             num_satellites: 0,
 
@@ -2633,7 +2639,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('Send WP_YAW_HEHAVIOR param set command to (' + value + ') ', target_name);
+                    console.log('Send WP_YAW_BEHAVIOR param set command to (' + value + ') ', target_name);
                     this.doPublish(pub_topic, msg);
                 }
             }
@@ -4579,6 +4585,71 @@ export default {
                         this.rc4.trim.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
                         // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RC4_TRIM', this.rc4.trim.param_value);
                     }
+                    else if (param_id.includes('WP_YAW_BEHAVIOR')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.params, 'wpYawBehavior')) {
+                            this.params.wpYawBehavior = {};
+                        }
+
+                        this.params.wpYawBehavior.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.params.wpYawBehavior.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.params.wpYawBehavior.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.params.wpYawBehavior.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WP_YAW_BEHAVIOR', this.params.wpYawBehavior);
+
+                        this.$store.state.params.wpYawBehavior[this.name] = this.itemsWpYawBehavior[this.params.wpYawBehavior.param_value];
+                    }
+                    else if (param_id.includes('ATC_SLEW_YAW')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.params, 'atcSlewYaw')) {
+                            this.params.atcSlewYaw = {};
+                        }
+
+                        this.params.atcSlewYaw.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.params.atcSlewYaw.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.params.atcSlewYaw.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.params.atcSlewYaw.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'ATC_SLEW_YAW', this.params.atcSlewYaw);
+
+                        this.$store.state.params.atcSlewYaw[this.name] = (this.params.atcSlewYaw.param_value / 100);
+                    }
+                    else if (param_id.includes('WPNAV_SPEED_UP')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.params, 'wpnavSpeedUp')) {
+                            this.params.wpnavSpeedUp = {};
+                        }
+
+                        this.params.wpnavSpeedUp.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.params.wpnavSpeedUp.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.params.wpnavSpeedUp.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.params.wpnavSpeedUp.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_SPEED_UP', this.params.wpnavSpeedUp);
+
+                        this.$store.state.params.wpnavSpeedUp[this.name] = (this.params.wpnavSpeedUp.param_value / 100);
+                    }
+                    else if (param_id.includes('WPNAV_SPEED_DN')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.params, 'wpnavSpeedDn')) {
+                            this.params.wpnavSpeedDn = {};
+                        }
+
+                        this.params.wpnavSpeedDn.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.params.wpnavSpeedDn.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.params.wpnavSpeedDn.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.params.wpnavSpeedDn.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_SPEED_DN', this.params.wpnavSpeedDn);
+
+                        this.$store.state.params.wpnavSpeedDn[this.name] = (this.params.wpnavSpeedDn.param_value / 100);
+                    }
+                    else if (param_id.includes('RTL_ALT')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.params, 'rtlAlt')) {
+                            this.params.rtlAlt = {};
+                        }
+
+                        this.params.rtlAlt.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.params.rtlAlt.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.params.rtlAlt.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.params.rtlAlt.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RTL_ALT', this.params.rtlAlt);
+
+                        this.$store.state.params.rtlAlt[this.name] = (this.params.rtlAlt.param_value / 100);
+                    }
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ITEM - ' + mavPacket);
@@ -5089,47 +5160,115 @@ export default {
             }
         }
 
+        var count = 0;
         var tidRcParam = setInterval(() => {
-            if(!Object.prototype.hasOwnProperty.call(this.rc1, 'min')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC1_MIN');
+            if(count === 0) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc1, 'min')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC1_MIN');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc1, 'max')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC1_MAX');
+
+            else if(count === 1) {
+                if (!Object.prototype.hasOwnProperty.call(this.rc1, 'max')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC1_MAX');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc1, 'trim')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC1_TRIM');
+            else if(count === 2) {
+                if (!Object.prototype.hasOwnProperty.call(this.rc1, 'trim')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC1_TRIM');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc2, 'min')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC2_MIN');
+            else if(count === 3) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc2, 'min')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC2_MIN');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc2, 'max')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC2_MAX');
+            else if(count === 4) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc2, 'max')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC2_MAX');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc2, 'trim')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC2_TRIM');
+            else if(count === 5) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc2, 'trim')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC2_TRIM');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc3, 'min')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC3_MIN');
+            else if(count === 6) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc3, 'min')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC3_MIN');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc3, 'max')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC3_MAX');
+            else if(count === 7) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc3, 'max')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC3_MAX');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc3, 'trim')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC3_TRIM');
+            else if(count === 8) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc3, 'trim')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC3_TRIM');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc4, 'min')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC4_MIN');
+            else if(count === 9) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc4, 'min')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC4_MIN');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc4, 'max')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC4_MAX');
+            else if(count === 10) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc4, 'max')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC4_MAX');
+                }
+                count++;
             }
-            else if(!Object.prototype.hasOwnProperty.call(this.rc4, 'trim')) {
-                this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC4_TRIM');
+            else if(count === 11) {
+                if(!Object.prototype.hasOwnProperty.call(this.rc4, 'trim')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RC4_TRIM');
+                }
+                count++;
+            }
+            else if(count === 12) {
+                if(!Object.prototype.hasOwnProperty.call(this.params, 'wpYawBehavior')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'WP_YAW_BEHAVIOR');
+                }
+                count++;
+            }
+            else if(count === 13) {
+                if(!Object.prototype.hasOwnProperty.call(this.params, 'atcSlewYaw')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'ATC_SLEW_YAW');
+                }
+                count++;
+            }
+            else if(count === 14) {
+                if(!Object.prototype.hasOwnProperty.call(this.params, 'wpnavSpeedUp')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'WPNAV_SPEED_UP');
+                }
+                count++;
+            }
+            else if(count === 15) {
+                if(!Object.prototype.hasOwnProperty.call(this.params, 'wpnavSpeedDn')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'WPNAV_SPEED_DN');
+                }
+                count++;
+            }
+            else if(count === 16) {
+                if(!Object.prototype.hasOwnProperty.call(this.params, 'rtlAlt')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'RTL_ALT');
+                }
+                count++;
             }
             else {
                 clearInterval(tidRcParam);
             }
-        }, 500);
+        }, 100);
 
         // setInterval(() => {
         //     if(this.flagReceiving) {

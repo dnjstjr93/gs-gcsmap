@@ -1899,7 +1899,7 @@
 
                         this.$store.state.didIPublish = true;
 
-                        this.drawLineTarget(payload);
+                        //this.drawLineTarget(payload);
 
                         this.doBroadcastTempPosition(payload);
 
@@ -2483,7 +2483,7 @@
                             payload.value = false;
                             this.$store.commit('setSelected', payload);
 
-                            this.drawLineTarget(payload);
+                            //this.drawLineTarget(payload);
                         }
                         else if (watchingPayload.broadcastMission === 'confirmAddTempMarker') {
                             //this.$store.state.tempPayload = JSON.parse(JSON.stringify(watchingPayload.payload));
