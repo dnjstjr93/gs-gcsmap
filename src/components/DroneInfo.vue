@@ -4010,6 +4010,8 @@ export default {
                             if(this.curArmStatus !== 'ARMED') {
                                 this.watchingMissionStatus = 100;
                                 this.watchingMission = 'auto-goto-complete';
+
+                                this.setWpYawBehavior(1);
                             }
                         }
 
@@ -4350,6 +4352,8 @@ export default {
                             this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
 
                             this.watchingMission = 'auto-goto-complete';
+
+                            this.setWpYawBehavior(1);
                         }
                     }
 
@@ -4375,6 +4379,8 @@ export default {
                     else if(this.watchingMission === 'goto') {
                         this.watchingMissionStatus = 100;
                         this.watchingMission = 'goto-complete';
+
+                        this.setWpYawBehavior(1);
                     }
 
                     else if(this.watchingMission === 'goto-alt') {
@@ -5514,11 +5520,36 @@ export default {
 
             this.send_wpnav_speed_param_set_command(this.name, this.target_pub_topic, this.sys_id, auto_speed);
 
-            let target_mode = 'GUIDED';
+            let target_mode = 'LOITER';
+            if (this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+
+            setTimeout((name, target_pub_topic, sys_id, mode) => {
+                console.log('send_set_mode_command', mode);
+                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+            }, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+            if(this.$store.state.drone_infos[this.name].yawBehavior === 'YAW고정') {
+                setTimeout((name, target_pub_topic, sys_id, param_value) => {
+                    this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
+                }, 2 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 0);
+            }
+            else {
+                setTimeout((name, target_pub_topic, sys_id, param_value) => {
+                    this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
+                }, 2 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 1);
+            }
+
+            target_mode = 'GUIDED';
             if(this.fcType === 'px4') {
                 target_mode = 'AUTO_LOITER';
             }
-            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+            setTimeout((name, target_pub_topic, sys_id, mode) => {
+                console.log('send_set_mode_command', mode);
+                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+            }, parseInt(5 + Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, target_mode);
 
             var auto_goto_positions = payload.goto_positions.slice(start_idx, (end_idx + 1));
             let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:16:1';
@@ -5552,8 +5583,8 @@ export default {
                     }, interval, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx)
                 }
 
-                checkMission(10, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
-            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, start_idx, end_idx, delay, start_idx);
+                checkMission(20, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
+            }, 10 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, start_idx, end_idx, delay, start_idx);
         });
 
         EventBus.$on('command-set-pwms-' + this.name, (pwms) => {
@@ -5926,6 +5957,8 @@ export default {
                                 if(this.watchingInitDist <= 0.1) {
                                     this.watchingMission = 'goto-complete';
                                     this.watchingMissionStatus = 100;
+
+                                    this.setWpYawBehavior(1);
                                 }
 
                                 this.doPublishBroadcast();

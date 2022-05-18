@@ -278,7 +278,7 @@
                                                     </v-card>
                                                     <v-card tile flat v-if="(command.title === '패턴')">
                                                         <v-row no-gutters>
-                                                            <v-col cols="3">
+                                                            <v-col cols="2">
                                                                 <v-text-field
                                                                     label="Index"
                                                                     class="text-right pa-1"
@@ -289,6 +289,16 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="3">
+                                                                <v-select
+                                                                    @change="changeYawBehavior($event, d.name)"
+                                                                    dense outlined hide-details
+                                                                    :items="['YAW고정', 'YAW회전']"
+                                                                    label="YAW설정"
+                                                                    v-model="yawBehavior[d.name]"
+                                                                    class="pa-1"
+                                                                ></v-select>
+                                                            </v-col>
+                                                            <v-col cols="2">
                                                                 <v-text-field
                                                                     label="비행고도(m)"
                                                                     class="text-right pa-1"
@@ -298,7 +308,7 @@
                                                                     hint="3 ~ 2000 m"
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="3">
+                                                            <v-col cols="2">
                                                                 <v-text-field
                                                                     label="비행속도(m/s)"
                                                                     class="text-right pa-1"
@@ -308,7 +318,7 @@
                                                                     hint="1 ~ 30 m/s"
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="3">
+                                                            <v-col cols="2">
                                                                 <v-text-field
                                                                     label="지점대기(sec)"
                                                                     class="text-right pa-1"
@@ -479,13 +489,23 @@
                                                             </v-col>
                                                             <v-col cols="3">
                                                                 <v-select
+                                                                    @change="changeYawBehavior($event, d.name)"
+                                                                    dense outlined hide-details
+                                                                    :items="['YAW고정', 'YAW회전']"
+                                                                    label="YAW설정"
+                                                                    v-model="yawBehavior[d.name]"
+                                                                    class="pa-1"
+                                                                ></v-select>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-select
                                                                     dense outlined :items="Object.keys(position_selections_items[d.name])"
                                                                     label="Start Index" v-model="autoStartIndex[d.name]"
                                                                     class="pa-1"
                                                                     hide-details
                                                                 ></v-select>
                                                             </v-col>
-                                                            <v-col cols="3">
+                                                            <v-col cols="2">
                                                                 <v-select
                                                                     dense outlined :items="Object.keys(position_selections_items[d.name])"
                                                                     label="End Index" v-model="autoEndIndex[d.name]"
@@ -493,7 +513,7 @@
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
-                                                            <v-col cols="3">
+                                                            <v-col cols="2">
                                                                 <v-text-field
                                                                     label="Speed"
                                                                     class="pa-1"
@@ -504,7 +524,7 @@
                                                                     max="15"
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="3">
+                                                            <v-col cols="2">
                                                                 <v-text-field
                                                                     label="Delay"
                                                                     class="pa-1"
@@ -2118,14 +2138,6 @@ export default {
                                     this.position_selections_items[dName].push(strPos);
                                 }
                             }
-
-                            let strPos = this.$store.state.drone_infos[dName].home_position.lat + ':' +
-                                this.$store.state.drone_infos[dName].home_position.lng + ':' +
-                                '50:' +
-                                '5:' +
-                                '100:5:16:' +
-                                '1:0';
-                            this.position_selections_items[dName].push(strPos);
 
                             console.log('setSurvey', parseInt(this.$store.state.drone_infos[dName].autoStartIndex), parseInt(this.$store.state.drone_infos[dName].autoEndIndex), this.$store.state.drone_infos[dName].autoDelay);
                             if (parseInt(this.$store.state.drone_infos[dName].autoStartIndex) <= parseInt(this.$store.state.drone_infos[dName].autoEndIndex)) {
