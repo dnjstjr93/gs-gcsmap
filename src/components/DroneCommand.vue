@@ -153,7 +153,7 @@
                                                     </v-card>
                                                     <v-card tile flat v-if="(command.title === '이동')">
                                                         <v-row no-gutters>
-                                                            <v-col cols="4">
+                                                            <v-col cols="2">
                                                                 <v-select
                                                                     @change="changeGotoType($event, d.name)"
                                                                     dense outlined hide-details
@@ -163,16 +163,16 @@
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
-<!--                                                            <v-col cols="2">-->
-<!--                                                                <v-select-->
-<!--                                                                    @change="selectedPosition($event, d)"-->
-<!--                                                                    dense outlined hide-details-->
-<!--                                                                    :items="position_selections_items[d.name]"-->
-<!--                                                                    label="Goto positions"-->
-<!--                                                                    v-model="position_selections[d.name]"-->
-<!--                                                                    class="px-1"-->
-<!--                                                                ></v-select>-->
-<!--                                                            </v-col>-->
+                                                            <v-col cols="2">
+                                                                <v-select
+                                                                    @change="changeYawBehavior($event, d.name)"
+                                                                    dense outlined hide-details
+                                                                    :items="['YAW고정', 'YAW회전']"
+                                                                    label="YAW설정"
+                                                                    v-model="yawBehavior[d.name]"
+                                                                    class="pa-1"
+                                                                ></v-select>
+                                                            </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="지형높이(m)"
@@ -1191,6 +1191,7 @@ export default {
             autoDelay: {},
 
             gotoType: {},
+            yawBehavior: {},
             circleType: {},
 
             rtlSpeed: {},
@@ -1381,6 +1382,7 @@ export default {
             this.autoSpeed = {};
             this.autoDelay = {};
             this.gotoType = {};
+            this.yawBehavior = {};
             this.circleType = {};
             for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
@@ -1410,6 +1412,7 @@ export default {
                         //     this.$store.state.drone_infos[name].gotoType = '바로이동';
                         // }
                         this.gotoType[name] = this.$store.state.drone_infos[name].gotoType;
+                        this.yawBehavior[name] = 'YAW고정';
                         this.circleType[name] = (this.$store.state.drone_infos[name].circleType === 'cw')?'시계방향':'반시계방향';
 
                         this.prepared = true;
@@ -1497,6 +1500,11 @@ export default {
         changeGotoType(gotoType, dName) {
             this.gotoType[dName] = gotoType;
             this.$store.state.drone_infos[dName].gotoType = gotoType;
+        },
+
+        changeYawBehavior(yawBehavior, dName) {
+            this.yawBehavior[dName] = yawBehavior;
+            this.$store.state.drone_infos[dName].yawBehavior = yawBehavior;
         },
 
         changeCircleType(circleType, dName) {
@@ -1900,6 +1908,7 @@ export default {
                         console.log('DroneCommand-setGoto', this.position_selections[name]);
                         if(this.position_selections[name] && this.position_selections[name] !== '' && this.position_selections[name] !== "") {
                             this.$store.state.drone_infos[name].gotoType = this.gotoType[name];
+                            this.$store.state.drone_infos[name].yawBehavior = this.yawBehavior[name];
                             this.$store.state.drone_infos[name].targetSpeed = parseInt(this.targetSpeed[name]);
                             this.$store.state.drone_infos[name].targetAlt = parseInt(this.targetAlt[name]);
                             EventBus.$emit('command-set-goto-' + name, this.position_selections[name]);
@@ -1967,6 +1976,7 @@ export default {
                         console.log('DroneCommand-setRoi', this.position_selections[name]);
                         if(this.position_selections[name] && this.position_selections[name] !== '' && this.position_selections[name] !== "") {
                             this.$store.state.drone_infos[name].gotoType = this.gotoType[name];
+                            this.$store.state.drone_infos[name].yawBehavior = this.yawBehavior[name];
                             this.$store.state.drone_infos[name].targetSpeed = parseInt(this.targetSpeed[name]);
                             this.$store.state.drone_infos[name].targetAlt = parseInt(this.targetAlt[name]);
                             EventBus.$emit('command-set-roi-' + name, this.position_selections[name]);
