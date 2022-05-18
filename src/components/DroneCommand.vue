@@ -12,7 +12,7 @@
             color="red"
             next-icon="mdi-arrow-right-bold-box-outline"
             prev-icon="mdi-arrow-left-bold-box-outline"
-            v-model="active_tab"
+            v-model="$store.state.active_tab"
             active-class="text--accent-5"
         >
             <v-tabs-slider color="red"></v-tabs-slider>
@@ -262,7 +262,7 @@
                                                                     type="number"
                                                                     min="10" max="255"
                                                                     hint="10 ~ 255"
-                                                                    @change="drawRadius(d.name)"
+                                                                    @input="drawRadius($event, d.name, position_selections_index[d.name])"
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
@@ -938,6 +938,7 @@ export default {
 
     data() {
         return {
+            drawRadiusUpdateTimer: null,
             items: [
                 {
                     "first": "0,0",
@@ -1168,7 +1169,6 @@ export default {
             context_left: 1,
             context_max_height: 640,
 
-            active_tab: 'virtual',
             target_alt: 20,
 
             position_selections_items: {},
@@ -1569,8 +1569,35 @@ export default {
                 }
             }
         },
-        drawRadius(dName) {
+
+        drawRadius(e, dName, pIndex) {
+            console.log('radius: ', e);
             this.$store.state.drone_infos[dName].targetRadius = parseInt(this.targetRadius[dName]);
+
+            if (this.$store.state.drone_infos[dName].targeted && this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                if(this.drawRadiusUpdateTimer !== null) {
+                    clearTimeout(this.drawRadiusUpdateTimer);
+                }
+
+                this.drawRadiusUpdateTimer = setTimeout((radius, dName, pIndex) => {
+                    this.$store.state.tempMarkers[dName][pIndex].radius = this.$store.state.drone_infos[dName].targetRadius;
+
+                    //delete this.$store.state.targetCircles[dName];
+                    this.$store.state.targetCircles[dName] = {
+                        lat: this.$store.state.tempMarkers[dName][pIndex].lat,
+                        lng: this.$store.state.tempMarkers[dName][pIndex].lng,
+                        radius: this.$store.state.tempMarkers[dName][pIndex].radius,
+                        options: {
+                            strokeColor: this.$store.state.drone_infos[dName].color,
+                            strokeOpacity: 0.9,
+                            strokeWeight: 5
+                        }
+                    };
+                }, 100, e, dName, pIndex);
+            }
+            else {
+                delete this.$store.state.targetCircles[dName];
+            }
 
             //EventBus.$emit('do-drawLineAllTarget');
         },
@@ -1681,16 +1708,31 @@ export default {
 
             this.curTab = title;
 
-            if (this.active_tab === this.curTab) {
-                this.active_tab = 'virtual';
+            if (this.$store.state.active_tab === this.curTab) {
+                this.$store.state.active_tab = 'virtual';
 
                 this.$store.state.currentCommandTab = 'virtual';
             }
 
             EventBus.$emit('do-deleteLineAllTarget');
 
-            if (this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회') {
+            if (this.$store.state.currentCommandTab === '이동') {
                 //EventBus.$emit('do-drawLineAllTarget');
+
+
+            }
+            else if(this.$store.state.currentCommandTab === '선회') {
+                for (let dName in this.$store.state.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                            let pIndex = this.position_selections_index[dName];
+                            if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                                console.log("*****************************************************************************", this.targetRadius[dName], pIndex);
+                                this.drawRadius(this.targetRadius[dName], dName, pIndex);
+                            }
+                        }
+                    }
+                }
             }
             else if (this.$store.state.currentCommandTab === '모드') {
                 for (let dName in this.$store.state.drone_infos) {
@@ -1757,7 +1799,7 @@ export default {
             }
 
             this.curTab = 'virtual';
-            this.active_tab = 'virtual';
+            this.$store.state.active_tab = 'virtual';
 
             for(let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {

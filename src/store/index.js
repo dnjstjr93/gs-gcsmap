@@ -331,6 +331,8 @@ const _defaultDroneInfo = {
 
 export default new Vuex.Store({
     state: {
+        active_tab: 'virtual',
+
         iconSourceMarker: faMapPin, //faMapMarkerAlt,
         iconSourceSurveyMarker: faMapMarkerAlt,
         // iconSourceDrone: droneSvgPath,

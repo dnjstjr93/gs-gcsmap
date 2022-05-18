@@ -24,18 +24,23 @@
                     <v-btn tile @click="cancelMarker" elevation="2" color="error">취소</v-btn>
                 </v-card>
                 <v-card>
-                    <GmapMap ref="mapRef" :center="center"
-                         :zoom="18"
-                         map-type-id="satellite"
-                         :restriction="{
-                             strictBounds: false,
-                         }"
-                         :style="myGcsStyle"
-                         :options="{disableDefaultUI: true, gestureHandling: 'greedy', disableDoubleClickZoom: true, minZoom: 1, maxZoom: 30}"
-                         @click="printPosClick"
-                         @dblclick="addingMarker"
-                         @dragstart="cancelMarker"
-                         @mousemove="calcDistance"
+                    <GmapMap
+                        ref="mapRef" :center="center"
+                        :zoom="18"
+                        :mapTypeId="myMapTypeId"
+                        :restriction="{
+                            strictBounds: false,
+                        }"
+                        :style="myGcsStyle"
+                        :options="{
+                            disableDefaultUI: true, gestureHandling: 'greedy', disableDoubleClickZoom: true, minZoom: 1, maxZoom: 30,
+                            streetViewControl: false,
+                        }"
+                        @click="printPosClick"
+                        @dblclick="addingMarker"
+                        @dragstart="cancelMarker"
+                        @mousemove="calcDistance"
+                        @zoom_changed="changeMapId"
                     >
 <!--                        <GmapMarker-->
 <!--                                :position="{lat: 37.40423134053018, lng: 127.16050533784832}"-->
@@ -143,7 +148,7 @@
                                             strokeWeight: (drone.targeted)?3:2,
                                             strokeColor: (drone.targeted)?'springgreen':'#1A237E',
                                             rotation: (360+drone.heading-45)%360,
-                                            scale: 0.1,
+                                            scale: scaleDroneIcon,
                                             anchor: {x: $store.state.iconSourceDrone.icon[0] / 2, y: $store.state.iconSourceDrone.icon[1] / 2},
                                             labelOrigin: {x: $store.state.iconSourceDrone.icon[0] / 2, y: $store.state.iconSourceDrone.icon[1] / 2},
                                             zIndex: 0
@@ -175,6 +180,18 @@
                                             strokeWeight: 10,
                                         }"
                                     ></GmapPolyline>
+
+                                    <GmapCircle
+                                        v-if="Object.prototype.hasOwnProperty.call($store.state.targetCircles, drone.name)"
+                                        :center="$store.state.targetCircles[drone.name]"
+                                        :radius="$store.state.targetCircles[drone.name].radius"
+                                        :options="{
+                                            strokeColor: $store.state.drone_infos[drone.name].color,
+                                            strokeOpacity: 0.9,
+                                            strokeWeight: 5
+                                        }"
+                                        @mousemove="calcDistance"
+                                    ></GmapCircle>
 
                                     <div v-for="(pos, pIndex) in $store.state.tempMarkers[drone.name]" :key="'marker'+pIndex">
                                         <GmapMarker
@@ -425,16 +442,16 @@
                                 </div>
                             </div>
 
-                            <div v-for="(circle, dName) in $store.state.targetCircles" :key="'targetCircles_'+dName">
-                                <div v-if="$store.state.drone_infos[dName].selected">
-                                    <GmapCircle
-                                        :center="circle"
-                                        :radius="circle.radius"
-                                        :options="circle.options"
-                                        @mousemove="calcDistance"
-                                    ></GmapCircle>
-                                </div>
-                            </div>
+<!--                            <div v-for="(circle, dName) in $store.state.targetCircles" :key="'targetCircles_'+dName">-->
+<!--                                <div v-if="$store.state.drone_infos[dName].selected">-->
+<!--                                    <GmapCircle-->
+<!--                                        :center="circle"-->
+<!--                                        :radius="circle.radius"-->
+<!--                                        :options="circle.options"-->
+<!--                                        @mousemove="calcDistance"-->
+<!--                                    ></GmapCircle>-->
+<!--                                </div>-->
+<!--                            </div>-->
 
                             <div v-for="(circle, dName) in $store.state.missionCircles" :key="'missionCircles_'+dName">
                                 <div v-if="$store.state.drone_infos[dName].selected">
@@ -595,8 +612,9 @@
 
         data () {
             return {
+                myMapTypeId: "satellite",
                 datum: {targeted: false, lat:0.0, lng:0.0},
-                scaleDroneIcon: 0.09,
+                scaleDroneIcon: 0.1,
                 turningDir: [90, 90, -90, -90],
                 idUpdateTimer: null,
                 idPostTimer: null,
@@ -1696,18 +1714,13 @@
                 for(let dName in this.$store.state.drone_infos) {
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
-                            this.$store.state.tempMarkers[dName].forEach((marker) => {
-                                marker.selected = false;
-                                marker.targeted = false;
-                            });
-                            this.$store.state.drone_infos[dName].targeted = false;
-                        }
-                    }
-                }
+                            if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
+                                this.$store.state.tempMarkers[dName].forEach((marker) => {
+                                    marker.selected = false;
+                                    marker.targeted = false;
+                                });
+                            }
 
-                for(let dName in this.$store.state.drone_infos) {
-                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
                             if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, dName)) {
                                 this.$store.state.surveyMarkers[dName].forEach((marker) => {
                                     marker.selected = false;
@@ -1716,11 +1729,33 @@
                                     marker.polygonEditable = false;
                                 });
                             }
+
+                            if(Object.prototype.hasOwnProperty.call(this.$store.state.targetLines, dName)) {
+                                this.$store.state.targetLines[dName].path = [];
+                            }
+
+                            this.$store.state.drone_infos[dName].targeted = false;
                         }
                     }
                 }
 
+                EventBus.$emit('do-targetDrone');
+
                 this.cancelMarker();
+            },
+
+            changeMapId(e) {
+                let zoomLevel = e;
+                console.log('zoomLevel: ' + zoomLevel);
+
+                if(zoomLevel >= 20) {
+                    this.myMapTypeId = 'roadmap';
+                    this.scaleDroneIcon = (0.1 - ((zoomLevel-20)/100));
+                }
+                else {
+                    this.myMapTypeId = 'satellite';
+                    this.scaleDroneIcon = 0.1;
+                }
             },
 
             calcDistance(e) {
@@ -1733,15 +1768,19 @@
 
             targetSurveyPolygon(e, dName, pIndex) {
                 this.curSurveyMarkerFlag = false;
-                this.$store.state.surveyMarkers[dName].forEach((marker) => {
-                    marker.selected = false;
-                });
-
                 this.$store.state.surveyMarkers[dName].forEach((marker, index) => {
+                    marker.selected = false;
+
                     if(pIndex !== index) {
                         marker.targeted = false;
                     }
                 });
+
+                this.$store.state.tempMarkers[dName].forEach((marker) => {
+                    marker.selected = false;
+                    marker.targeted = false;
+                });
+
                 this.$store.state.surveyMarkers[dName][pIndex].targeted = !this.$store.state.surveyMarkers[dName][pIndex].targeted;
 
                 if(!Object.prototype.hasOwnProperty.call(this.$store.state.targetLines, dName)) {
@@ -1756,6 +1795,8 @@
                 }
 
                 if(this.$store.state.drone_infos[dName].targeted && this.$store.state.surveyMarkers[dName][pIndex].targeted) {
+                    this.$store.state.active_tab = '패턴';
+
                     this.$store.state.targetLines[dName].path = [];
                     this.$store.state.targetLines[dName].path.push(this.$store.state.drone_infos[dName]);
                     this.$store.state.targetLines[dName].path.push(this.$store.state.surveyMarkers[dName][pIndex].pathLines[0]);
@@ -1933,37 +1974,97 @@
                 }
             },
 
-            targetTempMarker(e, pName, pIndex, _targeted) {
+            targetTempMarker(e, dName, pIndex, _targeted) {
                 if(!this.$store.state.adding) {
-                    console.log('targetTempMarker - pName', pName, 'pIndex', pIndex);
+                    console.log('targetTempMarker - pName', dName, 'pIndex', pIndex);
 
-                    if(!this.$store.state.tempMarkers[pName][pIndex].selected) {
+                    this.curSurveyMarkerFlag = false;
+                    this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                        marker.selected = false;
+                        marker.targeted = false;
+                    });
+
+                    if(!this.$store.state.tempMarkers[dName][pIndex].selected) {
 
                         let targeted = !_targeted;
                         let payload = {};
-                        payload.pName = pName;
+                        payload.pName = dName;
                         payload.pIndex = pIndex;
                         payload.value = false;
                         this.$store.commit('setTargetAllTempMarker', payload);
 
                         if (targeted) {
-                            payload.pName = pName;
+                            payload.pName = dName;
                             payload.pIndex = pIndex;
                             payload.value = targeted;
                             this.$store.commit('setTargetTempMarker', payload);
                         }
 
                         EventBus.$emit('do-selected-position', payload);
-                        EventBus.$emit('do-target-selected' + pName, payload);
+                        EventBus.$emit('do-target-selected' + dName, payload);
 
-                        this.drawLineTarget(payload);
+                        if(!Object.prototype.hasOwnProperty.call(this.$store.state.targetLines, dName)) {
+                            this.$store.state.targetLines[dName] = {
+                                path: [],
+                                options: {
+                                    strokeColor: this.$store.state.drone_infos[dName].color,
+                                    strokeOpacity: 0.9,
+                                    strokeWeight: 5
+                                }
+                            };
+                        }
 
-                        console.log('target', this.$store.state.tempMarkers[pName][pIndex].targeted);
+                        if(this.$store.state.drone_infos[dName].targeted && this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                            this.$store.state.targetLines[dName].path = [];
+                            this.$store.state.targetLines[dName].path.push(this.$store.state.drone_infos[dName]);
+                            this.$store.state.targetLines[dName].path.push(this.$store.state.tempMarkers[dName][pIndex]);
+                        }
+                        else {
+                            this.$store.state.targetLines[dName].path = [];
+                        }
 
-                        if(pName === 'unknown') {
+                        if(!Object.prototype.hasOwnProperty.call(this.$store.state.targetCircles, dName)) {
+                            this.$store.state.targetCircles[dName] = {
+                                lat: this.$store.state.tempMarkers[dName][pIndex].lat,
+                                lng: this.$store.state.tempMarkers[dName][pIndex].lng,
+                                radius: 0,
+                                options: {
+                                    strokeColor: this.$store.state.drone_infos[dName].color,
+                                    strokeOpacity: 0.9,
+                                    strokeWeight: 5
+                                }
+                            };
+                        }
+
+                        if(this.$store.state.currentCommandTab === '선회') {
+                            if (this.$store.state.drone_infos[dName].targeted && this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                                this.$store.state.tempMarkers[dName][pIndex].radius = this.$store.state.drone_infos[dName].targetRadius;
+
+                                delete this.$store.state.targetCircles[dName];
+                                this.$store.state.targetCircles[dName] = {
+                                    lat: this.$store.state.tempMarkers[dName][pIndex].lat,
+                                    lng: this.$store.state.tempMarkers[dName][pIndex].lng,
+                                    radius: this.$store.state.tempMarkers[dName][pIndex].radius,
+                                    options: {
+                                        strokeColor: this.$store.state.drone_infos[dName].color,
+                                        strokeOpacity: 0.9,
+                                        strokeWeight: 5
+                                    }
+                                };
+                            }
+                            else {
+                                delete this.$store.state.targetCircles[dName];
+                            }
+                        }
+
+                        //this.drawLineTarget(payload);
+
+                        console.log('target', this.$store.state.tempMarkers[dName][pIndex].targeted);
+
+                        if(dName === 'unknown') {
                             this.datum.targeted = targeted;
-                            this.datum.lat = this.$store.state.tempMarkers[pName][pIndex].lat;
-                            this.datum.lng = this.$store.state.tempMarkers[pName][pIndex].lng;
+                            this.datum.lat = this.$store.state.tempMarkers[dName][pIndex].lat;
+                            this.datum.lng = this.$store.state.tempMarkers[dName][pIndex].lng;
 
                             console.log('datum', this.datum);
 
@@ -2194,77 +2295,77 @@
                         this.$forceUpdate();
                     }
                 }
-                else if(this.$store.state.currentCommandTab === '선회') {
-                    if (this.$store.state.drone_infos[payload.pName].selected) {
-                        if (this.$store.state.tempMarkers[payload.pName][payload.pIndex].targeted) {
-                            console.log('draw', payload.pIndex);
-                            this.$store.state.targetLines[payload.pName] = null;
-                            this.$store.state.targetLines[payload.pName] = {
-                                path: [],
-                                options: {
-                                    strokeColor: this.$store.state.drone_infos[payload.pName].color,
-                                    strokeOpacity: 0.9,
-                                    strokeWeight: 5
-                                }
-                            };
-
-                            this.$store.state.targetLines[payload.pName].path.push(this.$store.state.drone_infos[payload.pName]);
-                            this.$store.state.targetLines[payload.pName].path.push(this.$store.state.tempMarkers[payload.pName][payload.pIndex]);
-
-                            this.$store.state.targetLines = this.clone(this.$store.state.targetLines);
-
-                            this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius = this.$store.state.drone_infos[payload.pName].targetRadius;
-
-                            this.$store.state.targetCircles[payload.pName] = null;
-                            this.$store.state.targetCircles[payload.pName] = {
-                                lat: this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat,
-                                lng: this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng,
-                                radius: this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius,
-                                options: {
-                                    strokeColor: this.$store.state.drone_infos[payload.pName].color,
-                                    strokeOpacity: 0.9,
-                                    strokeWeight: 5
-                                }
-                            };
-
-                            this.$store.state.targetCircles = this.clone(this.$store.state.targetCircles);
-                        }
-                        else {
-                            this.$store.state.targetLines[payload.pName] = null;
-                            delete this.$store.state.targetLines[payload.pName];
-                            // this.targetLinesOptions[payload.pName] = null;
-                            // delete this.targetLinesOptions[payload.pName];
-
-                            this.$store.state.targetLines = this.clone(this.$store.state.targetLines);
-
-                            this.$store.state.targetCircles[payload.pName] = null;
-                            delete this.$store.state.targetCircles[payload.pName]
-                            // this.targetCirclesOptions[payload.pName] = null;
-                            // delete this.targetCirclesOptions[payload.pName]
-
-                            this.$store.state.targetCircles = this.clone(this.$store.state.targetCircles);
-                        }
-
-                        this.$forceUpdate();
-                    }
-                    else {
-                        this.$store.state.targetLines[payload.pName] = null;
-                        delete this.$store.state.targetLines[payload.pName];
-                        // this.targetLinesOptions[payload.pName] = null;
-                        // delete this.targetLinesOptions[payload.pName]
-
-                        this.$store.state.targetLines = this.clone(this.$store.state.targetLines);
-
-                        this.$store.state.targetCircles[payload.pName] = null;
-                        delete this.$store.state.targetCircles[payload.pName]
-                        // this.targetCirclesOptions[payload.pName] = null;
-                        // delete this.targetCirclesOptions[payload.pName]
-
-                        this.$store.state.targetCircles = this.clone(this.$store.state.targetCircles);
-
-                        this.$forceUpdate();
-                    }
-                }
+                // else if(this.$store.state.currentCommandTab === '선회') {
+                //     if (this.$store.state.drone_infos[payload.pName].selected) {
+                //         if (this.$store.state.tempMarkers[payload.pName][payload.pIndex].targeted) {
+                //             console.log('draw', payload.pIndex);
+                //             this.$store.state.targetLines[payload.pName] = null;
+                //             this.$store.state.targetLines[payload.pName] = {
+                //                 path: [],
+                //                 options: {
+                //                     strokeColor: this.$store.state.drone_infos[payload.pName].color,
+                //                     strokeOpacity: 0.9,
+                //                     strokeWeight: 5
+                //                 }
+                //             };
+                //
+                //             this.$store.state.targetLines[payload.pName].path.push(this.$store.state.drone_infos[payload.pName]);
+                //             this.$store.state.targetLines[payload.pName].path.push(this.$store.state.tempMarkers[payload.pName][payload.pIndex]);
+                //
+                //             this.$store.state.targetLines = this.clone(this.$store.state.targetLines);
+                //
+                //             this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius = this.$store.state.drone_infos[payload.pName].targetRadius;
+                //
+                //             this.$store.state.targetCircles[payload.pName] = null;
+                //             this.$store.state.targetCircles[payload.pName] = {
+                //                 lat: this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat,
+                //                 lng: this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng,
+                //                 radius: this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius,
+                //                 options: {
+                //                     strokeColor: this.$store.state.drone_infos[payload.pName].color,
+                //                     strokeOpacity: 0.9,
+                //                     strokeWeight: 5
+                //                 }
+                //             };
+                //
+                //             this.$store.state.targetCircles = this.clone(this.$store.state.targetCircles);
+                //         }
+                //         else {
+                //             this.$store.state.targetLines[payload.pName] = null;
+                //             delete this.$store.state.targetLines[payload.pName];
+                //             // this.targetLinesOptions[payload.pName] = null;
+                //             // delete this.targetLinesOptions[payload.pName];
+                //
+                //             this.$store.state.targetLines = this.clone(this.$store.state.targetLines);
+                //
+                //             this.$store.state.targetCircles[payload.pName] = null;
+                //             delete this.$store.state.targetCircles[payload.pName]
+                //             // this.targetCirclesOptions[payload.pName] = null;
+                //             // delete this.targetCirclesOptions[payload.pName]
+                //
+                //             this.$store.state.targetCircles = this.clone(this.$store.state.targetCircles);
+                //         }
+                //
+                //         this.$forceUpdate();
+                //     }
+                //     else {
+                //         this.$store.state.targetLines[payload.pName] = null;
+                //         delete this.$store.state.targetLines[payload.pName];
+                //         // this.targetLinesOptions[payload.pName] = null;
+                //         // delete this.targetLinesOptions[payload.pName]
+                //
+                //         this.$store.state.targetLines = this.clone(this.$store.state.targetLines);
+                //
+                //         this.$store.state.targetCircles[payload.pName] = null;
+                //         delete this.$store.state.targetCircles[payload.pName]
+                //         // this.targetCirclesOptions[payload.pName] = null;
+                //         // delete this.targetCirclesOptions[payload.pName]
+                //
+                //         this.$store.state.targetCircles = this.clone(this.$store.state.targetCircles);
+                //
+                //         this.$forceUpdate();
+                //     }
+                // }
             },
 
             deleteLineTarget(pName) {
@@ -2618,7 +2719,7 @@
 
                 // this.$refs.mapRef.$mapPromise.then((map) => {
                     this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
-                    this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                    //this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
 
                 // });
             });
