@@ -1332,7 +1332,7 @@ export default {
         EventBus.$on('update-goto-positions', (payload) => {
             console.log('update-goto-positions', payload);
 
-            let strPos = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
+            this.position_selections[payload.pName] = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
                 this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng + ':' +
                 this.$store.state.tempMarkers[payload.pName][payload.pIndex].alt + ':' +
                 this.$store.state.tempMarkers[payload.pName][payload.pIndex].speed + ':' +
@@ -1341,8 +1341,6 @@ export default {
                 this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd + ':' +
                 this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetStayTime + ':' +
                 this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation;
-
-            this.position_selections[payload.pName] = strPos;
 
             this.$forceUpdate();
         });

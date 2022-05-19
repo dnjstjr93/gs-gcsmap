@@ -3,41 +3,40 @@
         <v-card ref="info" tile flat :color="$store.state.drone_infos[name].color">
             <v-row no-gutters class="mt-0">
                 <v-col cols="12">
-                    <v-row no-gutters class="d-flex justify-center" align="center">
-                        <v-col cols="12">
-                            <v-row no-gutters align="center" justify="center">
-                                <v-col cols="5">
-                                    <v-card flat tile :color="$store.state.drone_infos[name].color">
-                                        <v-checkbox
-                                            dense hide-details
-                                            @change="checkDroneSelected" class="pt-0 pl-1 ma-0 shadow"
-                                            v-model="$store.state.drone_infos[name].targeted"
-                                        >
-                                            <template v-slot:label>
-                                                <div>
-                                                    <span :class="statusTextColor">{{name + '(' + sys_id + ')' }}</span>
-                                                </div>
-                                            </template>
-                                        </v-checkbox>
-                                        <!--                            :disabled="!flagReceiving"-->
-                                    </v-card>
-                                </v-col>
-                                <v-col cols="1">
-                                    <v-fade-transition>
-                                        <v-avatar
-                                            v-if="isPlaying"
-                                            :color="bpm_color"
-                                            :style="{animationDuration: animationDuration}"
-                                            class="v-avatar--metronome"
-                                            size="18"
-                                        >
-                                            <v-icon dark>
-                                                mdi-heart-circle
-                                            </v-icon>
-                                        </v-avatar>
-                                    </v-fade-transition>
-                                </v-col>
-                                <v-col cols="1">
+                    <v-row no-gutters align="center" justify="center">
+                        <v-col cols="5">
+                            <v-card flat tile :color="$store.state.drone_infos[name].color">
+                                <v-checkbox
+                                    dense hide-details
+                                    @change="checkDroneSelected" class="pt-0 pl-1 ma-0 shadow"
+                                    v-model="$store.state.drone_infos[name].targeted"
+                                >
+                                    <template v-slot:label>
+                                        <div>
+                                            <span :class="statusTextColor">{{name + '(' + sys_id + ')' }}</span>
+                                        </div>
+                                    </template>
+                                </v-checkbox>
+                                <!--                            :disabled="!flagReceiving"-->
+                            </v-card>
+                        </v-col>
+                        <v-col cols="1" class="justify-center text-center">
+                            <v-fade-transition>
+                                <v-avatar
+                                    v-if="isPlaying"
+                                    :color="bpm_color"
+                                    :style="{animationDuration: animationDuration}"
+                                    class="v-avatar--metronome pb-0 mb-1"
+                                    size="20"
+                                >
+                                    <v-icon dark>
+                                        mdi-heart-circle
+                                    </v-icon>
+                                </v-avatar>
+                            </v-fade-transition>
+                        </v-col>
+                        <v-spacer></v-spacer>
+                        <v-col cols="1">
 <!--                                    <v-switch-->
 <!--                                        dense hide-details flat inset-->
 <!--                                        prepend-icon="mdi-video-outline"-->
@@ -47,317 +46,378 @@
 <!--                                        @change="onVideoHandler(name)"-->
 <!--                                    >-->
 <!--                                    </v-switch>-->
-                                    <v-btn-toggle
-                                        dense dark
-                                        v-model="toggle_exclusive"
-                                        :background-color="$store.state.drone_infos[name].color"
-                                        @change="onVideoHandler($event, name)"
-                                        active-class="deep-purple--text text--accent-5"
-                                    >
-                                        <v-tooltip top>
-                                            <template v-slot:activator="{ on, attrs }">
-                                                <v-btn
-                                                    class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                                    v-bind="attrs"
-                                                    v-on="on"
-                                                >
-                                                    <v-icon small>mdi-video-outline</v-icon>
-                                                </v-btn>
-                                            </template>
-                                            <span>Video On/Off</span>
-                                        </v-tooltip>
-                                    </v-btn-toggle>
-                                </v-col>
-                                <v-col cols="1">
-                                    <v-tooltip top>
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-btn
-                                                class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                                @click.stop="gotoHomePosition"
-                                                v-bind="attrs"
-                                                v-on="on"
-                                            >
-                                                <v-icon small>
-                                                    mdi-home
-                                                </v-icon>
-                                            </v-btn>
-                                        </template>
-                                        <span>홈 위치로 이동</span>
-                                    </v-tooltip>
-                                </v-col>
-                                <v-col cols="1">
-                                    <v-tooltip top>
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-btn
-                                                class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                                @click.stop="returnToLaunch"
-                                                v-bind="attrs"
-                                                v-on="on"
-                                            >
-                                                <v-icon small>
-                                                    mdi-backup-restore
-                                                </v-icon>
-                                            </v-btn>
-                                        </template>
-                                        <span>귀환</span>
-                                    </v-tooltip>
-                                </v-col>
-                                <v-col cols="1">
-                                    <v-tooltip top>
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-btn
-                                                class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                                @click.stop="pauseCurPosition"
-                                                v-bind="attrs"
-                                                v-on="on"
-                                            >
-                                                <v-icon small>
-                                                    mdi-close-octagon-outline
-                                                </v-icon>
-                                            </v-btn>
-                                        </template>
-                                        <span>정지(Loiter)</span>
-                                    </v-tooltip>
-                                </v-col>
-                                <v-col cols="1">
-                                    <v-tooltip top>
-                                        <template v-slot:activator="{ on, attrs }">
-                                            <v-btn
-                                                class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                                @click.stop="clearTrackingLines"
-                                                v-bind="attrs"
-                                                v-on="on"
-                                            >
-                                                <v-icon small>
-                                                    mdi-layers-off
-                                                </v-icon>
-                                            </v-btn>
-                                        </template>
-                                        <span>궤적 지우기</span>
-                                    </v-tooltip>
-                                </v-col>
-                                <v-col cols="1">
-                                    <div class="text-right">
-                                        <v-tooltip top>
-                                            <template v-slot:activator="{ on, attrs }">
-                                                <v-btn
-                                                    class="mr-1 my-1" dark x-small elevation="5"
-                                                    :color="$store.state.drone_infos[name].color"
-                                                    @click.stop="showMyDroneInfoDialog"
-                                                    v-bind="attrs"
-                                                    v-on="on"
-                                                >
-                                                    <v-icon small>
-                                                        mdi-text-box-check-outline
-                                                    </v-icon>
-                                                </v-btn>
-                                            </template>
-                                            <span>드론 정보 관리</span>
-                                        </v-tooltip>
-
-                                        <v-dialog
-                                            v-model="dialog"
-                                            max-width="720"
+                            <v-btn-toggle
+                                dense dark
+                                v-model="toggle_exclusive"
+                                :background-color="$store.state.drone_infos[name].color"
+                                @change="onVideoHandler($event, name)"
+                                active-class="deep-purple--text text--accent-5"
+                            >
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-btn
+                                            class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                            v-bind="attrs"
+                                            v-on="on"
                                         >
-                                            <v-card>
-                                                <v-card-title class="text-h6">Information of {{ name }}
-                                                    <v-spacer></v-spacer>
-                                                    <v-file-input
-                                                        class="mr-2"
-                                                        accept=".waypoints,.txt,.kml,.plan"
-                                                        label="Waypoints File input"
-                                                        :color="'#FF5722'"
-                                                        outlined dense hide-details small-chips
-                                                        v-model="chosenWaypointsFile"
-                                                    ></v-file-input>
-                                                    <v-btn
-                                                        class="ml-5"
-                                                        elevation="5"
-                                                        :color="'#FF5722'"
-                                                        @click.stop="loadUpdateWaypoints"
-                                                        left
-                                                        :disabled="showLoadWaypointsBtn"
-                                                    >
-                                                        <v-icon dark class="mr-2">mdi-map-marker-path</v-icon>
-                                                        Load
-                                                    </v-btn>
-                                                </v-card-title>
-                                                <v-textarea outlined name="myDroneInfo" label="drone_info" class="mx-2" height="480"
-                                                    v-model="strMyDroneInfo"
-                                                    hide-details
-                                                ></v-textarea>
+                                            <v-icon small>mdi-video-outline</v-icon>
+                                        </v-btn>
+                                    </template>
+                                    <span>Video On/Off</span>
+                                </v-tooltip>
+                            </v-btn-toggle>
+                        </v-col>
+                        <v-col cols="1">
+                            <v-tooltip top>
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-btn
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="clearTrackingLines"
+                                        v-bind="attrs"
+                                        v-on="on"
+                                    >
+                                        <v-icon small>
+                                            mdi-layers-off
+                                        </v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>궤적 지우기</span>
+                            </v-tooltip>
+                        </v-col>
+                        <v-col cols="1">
+                            <div class="text-right">
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-btn
+                                            class="mr-1 my-1" dark x-small elevation="5"
+                                            :color="$store.state.drone_infos[name].color"
+                                            @click.stop="showMyDroneInfoDialog"
+                                            v-bind="attrs"
+                                            v-on="on"
+                                        >
+                                            <v-icon small>
+                                                mdi-text-box-check-outline
+                                            </v-icon>
+                                        </v-btn>
+                                    </template>
+                                    <span>드론 정보 관리</span>
+                                </v-tooltip>
 
-                                                <v-card-actions>
-                                                    <v-btn
-                                                        dark
-                                                        elevation="5"
-                                                        :color="'#795548'"
-                                                        @click.stop="saveWaypoints"
-                                                        left
-                                                    >
-                                                        <v-icon dark class="mr-2">mdi-download</v-icon>
-                                                        Save
-                                                    </v-btn>
-                                                    <v-spacer></v-spacer>
+                                <v-dialog
+                                    v-model="dialog"
+                                    max-width="720"
+                                >
+                                    <v-card>
+                                        <v-card-title class="text-h6">Information of {{ name }}
+                                            <v-spacer></v-spacer>
+                                            <v-file-input
+                                                class="mr-2"
+                                                accept=".waypoints,.txt,.kml,.plan"
+                                                label="Waypoints File input"
+                                                :color="'#FF5722'"
+                                                outlined dense hide-details small-chips
+                                                v-model="chosenWaypointsFile"
+                                            ></v-file-input>
+                                            <v-btn
+                                                class="ml-5"
+                                                elevation="5"
+                                                :color="'#FF5722'"
+                                                @click.stop="loadUpdateWaypoints"
+                                                left
+                                                :disabled="showLoadWaypointsBtn"
+                                            >
+                                                <v-icon dark class="mr-2">mdi-map-marker-path</v-icon>
+                                                Load
+                                            </v-btn>
+                                        </v-card-title>
+                                        <v-textarea outlined name="myDroneInfo" label="drone_info" class="mx-2" height="480"
+                                            v-model="strMyDroneInfo"
+                                            hide-details
+                                        ></v-textarea>
 
-                                                    <v-btn
-                                                        color="green darken-1"
-                                                        text
-                                                        @click="dialog = false"
-                                                    >
-                                                        Cancel
-                                                    </v-btn>
+                                        <v-card-actions>
+                                            <v-btn
+                                                dark
+                                                elevation="5"
+                                                :color="'#795548'"
+                                                @click.stop="saveWaypoints"
+                                                left
+                                            >
+                                                <v-icon dark class="mr-2">mdi-download</v-icon>
+                                                Save
+                                            </v-btn>
+                                            <v-spacer></v-spacer>
 
-                                                    <v-btn
-                                                        color="green darken-1"
-                                                        text
-                                                        @click="updateMyDroneInfo"
-                                                    >
-                                                        OK
-                                                    </v-btn>
-                                                </v-card-actions>
-                                            </v-card>
-                                        </v-dialog>
-                                    </div>
-                                </v-col>
-                            </v-row>
-                            <!--                            <v-row no-gutters align="center" justify="center">-->
-                            <!--                                <v-col cols="12">-->
-                            <!--                                    <v-card class="px-2 py-0" :class="colorMode" flat tile :color="$store.state.droneColorMap[name]">-->
-                            <!--                                        <v-row no-gutters class="pa-0">-->
-                            <!--                                            <v-col cols="7">-->
-                            <!--                                                <v-card tile :color="$store.state.droneColorMap[name]">-->
-                            <!--                                                    <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
-                            <!--                                                        <v-col cols="12" class="pl-2 text-left align-self-center">-->
-                            <!--                                                            <v-card flat tile class="shadow" :class="colorMode" :color="$store.state.droneColorMap[name]">{{ curMode }}</v-card>-->
-                            <!--                                                        </v-col>-->
-                            <!--                                                    </v-row>-->
-                            <!--                                                    <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
-                            <!--                                                </v-card>-->
-                            <!--                                            </v-col>-->
-                            <!--                                            <v-col cols="5">-->
-                            <!--                                                <v-card tile :color="$store.state.droneColorMap[name]">-->
-                            <!--                                                    <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
-                            <!--                                                        <v-col cols="4" class="text-right align-self-center">-->
-                            <!--                                                            <v-icon :class="colorBattery" :style="iconSize" class="shadow_icon">{{ iconBattery }}</v-icon>-->
-                            <!--                                                        </v-col>-->
-                            <!--                                                        <v-col cols="8" class="text-right align-self-center">-->
-                            <!--                                                            <v-card flat tile :class="colorBattery" :style="fontSize" class="shadow_icon"  :color="$store.state.droneColorMap[name]">{{ (ss.voltage_battery / 1000).toFixed(1) }} V</v-card>-->
-                            <!--                                                        </v-col>-->
-                            <!--                                                    </v-row>-->
-                            <!--                                                    <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
-                            <!--                                                </v-card>-->
-                            <!--                                            </v-col>-->
-                            <!--                                        </v-row>-->
-                            <!--                                    </v-card>-->
-                            <!--                                </v-col>-->
-                            <!--                            </v-row>-->
-                            <!--                            <v-row no-gutters class="ma-0 pa-0 " justify="center" align="center">-->
-                            <!--                                <v-col cols="6">-->
-                            <!--                                    <v-card tile>-->
-                            <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
-                            <!--                                            <v-col cols="4" class="text-right align-self-center">-->
-                            <!--                                                <v-icon class="shadow_icon">mdi-satellite-variant</v-icon>-->
-                            <!--                                            </v-col>-->
-                            <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                            <span>{{ infos1[0].name }}</span>&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
-                            <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
-                            <!--                                                <v-card flat tile class="shadow_icon">{{ num_satellites }} </v-card>-->
-                            <!--                                            </v-col>-->
+                                            <v-btn
+                                                color="green darken-1"
+                                                text
+                                                @click="dialog = false"
+                                            >
+                                                Cancel
+                                            </v-btn>
 
-                            <!--                                        </v-row>-->
-                            <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
-                            <!--                                    </v-card>-->
-                            <!--                                </v-col>-->
-                            <!--                                <v-col cols="6">-->
-                            <!--                                    <v-card tile>-->
-                            <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
-                            <!--                                            <v-col cols="4" class="text-right align-self-center">-->
-                            <!--                                                <v-icon class="shadow_icon">mdi-altimeter</v-icon>-->
-                            <!--                                            </v-col>-->
-                            <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                            <span>{{ infos1[0].name }}</span>&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
-                            <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
-                            <!--                                                <v-card flat tile class="shadow_icon">{{ (gpi.relative_alt / 1000).toFixed(1) }} m</v-card>-->
-                            <!--                                            </v-col>-->
+                                            <v-btn
+                                                color="green darken-1"
+                                                text
+                                                @click="updateMyDroneInfo"
+                                            >
+                                                OK
+                                            </v-btn>
+                                        </v-card-actions>
+                                    </v-card>
+                                </v-dialog>
+                            </div>
+                        </v-col>
+                    </v-row>
+                    <!--                            <v-row no-gutters align="center" justify="center">-->
+                    <!--                                <v-col cols="12">-->
+                    <!--                                    <v-card class="px-2 py-0" :class="colorMode" flat tile :color="$store.state.droneColorMap[name]">-->
+                    <!--                                        <v-row no-gutters class="pa-0">-->
+                    <!--                                            <v-col cols="7">-->
+                    <!--                                                <v-card tile :color="$store.state.droneColorMap[name]">-->
+                    <!--                                                    <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
+                    <!--                                                        <v-col cols="12" class="pl-2 text-left align-self-center">-->
+                    <!--                                                            <v-card flat tile class="shadow" :class="colorMode" :color="$store.state.droneColorMap[name]">{{ curMode }}</v-card>-->
+                    <!--                                                        </v-col>-->
+                    <!--                                                    </v-row>-->
+                    <!--                                                    <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
+                    <!--                                                </v-card>-->
+                    <!--                                            </v-col>-->
+                    <!--                                            <v-col cols="5">-->
+                    <!--                                                <v-card tile :color="$store.state.droneColorMap[name]">-->
+                    <!--                                                    <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
+                    <!--                                                        <v-col cols="4" class="text-right align-self-center">-->
+                    <!--                                                            <v-icon :class="colorBattery" :style="iconSize" class="shadow_icon">{{ iconBattery }}</v-icon>-->
+                    <!--                                                        </v-col>-->
+                    <!--                                                        <v-col cols="8" class="text-right align-self-center">-->
+                    <!--                                                            <v-card flat tile :class="colorBattery" :style="fontSize" class="shadow_icon"  :color="$store.state.droneColorMap[name]">{{ (ss.voltage_battery / 1000).toFixed(1) }} V</v-card>-->
+                    <!--                                                        </v-col>-->
+                    <!--                                                    </v-row>-->
+                    <!--                                                    <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
+                    <!--                                                </v-card>-->
+                    <!--                                            </v-col>-->
+                    <!--                                        </v-row>-->
+                    <!--                                    </v-card>-->
+                    <!--                                </v-col>-->
+                    <!--                            </v-row>-->
+                    <!--                            <v-row no-gutters class="ma-0 pa-0 " justify="center" align="center">-->
+                    <!--                                <v-col cols="6">-->
+                    <!--                                    <v-card tile>-->
+                    <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
+                    <!--                                            <v-col cols="4" class="text-right align-self-center">-->
+                    <!--                                                <v-icon class="shadow_icon">mdi-satellite-variant</v-icon>-->
+                    <!--                                            </v-col>-->
+                    <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                            <span>{{ infos1[0].name }}</span>&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
+                    <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
+                    <!--                                                <v-card flat tile class="shadow_icon">{{ num_satellites }} </v-card>-->
+                    <!--                                            </v-col>-->
 
-                            <!--                                        </v-row>-->
-                            <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
-                            <!--                                    </v-card>-->
-                            <!--                                </v-col>-->
-                            <!--                            </v-row>-->
-                            <!--                            <v-row no-gutters class="ma-0 pa-0 " justify="center" align="center">-->
-                            <!--                                <v-col cols="6">-->
-                            <!--                                    <v-card tile>-->
-                            <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
-                            <!--                                            <v-col cols="4" class="text-right align-self-center">-->
-                            <!--                                                <v-icon :class="colorLteVal" :style="iconSize" class="shadow_icon">{{ iconLte }}</v-icon>-->
-                            <!--                                            </v-col>-->
-                            <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                            <span>{{ infos2[0].name }}</span>&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
-                            <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center" :class="colorLteVal">-->
-                            <!--                                                <v-card flat tile :class="colorLteVal" :style="fontSize" class="shadow_icon">{{ curLteVal }}</v-card>-->
-                            <!--                                            </v-col>-->
-                            <!--                                        </v-row>-->
-                            <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
-                            <!--                                    </v-card>-->
-                            <!--                                </v-col>-->
-                            <!--                                <v-col cols="6">-->
-                            <!--                                    <v-card tile>-->
-                            <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
-                            <!--                                            <v-col cols="4" class="text-right align-self-center">-->
-                            <!--                                                <v-icon class="shadow_icon">mdi-speedometer</v-icon>-->
-                            <!--                                            </v-col>-->
-                            <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                            <span>{{ infos1[0].name }}</span>&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
-                            <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
-                            <!--                                                <v-card flat tile class="shadow_icon">{{ airspeed.toFixed(1) }} m/s</v-card>-->
-                            <!--                                            </v-col>-->
+                    <!--                                        </v-row>-->
+                    <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
+                    <!--                                    </v-card>-->
+                    <!--                                </v-col>-->
+                    <!--                                <v-col cols="6">-->
+                    <!--                                    <v-card tile>-->
+                    <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
+                    <!--                                            <v-col cols="4" class="text-right align-self-center">-->
+                    <!--                                                <v-icon class="shadow_icon">mdi-altimeter</v-icon>-->
+                    <!--                                            </v-col>-->
+                    <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                            <span>{{ infos1[0].name }}</span>&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
+                    <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
+                    <!--                                                <v-card flat tile class="shadow_icon">{{ (gpi.relative_alt / 1000).toFixed(1) }} m</v-card>-->
+                    <!--                                            </v-col>-->
 
-                            <!--                                        </v-row>-->
-                            <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
-                            <!--                                    </v-card>-->
-                            <!--                                </v-col>-->
-                            <!--                            </v-row>-->
-                            <!--                            <v-row no-gutters class="ma-0 pa-0 " justify="center" align="center">-->
-                            <!--                                <v-col cols="6">-->
-                            <!--                                    <v-card tile>-->
-                            <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
-                            <!--                                            <v-col cols="4" class="text-right align-self-center">-->
-                            <!--                                                <v-icon class="shadow_icon">{{ iconDistance }}</v-icon>-->
-                            <!--                                            </v-col>-->
-                            <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                            <span>{{ infos2[0].name }}</span>&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
-                            <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
-                            <!--                                                <v-card flat tile class="shadow_icon">{{ valueDistance }}</v-card>-->
-                            <!--                                            </v-col>-->
-                            <!--                                        </v-row>-->
-                            <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
-                            <!--                                    </v-card>-->
-                            <!--                                </v-col>-->
-                            <!--                                <v-col cols="6">-->
-                            <!--                                    <v-card tile>-->
-                            <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
-                            <!--                                            <v-col cols="4" class="text-right align-self-center">-->
-                            <!--                                                <v-icon class="shadow_icon">{{ iconFlightElapsed }}</v-icon>-->
-                            <!--                                            </v-col>-->
-                            <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                            <span>{{ infos1[0].name }}</span>&ndash;&gt;-->
-                            <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
-                            <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
-                            <!--                                                <v-card flat tile class="shadow_icon">{{ flightElapsedTime }}</v-card>-->
-                            <!--                                            </v-col>-->
+                    <!--                                        </v-row>-->
+                    <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
+                    <!--                                    </v-card>-->
+                    <!--                                </v-col>-->
+                    <!--                            </v-row>-->
+                    <!--                            <v-row no-gutters class="ma-0 pa-0 " justify="center" align="center">-->
+                    <!--                                <v-col cols="6">-->
+                    <!--                                    <v-card tile>-->
+                    <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
+                    <!--                                            <v-col cols="4" class="text-right align-self-center">-->
+                    <!--                                                <v-icon :class="colorLteVal" :style="iconSize" class="shadow_icon">{{ iconLte }}</v-icon>-->
+                    <!--                                            </v-col>-->
+                    <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                            <span>{{ infos2[0].name }}</span>&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
+                    <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center" :class="colorLteVal">-->
+                    <!--                                                <v-card flat tile :class="colorLteVal" :style="fontSize" class="shadow_icon">{{ curLteVal }}</v-card>-->
+                    <!--                                            </v-col>-->
+                    <!--                                        </v-row>-->
+                    <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
+                    <!--                                    </v-card>-->
+                    <!--                                </v-col>-->
+                    <!--                                <v-col cols="6">-->
+                    <!--                                    <v-card tile>-->
+                    <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
+                    <!--                                            <v-col cols="4" class="text-right align-self-center">-->
+                    <!--                                                <v-icon class="shadow_icon">mdi-speedometer</v-icon>-->
+                    <!--                                            </v-col>-->
+                    <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                            <span>{{ infos1[0].name }}</span>&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
+                    <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
+                    <!--                                                <v-card flat tile class="shadow_icon">{{ airspeed.toFixed(1) }} m/s</v-card>-->
+                    <!--                                            </v-col>-->
 
-                            <!--                                        </v-row>-->
-                            <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
-                            <!--                                    </v-card>-->
-                            <!--                                </v-col>-->
-                            <!--                            </v-row>-->
+                    <!--                                        </v-row>-->
+                    <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
+                    <!--                                    </v-card>-->
+                    <!--                                </v-col>-->
+                    <!--                            </v-row>-->
+                    <!--                            <v-row no-gutters class="ma-0 pa-0 " justify="center" align="center">-->
+                    <!--                                <v-col cols="6">-->
+                    <!--                                    <v-card tile>-->
+                    <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
+                    <!--                                            <v-col cols="4" class="text-right align-self-center">-->
+                    <!--                                                <v-icon class="shadow_icon">{{ iconDistance }}</v-icon>-->
+                    <!--                                            </v-col>-->
+                    <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                            <span>{{ infos2[0].name }}</span>&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
+                    <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
+                    <!--                                                <v-card flat tile class="shadow_icon">{{ valueDistance }}</v-card>-->
+                    <!--                                            </v-col>-->
+                    <!--                                        </v-row>-->
+                    <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
+                    <!--                                    </v-card>-->
+                    <!--                                </v-col>-->
+                    <!--                                <v-col cols="6">-->
+                    <!--                                    <v-card tile>-->
+                    <!--                                        <v-row no-gutters class="d-flex justify-center" :style="heightInfo">-->
+                    <!--                                            <v-col cols="4" class="text-right align-self-center">-->
+                    <!--                                                <v-icon class="shadow_icon">{{ iconFlightElapsed }}</v-icon>-->
+                    <!--                                            </v-col>-->
+                    <!--                                            &lt;!&ndash;                        <v-col cols="4" class="pl-1 text-left align-self-center">&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                            <span>{{ infos1[0].name }}</span>&ndash;&gt;-->
+                    <!--                                            &lt;!&ndash;                        </v-col>&ndash;&gt;-->
+                    <!--                                            <v-col cols="8" class="pr-2 text-right align-self-center">-->
+                    <!--                                                <v-card flat tile class="shadow_icon">{{ flightElapsedTime }}</v-card>-->
+                    <!--                                            </v-col>-->
+
+                    <!--                                        </v-row>-->
+                    <!--                                        <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>-->
+                    <!--                                    </v-card>-->
+                    <!--                                </v-col>-->
+                    <!--                            </v-row>-->
+                    <v-row no-gutters align="center" justify="center">
+                        <v-col cols="1">
+                            <v-tooltip top>
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-btn
+                                        :disabled="$store.state.drone_infos[name].curArmStatus === 'DISARMED'"
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="gotoHomePosition"
+                                        v-bind="attrs"
+                                        v-on="on"
+                                    >
+                                        <v-icon small>
+                                            mdi-home
+                                        </v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>홈 위치로 이동</span>
+                            </v-tooltip>
+                        </v-col>
+                        <v-col cols="1">
+                            <v-tooltip top>
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-btn
+                                        :disabled="$store.state.drone_infos[name].curArmStatus === 'DISARMED'"
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="returnToLaunch"
+                                        v-bind="attrs"
+                                        v-on="on"
+                                    >
+                                        <v-icon small>
+                                            mdi-arrow-down-left-bold
+                                        </v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>귀환</span>
+                            </v-tooltip>
+                        </v-col>
+                        <v-col cols="1">
+                            <v-tooltip top>
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-btn
+                                        :disabled="$store.state.drone_infos[name].curArmStatus === 'DISARMED'"
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="pauseCurPosition"
+                                        v-bind="attrs"
+                                        v-on="on"
+                                    >
+                                        <v-icon small>
+                                            mdi-close-octagon-outline
+                                        </v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>정지(Loiter)</span>
+                            </v-tooltip>
+                        </v-col>
+                        <v-spacer></v-spacer>
+                        <v-col cols="1">
+                            <v-tooltip top>
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-btn
+                                        :disabled="$store.state.drone_infos[name].curArmStatus === 'DISARMED'"
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="showYawAngleDialog"
+                                        v-bind="attrs"
+                                        v-on="on"
+                                    >
+                                        <v-icon small>
+                                            mdi-rotate-orbit
+                                        </v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>YAW회전</span>
+                            </v-tooltip>
+                            <v-dialog
+                                v-model="yawAngleDialog"
+                                max-width="340"
+                            >
+                                <v-card class="pa-3 pt-5">
+                                    <v-row no-gutters align="center" justify="center">
+                                        <v-col cols="5">
+                                            <v-text-field
+                                                label="angle(°)"
+                                                v-model="yawAngle"
+                                                class="ma-0 pa-0 v-text-field--enclosed"
+                                                type="number"
+                                                outlined dense hide-details
+                                                color="amber"
+                                                min="-360"
+                                                max="360"
+                                            ></v-text-field>
+                                        </v-col>
+                                        <v-col cols="6">
+                                            <v-card-actions>
+                                                <v-btn
+                                                    color="green darken-1"
+                                                    text outlined
+                                                    @click="rotateYawAngle"
+                                                >
+                                                    OK
+                                                </v-btn>
+                                                <v-btn
+                                                    color="red darken-1"
+                                                    text outlined
+                                                    @click="yawAngleDialog = false"
+                                                >
+                                                    Cancel
+                                                </v-btn>
+                                            </v-card-actions>
+                                        </v-col>
+                                    </v-row>
+                                </v-card>
+                            </v-dialog>
                         </v-col>
                     </v-row>
                     <v-row no-gutters class="d-flex justify-center" align="center">
@@ -777,6 +837,7 @@ export default {
 
     data() {
         return {
+            yawAngle: 0,
             toggle_exclusive: undefined,
             itemsWpYawBehavior: [
                 '0 = Never change Yaw.',
@@ -792,6 +853,7 @@ export default {
             strWaypoints: null,
             chosenWaypointsFile: null,
             dialog: false,
+            yawAngleDialog: false,
             isPlaying: true,
             bpm: 40,
 
@@ -3748,7 +3810,7 @@ export default {
                         //     delete this.$store.state.trackingLines[this.name];
                         //     this.$store.state.trackingLines[this.name] = [];
                         // }
-                        if(this.$store.state.drone_infos[this.name].curArmStatus !== 'ARMED') {
+                        // if(this.$store.state.drone_infos[this.name].curArmStatus !== 'ARMED') {
                             this.iconArming = 'mdi-airplane';
                             this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
                             this.curArmStatus = 'ARMED';
@@ -3773,10 +3835,10 @@ export default {
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
-                        }
+                        // }
                     }
                     else {
-                        if(this.$store.state.drone_infos[this.name].curArmStatus !== 'DISARMED') {
+                        // if(this.$store.state.drone_infos[this.name].curArmStatus !== 'DISARMED') {
                             this.iconArming = 'mdi-airplane-off';
                             this.colorArming = 'white';
                             this.curArmStatus = 'DISARMED';
@@ -3789,7 +3851,7 @@ export default {
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
-                        }
+                        // }
                     }
 
                     this.info.curArmStatus = this.curArmStatus;
@@ -5255,6 +5317,22 @@ export default {
         pauseCurPosition() {
             EventBus.$emit('command-set-stop-' + this.name);
         },
+
+        showYawAngleDialog() {
+            this.yawAngleDialog = true;
+        },
+
+        rotateYawAngle() {
+            let curLat = (this.gpi.lat / 10000000);
+            let curLng = (this.gpi.lon / 10000000);
+            let curAlt = (this.gpi.relative_alt / 1000);
+            let roiPoint = get_point_dist(curLat, curLng, 1, this.yawAngle);
+
+            this.position_selections[this.name] = roiPoint.lat + ':' + roiPoint.lon + ':' + curAlt + ':5:100:5:16:1:0';
+            this.$store.state.drone_infos[this.name].targetAlt = curAlt;
+
+            EventBus.$emit('command-set-roi-' + this.name, this.position_selections[this.name]);
+        },
     },
 
     created() {
@@ -6618,5 +6696,11 @@ export default {
 .shadow_icon {
     text-shadow: 0.5px 0.5px 5px #000000;
 }
+
+.v-text-field--enclosed .v-input__slot {
+    padding: 0;
+}
+
+
 
 </style>
