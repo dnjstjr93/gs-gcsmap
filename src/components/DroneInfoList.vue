@@ -22,6 +22,7 @@
                                         label="ADS-B"
                                         color="warning"
                                         class="ma-0 pa-0 pl-1 py-1"
+                                        @change="switchADSBMonitor($event)"
                                     ></v-switch>
                                 </v-col>
                                 <v-col cols="2" class="text-right pr-1" >
@@ -412,7 +413,13 @@
                 setTimeout(() => {
                     this.onResize();
                 }, 50);
-            }
+            },
+
+            switchADSBMonitor(e) {
+                this.ADSBMonitor = e;
+                EventBus.$emit('ClickADSBMonitor', this.ADSBMonitor);
+            },
+
         },
 
         created() {
@@ -474,9 +481,9 @@
             //     }
             // }, 60000);
 
-            setInterval(() => {
-                EventBus.$emit('ClickADSBMonitor', this.ADSBMonitor);
-            }, 100);
+            // setInterval(() => {
+            //     EventBus.$emit('ClickADSBMonitor', this.ADSBMonitor);
+            // }, 100);
 
             setInterval(() => {
                 if(this.distanceMonitor) {
@@ -537,7 +544,17 @@
                         }
                     }
                 }
-            }, 100);
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].curMode === 'RTL') {
+                            if(parseInt(this.$store.state.params.wpYawBehavior[dName]) !== 1) {
+                                EventBus.$emit('setWpYawBehavior', 1);
+                            }
+                        }
+                    }
+                }
+            }, 1000);
 
             EventBus.$on('gcs-map-ready', () => {
                 this.drones_selected = null;

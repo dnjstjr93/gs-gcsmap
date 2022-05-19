@@ -1067,6 +1067,7 @@ export default {
                 iconFlightElapsed: 'mdi-timer-off-outline',
                 flightElapsedTime: '00:00',
                 valueDistance: '0 m',
+                wpYawBehavior: 'YAW-0',
                 colorMode: 'gray',
                 curMode: 'UNKNOWN',
                 curArmStatus: 'DISARMED',
@@ -3977,7 +3978,7 @@ export default {
                                     this.watchingMissionStatus = 100;
                                     this.watchingMission = 'goto-complete';
 
-                                    this.setWpYawBehavior(1);
+                                    //this.setWpYawBehavior(1);
                                 }
                             }
                             else {
@@ -4046,7 +4047,7 @@ export default {
                                 this.watchingMissionStatus = 100;
                                 this.watchingMission = 'auto-goto-complete';
 
-                                this.setWpYawBehavior(1);
+                                //this.setWpYawBehavior(1);
                             }
                         }
 
@@ -4388,7 +4389,7 @@ export default {
 
                             this.watchingMission = 'auto-goto-complete';
 
-                            this.setWpYawBehavior(1);
+                            //this.setWpYawBehavior(1);
                         }
                     }
 
@@ -4415,7 +4416,7 @@ export default {
                         this.watchingMissionStatus = 100;
                         this.watchingMission = 'goto-complete';
 
-                        this.setWpYawBehavior(1);
+                        //this.setWpYawBehavior(1);
                     }
 
                     else if(this.watchingMission === 'goto-alt') {
@@ -4640,6 +4641,7 @@ export default {
                         console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WP_YAW_BEHAVIOR', this.params.wpYawBehavior);
 
                         this.$store.state.params.wpYawBehavior[this.name] = this.itemsWpYawBehavior[this.params.wpYawBehavior.param_value];
+                        this.info.wpYawBehavior = 'YAW-' + String(this.params.wpYawBehavior.param_value);
                     }
                     else if (param_id.includes('ATC_SLEW_YAW')) {
                         if (!Object.prototype.hasOwnProperty.call(this.params, 'atcSlewYaw')) {
@@ -5174,37 +5176,12 @@ export default {
         },
 
         returnToLaunch() {
-            this.setWpYawBehavior(1);
-
             EventBus.$emit('command-set-rtl-' + this.name, 5);
         },
 
         pauseCurPosition() {
             EventBus.$emit('command-set-stop-' + this.name);
         },
-
-        setWpYawBehavior(param_value) {
-            let pre_custom_mode = this.curMode;
-
-            let target_mode = 'LOITER';
-            if(this.fcType === 'px4') {
-                target_mode = 'AUTO_LOITER';
-            }
-
-            setTimeout((name, target_pub_topic, sys_id, mode) => {
-                console.log('send_set_mode_command', mode);
-                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
-            }, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, target_mode);
-
-            setTimeout((name, target_pub_topic, sys_id, param_value) => {
-                this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
-            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
-
-            setTimeout((name, target_pub_topic, sys_id, mode) => {
-                console.log('send_set_mode_command', mode);
-                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
-            }, parseInt(50 + (Math.random() * 2)), this.name, this.target_pub_topic, this.sys_id, pre_custom_mode);
-        }
     },
 
     created() {
@@ -5418,6 +5395,29 @@ export default {
         // EventBus.$on('push-heading-' + this.name, (payload) => {
         //     this.heading = payload.heading;
         // });
+
+        EventBus.$on('setWpYawBehavior', (param_value) => {
+            let pre_custom_mode = this.curMode;
+
+            let target_mode = 'LOITER';
+            if(this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+
+            setTimeout((name, target_pub_topic, sys_id, mode) => {
+                console.log('send_set_mode_command', mode);
+                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+            }, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+            setTimeout((name, target_pub_topic, sys_id, param_value) => {
+                this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
+            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
+
+            setTimeout((name, target_pub_topic, sys_id, mode) => {
+                console.log('send_set_mode_command', mode);
+                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+            }, parseInt(50 + (Math.random() * 2)), this.name, this.target_pub_topic, this.sys_id, pre_custom_mode);
+        });
 
         EventBus.$on('ClickADSBMonitor', (flag) => {
             this.ADSB_Monitor_Flag = flag;
@@ -6003,7 +6003,7 @@ export default {
                                     this.watchingMission = 'goto-complete';
                                     this.watchingMissionStatus = 100;
 
-                                    this.setWpYawBehavior(1);
+                                    //this.setWpYawBehavior(1);
                                 }
 
                                 this.doPublishBroadcast();
@@ -6384,6 +6384,7 @@ export default {
 
         EventBus.$off('ClickADSBMonitor');
         EventBus.$off('do-positions-elevation-' + this.name);
+        EventBus.$off('setWpYawBehavior');
 
         if (this.timer_id) {
             clearInterval(this.timer_id);

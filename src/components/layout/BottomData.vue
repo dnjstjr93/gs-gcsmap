@@ -1,17 +1,25 @@
 <template>
     <v-container id="bottomWrapper" fill-height class="pa-0 ma-n1">
         <v-row no-gutters align="center">
-            <v-col cols="6" class="td-text-white text-left">
+            <v-col cols="3" class="justify-start td-text-white text-left pt-2">
                 <span class="shadow_icon pl-1 text--white" :style="fontSize">
                     <v-icon class="shadow_icon pr-0" :style="iconSize">mdi-map-marker-distance</v-icon>
                     {{ data.valueDistance }}
                 </span>
             </v-col>
-            <v-col cols="6" class="td-text-white text-right">
+            <v-col cols="3" class="justify-start td-text-white text-left pt-2">
+                <span class="shadow_icon pl-1 text--white" :style="fontSize">
+                    {{ data.wpYawBehavior }}
+                </span>
+            </v-col>
+            <v-spacer></v-spacer>
+            <v-spacer></v-spacer>
+            <v-col cols="4" class="justify-end td-text-white text-right">
                 <span class="shadow_icon pr-2 text--white" :style="modeFontSize">
                     {{ data.curMode }}
                 </span>
             </v-col>
+
         </v-row>
     </v-container>
 <!--    <div id="bottomWrapper" class="px-2" :class="{ 'px-4': data.fs, 'fsBottom': data.fs }">-->
@@ -74,6 +82,26 @@ export default {
     height: 5%;
     z-index: 1;
 }
+
+#resp-table {
+    width: 100%;
+    display: table;
+}
+
+#resp-table-header{
+    display: table-header-group;
+    background-color: gray;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.table-header-cell{
+    display: table-cell;
+    padding: 5px;
+    text-align: justify;
+    border-bottom: 1px solid black;
+}
+
 //
 //#bottomWrapper {
 //    position: absolute;
