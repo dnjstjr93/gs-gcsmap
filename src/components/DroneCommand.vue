@@ -17,12 +17,12 @@
         >
             <v-tabs-slider color="red"></v-tabs-slider>
             <v-tab class="pa-0 ma-0" style="min-width:0" href="virtual"></v-tab>
-            <v-tab v-for="(command) in commands" :key="command.title" :href="'#'+command.title" @click="tab_click(command.title)">
+            <v-tab v-for="(command) in $store.state.commands" :key="command.title" :href="'#'+command.title" @click="tab_click(command.title)">
                 {{command.title}}
             </v-tab>
 
             <v-tab-item value="virtual" class=""></v-tab-item>
-            <v-tab-item v-for="(command) in commands" :key="command.title" :value="command.title" class="">
+            <v-tab-item v-for="(command) in $store.state.commands" :key="command.title" :value="command.title" class="">
                 <v-card outlined color="grey lighten-4" style="opacity: 0.86" class="pa-0 overflow-y-auto" :max-height="$store.state.command_tab_max_height+'px'">
 <!--                    <v-card-title primary-title class="headline">-->
 <!--                        {{command.title}}-->
@@ -35,12 +35,12 @@
                             <v-col cols="10">
                                 <v-card>
 <!--                                        <v-toolbar flat dense-->
-<!--                                            v-if="((command.title === commands[0].title) || (command.title === commands[2].title) || (command.title === commands[3].title))"-->
+<!--                                            v-if="((command.title === $store.state.commands[0].title) || (command.title === $store.state.commands[2].title) || (command.title === $store.state.commands[3].title))"-->
 <!--                                        >-->
 <!--                                            <v-toolbar-title>-->
-<!--                                                <span class="subheading" v-if="command.title === commands[0].title">모드 설정</span>-->
-<!--                                                <span class="subheading" v-else-if="command.title === commands[2].title">이륙 고도 설정</span>-->
-<!--                                                <span class="subheading" v-else-if="command.title === commands[3].title">비행 고도 설정</span>-->
+<!--                                                <span class="subheading" v-if="command.title === $store.state.commands[0].title">모드 설정</span>-->
+<!--                                                <span class="subheading" v-else-if="command.title === $store.state.commands[2].title">이륙 고도 설정</span>-->
+<!--                                                <span class="subheading" v-else-if="command.title === $store.state.commands[3].title">비행 고도 설정</span>-->
 <!--                                            </v-toolbar-title>-->
 <!--                                        </v-toolbar>-->
                                     <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'mode'+dIndex">
@@ -959,88 +959,7 @@ export default {
     data() {
         return {
             drawRadiusUpdateTimer: null,
-            items: [
-                {
-                    "first": "0,0",
-                    "second": "0,1",
-                    "third": "0,2",
-                    "fourth": "0,3",
-                    "fifth": "0,4",
-                    "sixth": "0,5",
-                    "seventh": "0,6",
-                    "eighth": "0,7"
-                },
-                {
-                    "first": "1,0",
-                    "second": "1,1",
-                    "third": "1,2",
-                    "fourth": "1,3",
-                    "fifth": "1,4",
-                    "sixth": "1,5",
-                    "seventh": "1,6",
-                    "eighth": "1,7"
-                },
-                {
-                    "first": "2,0",
-                    "second": "2,1",
-                    "third": "2,2",
-                    "fourth": "2,3",
-                    "fifth": "2,4",
-                    "sixth": "2,5",
-                    "seventh": "2,6",
-                    "eighth": "2,7"
-                },
-                {
-                    "first": "3,0",
-                    "second": "3,1",
-                    "third": "3,2",
-                    "fourth": "3,3",
-                    "fifth": "3,4",
-                    "sixth": "3,5",
-                    "seventh": "3,6",
-                    "eighth": "3,7"
-                },
-                {
-                    "first": "4,0",
-                    "second": "4,1",
-                    "third": "4,2",
-                    "fourth": "4,3",
-                    "fifth": "4,4",
-                    "sixth": "4,5",
-                    "seventh": "4,6",
-                    "eighth": "4,7"
-                },
-                {
-                    "first": "5,0",
-                    "second": "5,1",
-                    "third": "5,2",
-                    "fourth": "5,3",
-                    "fifth": "5,4",
-                    "sixth": "5,5",
-                    "seventh": "5,6",
-                    "eighth": "5,7"
-                },
-                {
-                    "first": "6,0",
-                    "second": "6,1",
-                    "third": "6,2",
-                    "fourth": "6,3",
-                    "fifth": "6,4",
-                    "sixth": "6,5",
-                    "seventh": "6,6",
-                    "eighth": "6,7"
-                },
-                {
-                    "first": "7,0",
-                    "second": "7,1",
-                    "third": "7,2",
-                    "fourth": "7,3",
-                    "fifth": "7,4",
-                    "sixth": "7,5",
-                    "seventh": "7,6",
-                    "eighth": "7,7"
-                }
-            ],
+
             point: '8,8',
             dropped_point: [],
 
@@ -1102,80 +1021,6 @@ export default {
                 '0 = Never change Yaw.',
                 '1 = Face Next Waypoint including facing home during RTL.',
                 '2 = Face Next Waypoint except for RTL (i.e. during RTL vehicle will remain pointed at its last heading)'
-            ],
-            commands: [
-                {
-                    title: '모드', //0
-                    text: '선택한 비행체의 모드 변경'
-                },
-                {
-                    title: '이륙',
-                    text: '선택한 비행체에 설정한 고도로 이륙 명령'
-                },
-                {
-                    title: '고도',
-                    text: '선택한 비행체에 설정한 고도로 고도 변경 명령'
-                },
-                {
-                    title: '이동',
-                    text: '선택한 비행체를 선택한 지점으로 이동 명령'
-                },
-                {
-                    title: '선회',
-                    text: '선택한 비행체에 설정한 반경과 속도로 선회 비행 명령'
-                },
-                {
-                    title: '패턴',
-                    text: '선택한 비행체에 설정한 패턴과 속도, 고도로 비행 명령'
-                },
-                {
-                    title: '자동',
-                    text: '선택한 비행체에 설정한 비행좌표 리스트를 다운로드하고 자동 비행 명령'
-                },
-                {
-                    title: '속도',
-                    text: '선택한 비행체에 설정한 속도로 속도 변경 명령'
-                },
-                {
-                    title: '관심',
-                    text: '선택한 비행체에 ROI(Region Of Interest) 설정 명령'
-                },
-                // {
-                //     title: '정지',
-                //     text: '선택한 비행체 제자리 비행 명령'
-                // },
-                {
-                    title: '착륙',
-                    text: '선택한 비행체에 착륙 명령'
-                },
-                {
-                    title: '귀환',
-                    text: '선택한 비행체에 귀환 명령'
-                },
-                {
-                    title: '제어', //10
-                    text: '선택한 비행체의 임무 장비 제어 명령'
-                },
-                {
-                    title: '시동',
-                    text: '선택한 비행체에 시동 명령'
-                },
-                {
-                    title: '종료',
-                    text: '비행체 시동 끄기 명령'
-                },
-                {
-                    title: '설정',
-                    text: '선택한 비행체의 파라미터 설정'
-                },
-                {
-                    title: '임무',
-                    text: '선택한 비행체의 임무 장비 제어 (16채널)'
-                },
-                {
-                    title: '투하', //15
-                    text: '선택한 비행체의 투하장치 센서 투하 명령'
-                }
             ],
 
             curTab: 'virtual',
@@ -1461,8 +1306,18 @@ export default {
             console.log('do-selected-position', payload);
 
             if(payload.value) {
+                let strPos = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].alt + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].speed + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].turningSpeed + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetStayTime + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation;
+
                 this.position_selections_index[payload.pName] = payload.pIndex;
-                this.position_selections[payload.pName] = this.position_selections_items[payload.pName][payload.pIndex];
+                this.position_selections[payload.pName] = strPos;
                 this.position_selections_elevation[payload.pName] = parseFloat(this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation).toFixed(1);
             }
             else {
@@ -1477,7 +1332,17 @@ export default {
         EventBus.$on('update-goto-positions', (payload) => {
             console.log('update-goto-positions', payload);
 
-            this.position_selections[payload.pName] = this.position_selections_items[payload.pName][payload.pIndex];
+            let strPos = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].alt + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].speed + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].turningSpeed + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetStayTime + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation;
+
+            this.position_selections[payload.pName] = strPos;
 
             this.$forceUpdate();
         });
@@ -1754,9 +1619,22 @@ export default {
                     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                             let pIndex = this.position_selections_index[dName];
-                            if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
-                                console.log("*****************************************************************************", this.targetRadius[dName], pIndex);
-                                this.drawRadius(this.targetRadius[dName], dName, pIndex);
+                            if(pIndex !== undefined) {
+                                if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                                    console.log("*****************************************************************************", this.targetRadius[dName], pIndex);
+                                    this.drawRadius(this.targetRadius[dName], dName, pIndex);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else if(this.$store.state.currentCommandTab === '패턴') {
+                for (let dName in this.$store.state.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                            if(Object.prototype.hasOwnProperty.call(this.$store.state.targetCircles, dName)) {
+                                delete this.$store.state.targetCircles[dName];
                             }
                         }
                     }
@@ -1931,6 +1809,7 @@ export default {
                             this.$store.state.drone_infos[name].yawBehavior = this.yawBehavior[name];
                             this.$store.state.drone_infos[name].targetSpeed = parseInt(this.targetSpeed[name]);
                             this.$store.state.drone_infos[name].targetAlt = parseInt(this.targetAlt[name]);
+
                             EventBus.$emit('command-set-goto-' + name, this.position_selections[name]);
                         }
                     }
@@ -1952,11 +1831,13 @@ export default {
             for(let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                        console.log('DroneCommand-setGotoCircle', this.position_selections[name]);
                         if(this.position_selections[name] && this.position_selections[name] !== '' && this.position_selections[name] !== "") {
                             this.$store.state.drone_infos[name].circleType = this.circleType[name];
                             this.$store.state.drone_infos[name].targetTurningSpeed = parseInt(this.targetTurningSpeed[name]);
                             this.$store.state.drone_infos[name].targetRadius = parseInt(this.targetRadius[name]);
                             this.$store.state.drone_infos[name].targetAlt = parseInt(this.targetAlt[name]);
+
                             EventBus.$emit('command-set-goto-circle-' + name, this.position_selections[name]);
                         }
                     }

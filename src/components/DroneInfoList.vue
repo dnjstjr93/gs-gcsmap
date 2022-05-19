@@ -545,11 +545,18 @@
                     }
                 }
 
-                for(let dName in this.$store.state.drone_infos) {
+                for (let dName in this.$store.state.drone_infos) {
                     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].curMode === 'RTL') {
-                            if(parseInt(this.$store.state.params.wpYawBehavior[dName]) !== 1) {
-                                EventBus.$emit('setWpYawBehavior', 1);
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.rtlModeMonitor, dName)) {
+                            if(this.$store.state.rtlModeMonitor[dName]) {
+                                if (this.$store.state.drone_infos[dName].selected &&
+                                    this.$store.state.drone_infos[dName].curMode === 'RTL' &&
+                                    this.$store.state.drone_infos[dName].curArmStatus === 'ARMED') {
+
+                                    if (parseInt(this.$store.state.params.wpYawBehavior[dName]) !== 1) {
+                                        EventBus.$emit('setWpYawBehavior', 1);
+                                    }
+                                }
                             }
                         }
                     }
@@ -557,6 +564,12 @@
             }, 1000);
 
             EventBus.$on('gcs-map-ready', () => {
+
+                this.$store.state.commands = [];
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
+
                 this.drones_selected = null;
                 this.drones_selected = [];
                 for(let name in this.$store.state.drone_infos) {

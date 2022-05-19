@@ -54,62 +54,106 @@
                                         @change="onVideoHandler($event, name)"
                                         active-class="deep-purple--text text--accent-5"
                                     >
-                                        <v-btn class="mr-1 my-1" dark x-small text outlined elevation="5">
-                                            <v-icon small>mdi-video-outline</v-icon>
-                                        </v-btn>
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn
+                                                    class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                                    v-bind="attrs"
+                                                    v-on="on"
+                                                >
+                                                    <v-icon small>mdi-video-outline</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>Video On/Off</span>
+                                        </v-tooltip>
                                     </v-btn-toggle>
                                 </v-col>
                                 <v-col cols="1">
-                                    <v-btn
-                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                        @click.stop="gotoHomePosition"
-                                    >
-                                        <v-icon small>
-                                            mdi-home
-                                        </v-icon>
-                                    </v-btn>
+                                    <v-tooltip top>
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn
+                                                class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                                @click.stop="gotoHomePosition"
+                                                v-bind="attrs"
+                                                v-on="on"
+                                            >
+                                                <v-icon small>
+                                                    mdi-home
+                                                </v-icon>
+                                            </v-btn>
+                                        </template>
+                                        <span>홈 위치로 이동</span>
+                                    </v-tooltip>
                                 </v-col>
                                 <v-col cols="1">
-                                    <v-btn
-                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                        @click.stop="returnToLaunch"
-                                    >
-                                        <v-icon small>
-                                            mdi-backup-restore
-                                        </v-icon>
-                                    </v-btn>
+                                    <v-tooltip top>
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn
+                                                class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                                @click.stop="returnToLaunch"
+                                                v-bind="attrs"
+                                                v-on="on"
+                                            >
+                                                <v-icon small>
+                                                    mdi-backup-restore
+                                                </v-icon>
+                                            </v-btn>
+                                        </template>
+                                        <span>귀환</span>
+                                    </v-tooltip>
                                 </v-col>
                                 <v-col cols="1">
-                                    <v-btn
-                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                        @click.stop="pauseCurPosition"
-                                    >
-                                        <v-icon small>
-                                            mdi-close-octagon-outline
-                                        </v-icon>
-                                    </v-btn>
+                                    <v-tooltip top>
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn
+                                                class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                                @click.stop="pauseCurPosition"
+                                                v-bind="attrs"
+                                                v-on="on"
+                                            >
+                                                <v-icon small>
+                                                    mdi-close-octagon-outline
+                                                </v-icon>
+                                            </v-btn>
+                                        </template>
+                                        <span>정지(Loiter)</span>
+                                    </v-tooltip>
                                 </v-col>
                                 <v-col cols="1">
-                                    <v-btn
-                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                        @click.stop="clearTrackingLines"
-                                    >
-                                        <v-icon small>
-                                            mdi-layers-off
-                                        </v-icon>
-                                    </v-btn>
+                                    <v-tooltip top>
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn
+                                                class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                                @click.stop="clearTrackingLines"
+                                                v-bind="attrs"
+                                                v-on="on"
+                                            >
+                                                <v-icon small>
+                                                    mdi-layers-off
+                                                </v-icon>
+                                            </v-btn>
+                                        </template>
+                                        <span>궤적 지우기</span>
+                                    </v-tooltip>
                                 </v-col>
                                 <v-col cols="1">
                                     <div class="text-right">
-                                        <v-btn
-                                            class="mr-1 my-1" dark x-small elevation="5"
-                                            :color="$store.state.drone_infos[name].color"
-                                            @click.stop="showMyDroneInfoDialog"
-                                        >
-                                            <v-icon small>
-                                                mdi-text-box-check-outline
-                                            </v-icon>
-                                        </v-btn>
+                                        <v-tooltip top>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn
+                                                    class="mr-1 my-1" dark x-small elevation="5"
+                                                    :color="$store.state.drone_infos[name].color"
+                                                    @click.stop="showMyDroneInfoDialog"
+                                                    v-bind="attrs"
+                                                    v-on="on"
+                                                >
+                                                    <v-icon small>
+                                                        mdi-text-box-check-outline
+                                                    </v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <span>드론 정보 관리</span>
+                                        </v-tooltip>
 
                                         <v-dialog
                                             v-model="dialog"
@@ -3704,19 +3748,48 @@ export default {
                         //     delete this.$store.state.trackingLines[this.name];
                         //     this.$store.state.trackingLines[this.name] = [];
                         // }
+                        if(this.$store.state.drone_infos[this.name].curArmStatus !== 'ARMED') {
+                            this.iconArming = 'mdi-airplane';
+                            this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
+                            this.curArmStatus = 'ARMED';
+                            this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
+                            this.colorArm = 'td-text-red';
 
-                        this.iconArming = 'mdi-airplane';
-                        this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
-                        this.curArmStatus = 'ARMED';
-                        this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
-                        this.colorArm = 'td-text-red';
+                            this.$store.state.rtlModeMonitor[this.name] = true;
+
+                            this.$store.state.commands = [];
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['선회']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['패턴']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['자동']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['고도']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['속도']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['관심']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['착륙']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
+                        }
                     }
                     else {
-                        this.iconArming = 'mdi-airplane-off';
-                        this.colorArming = 'white';
-                        this.curArmStatus = 'DISARMED';
-                        this.$store.state.drone_infos[this.name].curArmStatus = 'DISARMED';
-                        this.colorArm = 'td-text-blue';
+                        if(this.$store.state.drone_infos[this.name].curArmStatus !== 'DISARMED') {
+                            this.iconArming = 'mdi-airplane-off';
+                            this.colorArming = 'white';
+                            this.curArmStatus = 'DISARMED';
+                            this.$store.state.drone_infos[this.name].curArmStatus = 'DISARMED';
+                            this.colorArm = 'td-text-blue';
+
+                            this.$store.state.rtlModeMonitor[this.name] = false;
+
+                            this.$store.state.commands = [];
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
+                        }
                     }
 
                     this.info.curArmStatus = this.curArmStatus;
