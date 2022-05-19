@@ -1109,10 +1109,6 @@ export default {
                     text: '선택한 비행체의 모드 변경'
                 },
                 {
-                    title: '시동',
-                    text: '선택한 비행체에 시동 명령'
-                },
-                {
                     title: '이륙',
                     text: '선택한 비행체에 설정한 고도로 이륙 명령'
                 },
@@ -1144,10 +1140,10 @@ export default {
                     title: '관심',
                     text: '선택한 비행체에 ROI(Region Of Interest) 설정 명령'
                 },
-                {
-                    title: '정지',
-                    text: '선택한 비행체 제자리 비행 명령'
-                },
+                // {
+                //     title: '정지',
+                //     text: '선택한 비행체 제자리 비행 명령'
+                // },
                 {
                     title: '착륙',
                     text: '선택한 비행체에 착륙 명령'
@@ -1159,6 +1155,10 @@ export default {
                 {
                     title: '제어', //10
                     text: '선택한 비행체의 임무 장비 제어 명령'
+                },
+                {
+                    title: '시동',
+                    text: '선택한 비행체에 시동 명령'
                 },
                 {
                     title: '종료',
