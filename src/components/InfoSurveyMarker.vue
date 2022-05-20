@@ -955,10 +955,7 @@
 
             if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'wayOfSurvey')) {
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey = 'forShooting';
-                console.log("1111111111111111111111111111111111111111111111111", this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey)
             }
-
-            console.log("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey)
 
             this.wayOfSurvey = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey;
 

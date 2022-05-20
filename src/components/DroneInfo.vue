@@ -6410,6 +6410,16 @@ export default {
             }
         });
 
+        EventBus.$on('do-publish-' + this.name, (payload) => {
+            if (this.client.connected) {
+                this.client.publish(payload.topic, payload.payload, 0, error => {
+                    if (error) {
+                        console.log('Publish error', error)
+                    }
+                });
+            }
+        });
+
         // EventBus.$on('push-status-' + this.name, (payload) => {
         //     //console.log(payload);
         //
@@ -6620,6 +6630,8 @@ export default {
         EventBus.$off('ClickADSBMonitor');
         EventBus.$off('do-positions-elevation-' + this.name);
         EventBus.$off('setWpYawBehavior');
+
+        EventBus.$off('do-publish-' + this.name);
 
         if (this.timer_id) {
             clearInterval(this.timer_id);
