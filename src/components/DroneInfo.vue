@@ -406,9 +406,24 @@
                                     <v-row no-gutters align="center" justify="center">
                                         <v-col cols="5">
                                             <v-text-field
-                                                label="angle(°)"
+                                                label="heading(°)"
+                                                :value="heading.toFixed(1)"
+                                                class="ma-0 pa-0"
+                                                outlined dense hide-details readonly filled
+                                            ></v-text-field>
+                                        </v-col>
+                                        <v-spacer/>
+                                        <v-col cols="2" class="text-center">
+                                            <v-icon>
+                                                mdi-rotate-orbit
+                                            </v-icon>
+                                        </v-col>
+                                        <v-spacer/>
+                                        <v-col cols="5">
+                                            <v-text-field
+                                                label="yawAngle(°)"
                                                 v-model="yawAngle"
-                                                class="ma-0 pa-0 v-text-field--enclosed"
+                                                class="ma-0 pa-0"
                                                 type="number"
                                                 outlined dense hide-details
                                                 color="amber"
@@ -416,6 +431,8 @@
                                                 max="360"
                                             ></v-text-field>
                                         </v-col>
+                                    </v-row>
+                                    <v-row no-gutters align="center" justify="center">
                                         <v-col cols="6">
                                             <v-card-actions>
                                                 <v-btn
