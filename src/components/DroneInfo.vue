@@ -20,7 +20,7 @@
                                 <!--                            :disabled="!flagReceiving"-->
                             </v-card>
                         </v-col>
-                        <v-col cols="1" class="justify-center text-center">
+                        <v-col cols="1">
                             <v-fade-transition>
                                 <v-avatar
                                     v-if="isPlaying"
@@ -343,6 +343,7 @@
                                 <span>귀환</span>
                             </v-tooltip>
                         </v-col>
+                        <v-spacer></v-spacer>
                         <v-col cols="1">
                             <v-tooltip top>
                                 <template v-slot:activator="{ on, attrs }">
@@ -362,6 +363,24 @@
                             </v-tooltip>
                         </v-col>
                         <v-spacer></v-spacer>
+                        <v-col cols="1">
+                            <v-tooltip top>
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-btn
+                                        disabled
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="reservedQuick"
+                                        v-bind="attrs"
+                                        v-on="on"
+                                    >
+                                        <v-icon small>
+                                            mdi-radiobox-blank
+                                        </v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>Reserved</span>
+                            </v-tooltip>
+                        </v-col>
                         <v-col cols="1">
                             <v-tooltip top>
                                 <template v-slot:activator="{ on, attrs }">
@@ -691,6 +710,11 @@
                                 <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
                             </v-card>
                         </v-col>
+                        <v-col cols="12">
+                            <v-card :style="{color:'white'}" outlined tile flat>
+                                <canvas id="chart" height="50"></canvas>
+                            </v-card>
+                        </v-col>
                     </v-row>
                 </v-col>
             </v-row>
@@ -715,6 +739,9 @@ import DroneInfoHUD from "./DroneInfoHUD";
 import DroneInfoBox from "@/components/DroneInfoBox";
 import mqtt from "mqtt";
 import convert from "xml-js";
+
+import {Chart, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement } from 'chart.js'; //👈 Chart 모듈 임포트
+Chart.register(BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement); // 👈 chart.js 모듈 Chart 모듈에 등록
 
 const byteToHex = [];
 
@@ -837,6 +864,8 @@ export default {
 
     data() {
         return {
+            myChart: null,
+
             yawAngle: 0,
             toggle_exclusive: undefined,
             itemsWpYawBehavior: [
@@ -1404,6 +1433,37 @@ export default {
     },
 
     methods: {
+        fillData() {
+            const ctx = document.getElementById('chart').getContext('2d');
+            let config = {
+                data: {
+                    labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: '# of Votes',
+                            data: [12, 19, 3, 5, 2, 3],
+                            backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'],
+                            borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
+                            borderWidth: 1
+                        },
+                        {
+                            type: 'line',
+                            label: 'Line Dataset',
+                            data: [20, 21, 19, 18, 20, 22],
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {beginAtZero: true}
+                    }
+                }
+            };
+
+            this.myChart = new Chart(ctx, config);
+        },
+
         selectedMavVersion: function(event) {
             // console.log("selectedMavVersion", event)
             this.mavVersion = event;
@@ -3834,7 +3894,7 @@ export default {
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
+                            //this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
                         // }
                     }
                     else {
@@ -3851,6 +3911,8 @@ export default {
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
                             this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
+                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
                         // }
                     }
 
@@ -5318,6 +5380,10 @@ export default {
             EventBus.$emit('command-set-stop-' + this.name);
         },
 
+        reservedQuick() {
+
+        },
+
         showYawAngleDialog() {
             this.yawAngleDialog = true;
         },
@@ -6441,6 +6507,8 @@ export default {
 
     mounted: function () {
 
+        this.fillData();
+
         this.positions = []
         // for(let i in this.goto_positions) {
         //     if(Object.prototype.hasOwnProperty.call(this.goto_positions, i)) {
@@ -6540,6 +6608,8 @@ export default {
         if (this.timer_id) {
             clearInterval(this.timer_id);
         }
+
+        this.myChart.destroy();
     }
 }
 </script>
