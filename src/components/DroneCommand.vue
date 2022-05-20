@@ -298,26 +298,26 @@
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
-                                                            <v-col cols="2">
-                                                                <v-text-field
-                                                                    label="비행고도(m)"
-                                                                    class="text-right pa-1"
-                                                                    outlined dense hide-details
-                                                                    v-model="targetAlt[d.name]"
-                                                                    type="number"
-                                                                    hint="3 ~ 2000 m"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col cols="2">
-                                                                <v-text-field
-                                                                    label="비행속도(m/s)"
-                                                                    class="text-right pa-1"
-                                                                    outlined dense hide-details
-                                                                    v-model="targetSpeed[d.name]"
-                                                                    type="number"
-                                                                    hint="1 ~ 30 m/s"
-                                                                ></v-text-field>
-                                                            </v-col>
+<!--                                                            <v-col cols="2">-->
+<!--                                                                <v-text-field-->
+<!--                                                                    label="비행고도(m)"-->
+<!--                                                                    class="text-right pa-1"-->
+<!--                                                                    outlined dense hide-details-->
+<!--                                                                    v-model="targetAlt[d.name]"-->
+<!--                                                                    type="number"-->
+<!--                                                                    hint="3 ~ 2000 m"-->
+<!--                                                                ></v-text-field>-->
+<!--                                                            </v-col>-->
+<!--                                                            <v-col cols="2">-->
+<!--                                                                <v-text-field-->
+<!--                                                                    label="비행속도(m/s)"-->
+<!--                                                                    class="text-right pa-1"-->
+<!--                                                                    outlined dense hide-details-->
+<!--                                                                    v-model="targetSpeed[d.name]"-->
+<!--                                                                    type="number"-->
+<!--                                                                    hint="1 ~ 30 m/s"-->
+<!--                                                                ></v-text-field>-->
+<!--                                                            </v-col>-->
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="지점대기(sec)"
@@ -2003,15 +2003,18 @@ export default {
                             this.$store.state.drone_infos[dName].autoStartIndex = 0;
                             this.$store.state.drone_infos[dName].autoEndIndex = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines.length - 1;
                             this.$store.state.drone_infos[dName].autoDelay = parseInt(this.targetStayTime[dName]);
-                            this.$store.state.drone_infos[dName].autoSpeed = parseInt(this.targetSpeed[dName]);
+                            //this.$store.state.drone_infos[dName].autoSpeed = parseInt(this.targetSpeed[dName]);
+                            this.$store.state.drone_infos[dName].autoSpeed = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].speed;
 
                             this.position_selections_items[dName] = [];
                             for (let idx in this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines) {
                                 if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines, idx)) {
                                     let strPos = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines[idx].lat + ':' +
                                         this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines[idx].lng + ':' +
-                                        this.targetAlt[dName] + ':' +
-                                        this.targetSpeed[dName] + ':' +
+                                        this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].alt + ':' +
+                                        this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].speed + ':' +
+                                        // this.targetAlt[dName] + ':' +
+                                        // this.targetSpeed[dName] + ':' +
                                         '100:5:16:' +
                                         this.targetStayTime[dName] + ':0';
                                     this.position_selections_items[dName].push(strPos);

@@ -2762,6 +2762,14 @@
                 this.postEachSurveyMarkerInfo(dName);
             });
 
+            EventBus.$on('do-update-way-of-survey-GcsMap', (payload) => {
+                let dName = payload.dName;
+                let pIndex = payload.pIndex;
+                this.$store.state.surveyMarkers[dName][pIndex].wayOfSurvey = payload.wayOfSurvey;
+
+                this.postEachSurveyMarkerInfo(dName);
+            });
+
             EventBus.$on('do-update-survey-gap-GcsMap', (payload) => {
                 let dName = payload.dName;
                 let pIndex = payload.pIndex;
@@ -3125,6 +3133,7 @@
             EventBus.$off('do-update-survey-dir-GcsMap');
             EventBus.$off('do-update-survey-gap-GcsMap');
             EventBus.$off('do-update-survey-alt-GcsMap');
+            EventBus.$off('do-update-way-of-survey-GcsMap');
         }
     }
 </script>

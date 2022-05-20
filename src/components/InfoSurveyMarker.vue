@@ -9,51 +9,57 @@
         <v-form ref="form" @submit.prevent="submit">
             <v-card tile flat>
                 <v-row align="center" justify="center">
+                    <v-col cols="2">
+                        <v-combobox
+                            v-model="targetSelect"
+                            :items="targets"
+                            label="Target"
+                            chips dense hide-details single-line
+                            :disabled="disableTargetSelect"
+                            class="pa-1 mr-10"
+                        >
+                            <template v-slot:selection="data">
+                                <v-chip
+                                    :key="JSON.stringify(data.item)"
+                                    v-bind="data.attrs"
+                                    :input-value="data.selected"
+                                    :disabled="data.disabled"
+                                    @click:close="data.parent.selectItem(data.item)"
+                                    small
+                                >
+                                    <v-avatar
+                                        class="white--text"
+                                        left
+                                        v-text="data.item.slice(0, 1).toUpperCase()"
+                                        :color="curDroneColorMap"
+                                    ></v-avatar>
+                                    {{ data.item }}
+                                </v-chip>
+                            </template>
+                        </v-combobox>
+                    </v-col>
+                    <v-radio-group
+                        v-model="wayOfSurvey" class="pt-2"
+                        row mandatory
+                        @change="changeWayOfSurvey($event)"
+                    >
+                        <v-radio
+                            label="촬영용 Survey (고도:100m, 속도:5m/s 기준)"
+                            value="forShooting"
+                            color="red"
+                        ></v-radio>
+                        <v-radio
+                            label="수색용 Survey"
+                            value="forSearch"
+                            color="primary"
+                        ></v-radio>
+                    </v-radio-group>
+                </v-row>
+                <v-row v-if="wayOfSurvey==='forShooting'" align="center" justify="center">
                     <v-col cols="12">
                         <v-card flat tile>
                             <v-row align="center" justify="center">
-                                <v-col cols="2">
-                                    <v-combobox
-                                            v-model="targetSelect"
-                                            :items="targets"
-                                            label="Target"
-                                            chips dense hide-details single-line
-                                            :disabled="disableTargetSelect"
-                                            class="pa-1"
-                                    >
-                                        <template v-slot:selection="data">
-                                            <v-chip
-                                                :key="JSON.stringify(data.item)"
-                                                v-bind="data.attrs"
-                                                :input-value="data.selected"
-                                                :disabled="data.disabled"
-                                                @click:close="data.parent.selectItem(data.item)"
-                                                small
-                                            >
-                                                <v-avatar
-                                                    class="white--text"
-                                                    left
-                                                    v-text="data.item.slice(0, 1).toUpperCase()"
-                                                    :color="curDroneColorMap"
-                                                ></v-avatar>
-                                                {{ data.item }}
-                                            </v-chip>
-                                        </template>
-                                    </v-combobox>
-                                </v-col>
                                 <v-col cols="1">
-                                    <v-select
-                                        class="py-3 pr-2"
-                                        v-model="targetSelectIndex"
-                                        :items="targetIndexList"
-                                        color="black"
-                                        label="Index"
-                                        required outlined dense hide-details readonly
-                                        :disabled="disableTargetSelectIndex"
-                                    >
-                                    </v-select>
-                                </v-col>
-                                <v-col cols="2">
                                     <v-text-field
                                         label="면적(㎡)"
                                         :value="area"
@@ -73,7 +79,228 @@
                                         color="amber"
                                     ></v-text-field>
                                 </v-col>
-
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="초점거리(mm)"
+                                        v-model="paramFocal"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="amber"
+                                        min="1"
+                                        max="100"
+                                        @input="changeParamShooting($event, 'Focal')"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="센서가로(mm)"
+                                        v-model="paramSensorW"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="green"
+                                        min="10"
+                                        max="500"
+                                        @input="changeParamShooting($event, 'sensorW')"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="센서세로(mm)"
+                                        v-model="paramSensorH"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="blue"
+                                        min="10"
+                                        max="500"
+                                        @input="changeParamShooting($event, 'sensorH')"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="중복도"
+                                        v-model="paramOverlap"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="red"
+                                        step="0.1"
+                                        min="0.0"
+                                        max="1.0"
+                                        @input="changeParamShooting($event, 'Overlap')"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="촬영고도(m)"
+                                        v-model="paramAlt"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="amber"
+                                        min="3"
+                                        max="500"
+                                        @input="changeParamShooting($event, 'Alt')"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="비행속도(m/s)"
+                                        v-model="paramSpeed"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="amber"
+                                        min="3"
+                                        max="500"
+                                        @input="changeParamShooting($event, 'Speed')"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-select
+                                        label="direction"
+                                        class="py-3 pr-2"
+                                        :items="['cw', 'ccw']"
+                                        v-model="paramDir"
+                                        color="black"
+                                        required outlined dense hide-details
+                                        @change="changeDirSurveyPath($event)"
+                                    >
+                                    </v-select>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="angle(°)"
+                                        v-model="paramAngle"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="amber"
+                                        min="-360"
+                                        max="360"
+                                        @input="changeAngleSurveyPath($event)"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="gap(m)"
+                                        v-model="paramGap"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details readonly filled
+                                        color="amber"
+                                        min="1"
+                                        max="500"
+                                        @input="changeGapSurveyPath($event)"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="촬영주기(s)"
+                                        v-model="paramPeriod"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details readonly filled
+                                        color="cyan"
+                                        min="1"
+                                        max="60"
+                                        @input="changeGapSurveyPath($event)"
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+                            <!--                            <v-row align="center" justify="center">-->
+                            <!--                                <v-col cols="4">-->
+                            <!--                                    <v-text-field class="py-1 pl-4"-->
+                            <!--                                                  v-model.number="targetLat"-->
+                            <!--                                                  color="purple darken-2"-->
+                            <!--                                                  label="Latitude"-->
+                            <!--                                                  readonly-->
+                            <!--                                                  filled-->
+                            <!--                                                  dense-->
+                            <!--                                                  hide-details-->
+                            <!--                                                  outlined-->
+                            <!--                                    ></v-text-field>-->
+                            <!--                                </v-col>-->
+                            <!--                                <v-col cols="4">-->
+                            <!--                                    <v-text-field class="py-1 px-0"-->
+                            <!--                                                  v-model.number="targetLng"-->
+                            <!--                                                  color="blue darken-2"-->
+                            <!--                                                  label="Longitude"-->
+                            <!--                                                  readonly-->
+                            <!--                                                  filled-->
+                            <!--                                                  dense-->
+                            <!--                                                  hide-details-->
+                            <!--                                                  outlined-->
+                            <!--                                    ></v-text-field>-->
+                            <!--                                </v-col>-->
+                            <!--                                <v-col cols="4">-->
+                            <!--                                    <v-text-field class="py-1 pr-4"-->
+                            <!--                                                  v-model.number="elevation"-->
+                            <!--                                                  color="blue darken-2"-->
+                            <!--                                                  label="Elevation"-->
+                            <!--                                                  readonly-->
+                            <!--                                                  filled-->
+                            <!--                                                  dense-->
+                            <!--                                                  hide-details-->
+                            <!--                                                  outlined-->
+                            <!--                                    ></v-text-field>-->
+                            <!--                                </v-col>-->
+                            <!--                            </v-row>-->
+                        </v-card>
+                    </v-col>
+                </v-row>
+                <v-row v-else align="center" justify="center">
+                    <v-col cols="12">
+                        <v-card flat tile>
+                            <v-row align="center" justify="center">
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="면적(㎡)"
+                                        :value="area"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details readonly filled
+                                        color="amber"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="루트(m)"
+                                        :value="Math.sqrt(area).toFixed(1)"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details readonly filled
+                                        color="amber"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="수색고도(m)"
+                                        v-model="paramAlt"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="amber"
+                                        min="3"
+                                        max="500"
+                                        @input="changeParamSearch($event, 'Alt')"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
+                                        label="비행속도(m/s)"
+                                        v-model="paramSpeed"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="amber"
+                                        min="3"
+                                        max="500"
+                                        @input="changeParamSearch($event, 'Speed')"
+                                    ></v-text-field>
+                                </v-col>
                                 <v-col cols="1">
                                     <v-select
                                         label="direction"
@@ -112,58 +339,45 @@
                                         @input="changeGapSurveyPath($event)"
                                     ></v-text-field>
                                 </v-col>
-<!--                                <v-col cols="1">-->
-<!--                                    <v-text-field-->
-<!--                                        label="비행고도(m)"-->
-<!--                                        v-model="paramAlt"-->
-<!--                                        class="mt-0 pt-0"-->
-<!--                                        type="number"-->
-<!--                                        outlined dense hide-details-->
-<!--                                        color="amber"-->
-<!--                                        min="3"-->
-<!--                                        max="500"-->
-<!--                                        @input="changeAltSurveyPath($event)"-->
-<!--                                    ></v-text-field>-->
-<!--                                </v-col>-->
                             </v-row>
-<!--                            <v-row align="center" justify="center">-->
-<!--                                <v-col cols="4">-->
-<!--                                    <v-text-field class="py-1 pl-4"-->
-<!--                                                  v-model.number="targetLat"-->
-<!--                                                  color="purple darken-2"-->
-<!--                                                  label="Latitude"-->
-<!--                                                  readonly-->
-<!--                                                  filled-->
-<!--                                                  dense-->
-<!--                                                  hide-details-->
-<!--                                                  outlined-->
-<!--                                    ></v-text-field>-->
-<!--                                </v-col>-->
-<!--                                <v-col cols="4">-->
-<!--                                    <v-text-field class="py-1 px-0"-->
-<!--                                                  v-model.number="targetLng"-->
-<!--                                                  color="blue darken-2"-->
-<!--                                                  label="Longitude"-->
-<!--                                                  readonly-->
-<!--                                                  filled-->
-<!--                                                  dense-->
-<!--                                                  hide-details-->
-<!--                                                  outlined-->
-<!--                                    ></v-text-field>-->
-<!--                                </v-col>-->
-<!--                                <v-col cols="4">-->
-<!--                                    <v-text-field class="py-1 pr-4"-->
-<!--                                                  v-model.number="elevation"-->
-<!--                                                  color="blue darken-2"-->
-<!--                                                  label="Elevation"-->
-<!--                                                  readonly-->
-<!--                                                  filled-->
-<!--                                                  dense-->
-<!--                                                  hide-details-->
-<!--                                                  outlined-->
-<!--                                    ></v-text-field>-->
-<!--                                </v-col>-->
-<!--                            </v-row>-->
+                            <!--                            <v-row align="center" justify="center">-->
+                            <!--                                <v-col cols="4">-->
+                            <!--                                    <v-text-field class="py-1 pl-4"-->
+                            <!--                                                  v-model.number="targetLat"-->
+                            <!--                                                  color="purple darken-2"-->
+                            <!--                                                  label="Latitude"-->
+                            <!--                                                  readonly-->
+                            <!--                                                  filled-->
+                            <!--                                                  dense-->
+                            <!--                                                  hide-details-->
+                            <!--                                                  outlined-->
+                            <!--                                    ></v-text-field>-->
+                            <!--                                </v-col>-->
+                            <!--                                <v-col cols="4">-->
+                            <!--                                    <v-text-field class="py-1 px-0"-->
+                            <!--                                                  v-model.number="targetLng"-->
+                            <!--                                                  color="blue darken-2"-->
+                            <!--                                                  label="Longitude"-->
+                            <!--                                                  readonly-->
+                            <!--                                                  filled-->
+                            <!--                                                  dense-->
+                            <!--                                                  hide-details-->
+                            <!--                                                  outlined-->
+                            <!--                                    ></v-text-field>-->
+                            <!--                                </v-col>-->
+                            <!--                                <v-col cols="4">-->
+                            <!--                                    <v-text-field class="py-1 pr-4"-->
+                            <!--                                                  v-model.number="elevation"-->
+                            <!--                                                  color="blue darken-2"-->
+                            <!--                                                  label="Elevation"-->
+                            <!--                                                  readonly-->
+                            <!--                                                  filled-->
+                            <!--                                                  dense-->
+                            <!--                                                  hide-details-->
+                            <!--                                                  outlined-->
+                            <!--                                    ></v-text-field>-->
+                            <!--                                </v-col>-->
+                            <!--                            </v-row>-->
                         </v-card>
                     </v-col>
                 </v-row>
@@ -211,6 +425,12 @@
             });
 
             return {
+                wayOfSurvey: 'forShooting',
+                paramFocal: 16,
+                paramSensorW: 23.5,
+                paramSensorH: 15.6,
+                paramOverlap: 0.7,
+
                 targets: [],
 
                 area: 0,
@@ -238,11 +458,14 @@
                 idDirUpdateTimer: null,
                 idGapUpdateTimer: null,
                 idAltUpdateTimer: null,
+                idWayUpdateTimer: null,
 
                 paramAngle: 0,
                 paramDir: 'cw',
                 paramGap: 10,
-                paramAlt: 20,
+                paramPeriod: 10,
+                paramAlt: 100,
+                paramSpeed: 5,
 
                 elevation: 0,
                 //form: Object.assign({}, defaultForm),
@@ -380,7 +603,82 @@
         },
 
         methods: {
+            changeWayOfSurvey(val) {
+                this.wayOfSurvey = val;
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey = val;
+
+                if(this.idWayUpdateTimer !== null) {
+                    clearTimeout(this.idWayUpdateTimer);
+                }
+
+                this.idWayUpdateTimer = setTimeout((dName, pIndex) => {
+                    EventBus.$emit('do-update-way-of-survey-GcsMap', {dName: dName, pIndex: pIndex, wayOfSurvey: val});
+                }, 500, this.markerName, this.markerIndex);
+            },
+
+            calcFactorSurvey(focal, sensor_h, overlap, alt, speed) {
+                let interval_t = (sensor_h * alt * (1-overlap)) / (focal * speed);
+                let interval_l = interval_t * 5;
+
+                return({'interval_t': interval_t, 'interval_l': interval_l});
+            },
+
+            changeParamShooting(val, factor) {
+                if(val !== '') {
+                    if (factor === 'Focal') {
+                        this.paramFocal = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal = val;
+                    } else if (factor === 'SensorH') {
+                        this.paramSensorH = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h = val;
+                    } else if (factor === 'SensorW') {
+                        this.paramSensorW = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w = val;
+                    } else if (factor === 'SensorH') {
+                        this.paramSensorH = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h = val;
+                    } else if (factor === 'Overlap') {
+                        this.paramOverlap = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap = val;
+                    } else if (factor === 'Alt') {
+                        this.paramAlt = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = val;
+                    } else if (factor === 'Speed') {
+                        this.paramSpeed = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = val;
+                    }
+
+                    // let interval_t = (this.paramSensorH * 100 * (1-this.paramOverlap)) / (this.paramFocal * 5);
+                    // let interval_l = interval_t * 5;
+
+                    let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, this.paramAlt, this.paramSpeed);
+                    this.paramGap = parseInt(result.interval_l * (this.paramSensorW / this.paramSensorH));
+
+                    this.paramPeriod = parseInt(result.interval_t);
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = this.paramPeriod;
+
+                    console.log('촬영주기: ', this.paramPeriod, '초, ', '간격: ', +this.paramGap + 'm');
+
+
+                    this.changeGapSurveyPath(this.paramGap);
+                }
+            },
+
+            changeParamSearch(val, factor) {
+                if(val !== '') {
+                    if (factor === 'Alt') {
+                        this.paramAlt = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = val;
+                    } else if (factor === 'Speed') {
+                        this.paramSpeed = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = val;
+                    }
+                }
+            },
+
             changeAltSurveyPath(alt) {
+                this.$store.state.drone_infos[this.markerName].targetAlt = alt;
+
                 if(this.idAltUpdateTimer !== null) {
                     clearTimeout(this.idAltUpdateTimer);
                 }
@@ -655,10 +953,61 @@
             this.targetSelect = this.markerName;
             this.targetSelectIndex = String(this.markerIndex);
 
+            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'wayOfSurvey')) {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey = 'forShooting';
+                console.log("1111111111111111111111111111111111111111111111111", this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey)
+            }
+
+            console.log("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey)
+
+            this.wayOfSurvey = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey;
+
             this.paramAngle = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].angle;
             this.paramDir = (this.$store.state.surveyMarkers[this.markerName][this.markerIndex].dir === 1) ? 'cw' : 'ccw';
             this.paramGap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap;
             this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt;
+
+            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'focal')) {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal = 16;
+            }
+
+            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'sensor_w')) {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w = 23.5;
+            }
+
+            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'sensor_h')) {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h = 15.6;
+            }
+
+            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'overlap')) {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap = 0.7;
+            }
+
+            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'speed')) {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = 5;
+            }
+
+            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'period')) {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = 5;
+            }
+
+            this.paramFocal = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal;
+            this.paramSensorW = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w;
+            this.paramSensorH = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h;
+            this.paramOverlap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap;
+            this.paramSpeed = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed;
+            this.paramPeriod = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period;
+
+            if(this.wayOfSurvey === 'forShooting') {
+                let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, 100, 5);
+                this.paramGap = parseInt(result.interval_l * (this.paramSensorW / this.paramSensorH));
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap = this.paramGap;
+
+                this.paramPeriod = parseInt(result.interval_t);
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = this.paramPeriod;
+
+                this.changeGapSurveyPath(this.paramGap);
+            }
 
             if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'area')) {
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area = 0;
