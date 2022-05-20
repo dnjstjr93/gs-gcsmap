@@ -2027,7 +2027,7 @@ export default {
                                 payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
                                 EventBus.$emit('command-set-auto_goto-' + dName, payload);
 
-                                payload.topic = '/Mobius/KETI_MUV/Mission_Data/' + dName + '/msw_lx_cam/Capture';
+                                payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
                                 payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].period + ' keti';
                                 EventBus.$emit('do-publish-' + dName, payload);
                             } else {
