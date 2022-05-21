@@ -392,12 +392,12 @@
             </v-card>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn text @click="resetForm" outlined>
-                    Close
-                </v-btn>
-                <v-spacer></v-spacer>
                 <v-btn text color="primary" type="submit" outlined :disabled="conditions">
                     Register
+                </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn text @click="resetForm" outlined>
+                    Close
                 </v-btn>
                 <v-spacer></v-spacer>
                 <v-btn text color="warning" fab dark @click="deleteMarker" outlined>
