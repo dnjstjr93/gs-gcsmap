@@ -506,17 +506,15 @@
                                     if (diff_lat < 600) {
                                         if (diff_lng < 600) {
 
-                                            var cur_lat = this.$store.state.curDronePositions[keyA].lat / 10000000;
-                                            var cur_lon = this.$store.state.curDronePositions[keyA].lng / 10000000;
-                                            var cur_alt = this.$store.state.curDronePositions[keyA].alt / 1000;
+                                            let cur_lat = this.$store.state.curDronePositions[keyA].lat / 10000000;
+                                            let cur_lon = this.$store.state.curDronePositions[keyA].lng / 10000000;
+                                            let cur_alt = this.$store.state.curDronePositions[keyA].alt / 1000;
+                                            let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
-                                            var result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
-
-                                            var tar_lat = this.$store.state.curDronePositions[keyB].lat / 10000000;
-                                            var tar_lon = this.$store.state.curDronePositions[keyB].lng / 10000000;
-                                            var tar_alt = this.$store.state.curDronePositions[keyB].alt / 1000;
-
-                                            var result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
+                                            let tar_lat = this.$store.state.curDronePositions[keyB].lat / 10000000;
+                                            let tar_lon = this.$store.state.curDronePositions[keyB].lng / 10000000;
+                                            let tar_alt = this.$store.state.curDronePositions[keyB].alt / 1000;
+                                            let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
                                             let dist = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2));
 
@@ -708,15 +706,13 @@
                 if(datum.targeted) {
                     //console.log(datum);
 
-                    var cur_lat = datum.lat;
-                    var cur_lon = datum.lng;
+                    let cur_lat = datum.lat;
+                    let cur_lon = datum.lng;
+                    let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
-                    var result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
-
-                    var tar_lat = datum.curLat;
-                    var tar_lon = datum.curLng;
-
-                    var result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
+                    let tar_lat = datum.curLat;
+                    let tar_lon = datum.curLng;
+                    let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
                     let dist = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2));
 

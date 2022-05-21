@@ -598,6 +598,74 @@
         return {lat, lon};
     }
 
+    //
+    // LCC DFS 좌표변환을 위한 기초 자료
+    //
+    var RE = 6371.00877; // 지구 반경(km)
+    var GRID = 0.001; // 격자 간격(km)
+    var SLAT1 = 30.0; // 투영 위도1(degree)
+    var SLAT2 = 60.0; // 투영 위도2(degree)
+    var OLON = 126.0; // 기준점 경도(degree)
+    var OLAT = 38.0; // 기준점 위도(degree)
+    var XO = 43; // 기준점 X좌표(GRID)
+    var YO = 136; // 기1준점 Y좌표(GRID)
+
+    function dfs_xy_conv(code, v1, v2) {
+        var DEGRAD = Math.PI / 180.0;
+        var RADDEG = 180.0 / Math.PI;
+
+        var re = RE / GRID;
+        var slat1 = SLAT1 * DEGRAD;
+        var slat2 = SLAT2 * DEGRAD;
+        var olon = OLON * DEGRAD;
+        var olat = OLAT * DEGRAD;
+
+        var sn = Math.tan(Math.PI * 0.25 + slat2 * 0.5) / Math.tan(Math.PI * 0.25 + slat1 * 0.5);
+        sn = Math.log(Math.cos(slat1) / Math.cos(slat2)) / Math.log(sn);
+        var sf = Math.tan(Math.PI * 0.25 + slat1 * 0.5);
+        sf = Math.pow(sf, sn) * Math.cos(slat1) / sn;
+        var ro = Math.tan(Math.PI * 0.25 + olat * 0.5);
+        ro = re * sf / Math.pow(ro, sn);
+        var rs = {};
+        if (code === "toXY") {
+            rs['lat'] = v1;
+            rs['lng'] = v2;
+            var ra = Math.tan(Math.PI * 0.25 + (v1) * DEGRAD * 0.5);
+            ra = re * sf / Math.pow(ra, sn);
+            var theta = v2 * DEGRAD - olon;
+            if (theta > Math.PI) theta -= 2.0 * Math.PI;
+            if (theta < -Math.PI) theta += 2.0 * Math.PI;
+            theta *= sn;
+            rs['x'] = Math.floor(ra * Math.sin(theta) + XO + 0.5);
+            rs['y'] = Math.floor(ro - ra * Math.cos(theta) + YO + 0.5);
+        }
+        else {
+            rs['x'] = v1;
+            rs['y'] = v2;
+            var xn = v1 - XO;
+            var yn = ro - v2 + YO;
+            ra = Math.sqrt(xn * xn + yn * yn);
+            if (sn < 0.0) - ra;
+            var alat = Math.pow((re * sf / ra), (1.0 / sn));
+            alat = 2.0 * Math.atan(alat) - Math.PI * 0.5;
+
+            if (Math.abs(xn) <= 0.0) {
+                theta = 0.0;
+            }
+            else {
+                if (Math.abs(yn) <= 0.0) {
+                    theta = Math.PI * 0.5;
+                    if (xn < 0.0) - theta;
+                }
+                else theta = Math.atan2(xn, yn);
+            }
+            var alon = theta / sn + olon;
+            rs['lat'] = alat * RADDEG;
+            rs['lng'] = alon * RADDEG;
+        }
+        return rs;
+    }
+
     export default {
         name: 'GcsMap',
 
@@ -1137,27 +1205,48 @@
                         }
                     }
                 }
+
+                this.$store.state.surveyMarkers[dName][pIndex].dists = [];
+                let total_dist = 0;
+                for(let i = 0; i < this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1; i++) {
+                    let cur_lat = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i].lat;
+                    let cur_lon = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i].lng;
+                    let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
+
+                    let tar_lat = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i+1].lat;
+                    let tar_lon = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i+1].lng;
+                    let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
+
+                    let dist = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2));
+
+                    this.$store.state.surveyMarkers[dName][pIndex].dists.push(dist);
+                    total_dist += dist;
+                    //console.log('dist- ', dist);
+                }
+                this.$store.state.surveyMarkers[dName][pIndex].total_dist = total_dist;
+
+                console.log('total_dist- ', total_dist);
             },
 
             showNewPolygon(e, dName, pIndex) {
                 //console.log(e);
 
-                this.$store.state.surveyMarkers[dName][pIndex].paths = [];
-
-                for(let obj in e) {
-                    if(Object.prototype.hasOwnProperty.call(e, obj)) {
-                        if(Array.isArray(e[obj])) {
-                            for (let idx in e[obj][0][obj]) {
-                                if (Object.prototype.hasOwnProperty.call(e[obj][0][obj], idx)) {
-                                    this.$store.state.surveyMarkers[dName][pIndex].paths.push({
-                                        lat: e[obj][0][obj][idx].lat(),
-                                        lng: e[obj][0][obj][idx].lng()
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
+                // this.$store.state.surveyMarkers[dName][pIndex].paths = [];
+                //
+                // for(let obj in e) {
+                //     if(Object.prototype.hasOwnProperty.call(e, obj)) {
+                //         if(Array.isArray(e[obj])) {
+                //             for (let idx in e[obj][0][obj]) {
+                //                 if (Object.prototype.hasOwnProperty.call(e[obj][0][obj], idx)) {
+                //                     this.$store.state.surveyMarkers[dName][pIndex].paths.push({
+                //                         lat: e[obj][0][obj][idx].lat(),
+                //                         lng: e[obj][0][obj][idx].lng()
+                //                     });
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
 
                 // if(Object.prototype.hasOwnProperty.call(e, 'Fd')) {
                 //     for (let idx in e.Fd[0].Fd) {
@@ -1194,7 +1283,24 @@
                     clearTimeout(this.idUpdateTimer);
                 }
 
-                this.idUpdateTimer = setTimeout((dName) => {
+                this.idUpdateTimer = setTimeout((newPaths, dName, pIndex) => {
+                    this.$store.state.surveyMarkers[dName][pIndex].paths = [];
+
+                    for(let obj in newPaths) {
+                        if(Object.prototype.hasOwnProperty.call(newPaths, obj)) {
+                            if(Array.isArray(newPaths[obj])) {
+                                for (let idx in newPaths[obj][0][obj]) {
+                                    if (Object.prototype.hasOwnProperty.call(newPaths[obj][0][obj], idx)) {
+                                        this.$store.state.surveyMarkers[dName][pIndex].paths.push({
+                                            lat: newPaths[obj][0][obj][idx].lat(),
+                                            lng: newPaths[obj][0][obj][idx].lng()
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     this.$store.state.surveyMarkers[dName][pIndex].color = 'orange';
 
                     let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
@@ -1203,21 +1309,20 @@
 
                     this.updateSurveyPath(dName, pIndex, gap, angle, dir);
 
+                    let area = this.google.maps.geometry.spherical.computeArea(this.$store.state.surveyMarkers[dName][pIndex].paths);
+                    this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
+                    console.log('computeArea = ', area.toFixed(1), '㎡');
+
+                    EventBus.$emit('on-update-survey-infomarker');
+
                     if(this.idPostTimer !== null) {
                         clearTimeout(this.idPostTimer);
                     }
 
                     this.idPostTimer = setTimeout((dName) => {
-                        let area = this.google.maps.geometry.spherical.computeArea(this.$store.state.surveyMarkers[dName][pIndex].paths);
-                        this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
-                        console.log('computeArea = ', area.toFixed(1), '㎡');
-
                         this.postEachSurveyMarkerInfo(dName);
-
-                        EventBus.$emit('on-update-survey-infomarker');
-
                     }, 2000, dName);
-                }, 500, dName);
+                }, 500, e, dName, pIndex);
 
                 this.$forceUpdate();
             },

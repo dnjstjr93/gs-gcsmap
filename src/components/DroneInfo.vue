@@ -6042,19 +6042,18 @@ export default {
 
                         console.log('send_goto_circle_command', this.$store.state.missionCircles);
 
-                        var cur_lat = this.gpi.lat / 10000000;
-                        var cur_lon = this.gpi.lon / 10000000;
+                        let cur_lat = this.gpi.lat / 10000000;
+                        let cur_lon = this.gpi.lon / 10000000;
+                        let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
-                        var result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
-
-                        var tar_lat = lat;
-                        var tar_lon = lon;
+                        let tar_lat = lat;
+                        let tar_lon = lon;
+                        var result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
                         this.$store.state.drone_infos[name].targetLat = lat;
                         this.$store.state.drone_infos[name].targetLng = lon;
                         this.$store.state.drone_infos[name].targetAlt = alt;
 
-                        var result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
                         this.watchingMission = 'goto-circle';
                         this.watchingMissionStatus = 0;
@@ -6212,21 +6211,20 @@ export default {
 
                                 this.$store.state.missionLines = this.clone(this.$store.state.missionLines);
 
-                                var cur_lat = this.gpi.lat / 10000000;
-                                var cur_lon = this.gpi.lon / 10000000;
-                                var cur_alt = this.gpi.relative_alt / 1000;
+                                let cur_lat = this.gpi.lat / 10000000;
+                                let cur_lon = this.gpi.lon / 10000000;
+                                let cur_alt = this.gpi.relative_alt / 1000;
+                                let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
-                                var result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
-
-                                var tar_lat = lat;
-                                var tar_lon = lon;
-                                var tar_alt = alt;
+                                let tar_lat = lat;
+                                let tar_lon = lon;
+                                let tar_alt = alt;
+                                var result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
                                 this.$store.state.drone_infos[name].targetLat = lat;
                                 this.$store.state.drone_infos[name].targetLng = lon;
                                 this.$store.state.drone_infos[name].targetAlt = alt;
 
-                                var result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
                                 this.watchingMission = 'goto';
                                 this.watchingInitDist = parseFloat(Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2)).toFixed(1));

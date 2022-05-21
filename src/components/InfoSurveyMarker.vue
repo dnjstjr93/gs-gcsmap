@@ -38,22 +38,46 @@
                             </template>
                         </v-combobox>
                     </v-col>
-                    <v-radio-group
-                        v-model="wayOfSurvey" class="pt-2"
-                        row mandatory
-                        @change="changeWayOfSurvey($event)"
-                    >
-                        <v-radio
-                            label="촬영용 Survey (고도:100m, 속도:5m/s 기준)"
-                            value="forShooting"
-                            color="red"
-                        ></v-radio>
-                        <v-radio
-                            label="수색용 Survey"
-                            value="forSearch"
-                            color="primary"
-                        ></v-radio>
-                    </v-radio-group>
+                    <v-col cols="6">
+                        <v-radio-group
+                            v-model="wayOfSurvey" class="pt-2"
+                            row mandatory
+                            @change="changeWayOfSurvey($event)"
+                        >
+                            <v-radio
+                                label="촬영용 Survey (고도:100m, 속도:5m/s 기준)"
+                                value="forShooting"
+                                color="red"
+                            ></v-radio>
+                            <v-radio
+                                label="수색용 Survey"
+                                value="forSearch"
+                                color="primary"
+                            ></v-radio>
+                        </v-radio-group>
+                    </v-col>
+                    <v-col cols="1">
+                        <div class="ml-20 text-subtitle-2">
+                            총 주행거리 : <br>
+                            <span v-if="total_dist > 1000" style="font-size: 20px">
+                                {{ (total_dist / 1000).toFixed(1) }} km
+                            </span>
+                            <span v-else style="font-size: 20px">
+                                {{ total_dist.toFixed(1) }} m
+                            </span>
+                        </div>
+                    </v-col>
+                    <v-col cols="1">
+                        <div class="ml-20 text-subtitle-2">
+                            예상비행시간 : <br>
+                            <span v-if="(total_dist / paramSpeed) > 60" style="font-size: 20px">
+                                {{ ((total_dist / paramSpeed) / 60).toFixed(1) }} 분
+                            </span>
+                            <span v-else style="font-size: 20px">
+                                {{ (total_dist / paramSpeed).toFixed(1) }} 초
+                            </span>
+                        </div>
+                    </v-col>
                 </v-row>
                 <v-row v-if="wayOfSurvey==='forShooting'" align="center" justify="center">
                     <v-col cols="12">
@@ -426,6 +450,7 @@
 
             return {
                 wayOfSurvey: 'forShooting',
+                total_dist: 400,
                 paramFocal: 16,
                 paramSensorW: 23.5,
                 paramSensorH: 15.6,
@@ -988,6 +1013,11 @@
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = 5;
             }
 
+            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'total_dist')) {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist = 400;
+            }
+
+            this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
             this.paramFocal = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal;
             this.paramSensorW = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w;
             this.paramSensorH = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h;
@@ -1015,6 +1045,7 @@
 
             EventBus.$on('on-update-survey-infomarker', () => {
                 this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
+                this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
                 this.$forceUpdate();
             });
         },
