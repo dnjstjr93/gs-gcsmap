@@ -1226,27 +1226,34 @@
                 this.$store.state.surveyMarkers[dName][pIndex].total_dist = total_dist;
 
                 console.log('total_dist- ', total_dist);
+
+                let area = this.google.maps.geometry.spherical.computeArea(this.$store.state.surveyMarkers[dName][pIndex].paths);
+                this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
+                console.log('computeArea = ', area.toFixed(1), '㎡');
+
+                EventBus.$emit('on-update-survey-infomarker');
+
             },
 
             showNewPolygon(e, dName, pIndex) {
                 //console.log(e);
 
-                // this.$store.state.surveyMarkers[dName][pIndex].paths = [];
-                //
-                // for(let obj in e) {
-                //     if(Object.prototype.hasOwnProperty.call(e, obj)) {
-                //         if(Array.isArray(e[obj])) {
-                //             for (let idx in e[obj][0][obj]) {
-                //                 if (Object.prototype.hasOwnProperty.call(e[obj][0][obj], idx)) {
-                //                     this.$store.state.surveyMarkers[dName][pIndex].paths.push({
-                //                         lat: e[obj][0][obj][idx].lat(),
-                //                         lng: e[obj][0][obj][idx].lng()
-                //                     });
-                //                 }
-                //             }
-                //         }
-                //     }
-                // }
+                this.$store.state.surveyMarkers[dName][pIndex].paths = [];
+
+                for(let obj in e) {
+                    if(Object.prototype.hasOwnProperty.call(e, obj)) {
+                        if(Array.isArray(e[obj])) {
+                            for (let idx in e[obj][0][obj]) {
+                                if (Object.prototype.hasOwnProperty.call(e[obj][0][obj], idx)) {
+                                    this.$store.state.surveyMarkers[dName][pIndex].paths.push({
+                                        lat: e[obj][0][obj][idx].lat(),
+                                        lng: e[obj][0][obj][idx].lng()
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // if(Object.prototype.hasOwnProperty.call(e, 'Fd')) {
                 //     for (let idx in e.Fd[0].Fd) {
@@ -1283,23 +1290,23 @@
                     clearTimeout(this.idUpdateTimer);
                 }
 
-                this.idUpdateTimer = setTimeout((newPaths, dName, pIndex) => {
+                this.idUpdateTimer = setTimeout((dName, pIndex) => {
                     this.$store.state.surveyMarkers[dName][pIndex].paths = [];
 
-                    for(let obj in newPaths) {
-                        if(Object.prototype.hasOwnProperty.call(newPaths, obj)) {
-                            if(Array.isArray(newPaths[obj])) {
-                                for (let idx in newPaths[obj][0][obj]) {
-                                    if (Object.prototype.hasOwnProperty.call(newPaths[obj][0][obj], idx)) {
-                                        this.$store.state.surveyMarkers[dName][pIndex].paths.push({
-                                            lat: newPaths[obj][0][obj][idx].lat(),
-                                            lng: newPaths[obj][0][obj][idx].lng()
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    // for(let obj in newPaths) {
+                    //     if(Object.prototype.hasOwnProperty.call(newPaths, obj)) {
+                    //         if(Array.isArray(newPaths[obj])) {
+                    //             for (let idx in newPaths[obj][0][obj]) {
+                    //                 if (Object.prototype.hasOwnProperty.call(newPaths[obj][0][obj], idx)) {
+                    //                     this.$store.state.surveyMarkers[dName][pIndex].paths.push({
+                    //                         lat: newPaths[obj][0][obj][idx].lat(),
+                    //                         lng: newPaths[obj][0][obj][idx].lng()
+                    //                     });
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    // }
 
                     this.$store.state.surveyMarkers[dName][pIndex].color = 'orange';
 
@@ -1309,12 +1316,6 @@
 
                     this.updateSurveyPath(dName, pIndex, gap, angle, dir);
 
-                    let area = this.google.maps.geometry.spherical.computeArea(this.$store.state.surveyMarkers[dName][pIndex].paths);
-                    this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
-                    console.log('computeArea = ', area.toFixed(1), '㎡');
-
-                    EventBus.$emit('on-update-survey-infomarker');
-
                     if(this.idPostTimer !== null) {
                         clearTimeout(this.idPostTimer);
                     }
@@ -1322,7 +1323,7 @@
                     this.idPostTimer = setTimeout((dName) => {
                         this.postEachSurveyMarkerInfo(dName);
                     }, 2000, dName);
-                }, 500, e, dName, pIndex);
+                }, 500, dName, pIndex);
 
                 this.$forceUpdate();
             },
@@ -1677,9 +1678,6 @@
                 survey.gap = 20;
                 survey.dir = 1;
                 survey.angle = 0;
-
-                let area = this.google.maps.geometry.spherical.computeArea(survey.paths);
-                survey.area = area.toFixed(1);
 
                 this.$store.state.surveyMarkers.unknown.push(survey);
                 console.log('elevation-confirmAddSurveyMarker', this.$store.state.surveyMarkers);

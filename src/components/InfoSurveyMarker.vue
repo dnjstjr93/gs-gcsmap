@@ -9,6 +9,7 @@
         <v-form ref="form" @submit.prevent="submit">
             <v-card tile flat>
                 <v-row align="center" justify="center">
+                    <v-spacer/>
                     <v-col cols="2">
                         <v-combobox
                             v-model="targetSelect"
@@ -38,14 +39,14 @@
                             </template>
                         </v-combobox>
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="3">
                         <v-radio-group
                             v-model="wayOfSurvey" class="pt-2"
                             row mandatory
                             @change="changeWayOfSurvey($event)"
                         >
                             <v-radio
-                                label="촬영용 Survey (고도:100m, 속도:5m/s 기준)"
+                                label="촬영용 Survey"
                                 value="forShooting"
                                 color="red"
                             ></v-radio>
@@ -56,6 +57,28 @@
                             ></v-radio>
                         </v-radio-group>
                     </v-col>
+                    <v-spacer/>
+                    <v-col cols="1">
+                        <v-text-field
+                            label="면적(㎡)"
+                            :value="area"
+                            class="mt-0 pt-0"
+                            type="number"
+                            outlined dense hide-details readonly filled
+                            color="amber"
+                        ></v-text-field>
+                    </v-col>
+                    <v-col cols="1">
+                        <v-text-field
+                            label="루트(m)"
+                            :value="Math.sqrt(area).toFixed(1)"
+                            class="mt-0 pt-0"
+                            type="number"
+                            outlined dense hide-details readonly filled
+                            color="amber"
+                        ></v-text-field>
+                    </v-col>
+                    <v-spacer/>
                     <v-col cols="1">
                         <div class="ml-20 text-subtitle-2">
                             총 주행거리 : <br>
@@ -70,39 +93,20 @@
                     <v-col cols="1">
                         <div class="ml-20 text-subtitle-2">
                             예상비행시간 : <br>
-                            <span v-if="(total_dist / paramSpeed) > 60" style="font-size: 20px">
+                            <span v-if="((total_dist / paramSpeed) + total_count) > 60" style="font-size: 20px">
                                 {{ ((total_dist / paramSpeed) / 60).toFixed(1) }} 분
                             </span>
                             <span v-else style="font-size: 20px">
-                                {{ (total_dist / paramSpeed).toFixed(1) }} 초
+                                {{ (total_dist / paramSpeed + total_count).toFixed(1) }} 초
                             </span>
                         </div>
                     </v-col>
+                    <v-spacer/>
                 </v-row>
                 <v-row v-if="wayOfSurvey==='forShooting'" align="center" justify="center">
                     <v-col cols="12">
                         <v-card flat tile>
                             <v-row align="center" justify="center">
-                                <v-col cols="1">
-                                    <v-text-field
-                                        label="면적(㎡)"
-                                        :value="area"
-                                        class="mt-0 pt-0"
-                                        type="number"
-                                        outlined dense hide-details readonly filled
-                                        color="amber"
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="1">
-                                    <v-text-field
-                                        label="루트(m)"
-                                        :value="Math.sqrt(area).toFixed(1)"
-                                        class="mt-0 pt-0"
-                                        type="number"
-                                        outlined dense hide-details readonly filled
-                                        color="amber"
-                                    ></v-text-field>
-                                </v-col>
                                 <v-col cols="1">
                                     <v-text-field
                                         label="초점거리(mm)"
@@ -281,26 +285,6 @@
                             <v-row align="center" justify="center">
                                 <v-col cols="1">
                                     <v-text-field
-                                        label="면적(㎡)"
-                                        :value="area"
-                                        class="mt-0 pt-0"
-                                        type="number"
-                                        outlined dense hide-details readonly filled
-                                        color="amber"
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="1">
-                                    <v-text-field
-                                        label="루트(m)"
-                                        :value="Math.sqrt(area).toFixed(1)"
-                                        class="mt-0 pt-0"
-                                        type="number"
-                                        outlined dense hide-details readonly filled
-                                        color="amber"
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="1">
-                                    <v-text-field
                                         label="수색고도(m)"
                                         v-model="paramAlt"
                                         class="mt-0 pt-0"
@@ -409,7 +393,7 @@
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn text @click="resetForm" outlined>
-                    Cancel
+                    Close
                 </v-btn>
                 <v-spacer></v-spacer>
                 <v-btn text color="primary" type="submit" outlined :disabled="conditions">
@@ -450,6 +434,7 @@
 
             return {
                 wayOfSurvey: 'forShooting',
+                total_count: 0,
                 total_dist: 400,
                 paramFocal: 16,
                 paramSensorW: 23.5,
@@ -683,7 +668,6 @@
                     this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = this.paramPeriod;
 
                     console.log('촬영주기: ', this.paramPeriod, '초, ', '간격: ', +this.paramGap + 'm');
-
 
                     this.changeGapSurveyPath(this.paramGap);
                 }
@@ -1017,6 +1001,7 @@
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist = 400;
             }
 
+            this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
             this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
             this.paramFocal = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal;
             this.paramSensorW = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w;
@@ -1026,7 +1011,7 @@
             this.paramPeriod = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period;
 
             if(this.wayOfSurvey === 'forShooting') {
-                let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, 100, 5);
+                let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, this.paramAlt, this.paramSpeed);
                 this.paramGap = parseInt(result.interval_l * (this.paramSensorW / this.paramSensorH));
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap = this.paramGap;
 
@@ -1046,6 +1031,7 @@
             EventBus.$on('on-update-survey-infomarker', () => {
                 this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
                 this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
+                this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
                 this.$forceUpdate();
             });
         },
