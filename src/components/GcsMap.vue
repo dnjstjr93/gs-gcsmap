@@ -1291,7 +1291,7 @@
                 }
 
                 this.idUpdateTimer = setTimeout((dName, pIndex) => {
-                    this.$store.state.surveyMarkers[dName][pIndex].paths = [];
+                    // this.$store.state.surveyMarkers[dName][pIndex].paths = [];
 
                     // for(let obj in newPaths) {
                     //     if(Object.prototype.hasOwnProperty.call(newPaths, obj)) {

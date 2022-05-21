@@ -277,8 +277,9 @@
                                                         </v-row>
                                                     </v-card>
                                                     <v-card tile flat v-if="(command.title === '패턴')">
-                                                        <v-row no-gutters>
-                                                            <v-col cols="2">
+                                                        <v-row no-gutters justify="center">
+                                                            <v-spacer/>
+                                                            <v-col cols="2" class="pa-1 pt-2">
                                                                 <v-text-field
                                                                     label="Index"
                                                                     class="text-right pa-1"
@@ -288,16 +289,34 @@
                                                                     readonly
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="3">
-                                                                <v-select
-                                                                    @change="changeYawBehavior($event, d.name)"
-                                                                    dense outlined hide-details
-                                                                    :items="['YAW고정', 'YAW회전']"
-                                                                    label="YAW설정"
+                                                            <v-spacer/>
+                                                            <v-col cols="3" class="pl-4 px-1 mt-n4 mb-1">
+<!--                                                                <v-select-->
+<!--                                                                    @change="changeYawBehavior($event, d.name)"-->
+<!--                                                                    dense outlined hide-details-->
+<!--                                                                    :items="['YAW고정', 'YAW회전']"-->
+<!--                                                                    label="YAW설정"-->
+<!--                                                                    v-model="yawBehavior[d.name]"-->
+<!--                                                                    class="pa-1"-->
+<!--                                                                ></v-select>-->
+                                                                <v-radio-group
                                                                     v-model="yawBehavior[d.name]"
-                                                                    class="pa-1"
-                                                                ></v-select>
+                                                                    column mandatory hide-details
+                                                                    @change="changeYawBehavior($event, d.name)"
+                                                                >
+                                                                    <v-radio
+                                                                        label="YAW고정"
+                                                                        value="YAW고정"
+                                                                        color="red"
+                                                                    ></v-radio>
+                                                                    <v-radio
+                                                                        label="YAW회전"
+                                                                        value="YAW회전"
+                                                                        color="primary"
+                                                                    ></v-radio>
+                                                                </v-radio-group>
                                                             </v-col>
+                                                            <v-spacer/>
 <!--                                                            <v-col cols="2">-->
 <!--                                                                <v-text-field-->
 <!--                                                                    label="비행고도(m)"-->
@@ -318,7 +337,7 @@
 <!--                                                                    hint="1 ~ 30 m/s"-->
 <!--                                                                ></v-text-field>-->
 <!--                                                            </v-col>-->
-                                                            <v-col cols="2">
+                                                            <v-col cols="2" class="pa-1 pt-2">
                                                                 <v-text-field
                                                                     label="지점대기(sec)"
                                                                     class="text-right pa-1"
@@ -329,6 +348,25 @@
                                                                     hint="0 ~ 60초"
                                                                 ></v-text-field>
                                                             </v-col>
+                                                            <v-spacer/>
+                                                            <v-col cols="2" class="pa-1 pt-3">
+                                                                <v-tooltip top>
+                                                                    <template v-slot:activator="{ on, attrs }">
+                                                                        <v-btn
+                                                                            :disabled="($store.state.drone_infos[d.name].curMissionItemReached === 0)"
+                                                                            color="red"
+                                                                            v-bind="attrs"
+                                                                            v-on="on"
+                                                                            elevation="4"
+                                                                            @click="doMissionRewind(d.name)"
+                                                                        >
+                                                                            연결
+                                                                        </v-btn>
+                                                                    </template>
+                                                                    <span>미종료 미션 존재 - {{ $store.state.drone_infos[d.name].curMissionItemReached }}번째 부터</span>
+                                                                </v-tooltip>
+                                                            </v-col>
+                                                            <v-spacer/>
                                                         </v-row>
                                                     </v-card>
                                                     <v-card tile flat v-if="(command.title === '속도')">
@@ -1420,6 +1458,7 @@ export default {
                 }
             }
         },
+
         setDropCommand() {
             for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
@@ -1648,6 +1687,17 @@ export default {
                     }
                 }
             }
+        },
+
+        doMissionRewind(dName) {
+            this.curTab = 'virtual';
+            this.$store.state.active_tab = 'virtual';
+
+            this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
+
+            console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
+
+            EventBus.$emit('command-set-mission_rewind-' + dName);
         },
 
         sendCommand() {

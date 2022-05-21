@@ -1886,6 +1886,39 @@ export default {
             );
         },
 
+        postDroneInfos(callback) {
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + this.name,
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random()*10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: this.$store.state.drone_infos[this.name]
+                    }
+                }
+            }).then(
+                (res) => {
+                    console.log('postDroneInfos-axios', this.name, res.data);
+
+                    callback(res);
+                }
+            ).catch(
+                (err) => {
+                    console.log(err.message);
+
+                    callback(err)
+                }
+            );
+        },
+
         // postDroneInfos(callback) {
         //     axios({
         //         validateStatus: function (status) {
@@ -2933,6 +2966,35 @@ export default {
         //     }
         // },
 
+        send_set_mission_current_command(target_name, pub_topic, target_sys_id, seq) {
+            var btn_params = {};
+            btn_params.target_system = target_sys_id;
+            btn_params.target_component = 1;
+            btn_params.command = mavlink.MAV_CMD_DO_SET_MISSION_CURRENT;
+            btn_params.confirmation = 0;
+            btn_params.param1 = seq; // current sequence number of mission
+            btn_params.param2 = 0; //
+            btn_params.param3 = 0; //
+            btn_params.param4 = 0; //
+            btn_params.param5 = 0; //
+            btn_params.param6 = 0; //
+            btn_params.param7 = 0; //
+
+            try {
+                var msg = this.mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_COMMAND_LONG, btn_params);
+                if (msg == null) {
+                    console.log("mavlink message is null");
+                }
+                else {
+                    console.log('Send Set ROI command to %s, ' + 'msg: ' + msg.toString('hex') + '\n', target_name);
+                    this.doPublish(pub_topic, msg);
+                }
+            }
+            catch (ex) {
+                console.log('[ERROR] ' + ex);
+            }
+        },
+
         send_set_roi_command(target_name, pub_topic, target_sys_id, target_lat, target_lon, target_alt) {
             var btn_params = {};
             btn_params.target_system = target_sys_id;
@@ -3091,6 +3153,7 @@ export default {
                     this.droneStatus.delay = delay;
                     this.droneStatus.cur_idx = cur_idx;
                     this.droneStatus.mission_count = btn_params.count;
+                    this.$store.state.drone_infos[this.name].mission_count = btn_params.count;
 
                     console.log('Send AUTO_MISSION_COUNT to %s, msg: ' + msg.toString('hex') + ' - ' + btn_params.count, target_name);
 
@@ -4131,7 +4194,7 @@ export default {
                     // console.log('airspeed: ' + this.airspeed, 'heading: ' + this.heading);
 
                     if (this.flagReceiving) {
-                        if (this.watchingMission === 'takeoff') {
+                        if (this.$store.state.drone_infos[this.name].watchingMission === 'takeoff') {
                             let cur_alt = this.gpi.relative_alt / 1000;
                             let target_alt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
                             let cur_dist = Math.abs(target_alt - cur_alt);
@@ -4143,13 +4206,14 @@ export default {
                                  if(this.watchingCount > 32) {
                                      this.watchingMissionStatus = 100;
                                      this.watchingMission = 'takeoff-complete';
+                                     this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                                  }
                             }
                             else {
                                 this.watchingCount = 0;
                             }
                         }
-                        else if (this.watchingMission === 'goto-alt') {
+                        else if (this.$store.state.drone_infos[this.name].watchingMission === 'goto-alt') {
                             let cur_alt = this.gpi.relative_alt / 1000;
                             let target_alt = this.$store.state.drone_infos[this.name].targetAlt;
                             let cur_dist = Math.abs(target_alt - cur_alt);
@@ -4161,13 +4225,14 @@ export default {
                                 if(this.watchingCount > 32) {
                                     this.watchingMissionStatus = 100;
                                     this.watchingMission = 'goto-alt-complete';
+                                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                                 }
                             }
                             else {
                                 this.watchingCount = 0;
                             }
                         }
-                        else if (this.watchingMission === 'goto') {
+                        else if (this.$store.state.drone_infos[this.name].watchingMission === 'goto') {
 
                             let cur_lat = this.gpi.lat / 10000000;
                             let cur_lon = this.gpi.lon / 10000000;
@@ -4190,6 +4255,7 @@ export default {
                                 if(this.watchingCount > 32) {
                                     this.watchingMissionStatus = 100;
                                     this.watchingMission = 'goto-complete';
+                                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
 
                                     //this.setWpYawBehavior(1);
                                 }
@@ -4199,7 +4265,7 @@ export default {
                             }
                         }
 
-                        else if (this.watchingMission === 'goto-circle') {
+                        else if (this.$store.state.drone_infos[this.name].watchingMission === 'goto-circle') {
                             let cur_lat = this.gpi.lat / 10000000;
                             let cur_lon = this.gpi.lon / 10000000;
                             let cur_alt = this.gpi.relative_alt / 1000;
@@ -4255,16 +4321,17 @@ export default {
                             // }
                         }
 
-                        else if (this.watchingMission === 'auto-goto') {
-                            if(this.curArmStatus !== 'ARMED') {
-                                this.watchingMissionStatus = 100;
-                                this.watchingMission = 'auto-goto-complete';
-
-                                //this.setWpYawBehavior(1);
-                            }
+                        else if (this.$store.state.drone_infos[this.name].watchingMission === 'auto-goto') {
+                            // if(this.curArmStatus !== 'ARMED') {
+                            //     this.watchingMissionStatus = 100;
+                            //     this.watchingMission = 'auto-goto-complete';
+                            //     this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                            //
+                            //     //this.setWpYawBehavior(1);
+                            // }
                         }
 
-                        else if (this.watchingMission === 'land') {
+                        else if (this.$store.state.drone_infos[this.name].watchingMission === 'land') {
                             let cur_alt = this.gpi.relative_alt / 1000;
                             let target_alt = 0;
                             let cur_dist = Math.abs(target_alt - cur_alt);
@@ -4274,14 +4341,16 @@ export default {
                             if(this.curArmStatus !== 'ARMED') {
                                 this.watchingMissionStatus = 100;
                                 this.watchingMission = 'land-complete';
+                                this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                             }
                         }
-                        else if (this.watchingMission === 'rtl') {
+                        else if (this.$store.state.drone_infos[this.name].watchingMission === 'rtl') {
                             this.watchingMissionStatus = parseInt(Math.abs((1 - (this.valueDistance / this.watchingInitDist))) * 100);
 
                             if(this.curArmStatus !== 'ARMED') {
                                 this.watchingMissionStatus = 100;
                                 this.watchingMission = 'rtl-complete';
+                                this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                             }
                         }
 
@@ -4569,74 +4638,6 @@ export default {
                 //     this.info.rssi = this.rssi;
                 //     console.log('MAVLINK_MSG_ID_RC_CHANNELS', this.rssi);
                 // }
-
-                else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM_REACHED) {
-                    let my_len = 30;
-                    if(ver === 'fd') {
-                        my_len += 22;
-                    }
-                    let ar = mavPacket.split('');
-                    for (let i = 0; i < (my_len - msg_len); i++) {
-                        ar.splice(ar.length-4, 0, '0');
-                        ar.splice(ar.length-4, 0, '0');
-                    }
-                    mavPacket = ar.join('');
-
-                    var mission_seq = mavPacket.substr(base_offset, 4).toLowerCase();
-
-                    this.mission_seq = Buffer.from(mission_seq, 'hex').readUInt16LE(0);
-
-                    console.log(this.name, 'MAVLINK_MSG_ID_MISSION_ITEM_REACHED', this.mission_seq);
-
-                    if(this.watchingMission === 'auto-goto') {
-                        this.watchingMissionStatus = parseInt((this.mission_seq) / (this.droneStatus.mission_count-1) * 100);
-
-                        if(this.droneStatus.mission_count === (this.mission_seq+1)) {
-                            console.log('Auto Mission Complete at %s', this.droneStatus.target_name);
-
-                            let target_mode = 'GUIDED';
-                            if(this.fcType === 'px4') {
-                                target_mode = 'AUTO_LOITER';
-                            }
-                            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
-
-                            this.watchingMission = 'auto-goto-complete';
-
-                            //this.setWpYawBehavior(1);
-                        }
-                    }
-
-                    else if(this.watchingMission === 'goto-circle') {
-                        this.watchingMissionStatus = 100;
-
-                        this.droneStatus.startFlag = false;
-
-                        let target_mode = 'GUIDED';
-                        if(this.fcType === 'px4') {
-                            target_mode = 'AUTO_LOITER';
-                        }
-                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
-
-                        this.watchingMission = 'goto-circle-complete';
-                    }
-
-                    else if(this.watchingMission === 'takeoff') {
-                        this.watchingMissionStatus = 100;
-                        this.watchingMission = 'takeoff-complete';
-                    }
-
-                    else if(this.watchingMission === 'goto') {
-                        this.watchingMissionStatus = 100;
-                        this.watchingMission = 'goto-complete';
-
-                        //this.setWpYawBehavior(1);
-                    }
-
-                    else if(this.watchingMission === 'goto-alt') {
-                        this.watchingMissionStatus = 100;
-                        this.watchingMission = 'goto-alt-complete';
-                    }
-                }
 
                 // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
                 //     if (ver === 'fd') {
@@ -4955,11 +4956,95 @@ export default {
                         this.send_auto_mission_protocol(this.droneStatus.target_name, this.droneStatus.pub_topic, this.droneStatus.target_sys_id, this.droneStatus.goto_each_position, this.droneStatus.start_idx, this.droneStatus.end_idx, this.droneStatus.delay, this.droneStatus.cur_idx, this.mission_request[sys_id].seq_requested);
                     }
                 }
-                else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_REQUEST_LIST) {
-                    // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_REQUEST_LIST - ' + mavPacket);
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM_REACHED) {
+                    let my_len = 30;
+                    if(ver === 'fd') {
+                        my_len += 22;
+                    }
+                    let ar = mavPacket.split('');
+                    for (let i = 0; i < (my_len - msg_len); i++) {
+                        ar.splice(ar.length-4, 0, '0');
+                        ar.splice(ar.length-4, 0, '0');
+                    }
+                    mavPacket = ar.join('');
+
+                    var mission_seq = mavPacket.substr(base_offset, 4).toLowerCase();
+
+                    this.mission_seq = Buffer.from(mission_seq, 'hex').readUInt16LE(0);
+
+                    console.log(this.name, 'MAVLINK_MSG_ID_MISSION_ITEM_REACHED', this.mission_seq);
+
+                    if(this.$store.state.drone_infos[this.name].watchingMission === 'auto-goto') {
+
+                        this.watchingMissionStatus = parseInt((this.mission_seq) / (this.$store.state.drone_infos[this.name].mission_count-1) * 100);
+
+                        if(this.$store.state.drone_infos[this.name].mission_count === (this.mission_seq+1)) {
+                            console.log('Auto Mission Complete at %s', this.droneStatus.target_name);
+
+                            let target_mode = 'GUIDED';
+                            if(this.fcType === 'px4') {
+                                target_mode = 'AUTO_LOITER';
+                            }
+                            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+                            this.watchingMission = 'auto-goto-complete';
+                            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+
+                            this.$store.state.drone_infos[this.name].curMissionItemReached = 0;
+
+                            //this.setWpYawBehavior(1);
+                        }
+                        else {
+                            this.$store.state.drone_infos[this.name].curMissionItemReached = this.mission_seq;
+                        }
+
+                        this.postDroneInfos((res) => {
+                            console.log('postDroneInfos - MAVLINK_MSG_ID_MISSION_ITEM_REACHED', res);
+                        });
+                    }
+
+                    else if(this.$store.state.drone_infos[this.name].watchingMission === 'goto-circle') {
+                        this.watchingMissionStatus = 100;
+
+                        this.droneStatus.startFlag = false;
+
+                        let target_mode = 'GUIDED';
+                        if(this.fcType === 'px4') {
+                            target_mode = 'AUTO_LOITER';
+                        }
+                        this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+                        this.watchingMission = 'goto-circle-complete';
+                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                    }
+
+                    else if(this.$store.state.drone_infos[this.name].watchingMission === 'takeoff') {
+                        this.watchingMissionStatus = 100;
+                        this.watchingMission = 'takeoff-complete';
+                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                    }
+
+                    else if(this.$store.state.drone_infos[this.name].watchingMission === 'goto') {
+                        this.watchingMissionStatus = 100;
+                        this.watchingMission = 'goto-complete';
+                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+
+                        //this.setWpYawBehavior(1);
+                    }
+
+                    else if(this.$store.state.drone_infos[this.name].watchingMission === 'goto-alt') {
+                        this.watchingMissionStatus = 100;
+                        this.watchingMission = 'goto-alt-complete';
+                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                    }
+
+
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_COUNT) { //
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_COUNT - ' + mavPacket);
+                }
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_REQUEST_LIST) {
+                    // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_REQUEST_LIST - ' + mavPacket);
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ACK) { // #47 - mission_ack
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ACK - ' + mavPacket);
@@ -4998,8 +5083,7 @@ export default {
 
                         this.send_auto_mission_count(this.droneStatus.target_name, this.droneStatus.pub_topic, this.droneStatus.target_sys_id, this.droneStatus.goto_each_position, this.droneStatus.start_idx, this.droneStatus.end_idx, this.droneStatus.delay, this.droneStatus.cur_idx);
                     }
-
-                    if((this.droneStatus.curCommand === 'auto_mission_item') && (this.result_mission_ack[sys_id].type === 0)) {
+                    else if((this.droneStatus.curCommand === 'auto_mission_item') && (this.result_mission_ack[sys_id].type === 0)) {
                         clearTimeout(this.droneStatus.objTimeout);
                         this.droneStatus.curCommand = '';
 
@@ -5007,7 +5091,7 @@ export default {
 
                         this.watchingMissionStatus = 0;
 
-                        if(this.watchingMission === 'goto-circle') {
+                        if(this.$store.state.drone_infos[this.name].watchingMission === 'goto-circle') {
                             delete this.$store.state.missionLines[this.droneStatus.target_name];
                             this.$store.state.missionCircles[this.droneStatus.target_name] = null;
                             delete this.$store.state.missionCircles[this.droneStatus.target_name];
@@ -5397,7 +5481,8 @@ export default {
         },
 
         reservedQuick() {
-
+            // console.log('send_set_mission_current - 5');
+            // setTimeout(this.send_set_mission_current_command, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 5);
         },
 
         showYawAngleDialog() {
@@ -5843,14 +5928,16 @@ export default {
                 }
                 else {
                     this.watchingMission = 'takeoff-complete';
+                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                 }
 
                 const checkMission = (interval, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx) => {
                     setTimeout(() => {
-                        if (this.watchingMission === 'takeoff-complete') {
+                        if (this.$store.state.drone_infos[this.name].watchingMission === 'takeoff-complete') {
                             setTimeout(this.send_auto_command, 50, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
 
                             this.watchingMission = 'auto-goto';
+                            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                             this.watchingMissionStatus = 0;
 
                             this.doPublishBroadcast();
@@ -5939,6 +6026,7 @@ export default {
                     this.send_rtl_command(name, target_pub_topic, sys_id);
 
                     this.watchingMission = 'rtl';
+                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                     this.watchingInitDist = this.valueDistance;
 
                     this.doPublishBroadcast();
@@ -5951,11 +6039,13 @@ export default {
             setTimeout(this.send_land_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id);
 
             this.watchingMission = 'land';
+            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
             this.watchingInitDist = Math.abs(0 - parseFloat((this.gpi.relative_alt / 1000).toFixed(1)));
             this.watchingMissionStatus = 0;
 
             if(this.watchingInitDist <= 0.1) {
                 this.watchingMission = 'land-complete';
+                this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                 this.watchingMissionStatus = 100;
             }
 
@@ -6056,6 +6146,7 @@ export default {
 
 
                         this.watchingMission = 'goto-circle';
+                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                         this.watchingMissionStatus = 0;
 
                         let deg = (Math.atan2((result2.y - result1.y), (result2.x - result1.x)) * (180/3.14));
@@ -6169,11 +6260,13 @@ export default {
                     this.send_goto_alt_command(name, target_pub_topic, sys_id, alt);
 
                     this.watchingMission = 'goto-alt';
+                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                     this.watchingInitDist = Math.abs(alt - parseFloat((this.gpi.relative_alt / 1000).toFixed(1)));
                     this.watchingMissionStatus = 0;
 
                     if(this.watchingInitDist <= 0.1) {
                         this.watchingMission = 'goto-alt-complete';
+                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                         this.watchingMissionStatus = 100;
                     }
 
@@ -6181,11 +6274,12 @@ export default {
                 }
                 else {
                     this.watchingMission = 'goto-alt-complete';
+                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                 }
 
                 const checkMission = (interval, name, target_pub_topic, sys_id, lat, lon, alt, speed) => {
                     setTimeout(() => {
-                        if (this.watchingMission === 'goto-alt-complete') {
+                        if (this.$store.state.drone_infos[this.name].watchingMission === 'goto-alt-complete') {
                             this.send_goto_command(name, target_pub_topic, sys_id, lat, lon, alt);
                             setTimeout((name, target_pub_topic, sys_id, speed) => {
                                 this.send_change_speed_command(name, target_pub_topic, sys_id, speed);
@@ -6227,11 +6321,13 @@ export default {
 
 
                                 this.watchingMission = 'goto';
+                                this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                                 this.watchingInitDist = parseFloat(Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2)).toFixed(1));
                                 this.watchingMissionStatus = 0;
 
                                 if(this.watchingInitDist <= 0.1) {
                                     this.watchingMission = 'goto-complete';
+                                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                                     this.watchingMissionStatus = 100;
 
                                     //this.setWpYawBehavior(1);
@@ -6241,7 +6337,7 @@ export default {
 
                             }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, speed);
                         }
-                        else if (this.watchingMission === 'fail') {
+                        else if (this.$store.state.drone_infos[this.name].watchingMission === 'fail') {
                             console.log('command-set-goto-', name, ' fail');
                         }
                         else {
@@ -6265,11 +6361,13 @@ export default {
             let _alt = this.$store.state.drone_infos[this.name].targetAlt;
 
             this.watchingMission = 'goto-alt';
+            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
             this.watchingInitDist = Math.abs(_alt - parseFloat((this.gpi.relative_alt / 1000).toFixed(1)));
             this.watchingMissionStatus = 0;
 
             if(this.watchingInitDist <= 0.1) {
                 this.watchingMission = 'goto-alt-complete';
+                this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                 this.watchingMissionStatus = 100;
             }
 
@@ -6317,11 +6415,13 @@ export default {
                             this.send_takeoff_command(name, target_pub_topic, sys_id, takeoff_alt);
 
                             this.watchingMission = 'takeoff';
+                            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                             this.watchingInitDist = Math.abs(relativeAlt - parseFloat((this.gpi.relative_alt / 1000).toFixed(1)));
                             this.watchingMissionStatus = 0;
 
                             if(this.watchingInitDist <= 0.1) {
                                 this.watchingMission = 'takeoff-complete';
+                                this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                                 this.watchingMissionStatus = 100;
                             }
 
@@ -6353,6 +6453,7 @@ export default {
             setTimeout(this.send_set_mode_command, 1, this.name, this.target_pub_topic, this.sys_id, selected_mode);
 
             this.watchingMission = 'mode';
+            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
         });
 
         EventBus.$on('command-set-arm-' + this.name, () => {
@@ -6366,6 +6467,7 @@ export default {
                     console.log('send_arm_command ', this.name);
                     this.send_arm_command(name, target_pub_topic, sys_id, 1, 0);
                     this.watchingMission = 'arm';
+                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                 }, parseInt(Math.random() * 5), name, target_pub_topic, sys_id);
             }, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id);
         });
@@ -6416,6 +6518,37 @@ export default {
                     }
                 });
             }
+        });
+
+        EventBus.$on('command-set-mission_rewind-' + this.name, () => {
+            console.log('send_set_mission_current - ', this.$store.state.drone_infos[this.name].curMissionItemReached);
+
+            this.watchingMission = 'auto-goto';
+            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+
+            let target_mode = 'LOITER';
+            if (this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+            setTimeout((name, target_pub_topic, sys_id, mode) => {
+                console.log('send_set_mode_command', mode);
+                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+            }, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+            if(this.$store.state.drone_infos[this.name].yawBehavior === 'YAW고정') {
+                setTimeout((name, target_pub_topic, sys_id, param_value) => {
+                    this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
+                }, 2 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 0);
+            }
+            else {
+                setTimeout((name, target_pub_topic, sys_id, param_value) => {
+                    this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
+                }, 2 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 1);
+            }
+
+            setTimeout(this.send_set_mission_current_command, 25 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, this.$store.state.drone_infos[this.name].curMissionItemReached);
+
+            setTimeout(this.send_set_mode_command, 50, this.name, this.target_pub_topic, this.sys_id, 'AUTO');
         });
 
         // EventBus.$on('push-status-' + this.name, (payload) => {
@@ -6630,6 +6763,8 @@ export default {
         EventBus.$off('setWpYawBehavior');
 
         EventBus.$off('do-publish-' + this.name);
+
+        EventBus.$off('command-set-mission_rewind-' + this.name);
 
         if (this.timer_id) {
             clearInterval(this.timer_id);
