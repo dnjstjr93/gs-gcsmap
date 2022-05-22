@@ -729,7 +729,7 @@
                         </v-col>
                         <v-col cols="12">
                             <v-card :style="{color:'white'}" outlined tile flat>
-                                <canvas id="chart" height="50"></canvas>
+                                <canvas :id="'chart-'+name" height="50"></canvas>
                             </v-card>
                         </v-col>
                     </v-row>
@@ -1451,7 +1451,7 @@ export default {
 
     methods: {
         fillData() {
-            const ctx = document.getElementById('chart').getContext('2d');
+            const ctx = document.getElementById('chart-'+this.name).getContext('2d');
             let config = {
                 data: {
                     labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
@@ -5455,6 +5455,8 @@ export default {
             this.$store.state.trackingLines[this.name] = null;
             delete this.$store.state.trackingLines[this.name];
             this.$store.state.trackingLines[this.name] = [];
+
+            localStorage.setItem('trackingLines-' + this.name, JSON.stringify(this.$store.state.trackingLines[this.name]));
         },
 
         gotoHomePosition() {

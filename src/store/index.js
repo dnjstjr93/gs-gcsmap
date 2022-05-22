@@ -1263,7 +1263,7 @@ export default new Vuex.Store({
                 }
             }).then(
                 function (res) {
-                    console.log('removeMarkerDroneInfo-axios', res.data);
+                    console.log('removeMarkerDroneInfo-axios', res);
                 }
             ).catch(
                 function (err) {
@@ -1298,7 +1298,7 @@ export default new Vuex.Store({
                     return status < 500;
                 },
                 method: 'post',
-                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + payload.pName,
+                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + payload.pOldName,
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
@@ -1306,15 +1306,42 @@ export default new Vuex.Store({
                 },
                 data: {
                     'm2m:cin': {
-                        con: state.tempMarkers[payload.pName]
+                        con: state.tempMarkers[payload.pOldName]
                     }
                 }
             }).then(
-                function (res) {
-                    console.log('deleteMarkerDroneInfo-axios', res.data);
+                (res) => {
+                    console.log('deleteMarker-axios-', payload.pOldName, res);
+
+                    axios({
+                        validateStatus: function (status) {
+                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            return status < 500;
+                        },
+                        method: 'post',
+                        url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + payload.pName,
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'SVue',
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                        data: {
+                            'm2m:cin': {
+                                con: state.tempMarkers[payload.pName]
+                            }
+                        }
+                    }).then(
+                        function (res) {
+                            console.log('deleteMarker-axios-', payload.pName, res);
+                        }
+                    ).catch(
+                        function (err) {
+                            console.log(err.message);
+                        }
+                    );
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
                 }
             );

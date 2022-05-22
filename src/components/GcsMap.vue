@@ -680,6 +680,7 @@
 
         data () {
             return {
+                preZoomLevel: 18,
                 myMapTypeId: "satellite",
                 datum: {targeted: false, lat:0.0, lng:0.0},
                 scaleDroneIcon: 0.1,
@@ -1849,17 +1850,27 @@
             },
 
             changeMapId(e) {
-                let zoomLevel = e;
-                console.log('zoomLevel: ' + zoomLevel);
+                const maxZoomService = new this.google.maps.MaxZoomService();
 
-                if(zoomLevel >= 20) {
-                    this.myMapTypeId = 'roadmap';
-                    this.scaleDroneIcon = (0.1 - ((zoomLevel-20)/100));
-                }
-                else {
-                    this.myMapTypeId = 'satellite';
-                    this.scaleDroneIcon = 0.1;
-                }
+                maxZoomService.getMaxZoomAtLatLng(this.center, (result) => {
+                    if (result.status !== "OK") {
+                        console.log("Error in MaxZoomService");
+                    } else {
+                        let zoomLevel = e;
+                        console.log('zoomLevel: ' + zoomLevel);
+
+                        if(zoomLevel >= result.zoom) {
+                            this.myMapTypeId = 'roadmap';
+                            this.scaleDroneIcon = (0.1 - ((zoomLevel-20)/100));
+                        }
+                        else {
+                            this.myMapTypeId = 'satellite';
+                            this.scaleDroneIcon = 0.1;
+                        }
+
+                        this.preZoomLevel = e;
+                    }
+                });
             },
 
             calcDistance(e) {
@@ -2083,10 +2094,12 @@
                     console.log('targetTempMarker - pName', dName, 'pIndex', pIndex);
 
                     this.curSurveyMarkerFlag = false;
-                    this.$store.state.surveyMarkers[dName].forEach((marker) => {
-                        marker.selected = false;
-                        marker.targeted = false;
-                    });
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, dName)) {
+                        this.$store.state.surveyMarkers[dName].forEach((marker) => {
+                            marker.selected = false;
+                            marker.targeted = false;
+                        });
+                    }
 
                     if(!this.$store.state.tempMarkers[dName][pIndex].selected) {
 
@@ -2827,6 +2840,8 @@
 
                 // });
             });
+
+
 
             setInterval(() => {
                 for (let idx in this.planeMarkers) {
