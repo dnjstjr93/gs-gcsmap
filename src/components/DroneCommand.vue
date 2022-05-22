@@ -290,7 +290,7 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-spacer/>
-                                                            <v-col cols="3" class="pl-4 px-1 mt-n4 mb-1">
+                                                            <v-col cols="2" class="pl-4 px-1 mt-n4 mb-1">
 <!--                                                                <v-select-->
 <!--                                                                    @change="changeYawBehavior($event, d.name)"-->
 <!--                                                                    dense outlined hide-details-->
@@ -349,7 +349,17 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-spacer/>
-                                                            <v-col cols="2" class="pa-1 pt-3">
+                                                            <v-col cols="2" class="pa-1 pt-2">
+                                                                <v-text-field
+                                                                    v-model="$store.state.drone_infos[d.name].curMissionItemReached"
+                                                                    dense outlined hide-details
+                                                                    label="Current Mission Count"
+                                                                    type="number"
+                                                                    class="pa-1"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-spacer/>
+                                                            <v-col cols="1" class="pa-1 pt-3">
                                                                 <v-tooltip top>
                                                                     <template v-slot:activator="{ on, attrs }">
                                                                         <v-btn
@@ -1697,7 +1707,7 @@ export default {
 
             console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
 
-            EventBus.$emit('command-set-mission_rewind-' + dName);
+            EventBus.$emit('command-set-mission_rewind-' + dName, this.$store.state.drone_infos[dName].curMissionItemReached);
         },
 
         sendCommand() {

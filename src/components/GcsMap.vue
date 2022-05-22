@@ -1232,7 +1232,6 @@
                 console.log('computeArea = ', area.toFixed(1), '㎡');
 
                 EventBus.$emit('on-update-survey-infomarker');
-
             },
 
             showNewPolygon(e, dName, pIndex) {
@@ -1315,6 +1314,8 @@
                     let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
 
                     this.updateSurveyPath(dName, pIndex, gap, angle, dir);
+
+                    this.$store.state.drone_infos[dName].curMissionItemReached = 0;
 
                     if(this.idPostTimer !== null) {
                         clearTimeout(this.idPostTimer);
