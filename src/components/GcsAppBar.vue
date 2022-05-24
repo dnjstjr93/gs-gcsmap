@@ -10,6 +10,10 @@
 
         <v-spacer></v-spacer>
 
+        <v-btn text @click.stop="mapAngleDialog=true" :disabled="!MOBIUS_CONNECTION_CONNECTED">
+            <v-icon>mdi-format-rotate-90</v-icon>
+        </v-btn>
+
         <v-btn text :disabled="!MOBIUS_CONNECTION_CONNECTED">
             <v-icon>mdi-crosshairs-gps</v-icon>
         </v-btn>
@@ -40,6 +44,55 @@
         <v-btn text :disabled="!MOBIUS_CONNECTION_CONNECTED">
             <v-icon>mdi-account</v-icon>
         </v-btn>
+
+        <v-dialog
+            v-model="mapAngleDialog"
+            max-width="340"
+        >
+            <v-card class="pa-3 pt-5">
+                <v-row no-gutters align="center" justify="center">
+                    <v-spacer/>
+                    <v-col cols="2" class="text-center">
+                        <v-icon>
+                            mdi-format-rotate-90
+                        </v-icon>
+                    </v-col>
+                    <v-spacer/>
+                    <v-col cols="5">
+                        <v-text-field
+                            label="mapAngle(°)"
+                            v-model="mapAngle"
+                            class="ma-0 pa-0"
+                            type="number"
+                            outlined dense hide-details
+                            color="amber"
+                            min="-360"
+                            max="360"
+                        ></v-text-field>
+                    </v-col>
+                </v-row>
+                <v-row no-gutters align="center" justify="center">
+                    <v-col cols="6">
+                        <v-card-actions>
+                            <v-btn
+                                color="green darken-1"
+                                text outlined
+                                @click="rotateMapAngle"
+                            >
+                                OK
+                            </v-btn>
+                            <v-btn
+                                color="red darken-1"
+                                text outlined
+                                @click="mapAngleDialog = false"
+                            >
+                                Cancel
+                            </v-btn>
+                        </v-card-actions>
+                    </v-col>
+                </v-row>
+            </v-card>
+        </v-dialog>
 
         <v-dialog v-model="dialog" persistent max-width="900px">
             <v-card id="create" class="mx-auto">
@@ -429,6 +482,8 @@
 
         data: function () {
             return {
+                mapAngleDialog: false,
+                mapAngle: 0,
                 open: false,
                 MOBIUS_DISCONNECTION_TEXT: 'Disconnect',
                 MOBIUS_CONNECTION_TEXT: 'Connect',
@@ -1700,6 +1755,12 @@
                 console.log(this.open);
 
                 window.open("http://webrtc.intellicode.info:8080/", "_blank");
+            },
+
+            rotateMapAngle() {
+                EventBus.$emit('do-rotate-map', this.mapAngle);
+
+                this.mapAngleDialog = false;
             },
 
             postDroneInfos(dName, callback) {

@@ -2785,6 +2785,29 @@ export default {
             }
         },
 
+        send_wpnav_radius_param_set_command(target_name, pub_topic, target_sys_id, radius) {
+            var btn_params = {};
+            btn_params.target_system = target_sys_id;
+            btn_params.target_component = 1;
+            btn_params.param_id = "WPNAV_RADIUS";
+            btn_params.param_type = mavlink.MAV_PARAM_TYPE_REAL32;
+            btn_params.param_value = radius * 100; // cm.
+
+            try {
+                var msg = this.mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_PARAM_SET, btn_params);
+                if (msg == null) {
+                    console.log("mavlink message is null");
+                }
+                else {
+                    console.log('Send WPNAV_RADIUS to (' + radius + ')', target_name);
+                    this.doPublish(pub_topic, msg);
+                }
+            }
+            catch (ex) {
+                console.log('[ERROR] ' + ex);
+            }
+        },
+
         send_rtl_alt_param_set_command(target_name, pub_topic, target_sys_id, target_alt) {
             var btn_params = {};
             btn_params.target_system = target_sys_id;
@@ -3038,7 +3061,15 @@ export default {
             var rel_altitude = parseFloat(arr_cur_goto_position[2]);
             var radius = parseFloat(arr_cur_goto_position[4]);
 
-            var mav_cmd = mavlink.MAV_CMD_NAV_WAYPOINT;
+            let mav_cmd = mavlink.MAV_CMD_NAV_WAYPOINT;
+
+            if(this.$store.state.drone_infos[this.name].flyShape === '곡선비행') {
+                if (seq % 2 === 1) {
+                    if (seq !== 1) {
+                        mav_cmd = mavlink.MAV_CMD_NAV_SPLINE_WAYPOINT;
+                    }
+                }
+            }
 
             if(arr_cur_goto_position.length > 6) {
                 if(parseInt(arr_cur_goto_position[6]) === mavlink.MAV_CMD_NAV_TAKEOFF) {
@@ -4913,6 +4944,19 @@ export default {
 
                         this.$store.state.params.rtlAlt[this.name] = (this.params.rtlAlt.param_value / 100);
                     }
+                    else if (param_id.includes('WPNAV_RADIUS')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.params, 'wpnavRadius')) {
+                            this.params.wpnavRadius = {};
+                        }
+
+                        this.params.wpnavRadius.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.params.wpnavRadius.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.params.wpnavRadius.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.params.wpnavRadius.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_RADIUS', this.params.wpnavRadius);
+
+                        this.$store.state.params.wpnavRadius[this.name] = (this.params.wpnavRadius.param_value / 100);
+                    }
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ITEM - ' + mavPacket);
@@ -5646,6 +5690,12 @@ export default {
                 }
                 count++;
             }
+            else if(count === 17) {
+                if(!Object.prototype.hasOwnProperty.call(this.params, 'wpnavRadius')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'WPNAV_RADIUS');
+                }
+                count++;
+            }
             else {
                 clearInterval(tidRcParam);
             }
@@ -5869,6 +5919,17 @@ export default {
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
                         this.send_rtl_alt_param_set_command(name, target_pub_topic, sys_id, param_value);
+
+                    }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
+                }
+            }
+
+            if (Object.prototype.hasOwnProperty.call(params, 'wpnavRadius')) {
+                if (params.wpnavRadius[this.name] !== undefined) {
+                    let param_value = parseFloat(params.wpnavRadius[this.name]);
+
+                    setTimeout((name, target_pub_topic, sys_id, param_value) => {
+                        this.send_wpnav_radius_param_set_command(name, target_pub_topic, sys_id, param_value);
 
                     }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
                 }

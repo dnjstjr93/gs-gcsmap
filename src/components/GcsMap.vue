@@ -25,16 +25,18 @@
                 </v-card>
                 <v-card>
                     <GmapMap
+                        v-if="prepared"
                         ref="mapRef" :center="center"
                         :zoom="18"
                         :mapTypeId="myMapTypeId"
+                        :heading="mapHeading"
                         :restriction="{
                             strictBounds: false,
                         }"
                         :style="myGcsStyle"
                         :options="{
                             disableDefaultUI: true, gestureHandling: 'greedy', disableDoubleClickZoom: true, minZoom: 1, maxZoom: 30,
-                            streetViewControl: false,
+                            streetViewControl: false, mapId:'3ce830ad992810c1',
                         }"
                         @click="printPosClick"
                         @dblclick="addingMarker"
@@ -680,6 +682,7 @@
 
         data () {
             return {
+                mapHeading: 0,
                 preZoomLevel: 18,
                 myMapTypeId: "satellite",
                 datum: {targeted: false, lat:0.0, lng:0.0},
@@ -716,6 +719,7 @@
                     lat: 37.40423134053018,
                     lng: 127.16050533784832
                 },
+                prepared: true,
                 myHeight: window.innerHeight-50,
                 myWidth: window.innerWidth,
                 readyFlagGcsMap: false,
@@ -967,10 +971,30 @@
                         }
 
                         if (intersectPoint !== null) {
-                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
-                                lat: intersectPoint.x,
-                                lng: intersectPoint.y
-                            });
+                            if(i%2 === 1) {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+                            }
+                            else {
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
                         }
                     }
                     else {
@@ -992,10 +1016,30 @@
                             }
 
                             if (intersectPoint !== null) {
-                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
-                                    lat: intersectPoint.x,
-                                    lng: intersectPoint.y
-                                });
+                                if(i%2 === 1) {
+                                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                        lat: intersectPoint.x,
+                                        lng: intersectPoint.y
+                                    });
+
+                                    // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle))%360);
+                                    // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                    //     lat: guidePoint.lat,
+                                    //     lng: guidePoint.lon
+                                    // });
+                                }
+                                else {
+                                    // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle))%360);
+                                    // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                    //     lat: guidePoint.lat,
+                                    //     lng: guidePoint.lon
+                                    // });
+
+                                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                        lat: intersectPoint.x,
+                                        lng: intersectPoint.y
+                                    });
+                                }
                             }
                         }
                     }
@@ -1019,6 +1063,12 @@
 
                         if (intersectPoint !== null) {
                             if(i%2 === 1) {
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle+180))%360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-2, 0, {
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+
                                 this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1, 0, {
                                     lat: intersectPoint.x,
                                     lng: intersectPoint.y
@@ -1029,6 +1079,12 @@
                                     lat: intersectPoint.x,
                                     lng: intersectPoint.y
                                 });
+
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle+180))%360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
                             }
                         }
                     }
@@ -1052,6 +1108,12 @@
 
                             if (intersectPoint !== null) {
                                 if(i%2 === 1) {
+                                    // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle+180))%360);
+                                    // this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-2, 0, {
+                                    //     lat: guidePoint.lat,
+                                    //     lng: guidePoint.lon
+                                    // });
+
                                     this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1, 0, {
                                         lat: intersectPoint.x,
                                         lng: intersectPoint.y
@@ -1062,6 +1124,12 @@
                                         lat: intersectPoint.x,
                                         lng: intersectPoint.y
                                     });
+
+                                    // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle+180))%360);
+                                    // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                    //     lat: guidePoint.lat,
+                                    //     lng: guidePoint.lon
+                                    // });
                                 }
                             }
                         }
@@ -1105,10 +1173,30 @@
                         }
 
                         if (intersectPoint !== null) {
-                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
-                                lat: intersectPoint.x,
-                                lng: intersectPoint.y
-                            });
+                            if(i%2 === 1) {
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
+                            else {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+                            }
                         }
                     }
                     else {
@@ -1130,10 +1218,30 @@
                             }
 
                             if (intersectPoint !== null) {
-                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
-                                    lat: intersectPoint.x,
-                                    lng: intersectPoint.y
-                                });
+                                if(i%2 === 1) {
+                                    // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                                    // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                    //     lat: guidePoint.lat,
+                                    //     lng: guidePoint.lon
+                                    // });
+
+                                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                        lat: intersectPoint.x,
+                                        lng: intersectPoint.y
+                                    });
+                                }
+                                else {
+                                    this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                        lat: intersectPoint.x,
+                                        lng: intersectPoint.y
+                                    });
+
+                                    // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                                    // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                    //     lat: guidePoint.lat,
+                                    //     lng: guidePoint.lon
+                                    // });
+                                }
                             }
                         }
                     }
@@ -1158,6 +1266,12 @@
 
                         if (intersectPoint !== null) {
                             if(i%2 === 0) {
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle+180)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(2, 0, {
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+
                                 this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(1, 0, {
                                     lat: intersectPoint.x,
                                     lng: intersectPoint.y
@@ -1168,6 +1282,12 @@
                                     lat: intersectPoint.x,
                                     lng: intersectPoint.y
                                 });
+
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle+180)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
                             }
                         }
                     }
@@ -1191,6 +1311,12 @@
 
                             if (intersectPoint !== null) {
                                 if(i%2 === 0) {
+                                    // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle+180)) % 360);
+                                    // this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(2, 0, {
+                                    //     lat: guidePoint.lat,
+                                    //     lng: guidePoint.lon
+                                    // });
+
                                     this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(1, 0, {
                                         lat: intersectPoint.x,
                                         lng: intersectPoint.y
@@ -1201,6 +1327,12 @@
                                         lat: intersectPoint.x,
                                         lng: intersectPoint.y
                                     });
+
+                                    // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle+180)) % 360);
+                                    // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                    //     lat: guidePoint.lat,
+                                    //     lng: guidePoint.lon
+                                    // });
                                 }
                             }
                         }
@@ -2843,23 +2975,34 @@
 
 
 
-            setInterval(() => {
-                for (let idx in this.planeMarkers) {
-
-                    if ((this.preADSB[idx].lat == this.planeMarkers[idx].lat) && (this.preADSB[idx].lng == this.planeMarkers[idx].lng)) {
-                        if (this.count[idx] > 20) {
-                            EventBus.$emit('clearPlaneMarker', this.planeMarkers[idx].ICAO_address);
-                        }
-                        this.count[idx]++;
-                        // EventBus.$emit('clearAllPlaneMarker', '');
-                    } else {
-                        this.preADSB[idx].ICAO_address = this.planeMarkers[idx].ICAO_address;
-                        this.preADSB[idx].lat = this.planeMarkers[idx].lat;
-                        this.preADSB[idx].lng = this.planeMarkers[idx].lng;
-                    }
-
-                }
-            }, 1000);
+            // setInterval(() => {
+            //     for (let idx in this.planeMarkers) {
+            //
+            //         if ((this.preADSB[idx].lat == this.planeMarkers[idx].lat) && (this.preADSB[idx].lng == this.planeMarkers[idx].lng)) {
+            //             if (this.count[idx] > 20) {
+            //                 EventBus.$emit('clearPlaneMarker', this.planeMarkers[idx].ICAO_address);
+            //             }
+            //             this.count[idx]++;
+            //             // EventBus.$emit('clearAllPlaneMarker', '');
+            //         } else {
+            //             this.preADSB[idx].ICAO_address = this.planeMarkers[idx].ICAO_address;
+            //             this.preADSB[idx].lat = this.planeMarkers[idx].lat;
+            //             this.preADSB[idx].lng = this.planeMarkers[idx].lng;
+            //         }
+            //
+            //     }
+            //
+            //     console.log(this.mapHeading);
+            //
+            //     //this.prepared = !this.prepared;
+            //     this.mapHeading += 20;
+            //     this.mapHeading %= 360;
+            //
+            //     this.map.setHeading(this.mapHeading);
+            //
+            //     this.$forceUpdate();
+            //
+            // }, 5000);
 
             EventBus.$on('do-update-survey-angle-GcsMap', (payload) => {
                 let dName = payload.dName;
@@ -2973,7 +3116,8 @@
                 this.readyFlagGcsMap = true;
 
                 // this.$refs.mapRef.$mapPromise.then((map) => {
-                //     map.setTilt(45);
+                //     //map.setTilt(45);
+                //     map.setHeading(map.getHeading()+20);
                 // });
 
                 this.lineArrow = {
@@ -3227,6 +3371,15 @@
 
                 this.$store.state.didIPublish = true;
             });
+
+            EventBus.$on('do-rotate-map', (angle)=>{
+
+
+                this.prepared = false;
+                this.prepared = true;
+
+                this.mapHeading = parseInt(angle);
+            });
         },
 
         beforeDestroy() {
@@ -3253,6 +3406,8 @@
             EventBus.$off('do-update-survey-gap-GcsMap');
             EventBus.$off('do-update-survey-alt-GcsMap');
             EventBus.$off('do-update-way-of-survey-GcsMap');
+
+            EventBus.$off('do-rotate-map');
         }
     }
 </script>

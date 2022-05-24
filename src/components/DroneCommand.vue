@@ -316,6 +316,24 @@
                                                                     ></v-radio>
                                                                 </v-radio-group>
                                                             </v-col>
+                                                            <v-col cols="2" class="pl-4 px-1 mt-n4 mb-1">
+                                                                <v-radio-group
+                                                                    v-model="flyShape[d.name]"
+                                                                    column mandatory hide-details
+                                                                    @change="changeFlyShape($event, d.name)"
+                                                                >
+                                                                    <v-radio
+                                                                        label="곡선비행"
+                                                                        value="곡선비행"
+                                                                        color="red"
+                                                                    ></v-radio>
+                                                                    <v-radio
+                                                                        label="직선비행"
+                                                                        value="직선비행"
+                                                                        color="primary"
+                                                                    ></v-radio>
+                                                                </v-radio-group>
+                                                            </v-col>
                                                             <v-spacer/>
 <!--                                                            <v-col cols="2">-->
 <!--                                                                <v-text-field-->
@@ -337,9 +355,9 @@
 <!--                                                                    hint="1 ~ 30 m/s"-->
 <!--                                                                ></v-text-field>-->
 <!--                                                            </v-col>-->
-                                                            <v-col cols="2" class="pa-1 pt-2">
+                                                            <v-col cols="1" class="pa-1 pt-2">
                                                                 <v-text-field
-                                                                    label="지점대기(sec)"
+                                                                    label="대기(sec)"
                                                                     class="text-right pa-1"
                                                                     outlined dense hide-details
                                                                     v-model="targetStayTime[d.name]"
@@ -349,7 +367,7 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-spacer/>
-                                                            <v-col cols="2" class="pa-1 pt-2">
+                                                            <v-col cols="1" class="pa-1 pt-2">
                                                                 <v-text-field
                                                                     v-model="$store.state.drone_infos[d.name].curMissionItemReached"
                                                                     dense outlined hide-details
@@ -644,6 +662,20 @@
                                                                     min="2.0"
                                                                     max="80.0"
                                                                     hint="The minimum alt above home"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="WPNAV_RADIUS(m), 0.05-10, 0.01"
+                                                                    class="pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="$store.state.params.wpnavRadius[d.name]"
+                                                                    placeholder="2.0"
+                                                                    type="number"
+                                                                    min="2"
+                                                                    max="50"
+                                                                    setp="1"
+                                                                    hint="Range:0.05~10.0, Increment:0.01"
                                                                 ></v-text-field>
                                                             </v-col>
                                                         </v-row>
@@ -1105,6 +1137,7 @@ export default {
 
             gotoType: {},
             yawBehavior: {},
+            flyShape: {},
             circleType: {},
 
             rtlSpeed: {},
@@ -1296,6 +1329,7 @@ export default {
             this.autoDelay = {};
             this.gotoType = {};
             this.yawBehavior = {};
+            this.flyShape = {};
             this.circleType = {};
             for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
@@ -1306,7 +1340,7 @@ export default {
                         this.targetAlt[name] = this.$store.state.drone_infos[name].targetAlt;
                         this.targetSpeed[name] = this.$store.state.drone_infos[name].targetSpeed;
                         if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'targetStayTime')) {
-                            this.$store.state.drone_infos[name].targetStayTime = 1;
+                            this.$store.state.drone_infos[name].targetStayTime = 0;
                         }
                         if(!Object.prototype.hasOwnProperty.call(this.rtlSpeed, name)) {
                             this.rtlSpeed[name] = 5;
@@ -1326,6 +1360,7 @@ export default {
                         // }
                         this.gotoType[name] = this.$store.state.drone_infos[name].gotoType;
                         this.yawBehavior[name] = 'YAW고정';
+                        this.flyShape[name] = '곡선비행';
                         this.circleType[name] = (this.$store.state.drone_infos[name].circleType === 'cw')?'시계방향':'반시계방향';
 
                         this.prepared = true;
@@ -1436,6 +1471,11 @@ export default {
         changeYawBehavior(yawBehavior, dName) {
             this.yawBehavior[dName] = yawBehavior;
             this.$store.state.drone_infos[dName].yawBehavior = yawBehavior;
+        },
+
+        changeFlyShape(flyShape, dName) {
+            this.flyShape[dName] = flyShape;
+            this.$store.state.drone_infos[dName].flyShape = flyShape;
         },
 
         changeCircleType(circleType, dName) {
@@ -2056,6 +2096,7 @@ export default {
         },
 
         setSurvey() {
+
             for(let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
@@ -2063,8 +2104,11 @@ export default {
                             this.$store.state.drone_infos[dName].autoStartIndex = 0;
                             this.$store.state.drone_infos[dName].autoEndIndex = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines.length - 1;
                             this.$store.state.drone_infos[dName].autoDelay = parseInt(this.targetStayTime[dName]);
+                            this.$store.state.drone_infos[dName].targetStayTime = parseInt(this.targetStayTime[dName]);
                             //this.$store.state.drone_infos[dName].autoSpeed = parseInt(this.targetSpeed[dName]);
                             this.$store.state.drone_infos[dName].autoSpeed = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].speed;
+                            this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
+                            this.$store.state.drone_infos[dName].flyShape = this.flyShape[dName];
 
                             this.position_selections_items[dName] = [];
                             for (let idx in this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines) {
