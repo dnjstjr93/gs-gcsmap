@@ -438,6 +438,7 @@ export default new Vuex.Store({
             wpnavSpeedDn: {},
             rtlAlt: {},
             wpnavRadius: {},
+            wpnavAccel: {},
         },
 
         active_tab: 'virtual',

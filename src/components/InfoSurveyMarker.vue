@@ -58,6 +58,16 @@
                         </v-radio-group>
                     </v-col>
                     <v-spacer/>
+                    <v-col cols="2">
+                        <v-select
+                            @change="changeFlyAltType($event)"
+                            dense outlined hide-details
+                            :items="['상대고도', '지형고도']"
+                            label="비행고도설정"
+                            v-model="flyAltType"
+                            class="pa-1"
+                        ></v-select>
+                    </v-col>
                     <v-col cols="1">
                         <v-text-field
                             label="면적(㎡)"
@@ -392,7 +402,7 @@
                 <v-row align="center" justify="center">
                     <v-col cols="12">
                         <v-card :style="{color:'white'}" outlined tile flat>
-                            <canvas :id="'elevation-chart-'+markerName" height="50"></canvas>
+                            <canvas :id="'elevation-chart-'+markerName" :height="120+'px'"></canvas>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -463,6 +473,7 @@
                     'Vuetify',
                 ],
 
+                flyAltType: "상대고도",
                 targetTypes: ['Goto', 'Circle', 'Survey'],
                 targetType: 'Goto',
                 targetSelect: '',
@@ -624,35 +635,85 @@
         },
 
         methods: {
-            fillData() {
+            fillElevationData() {
+                if(this.myChart) {
+                    this.myChart.destroy();
+                }
+
+                if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'elevations')) {
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations = [];
+                }
+
+                //console.log(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations);
+
+                let eiganVal = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist / 256);
+                console.log('eiganVal', eiganVal);
+                let labels = [0];
+                let dist = 0;
+                for(let i = 1; i < 256; i++) {
+                    dist += eiganVal;
+                    labels.push(dist);
+                }
+
                 const ctx = document.getElementById('elevation-chart-'+this.markerName).getContext('2d');
                 let config = {
                     data: {
-                        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                        labels: labels,
                         datasets: [
                             {
                                 type: 'bar',
-                                label: '# of Votes',
-                                data: [12, 19, 3, 5, 2, 3],
-                                backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'],
-                                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
+                                data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations,
+                                backgroundColor: Array(256).fill('rgba(153, 102, 255, 0.2)'),
+                                // aaa: [
+                                //     //색상
+                                //     'rgba(255, 99, 132, 0.2)',
+                                //     'rgba(54, 162, 235, 0.2)',
+                                //     'rgba(255, 206, 86, 0.2)',
+                                //     'rgba(75, 192, 192, 0.2)',
+                                //     'rgba(153, 102, 255, 0.2)',
+                                //     'rgba(255, 159, 64, 0.2)'
+                                // ],
+                                borderColor: Array(256).fill('rgba(153, 102, 255, 1)'),
+                                // [
+                                //     //경계선 색상
+                                //     'rgba(255, 99, 132, 1)',
+                                //     'rgba(54, 162, 235, 1)',
+                                //     'rgba(255, 206, 86, 1)',
+                                //     'rgba(75, 192, 192, 1)',
+                                //     'rgba(153, 102, 255, 1)',
+                                //     'rgba(255, 159, 64, 1)'
+                                // ],
                                 borderWidth: 1
                             },
                             {
                                 type: 'line',
                                 label: 'Line Dataset',
-                                data: [20, 21, 19, 18, 20, 22],
-                            }
-                        ]
+                                data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt,
+                                backgroundColor: Array(256).fill('rgba(255, 99, 132, 0.2)'),
+                                borderColor: Array(256).fill('rgba(255, 99, 132, 1)'),
+                            },
+                        ],
                     },
                     options: {
                         scales: {
                             y: {beginAtZero: true}
-                        }
+                        },
+                        // responsive: false,
+                        maintainAspectRatio: false,
                     }
                 };
 
                 this.myChart = new Chart(ctx, config);
+            },
+
+            changeFlyAltType(altType) {
+                console.log(altType, this.markerName);
+
+                this.flyAltType = altType;
+
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
+
+                this.changeParamShooting(this.paramAlt, 'Alt');
             },
 
             changeWayOfSurvey(val) {
@@ -695,6 +756,18 @@
                     } else if (factor === 'Alt') {
                         this.paramAlt = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = val;
+
+                        if(this.flyAltType === '상대고도') {
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramAlt));
+                        }
+                        else {
+                            for(let i = 0; i < 256; i++) {
+                                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
+                                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i] + parseInt(this.paramAlt)
+                                );
+                            }
+
+                        }
                     } else if (factor === 'Speed') {
                         this.paramSpeed = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = val;
@@ -1075,9 +1148,9 @@
                 this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
                 this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
 
-                this.fillData();
+                this.fillElevationData();
 
-                this.$forceUpdate();
+                //this.$forceUpdate();
             });
         },
 

@@ -1364,7 +1364,40 @@
                 this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
                 console.log('computeArea = ', area.toFixed(1), '㎡');
 
-                EventBus.$emit('on-update-survey-infomarker');
+                const elevator = new this.google.maps.ElevationService();
+
+                // Initiate the location request
+                elevator.getElevationAlongPath({
+                    path: this.$store.state.surveyMarkers[dName][pIndex].pathLines,
+                    samples: 256,
+                })
+                .then(({ results }) => {
+                    if (results[0]) {
+                        this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
+
+                        //console.log('getElevationAlongPath');
+
+                        console.log(this.$store.state.drone_infos[dName].absolute_alt);
+
+                        let diff_alt = this.$store.state.drone_infos[dName].alt - this.$store.state.drone_infos[dName].absolute_alt;
+
+                        for (let i = 0; i < results.length; i++) {
+                            //console.log(results[i]);
+
+                            this.$store.state.surveyMarkers[dName][pIndex].elevations.push((results[i].elevation - diff_alt));
+                        }
+                    }
+                    else {
+                        console.log("No results found");
+                    }
+
+                    EventBus.$emit('on-update-survey-infomarker');
+                })
+                .catch((e) => {
+                    console.log(location, "Elevation service failed due to: " + e);
+
+                    EventBus.$emit('on-update-survey-infomarker');
+                });
             },
 
             showNewPolygon(e, dName, pIndex) {
@@ -3417,7 +3450,7 @@
         position: absolute;
         left: 0;
         top: 0;
-        opacity: 0.93;
+        opacity: 1;
         z-index: 2;
         width: 100%;
     }

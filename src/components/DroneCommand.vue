@@ -678,6 +678,20 @@
                                                                     hint="Range:0.05~10.0, Increment:0.01"
                                                                 ></v-text-field>
                                                             </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="WPNAV_ACCEL(m/s/s), 0.5-5, 0.1"
+                                                                    class="pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="$store.state.params.wpnavAccel[d.name]"
+                                                                    placeholder="2.0"
+                                                                    type="number"
+                                                                    min="0.5"
+                                                                    max="5"
+                                                                    setp="0.1"
+                                                                    hint="Range:0.5~5.0, Increment:0.1"
+                                                                ></v-text-field>
+                                                            </v-col>
                                                         </v-row>
                                                     </v-card>
                                                     <v-card tile flat v-if="(command.title === '임무')">

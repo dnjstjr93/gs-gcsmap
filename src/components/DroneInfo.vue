@@ -2808,6 +2808,28 @@ export default {
             }
         },
 
+        send_wpnav_accel_param_set_command(target_name, pub_topic, target_sys_id, accel) {
+            var btn_params = {};
+            btn_params.target_system = target_sys_id;
+            btn_params.target_component = 1;
+            btn_params.param_id = "WPNAV_ACCEL";
+            btn_params.param_type = mavlink.MAV_PARAM_TYPE_REAL32;
+            btn_params.param_value = accel * 100; // cm.
+
+            try {
+                var msg = this.mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_PARAM_SET, btn_params);
+                if (msg == null) {
+                    console.log("mavlink message is null");
+                }
+                else {
+                    console.log('Send WPNAV_ACCEL to (' + accel + ')', target_name);
+                    this.doPublish(pub_topic, msg);
+                }
+            }
+            catch (ex) {
+                console.log('[ERROR] ' + ex);
+            }
+        },
         send_rtl_alt_param_set_command(target_name, pub_topic, target_sys_id, target_alt) {
             var btn_params = {};
             btn_params.target_system = target_sys_id;
@@ -4184,6 +4206,7 @@ export default {
                     this.$store.state.drone_infos[this.name].lat = (this.gpi.lat / 10000000);
                     this.$store.state.drone_infos[this.name].lng = (this.gpi.lon / 10000000);
                     this.$store.state.drone_infos[this.name].alt = (this.gpi.relative_alt / 1000);
+                    this.$store.state.drone_infos[this.name].absolute_alt = (this.gpi.alt / 1000);
 
 
                     let h_pos = get_point_dist((this.gpi.lat / 10000000), (this.gpi.lon / 10000000), 1, this.heading);
@@ -4957,6 +4980,19 @@ export default {
 
                         this.$store.state.params.wpnavRadius[this.name] = (this.params.wpnavRadius.param_value / 100);
                     }
+                    else if (param_id.includes('WPNAV_ACCEL')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.params, 'wpnavAccel')) {
+                            this.params.wpnavAccel = {};
+                        }
+
+                        this.params.wpnavAccel.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.params.wpnavAccel.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.params.wpnavAccel.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.params.wpnavAccel.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_ACCEL', this.params.wpnavAccel);
+
+                        this.$store.state.params.wpnavAccel[this.name] = (this.params.wpnavAccel.param_value / 100);
+                    }
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM) {
                     // console.log('---> ' + 'MAVLINK_MSG_ID_MISSION_ITEM - ' + mavPacket);
@@ -5696,6 +5732,12 @@ export default {
                 }
                 count++;
             }
+            else if(count === 18) {
+                if(!Object.prototype.hasOwnProperty.call(this.params, 'wpnavAccel')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'WPNAV_ACCEL');
+                }
+                count++;
+            }
             else {
                 clearInterval(tidRcParam);
             }
@@ -5930,6 +5972,17 @@ export default {
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
                         this.send_wpnav_radius_param_set_command(name, target_pub_topic, sys_id, param_value);
+
+                    }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
+                }
+            }
+
+            if (Object.prototype.hasOwnProperty.call(params, 'wpnavAccel')) {
+                if (params.wpnavAccel[this.name] !== undefined) {
+                    let param_value = parseFloat(params.wpnavAccel[this.name]);
+
+                    setTimeout((name, target_pub_topic, sys_id, param_value) => {
+                        this.send_wpnav_accel_param_set_command(name, target_pub_topic, sys_id, param_value);
 
                     }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
                 }
