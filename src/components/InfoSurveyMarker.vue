@@ -389,6 +389,13 @@
                         </v-card>
                     </v-col>
                 </v-row>
+                <v-row align="center" justify="center">
+                    <v-col cols="12">
+                        <v-card :style="{color:'white'}" outlined tile flat>
+                            <canvas :id="'elevation-chart-'+markerName" height="50"></canvas>
+                        </v-card>
+                    </v-col>
+                </v-row>
             </v-card>
             <v-card-actions>
                 <v-spacer></v-spacer>
@@ -412,8 +419,12 @@
 <script>
     import EventBus from "@/EventBus";
     import axios from "axios";
+    import {Chart, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement } from 'chart.js'; //👈 Chart 모듈 임포트
+    Chart.register(BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement); // 👈 chart.js 모듈 Chart 모듈에 등록
 
     export default {
+        myChart: null,
+
         name: "InfoMarker",
 
         props: [
@@ -613,6 +624,37 @@
         },
 
         methods: {
+            fillData() {
+                const ctx = document.getElementById('elevation-chart-'+this.markerName).getContext('2d');
+                let config = {
+                    data: {
+                        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: '# of Votes',
+                                data: [12, 19, 3, 5, 2, 3],
+                                backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'],
+                                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
+                                borderWidth: 1
+                            },
+                            {
+                                type: 'line',
+                                label: 'Line Dataset',
+                                data: [20, 21, 19, 18, 20, 22],
+                            }
+                        ]
+                    },
+                    options: {
+                        scales: {
+                            y: {beginAtZero: true}
+                        }
+                    }
+                };
+
+                this.myChart = new Chart(ctx, config);
+            },
+
             changeWayOfSurvey(val) {
                 this.wayOfSurvey = val;
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey = val;
@@ -1032,12 +1074,17 @@
                 this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
                 this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
                 this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
+
+                this.fillData();
+
                 this.$forceUpdate();
             });
         },
 
         beforeDestroy() {
             EventBus.$off('on-update-survey-infomarker');
+
+            this.myChart.destroy();
         }
     }
 </script>

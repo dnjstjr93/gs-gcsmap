@@ -31,14 +31,14 @@
                                     </v-card>
                                 </v-col>
                                 <v-col cols="3" class="text-right" >
-                                    <v-btn class="mr-2" x-small @click.stop="zoomDouble">
-                                        <v-icon small>
-                                            mdi-magnify-plus-outline
-                                        </v-icon>
-                                    </v-btn>
                                     <v-btn class="mr-2" x-small @click.stop="zoomNormal">
                                         <v-icon small>
                                             mdi-magnify-minus-outline
+                                        </v-icon>
+                                    </v-btn>
+                                    <v-btn class="mr-2" x-small @click.stop="zoomDouble">
+                                        <v-icon small>
+                                            mdi-magnify-plus-outline
                                         </v-icon>
                                     </v-btn>
                                 </v-col>
