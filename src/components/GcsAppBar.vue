@@ -719,7 +719,7 @@
                 // EventBus.$emit('do-setGCSHomePosition');
             },
 
-            createDroneInfoToMobius(callback) {
+            createGcsToMobius(callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -742,37 +742,101 @@
                         }
                     }
                 }).then(
-                    () => {
+                    (res) => {
                         console.log('------------------GCS ae created');
 
-                        axios({
-                            validateStatus: function (status) {
-                                // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                                return status < 500;
-                            },
-                            method: 'post',
-                            url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                            headers: {
-                                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                                'X-M2M-Origin': 'SVue',
-                                'Content-Type': 'application/json;ty=3'
-                            },
-                            data: {
-                                'm2m:cnt': {
-                                    rn: 'DroneInfos',
-                                    lbl: ['DroneInfos'],
-                                }
-                            }
-                        }).then(
-                            function (res) {
-                                console.log('------------------DroneInfos created');
-                                callback(res.status, '');
-                            }
-                        ).catch(
-                            function (err) {
-                                console.log(err.message);
-                            }
-                        );
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            createLossLTEInfosToMobius(callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            rn: 'LossLTEInfos',
+                            lbl: ['LossLTEInfos'],
+                        }
+                    }
+                }).then(
+                    (res) => {
+                        console.log('------------------LossLTEInfos created');
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            createDroneInfoToMobius(callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            rn: 'DroneInfos',
+                            lbl: ['DroneInfos'],
+                        }
+                    }
+                }).then(
+                    (res) => {
+                        console.log('------------------DroneInfos created');
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            createEachLossLTEInfoToMobius(callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/LossLTEInfos',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cin': {
+                            con: this.$store.state.loss_lte_infos,
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        callback(res.status, '');
                     }
                 ).catch(
                     function (err) {
@@ -890,6 +954,63 @@
 
                         console.log('getEachDroneInfoFromMobius', 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName + '/la', res.data['m2m:cin'].con);
 
+                        if (res.status === 200) {
+                            callback(res.status, res.data['m2m:cin'].con);
+                        } else {
+                            callback(res.status, '');
+                        }
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            getGcsFromMobius(callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'get',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(
+                    function (res) {
+                        if (res.status === 200) {
+                            callback(res.status, res.data);
+                        } else {
+                            callback(res.status, '');
+                        }
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            getLossLTEInfosFromMobius(callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'get',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/LossLTEInfos/la',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(
+                    function (res) {
+                        console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', res)
                         if (res.status === 200) {
                             callback(res.status, res.data['m2m:cin'].con);
                         } else {
@@ -1455,264 +1576,190 @@
                 localStorage.setItem('mobius_host', this.host);
                 localStorage.setItem('mobius_gcs', this.gcs);
 
-                this.getDroneInfosFromMobius((status, drones) => {
-                    console.log('------1---------------------------------GcsAppBarCreated-getDroneInfosFromMobius', status, drones.length, drones);
+                this.getGcsFromMobius((status) => {
+                    console.log('------1---------------------------------GcsAppBarCreated-getGcsFromMobius', status);
                     if(status === 200) {
-                        if(drones.length === 0) {
-                            this.createEachDroneInfoToMobius('unknown', () => {
-                                this.postUnknownDroneInfo((status) => {
-                                    if (status === 201) {
-                                        this.getDroneInfosFromMobius((status, drones) => {
-                                            if(status === 200) {
-                                                this.$store.state.drone_infos = {};
-                                                this.initDroneInfos(drones, 0, () => {
-                                                    console.log(this.$store.state.drone_infos);
+                        this.getLossLTEInfosFromMobius((status, lossLTEs) => {
+                            if(status === 200) {
+                                if(lossLTEs === undefined) {
+                                    this.$store.state.loss_lte_infos = {};
+                                }
+                                else {
+                                    this.$store.state.loss_lte_infos = lossLTEs;
+                                }
+                                console.log('------1---------------------------------GcsAppBarCreated-getLossLTEInfosFromMobius', status, this.$store.state.loss_lte_infos);
+                            }
+                            else {
+                                this.createLossLTEInfosToMobius(() => {
+                                    this.$store.state.loss_lte_infos = {};
+                                     this.createEachLossLTEInfoToMobius(() => {
+                                         console.log('this.$store.state.loss_lte_infos', this.$store.state.loss_lte_infos);
+                                     });
+                                });
+                            }
+                        });
 
-                                                    setTimeout(() => {
-                                                        this.readyDroneInfos();
-                                                    }, 250);
+                        this.getDroneInfosFromMobius((status, drones) => {
+                            console.log('------1---------------------------------GcsAppBarCreated-getDroneInfosFromMobius', status, drones.length, drones);
+                            if(status === 200) {
+                                if(drones.length === 0) {
+                                    this.createEachDroneInfoToMobius('unknown', () => {
+                                        this.postUnknownDroneInfo((status) => {
+                                            if (status === 201) {
+                                                this.getDroneInfosFromMobius((status, drones) => {
+                                                    if(status === 200) {
+                                                        this.$store.state.drone_infos = {};
+                                                        this.initDroneInfos(drones, 0, () => {
+                                                            console.log(this.$store.state.drone_infos);
+
+                                                            setTimeout(() => {
+                                                                this.readyDroneInfos();
+                                                            }, 250);
+                                                        });
+                                                    }
                                                 });
                                             }
                                         });
-                                    }
-                                });
-                            });
-                        }
-                        else {
-                            this.$store.state.drone_infos = {};
-                            this.initDroneInfos(drones, 0, () => {
-                                console.log(this.$store.state.drone_infos);
+                                    });
+                                }
+                                else {
+                                    this.$store.state.drone_infos = {};
+                                    this.initDroneInfos(drones, 0, () => {
+                                        console.log(this.$store.state.drone_infos);
 
-                                setTimeout(() => {
-                                    this.readyDroneInfos();
-                                }, 250);
-                            });
-                        }
-                    }
-                    else {
-                        this.createDroneInfoToMobius(() => {
-                            this.createEachDroneInfoToMobius('unknown', () => {
-                                this.postUnknownDroneInfo((status) => {
-                                    if(status === 201) {
-                                        this.getDroneInfosFromMobius((status, drones) => {
-                                            if(status === 200) {
-                                                this.$store.state.drone_infos = {};
-                                                this.initDroneInfos(drones, 0, () => {
-                                                    console.log(this.$store.state.drone_infos);
+                                        setTimeout(() => {
+                                            this.readyDroneInfos();
+                                        }, 250);
+                                    });
+                                }
+                            }
+                            else {
+                                this.createDroneInfoToMobius(() => {
+                                    this.createEachDroneInfoToMobius('unknown', () => {
+                                        this.postUnknownDroneInfo((status) => {
+                                            if(status === 201) {
+                                                this.getDroneInfosFromMobius((status, drones) => {
+                                                    if(status === 200) {
+                                                        this.$store.state.drone_infos = {};
+                                                        this.initDroneInfos(drones, 0, () => {
+                                                            console.log(this.$store.state.drone_infos);
 
-                                                    setTimeout(() => {
-                                                        this.readyDroneInfos();
-                                                    }, 250);
+                                                            setTimeout(() => {
+                                                                this.readyDroneInfos();
+                                                            }, 250);
+                                                        });
+                                                    }
                                                 });
                                             }
                                         });
-                                    }
+                                    });
                                 });
-                            });
+                            }
                         });
-                    }
-                });
 
-                this.getMarkerInfosFromMobius((status, markers) => {
-                    console.log('GcsAppBarCreated-getMarkerInfosFromMobius', status, markers.length, markers);
-                    if(status === 200) {
-                        if(markers.length === 0) {
-                            this.$store.state.tempMarkers = {};
-                        }
-                        else {
-                            this.$store.state.tempMarkers = {};
-                            this.initMarkerInfos(markers, 0, () => {
-                                console.log('GcsAppBarCreated()-2', this.$store.state.tempMarkers);
-                            });
-                        }
+                        this.getMarkerInfosFromMobius((status, markers) => {
+                            console.log('GcsAppBarCreated-getMarkerInfosFromMobius', status, markers.length, markers);
+                            if(status === 200) {
+                                if(markers.length === 0) {
+                                    this.$store.state.tempMarkers = {};
+                                }
+                                else {
+                                    this.$store.state.tempMarkers = {};
+                                    this.initMarkerInfos(markers, 0, () => {
+                                        console.log('GcsAppBarCreated()-2', this.$store.state.tempMarkers);
+                                    });
+                                }
+                            }
+                            else {
+                                this.createMarkerInfoToMobius(() => {
+                                });
+
+                                this.createSurveyMarkerInfoToMobius(() => {
+                                });
+                            }
+                        });
+
+                        this.getSurveyMarkerInfosFromMobius((status, markers) => {
+                            console.log('GcsAppBarCreated-getSurveyMarkerInfosFromMobius', status, markers.length, markers);
+                            if(status === 200) {
+                                if(markers.length === 0) {
+                                    this.$store.state.surveyMarkers = {};
+                                }
+                                else {
+                                    this.$store.state.surveyMarkers = {};
+                                    this.initSurveyMarkerInfos(markers, 0, () => {
+                                        console.log('GcsAppBarCreated()-2', 'initSurveyMarkerInfos', this.$store.state.surveyMarkers);
+                                    });
+                                }
+                            }
+                            else {
+                                this.createSurveyMarkerInfoToMobius(() => {
+                                });
+                            }
+                        });
                     }
                     else {
-                        this.createMarkerInfoToMobius(() => {
-                        });
+                        this.createGcsToMobius(() => {
+                            this.getDroneInfosFromMobius((status, drones) => {
+                                console.log('------1---------------------------------GcsAppBarCreated-getDroneInfosFromMobius', status, drones.length, drones);
+                                if(status === 200) {
+                                    if(drones.length === 0) {
+                                        this.createEachDroneInfoToMobius('unknown', () => {
+                                            this.postUnknownDroneInfo((status) => {
+                                                if (status === 201) {
+                                                    this.getDroneInfosFromMobius((status, drones) => {
+                                                        if(status === 200) {
+                                                            this.$store.state.drone_infos = {};
+                                                            this.initDroneInfos(drones, 0, () => {
+                                                                console.log(this.$store.state.drone_infos);
 
-                        this.createSurveyMarkerInfoToMobius(() => {
-                        });
-                    }
-                });
+                                                                setTimeout(() => {
+                                                                    this.readyDroneInfos();
+                                                                }, 250);
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        });
+                                    }
+                                    else {
+                                        this.$store.state.drone_infos = {};
+                                        this.initDroneInfos(drones, 0, () => {
+                                            console.log(this.$store.state.drone_infos);
 
-                this.getSurveyMarkerInfosFromMobius((status, markers) => {
-                    console.log('GcsAppBarCreated-getSurveyMarkerInfosFromMobius', status, markers.length, markers);
-                    if(status === 200) {
-                        if(markers.length === 0) {
-                            this.$store.state.surveyMarkers = {};
-                        }
-                        else {
-                            this.$store.state.surveyMarkers = {};
-                            this.initSurveyMarkerInfos(markers, 0, () => {
-                                console.log('GcsAppBarCreated()-2', 'initSurveyMarkerInfos', this.$store.state.surveyMarkers);
+                                            setTimeout(() => {
+                                                this.readyDroneInfos();
+                                            }, 250);
+                                        });
+                                    }
+                                }
+                                else {
+                                    this.createDroneInfoToMobius(() => {
+                                        this.createEachDroneInfoToMobius('unknown', () => {
+                                            this.postUnknownDroneInfo((status) => {
+                                                if(status === 201) {
+                                                    this.getDroneInfosFromMobius((status, drones) => {
+                                                        if(status === 200) {
+                                                            this.$store.state.drone_infos = {};
+                                                            this.initDroneInfos(drones, 0, () => {
+                                                                console.log(this.$store.state.drone_infos);
+
+                                                                setTimeout(() => {
+                                                                    this.readyDroneInfos();
+                                                                }, 250);
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        });
+                                    });
+                                }
                             });
-                        }
-                    }
-                    else {
-                        this.createSurveyMarkerInfoToMobius(() => {
                         });
                     }
                 });
-
-                // let self = this;
-                //
-                // axios({
-                //     validateStatus: function (status) {
-                //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                //         return status < 500;
-                //     },
-                //     method: 'get',
-                //     url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Info/la',
-                //     headers: {
-                //         'X-M2M-RI': String(parseInt(Math.random()*10000)),
-                //         'X-M2M-Origin': 'SVue',
-                //         'Content-Type': 'application/json'
-                //     }
-                // }).then(
-                //     function (res) {
-                //
-                //         console.log('GcsAppBarCreated', 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/Info/la', res);
-                //
-                //         if(res.status === 200) {
-                //
-                //             let payload = res.data;
-                //
-                //             self.$store.commit('resetDroneInfos', payload['m2m:cin'].con);
-                //
-                //             EventBus.$emit('do-selected-drone-profiles');
-                //
-                //             console.log('GcsAppBar-created-drone_infos', self.$store.state.drone_infos);
-                //
-                //             self.$store.commit('updateDroneInfosSelected');
-                //
-                //             let unknown = JSON.parse(JSON.stringify(self.$store.state.drone_infos.unknown));
-                //
-                //             console.log('GcsAppBar-created-unknown', unknown);
-                //             self.$store.commit('initUnknownInfo', unknown);
-                //
-                //             EventBus.$emit('gcs-map-ready', {});
-                //
-                //             unknown = null;
-                //
-                //             self.MOBIUS_CONNECTION_CONNECTED = true;
-                //             self.$store.state.MOBIUS_CONNECTION_CONNECTED = true;
-                //             //self.$cookies.set('mobius_connected', self.MOBIUS_CONNECTION_CONNECTED);
-                //             localStorage.setItem('mobius_connected', self.MOBIUS_CONNECTION_CONNECTED);
-                //         }
-                //         else if(res.status === 404) {
-                //             axios({
-                //                 validateStatus: function (status) {
-                //                     // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                //                     return status < 500;
-                //                 },
-                //                 method: 'post',
-                //                 url: 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius',
-                //                 headers: {
-                //                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                //                     'X-M2M-Origin': 'S'+self.$store.state.VUE_APP_MOBIUS_GCS,
-                //                     'Content-Type': 'application/json;ty=2'
-                //                 },
-                //                 data: {
-                //                     'm2m:ae': {
-                //                         rn: self.$store.state.VUE_APP_MOBIUS_GCS,
-                //                         api: '0.2.481.1.1111',
-                //                         lbl: [self.$store.state.VUE_APP_MOBIUS_GCS],
-                //                         rr: true,
-                //                         poa: ["http://localhost:8080"]
-                //                     }
-                //                 }
-                //             }).then(
-                //                 function () {
-                //                     axios({
-                //                         validateStatus: function (status) {
-                //                             // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                //                             return status < 500;
-                //                         },
-                //                         method: 'post',
-                //                         url: 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS,
-                //                         headers: {
-                //                             'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                //                             'X-M2M-Origin': 'SVue',
-                //                             'Content-Type': 'application/json;ty=3'
-                //                         },
-                //                         data: {
-                //                             'm2m:cnt': {
-                //                                 rn: 'Info',
-                //                                 lbl: ['Info'],
-                //                             }
-                //                         }
-                //                     }).then(
-                //                         function () {
-                //                             axios({
-                //                                 validateStatus: function (status) {
-                //                                     // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                //                                     return status < 500;
-                //                                 },
-                //                                 method: 'post',
-                //                                 url: 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/Info',
-                //                                 headers: {
-                //                                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                //                                     'X-M2M-Origin': 'SVue',
-                //                                     'Content-Type': 'application/json;ty=4'
-                //                                 },
-                //                                 data: {
-                //                                     'm2m:cin': {
-                //                                         con: {
-                //                                             'unknown': {
-                //
-                //                                             }
-                //                                         }
-                //                                     }
-                //                                 }
-                //                             }).then(
-                //                                 function (res) {
-                //                                     let payload = res.data;
-                //
-                //                                     self.$store.commit('resetDroneInfos', payload['m2m:cin'].con);
-                //
-                //                                     console.log('GcsAppBar-created-drone_infos', self.$store.state.drone_infos);
-                //
-                //                                     self.$store.commit('updateDroneInfosSelected');
-                //
-                //                                     let unknown = JSON.parse(JSON.stringify(self.$store.state.drone_infos.unknown));
-                //
-                //                                     console.log('GcsAppBar-created-unknown', unknown);
-                //                                     self.$store.commit('initUnknownInfo', unknown);
-                //
-                //                                     EventBus.$emit('gcs-map-ready', {});
-                //
-                //                                     unknown = null;
-                //
-                //                                     self.MOBIUS_CONNECTION_CONNECTED = true;
-                //                                     self.$store.state.MOBIUS_CONNECTION_CONNECTED = true;
-                //
-                //                                     //self.$cookies.set('mobius_connected', self.MOBIUS_CONNECTION_CONNECTED);
-                //                                     localStorage.setItem('mobius_connected', self.MOBIUS_CONNECTION_CONNECTED);
-                //                                 }
-                //                             ).catch(
-                //                                 function (err) {
-                //                                     console.log(err.message);
-                //                                 }
-                //                             );
-                //                         }
-                //                     ).catch(
-                //                         function (err) {
-                //                             console.log(err.message);
-                //                         }
-                //                     );
-                //                 }
-                //             ).catch(
-                //                 function (err) {
-                //                     console.log(err.message);
-                //                 }
-                //             );
-                //         }
-                //     }
-                // ).catch(
-                //     function (err) {
-                //         console.log(err.message);
-                //     }
-                // );
             },
 
             GcsAppBarReseted() {

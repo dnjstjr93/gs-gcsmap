@@ -23,7 +23,7 @@ Vue.use(Vuex)
 // <v-row justify="space-around"></v-row> // centered - spaced evenly around
 // <v-row justify="space-between"></v-row> // not centered - spaced evenly between
 
-import { faMapMarkerAlt, faMapPin, faFlag } from "@fortawesome/free-solid-svg-icons";
+import { faMapMarkerAlt, faMapPin, faFlag, faPlaneSlash } from "@fortawesome/free-solid-svg-icons";
 import { faDotCircle, faLocationArrow } from "@fortawesome/free-solid-svg-icons";
 //import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 
@@ -331,6 +331,8 @@ const _defaultDroneInfo = {
 
 export default new Vuex.Store({
     state: {
+        loss_lte_infos: {},
+
         rtlModeMonitor: {},
 
         commands: [],
@@ -445,6 +447,7 @@ export default new Vuex.Store({
 
         iconSourceMarker: faMapPin, //faMapMarkerAlt,
         iconSourceSurveyMarker: faMapMarkerAlt,
+        iconSourceLossMarker: faPlaneSlash,
         // iconSourceDrone: droneSvgPath,
         iconSourceDrone: faLocationArrow,
         iconSourceDroneHome: faFlag, //faMapMarkerAlt,

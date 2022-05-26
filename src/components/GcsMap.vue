@@ -64,6 +64,31 @@
 <!--                        />-->
 
                         <GmapMarker
+                            v-for="(p, pIndex) in $store.state.loss_lte_infos" :key="'loss_lte_infos-'+pIndex"
+                            :position="p"
+                            :clickable="false"
+                            :draggable="false"
+                            :title="pIndex"
+                            :icon="{
+                                path: $store.state.iconSourceLossMarker.icon[4],
+                                fillColor: 'black',
+                                fillOpacity: 1,
+                                strokeWeight: 1,
+                                strokeColor: 'white',
+                                rotation: 0,
+                                scale: 0.06,
+                                anchor: {x: $store.state.iconSourceLossMarker.icon[0] / 2, y: $store.state.iconSourceLossMarker.icon[1]},
+                                labelOrigin: {x: $store.state.iconSourceLossMarker.icon[0] / 2, y: 0},
+                            }"
+                            :label="{
+                                text: String(p.alt),
+                                color: 'white',
+                                fontSize: '14px',
+                                fontWeight: 'normal'
+                            }"
+                        />
+
+                        <GmapMarker
                             v-for="(p, pIndex) in planeMarkers" :key="'targetPlaneMarker_'+pIndex"
                             :position="{lat: p.lat, lng: p.lng}"
                             :clickable="false"

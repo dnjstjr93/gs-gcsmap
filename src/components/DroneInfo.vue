@@ -2315,6 +2315,37 @@ export default {
                 }
             }
         },
+
+        postLossLTEInfoToMobius(callback) {
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/LossLTEInfos',
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=3'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: this.$store.state.loss_lte_infos,
+                    }
+                }
+            }).then(
+                (res) => {
+                    console.log('postLossLTEInfoToMobius', res.data);
+                    callback(res.status, '');
+                }
+            ).catch(
+                (err) => {
+                    console.log(err.message);
+                }
+            );
+        },
+
         speak(text, opt_prop) {
             if (typeof SpeechSynthesisUtterance === "undefined" || typeof window.speechSynthesis === "undefined") {
                 alert("이 브라우저는 음성 합성을 지원하지 않습니다.")
@@ -2407,6 +2438,22 @@ export default {
                 }
 
                 this.timeoutObj = setTimeout(() => {
+                    if(this.curArmStatus === 'ARMED') {
+                        let posLat = this.gpi.lat / 10000000;
+                        let posLng = this.gpi.lon / 10000000;
+                        let posAlt = this.gpi.alt / 1000;
+                        let posKey = (parseInt(this.gpi.lat / 1000) / 10000) + '_' + parseInt(this.gpi.lon / 1000) / 10000;
+                        console.log('this.$store.state.loss_lte_infos', this.$store.state.loss_lte_infos);
+
+                        this.$store.state.loss_lte_infos[posKey] = {
+                            lat: posLat,
+                            lng: posLng,
+                            alt: posAlt
+                        };
+
+                        this.postLossLTEInfoToMobius();
+                    }
+
                     this.iconArming = 'mdi-airplane-off';
                     this.colorArming = 'white';
                     this.iconDistance = 'mdi-map-marker-distance';
