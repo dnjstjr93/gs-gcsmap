@@ -16,6 +16,12 @@
                         :marker-index="curIndexMarker"
                     ></InfoSurveyMarker>
                 </v-card>
+                <v-card flat tile class="info_markers" v-if="curLossMarkerFlag">
+                    <InfoLossMarker
+                        v-model="curLossMarkerFlag"
+                        :marker-index="curIndexMarker"
+                    ></InfoLossMarker>
+                </v-card>
                 <v-card flat tile class="context-menu" :style="{top:context.top + 'px',left:context.left+'px'}"
                         v-if="context_flag"
                 >
@@ -65,6 +71,7 @@
 
                         <GmapMarker
                             v-for="(p, pIndex) in $store.state.loss_lte_infos" :key="'loss_lte_infos-'+pIndex"
+                            @dblclick="updataLossMarker($event, p, pIndex)"
                             :position="p"
                             :clickable="false"
                             :draggable="false"
@@ -604,6 +611,7 @@
     import {nanoid} from "nanoid";
     import {gmapApi} from 'vue2-google-maps';
     import axios from "axios";
+    import InfoLossMarker from "@/components/InfoLossMarker";
     // import {faMapMarkerAlt} from "@fortawesome/free-solid-svg-icons";
 
     // var curElevationVal = 0;
@@ -701,6 +709,7 @@
         ],
 
         components: {
+            InfoLossMarker,
             InfoMarker,
             InfoSurveyMarker,
         },
@@ -720,6 +729,7 @@
                 zoom: 18,
                 curTempMarkerFlag: false,
                 curSurveyMarkerFlag: false,
+                curLossMarkerFlag: false,
                 curSelectedMarker: {},
                 curIndexMarker: 0,
                 curNameMarker: 'unknown',
@@ -2149,6 +2159,21 @@
                         this.curIndexMarker = pIndex;
                         this.curNameMarker = dName;
                         this.curSurveyMarkerFlag = true;
+                    }, 10)
+                }
+            },
+
+            updataLossMarker(e, p, pIndex) {
+                if(!this.$store.state.adding) {
+                    console.log('updataLossMarker', p, pIndex);
+
+                    this.curLossMarkerFlag = false;
+
+                    this.$forceUpdate();
+
+                    setTimeout(() => {
+                        this.curIndexMarker = pIndex;
+                        this.curLossMarkerFlag = true;
                     }, 10)
                 }
             },

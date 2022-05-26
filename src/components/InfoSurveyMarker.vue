@@ -435,7 +435,7 @@
     export default {
         myChart: null,
 
-        name: "InfoMarker",
+        name: "InfoSurveyMarker",
 
         props: [
             'value',

@@ -1307,22 +1307,15 @@ export default {
         },
 
         curMode: function (newVal) {
-            let self = this;
             this.colorMode = 'td-text-blue';
             this.info.colorMode = 'blue';
 
             this.$store.state.drone_infos[this.name].curMode = newVal;
             this.info.curMode = newVal;
 
-            setTimeout(function () {
-                if (self.flagReceiving) {
-                    self.colorMode = 'td-text-black';
-                }
-                else {
-                    self.colorMode = 'td-text-gray';
-                }
-
-            }, 1500);
+            if(this.$store.state.drone_infos[this.name].preMode === 'AUTO') {
+                console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& AUTO mode is interrupted!', this.name, 'AUTO -> ', newVal);
+            }
 
             setTimeout(() => {
                 if (this.flagReceiving) {
@@ -1333,8 +1326,9 @@ export default {
                     this.colorMode = 'td-text-gray';
                     this.info.colorMode = 'gray';
                 }
-
             }, 2000);
+
+            this.$store.state.drone_infos[this.name].preMode = this.$store.state.drone_infos[this.name].curMode;
         },
 
         sortie_name: function (newData) {
