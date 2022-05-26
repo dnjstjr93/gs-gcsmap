@@ -711,8 +711,6 @@
 
                 this.flyAltType = altType;
 
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
-
                 this.changeParamShooting(this.paramAlt, 'Alt');
             },
 
@@ -757,6 +755,7 @@
                         this.paramAlt = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = val;
 
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
                         if(this.flyAltType === '상대고도') {
                             this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramAlt));
                         }
@@ -766,7 +765,6 @@
                                     this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i] + parseInt(this.paramAlt)
                                 );
                             }
-
                         }
                     } else if (factor === 'Speed') {
                         this.paramSpeed = val;
@@ -793,6 +791,20 @@
                     if (factor === 'Alt') {
                         this.paramAlt = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = val;
+
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
+                        if(this.flyAltType === '상대고도') {
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramAlt));
+                        }
+                        else {
+                            for(let i = 0; i < 256; i++) {
+                                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
+                                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i] + parseInt(this.paramAlt)
+                                );
+                            }
+                        }
+
+                        this.changeGapSurveyPath(this.paramGap);
                     } else if (factor === 'Speed') {
                         this.paramSpeed = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = val;
