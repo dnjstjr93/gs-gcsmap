@@ -202,12 +202,12 @@
                                         :draggable="false"
                                         :icon="{
                                             path: $store.state.iconSourcePauseMarker.icon[4],
-                                            fillColor: 'blue',
+                                            fillColor: drone.color,
                                             fillOpacity: 1,
                                             strokeWeight: 1,
                                             strokeColor: 'white',
                                             rotation: 0,
-                                            scale: 0.06,
+                                            scale: 0.05,
                                             anchor: {x: $store.state.iconSourcePauseMarker.icon[0] / 2, y: $store.state.iconSourcePauseMarker.icon[1]},
                                             labelOrigin: {x: $store.state.iconSourcePauseMarker.icon[0] / 2, y: 0},
                                         }"
