@@ -196,6 +196,23 @@
                                         :title="drone.name"
                                     />
 
+                                    <GmapMarker
+                                        :position="drone.pausePosition"
+                                        :clickable="false"
+                                        :draggable="false"
+                                        :icon="{
+                                            path: $store.state.iconSourcePauseMarker.icon[4],
+                                            fillColor: 'blue',
+                                            fillOpacity: 1,
+                                            strokeWeight: 1,
+                                            strokeColor: 'white',
+                                            rotation: 0,
+                                            scale: 0.06,
+                                            anchor: {x: $store.state.iconSourcePauseMarker.icon[0] / 2, y: $store.state.iconSourcePauseMarker.icon[1]},
+                                            labelOrigin: {x: $store.state.iconSourcePauseMarker.icon[0] / 2, y: 0},
+                                        }"
+                                    />
+
                                     <GmapPolyline
                                         :path.sync="$store.state.trackingLines[drone.name]"
                                         :options="{

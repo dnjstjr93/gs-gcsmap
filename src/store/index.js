@@ -23,7 +23,7 @@ Vue.use(Vuex)
 // <v-row justify="space-around"></v-row> // centered - spaced evenly around
 // <v-row justify="space-between"></v-row> // not centered - spaced evenly between
 
-import { faMapMarkerAlt, faMapPin, faFlag, faPlaneSlash } from "@fortawesome/free-solid-svg-icons";
+import { faMapMarkerAlt, faMapPin, faFlag, faPlaneSlash, faHourglassHalf } from "@fortawesome/free-solid-svg-icons";
 import { faDotCircle, faLocationArrow } from "@fortawesome/free-solid-svg-icons";
 //import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 
@@ -448,6 +448,7 @@ export default new Vuex.Store({
         iconSourceMarker: faMapPin, //faMapMarkerAlt,
         iconSourceSurveyMarker: faMapMarkerAlt,
         iconSourceLossMarker: faPlaneSlash,
+        iconSourcePauseMarker: faHourglassHalf,
         // iconSourceDrone: droneSvgPath,
         iconSourceDrone: faLocationArrow,
         iconSourceDroneHome: faFlag, //faMapMarkerAlt,

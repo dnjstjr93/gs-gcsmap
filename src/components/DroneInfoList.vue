@@ -566,12 +566,35 @@
                 this.$store.state.commands = [];
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['선회']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['패턴']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['자동']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['고도']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['속도']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['관심']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['착륙']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
 
                 this.drones_selected = null;
                 this.drones_selected = [];
                 for(let name in this.$store.state.drone_infos) {
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'pausePosition')) {
+                            this.$store.state.drone_infos[name].pausePosition = {
+                                lat: 0,
+                                lng: 0,
+                                alt: 0,
+                                heading: 0
+                            };
+                        }
+
                         if(this.$store.state.drone_infos[name].selected) {
                             this.drones_selected.push(this.$store.state.drone_infos[name]);
                         }

@@ -1313,8 +1313,15 @@ export default {
             this.$store.state.drone_infos[this.name].curMode = newVal;
             this.info.curMode = newVal;
 
-            if(this.$store.state.drone_infos[this.name].preMode === 'AUTO') {
-                console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& AUTO mode is interrupted!', this.name, 'AUTO -> ', newVal);
+            if(this.$store.state.drone_infos[this.name].preMode === 'AUTO' && this.curArmStatus === 'ARMED') {
+                this.$store.state.drone_infos[this.name].pausePosition = {
+                    lat: this.gpi.lat / 10000000,
+                    lng: this.gpi.lon / 10000000,
+                    alt: this.gpi.alt / 1000,
+                    heading: this.heading,
+                };
+
+                console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& AUTO mode is interrupted!', this.name, 'AUTO -> ', newVal, this.$store.state.drone_infos[this.name].pausePosition);
             }
 
             setTimeout(() => {
@@ -4057,22 +4064,22 @@ export default {
 
                             this.$store.state.rtlModeMonitor[this.name] = true;
 
-                            this.$store.state.commands = [];
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['선회']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['패턴']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['자동']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['고도']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['속도']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['관심']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['착륙']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
+                            // this.$store.state.commands = [];
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['선회']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['패턴']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['자동']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['고도']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['속도']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['관심']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['착륙']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
                         // }
                     }
                     else {
@@ -4085,11 +4092,11 @@ export default {
 
                             this.$store.state.rtlModeMonitor[this.name] = false;
 
-                            this.$store.state.commands = [];
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
-                            this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
+                            // this.$store.state.commands = [];
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
+                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
                         // }
                     }
 
@@ -6094,28 +6101,26 @@ export default {
                     this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
                 }
 
-                const checkMission = (interval, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx) => {
-                    setTimeout(() => {
-                        if (this.$store.state.drone_infos[this.name].watchingMission === 'takeoff-complete') {
-                            setTimeout(this.send_auto_command, 50, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
+                const checkMission = (name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx) => {
+                    if (this.$store.state.drone_infos[this.name].watchingMission === 'takeoff-complete') {
+                        setTimeout(this.send_auto_command, 50, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
 
-                            this.watchingMission = 'auto-goto';
-                            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
-                            this.watchingMissionStatus = 0;
+                        this.watchingMission = 'auto-goto';
+                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                        this.watchingMissionStatus = 0;
 
-                            this.postDroneInfos((res) => {
-                                console.log('postDroneInfos - auto-goto', res);
-                            });
+                        this.postDroneInfos((res) => {
+                            console.log('postDroneInfos - auto-goto', res);
+                        });
 
-                            this.doPublishBroadcast();
-                        }
-                        else {
-                            checkMission(250, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
-                        }
-                    }, interval, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx)
+                        this.doPublishBroadcast();
+                    }
+                    else {
+                        setTimeout(checkMission, 250, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
+                    }
                 }
 
-                checkMission(20, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
+                checkMission(name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
             }, 35 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, start_idx, end_idx, delay, start_idx);
         });
 
@@ -6688,15 +6693,9 @@ export default {
             }
         });
 
-        EventBus.$on('command-set-mission_rewind-' + this.name, (mission_current_number) => {
-            console.log('send_set_mission_current - ', mission_current_number);
-
-            this.watchingMission = 'auto-goto';
-            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
-
-            this.postDroneInfos((res) => {
-                console.log('postDroneInfos - command-set-mission_rewind', res);
-            });
+        EventBus.$on('command-set-mission_rewind-' + this.name, (payload) => {
+            let position = payload.position;
+            let mission_current_number = payload.mission_current_number;
 
             let target_mode = 'LOITER';
             if (this.fcType === 'px4') {
@@ -6727,15 +6726,56 @@ export default {
                 this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
             }, 25 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
 
-            setTimeout((name, target_pub_topic, sys_id, mission_current_number) => {
-                console.log('send_set_mission_current_command', mission_current_number);
-                this.send_set_mission_current_command(name, target_pub_topic, sys_id, mission_current_number);
-            }, 35 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, mission_current_number);
+            // goto
+            let arr_cur_goto_position = position.split(':');
+            let lat = parseFloat(arr_cur_goto_position[0]);
+            let lon = parseFloat(arr_cur_goto_position[1]);
+            var alt = parseFloat(arr_cur_goto_position[2]);
+            var speed = parseFloat(arr_cur_goto_position[3]);
 
-            setTimeout((name, target_pub_topic, sys_id, mode) => {
-                console.log('send_set_mode_command', mode);
-                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
-            }, 45 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'AUTO');
+            setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
+                this.send_goto_command(name, target_pub_topic, sys_id, lat, lon, alt);
+
+                setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
+                    this.send_change_speed_command(name, target_pub_topic, sys_id, speed);
+
+                    const checkMission = (name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
+                        if (this.$store.state.drone_infos[this.name].watchingMission === 'goto-complete') {
+
+                            console.log('send_set_mission_current - ', mission_current_number);
+
+                            setTimeout((name, target_pub_topic, sys_id, mode) => {
+                                console.log('send_set_mode_command', mode);
+                                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+                            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+                            setTimeout((name, target_pub_topic, sys_id, mission_current_number) => {
+                                console.log('send_set_mission_current_command', mission_current_number);
+                                this.send_set_mission_current_command(name, target_pub_topic, sys_id, mission_current_number);
+                            }, 15 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, mission_current_number);
+
+                            setTimeout((name, target_pub_topic, sys_id, mode) => {
+                                console.log('send_set_mode_command', mode);
+                                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+                            }, 25 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'AUTO');
+
+                            this.postDroneInfos((res) => {
+                                console.log('postDroneInfos - command-set-mission_rewind', res);
+                            });
+
+                            this.watchingMission = 'auto-goto';
+                            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                            this.watchingMissionStatus = parseInt(mission_current_number / (this.$store.state.drone_infos[this.name].mission_count-1) * 100);
+
+                            this.doPublishBroadcast();
+                        }
+                        else {
+                            setTimeout(checkMission, 250, name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
+                        }
+                    }
+                    checkMission(250, name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
+                }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
+            }, 35 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lon, alt, speed, mission_current_number);
         });
 
         // EventBus.$on('push-status-' + this.name, (payload) => {
