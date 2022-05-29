@@ -1322,6 +1322,11 @@ export default {
                 };
 
                 console.log('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& AUTO mode is interrupted!', this.name, 'AUTO -> ', newVal, this.$store.state.drone_infos[this.name].pausePosition);
+
+                this.postDroneInfos(() => {
+
+                });
+
             }
 
             setTimeout(() => {
@@ -2328,7 +2333,7 @@ export default {
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=3'
+                    'Content-Type': 'application/json;ty=4'
                 },
                 data: {
                     'm2m:cin': {
@@ -3079,7 +3084,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('Send Set ROI command to %s, ' + 'msg: ' + msg.toString('hex') + '\n', target_name);
+                    console.log('Send Set Mission Current command to %s, ' + 'msg: ' + msg.toString('hex') + '\n', target_name);
                     this.doPublish(pub_topic, msg);
                 }
             }
@@ -5132,6 +5137,7 @@ export default {
                         }
                         else {
                             this.$store.state.drone_infos[this.name].curMissionItemReached = this.mission_seq;
+                            localStorage.setItem('curMissionItemReached', this.mission_seq);
                         }
                     }
 
@@ -6094,7 +6100,11 @@ export default {
                     this.$store.state.drone_infos[name].targetTakeoffAlt = auto_goto_positions[1].split(':')[2];
                     this.$store.state.drone_infos[name].takeoffDelay = 7;
 
-                    EventBus.$emit('command-set-takeoff-' + this.name);
+                    let payload = {};
+                    payload.targetTakeoffAlt = auto_goto_positions[1].split(':')[2];
+                    payload.takeoffDelay = 7;
+
+                    EventBus.$emit('command-set-takeoff-' + this.name, payload);
                 }
                 else {
                     this.watchingMission = 'takeoff-complete';
@@ -6550,7 +6560,7 @@ export default {
             setTimeout(this.send_goto_alt_command, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, _alt);
         });
 
-        EventBus.$on('command-set-takeoff-' + this.name, () => {
+        EventBus.$on('command-set-takeoff-' + this.name, (payload) => {
             if(this.curArmStatus === 'ARMED' && (this.gpi.alt / 1000).toFixed(1) > 1) {
                 console.log("비행체가 이륙된 상태 입니다.");
             }
@@ -6564,8 +6574,8 @@ export default {
                 console.log('send_arm_command ', this.name);
                 setTimeout(this.send_arm_command, parseInt(50 + Math.random() * 50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
 
-                let takeoffDelay = this.$store.state.drone_infos[this.name].takeoffDelay;
-                let relativeAlt = this.$store.state.drone_infos[this.name].targetTakeoffAlt;
+                let takeoffDelay = payload.takeoffDelay;
+                let relativeAlt = payload.targetTakeoffAlt;
                 let absoluteAlt = parseFloat((this.gpi.alt / 1000) + relativeAlt);
 
                 let _alt = relativeAlt;
@@ -6733,48 +6743,104 @@ export default {
             var alt = parseFloat(arr_cur_goto_position[2]);
             var speed = parseFloat(arr_cur_goto_position[3]);
 
+            if (this.curArmStatus === 'DISARMED') {
+                let payload = {};
+                payload.targetTakeoffAlt = alt;
+                payload.takeoffDelay = 6;
+
+                EventBus.$emit('command-set-takeoff-' + this.name, payload);
+            }
+            else {
+                this.watchingMission = 'takeoff-complete';
+                this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+            }
+
             setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
-                this.send_goto_command(name, target_pub_topic, sys_id, lat, lon, alt);
+                const checkTakeoff = (name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
+                    if (this.$store.state.drone_infos[this.name].watchingMission === 'takeoff-complete') {
+                        this.send_goto_command(name, target_pub_topic, sys_id, lat, lon, alt);
 
-                setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
-                    this.send_change_speed_command(name, target_pub_topic, sys_id, speed);
+                        setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
+                            this.send_change_speed_command(name, target_pub_topic, sys_id, speed);
 
-                    const checkMission = (name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
-                        if (this.$store.state.drone_infos[this.name].watchingMission === 'goto-complete') {
+                            setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
+                                this.send_change_speed_command(name, target_pub_topic, sys_id, speed);
 
-                            console.log('send_set_mission_current - ', mission_current_number);
+                                let cur_lat = this.gpi.lat / 10000000;
+                                let cur_lon = this.gpi.lon / 10000000;
+                                let cur_alt = this.gpi.relative_alt / 1000;
+                                let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
-                            setTimeout((name, target_pub_topic, sys_id, mode) => {
-                                console.log('send_set_mode_command', mode);
-                                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
-                            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
+                                let tar_lat = lat;
+                                let tar_lon = lon;
+                                let tar_alt = alt;
+                                var result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
-                            setTimeout((name, target_pub_topic, sys_id, mission_current_number) => {
-                                console.log('send_set_mission_current_command', mission_current_number);
-                                this.send_set_mission_current_command(name, target_pub_topic, sys_id, mission_current_number);
-                            }, 15 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, mission_current_number);
+                                this.$store.state.drone_infos[name].targetLat = lat;
+                                this.$store.state.drone_infos[name].targetLng = lon;
+                                this.$store.state.drone_infos[name].targetAlt = alt;
 
-                            setTimeout((name, target_pub_topic, sys_id, mode) => {
-                                console.log('send_set_mode_command', mode);
-                                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
-                            }, 25 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'AUTO');
 
-                            this.postDroneInfos((res) => {
-                                console.log('postDroneInfos - command-set-mission_rewind', res);
-                            });
+                                this.watchingMission = 'goto';
+                                this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                                this.watchingInitDist = parseFloat(Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2)).toFixed(1));
+                                this.watchingMissionStatus = 0;
 
-                            this.watchingMission = 'auto-goto';
-                            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
-                            this.watchingMissionStatus = parseInt(mission_current_number / (this.$store.state.drone_infos[this.name].mission_count-1) * 100);
+                                if(this.watchingInitDist <= 0.1) {
+                                    this.watchingMission = 'goto-complete';
+                                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                                    this.watchingMissionStatus = 100;
+                                }
 
-                            this.doPublishBroadcast();
-                        }
-                        else {
-                            setTimeout(checkMission, 250, name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
-                        }
+                                this.doPublishBroadcast();
+
+                                const checkMission = (name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number) => {
+                                    if (this.$store.state.drone_infos[this.name].watchingMission === 'goto-complete') {
+
+                                        console.log('send_set_mission_current - ', mission_current_number);
+
+                                        setTimeout((name, target_pub_topic, sys_id, mode) => {
+                                            console.log('send_set_mode_command', mode);
+                                            this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+                                        }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+                                        setTimeout((name, target_pub_topic, sys_id, mission_current_number) => {
+                                            console.log('send_set_mission_current_command', mission_current_number);
+                                            this.send_set_mission_current_command(name, target_pub_topic, sys_id, (mission_current_number));
+                                        }, 15 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, mission_current_number);
+
+                                        setTimeout((name, target_pub_topic, sys_id, mode) => {
+                                            console.log('send_set_mode_command', mode);
+                                            this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+                                        }, 25 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, 'AUTO');
+
+                                        this.postDroneInfos((res) => {
+                                            console.log('postDroneInfos - command-set-mission_rewind', res);
+                                        });
+
+                                        this.watchingMission = 'auto-goto';
+                                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                                        this.watchingMissionStatus = parseInt(mission_current_number / (this.$store.state.drone_infos[this.name].mission_count-1) * 100);
+
+                                        this.doPublishBroadcast();
+                                    }
+                                    else {
+                                        setTimeout(checkMission, 250, name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
+                                    }
+                                }
+                                checkMission(250, name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
+
+                            }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
+
+                        }, 15 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
                     }
-                    checkMission(250, name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
-                }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
+                    else {
+                        setTimeout(checkTakeoff, 250, name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
+                    }
+                }
+
+                checkTakeoff(name, target_pub_topic, sys_id, lat, lon, alt, speed, mission_current_number);
+
             }, 35 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lon, alt, speed, mission_current_number);
         });
 

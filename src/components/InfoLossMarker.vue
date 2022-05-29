@@ -126,7 +126,7 @@
                     }
                 }).then(
                     function (res) {
-                        console.log('++++++++ confirmAddSurveyMarker-axios', res.data);
+                        console.log('++++++++ postEachLossMarkerInfo-axios', res.data);
                     }
                 ).catch(
                     function (err) {

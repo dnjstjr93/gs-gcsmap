@@ -827,7 +827,7 @@
                     headers: {
                         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                         'X-M2M-Origin': 'SVue',
-                        'Content-Type': 'application/json;ty=3'
+                        'Content-Type': 'application/json;ty=4'
                     },
                     data: {
                         'm2m:cin': {

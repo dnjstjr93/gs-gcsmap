@@ -279,7 +279,7 @@
                                                     <v-card tile flat v-if="(command.title === '패턴')">
                                                         <v-row no-gutters justify="center">
                                                             <v-spacer/>
-                                                            <v-col cols="2" class="pa-1 pt-2">
+                                                            <v-col cols="1" class="pa-1 pt-2">
                                                                 <v-text-field
                                                                     label="Index"
                                                                     class="text-right pa-1"
@@ -335,39 +335,25 @@
                                                                 </v-radio-group>
                                                             </v-col>
                                                             <v-spacer/>
-<!--                                                            <v-col cols="2">-->
-<!--                                                                <v-text-field-->
-<!--                                                                    label="비행고도(m)"-->
-<!--                                                                    class="text-right pa-1"-->
-<!--                                                                    outlined dense hide-details-->
-<!--                                                                    v-model="targetAlt[d.name]"-->
-<!--                                                                    type="number"-->
-<!--                                                                    hint="3 ~ 2000 m"-->
-<!--                                                                ></v-text-field>-->
-<!--                                                            </v-col>-->
-<!--                                                            <v-col cols="2">-->
-<!--                                                                <v-text-field-->
-<!--                                                                    label="비행속도(m/s)"-->
-<!--                                                                    class="text-right pa-1"-->
-<!--                                                                    outlined dense hide-details-->
-<!--                                                                    v-model="targetSpeed[d.name]"-->
-<!--                                                                    type="number"-->
-<!--                                                                    hint="1 ~ 30 m/s"-->
-<!--                                                                ></v-text-field>-->
-<!--                                                            </v-col>-->
-                                                            <v-col cols="1" class="pa-1 pt-2">
-                                                                <v-text-field
-                                                                    label="대기(sec)"
-                                                                    class="text-right pa-1"
-                                                                    outlined dense hide-details
-                                                                    v-model="targetStayTime[d.name]"
-                                                                    type="number"
-                                                                    min="0" max="60"
-                                                                    hint="0 ~ 60초"
-                                                                ></v-text-field>
+                                                            <v-col cols="2" class="pl-4 px-1 mt-n4 mb-1">
+                                                                <v-radio-group
+                                                                    v-model="startWay[d.name]"
+                                                                    column mandatory hide-details
+                                                                    @change="changeStartWay($event, d.name)"
+                                                                >
+                                                                    <v-radio
+                                                                        label="처음부터"
+                                                                        value="처음부터"
+                                                                        color="red"
+                                                                    ></v-radio>
+                                                                    <v-radio
+                                                                        label="중간부터"
+                                                                        value="중간부터"
+                                                                        color="primary"
+                                                                    ></v-radio>
+                                                                </v-radio-group>
                                                             </v-col>
-                                                            <v-spacer/>
-                                                            <v-col cols="1" class="pa-1 pt-2">
+                                                            <v-col cols="2" v-show="showMissionParam" class="pa-1 pt-2">
                                                                 <v-text-field
                                                                     v-model="$store.state.drone_infos[d.name].curMissionItemReached"
                                                                     dense outlined hide-details
@@ -377,22 +363,35 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-spacer/>
-                                                            <v-col cols="1" class="pa-1 pt-3">
-                                                                <v-tooltip top>
-                                                                    <template v-slot:activator="{ on, attrs }">
-                                                                        <v-btn
-                                                                            :disabled="($store.state.drone_infos[d.name].curMissionItemReached === 0)"
-                                                                            color="red"
-                                                                            v-bind="attrs"
-                                                                            v-on="on"
-                                                                            elevation="4"
-                                                                            @click="doMissionRewind(d.name)"
-                                                                        >
-                                                                            연결
-                                                                        </v-btn>
-                                                                    </template>
-                                                                    <span>미종료 미션 존재 - {{ $store.state.drone_infos[d.name].curMissionItemReached }}번째 부터</span>
-                                                                </v-tooltip>
+<!--                                                            <v-col cols="1" class="pa-1 pt-3">-->
+<!--                                                                <v-tooltip top>-->
+<!--                                                                    <template v-slot:activator="{ on, attrs }">-->
+<!--                                                                        <v-btn-->
+<!--                                                                            v-show="startWay[d.name] === '중간부터'"-->
+<!--                                                                            :disabled="($store.state.drone_infos[d.name].curMissionItemReached === 0)"-->
+<!--                                                                            color="red"-->
+<!--                                                                            v-bind="attrs"-->
+<!--                                                                            v-on="on"-->
+<!--                                                                            elevation="4"-->
+<!--                                                                            @click="doMissionRewind(d.name)"-->
+<!--                                                                        >-->
+<!--                                                                            연결-->
+<!--                                                                        </v-btn>-->
+<!--                                                                    </template>-->
+<!--                                                                    <span>미종료 미션 존재 - {{ $store.state.drone_infos[d.name].curMissionItemReached }}번째 부터</span>-->
+<!--                                                                </v-tooltip>-->
+<!--                                                            </v-col>-->
+                                                            <v-spacer/>
+                                                            <v-col cols="2" class="pa-1 pt-2">
+                                                                <v-text-field
+                                                                    label="지점대기(sec)"
+                                                                    class="text-right pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="targetStayTime[d.name]"
+                                                                    type="number"
+                                                                    min="0" max="60"
+                                                                    hint="0 ~ 60초"
+                                                                ></v-text-field>
                                                             </v-col>
                                                             <v-spacer/>
                                                         </v-row>
@@ -1152,6 +1151,8 @@ export default {
             gotoType: {},
             yawBehavior: {},
             flyShape: {},
+            startWay: {},
+            showMissionParam: false,
             circleType: {},
 
             rtlSpeed: {},
@@ -1344,6 +1345,7 @@ export default {
             this.gotoType = {};
             this.yawBehavior = {};
             this.flyShape = {};
+            this.startWay = {};
             this.circleType = {};
             for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
@@ -1375,6 +1377,7 @@ export default {
                         this.gotoType[name] = this.$store.state.drone_infos[name].gotoType;
                         this.yawBehavior[name] = 'YAW고정';
                         this.flyShape[name] = '곡선비행';
+                        this.startWay[name] = '처음부터';
                         this.circleType[name] = (this.$store.state.drone_infos[name].circleType === 'cw')?'시계방향':'반시계방향';
 
                         this.prepared = true;
@@ -1490,6 +1493,20 @@ export default {
         changeFlyShape(flyShape, dName) {
             this.flyShape[dName] = flyShape;
             this.$store.state.drone_infos[dName].flyShape = flyShape;
+        },
+
+        changeStartWay(startWay, dName) {
+            this.startWay[dName] = startWay;
+            this.$store.state.drone_infos[dName].startWay = startWay;
+
+            if(startWay === '중간부터') {
+                this.showMissionParam = true;
+            }
+            else {
+                this.showMissionParam = false;
+            }
+
+            console.log(this.startWay[dName]);
         },
 
         changeCircleType(circleType, dName) {
@@ -1753,17 +1770,6 @@ export default {
             }
         },
 
-        doMissionRewind(dName) {
-            this.curTab = 'virtual';
-            this.$store.state.active_tab = 'virtual';
-
-            this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
-
-            console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
-
-            EventBus.$emit('command-set-mission_rewind-' + dName, this.$store.state.drone_infos[dName].curMissionItemReached);
-        },
-
         sendCommand() {
             this.loading = true;
             console.log(this.curTab);
@@ -1877,7 +1883,11 @@ export default {
                         }
                         this.$store.state.drone_infos[name].targetTakeoffAlt = parseInt(this.targetTakeoffAlt[name]);
 
-                        EventBus.$emit('command-set-takeoff-' + name);
+                        let payload = {};
+                        payload.targetTakeoffAlt = this.$store.state.drone_infos[name].targetTakeoffAlt
+                        payload.takeoffDelay = this.$store.state.drone_infos[name].takeoffDelay;
+
+                        EventBus.$emit('command-set-takeoff-' + name, payload);
                     }
                 }
             }
@@ -2109,8 +2119,18 @@ export default {
             }, 100);
         },
 
-        setSurvey() {
+        doMissionRewind(dName) {
+            this.curTab = 'virtual';
+            this.$store.state.active_tab = 'virtual';
 
+            this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
+
+            console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
+
+            EventBus.$emit('command-set-mission_rewind-' + dName, this.$store.state.drone_infos[dName].curMissionItemReached);
+        },
+
+        setSurvey() {
             for(let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
@@ -2123,6 +2143,7 @@ export default {
                             this.$store.state.drone_infos[dName].autoSpeed = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].speed;
                             this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
                             this.$store.state.drone_infos[dName].flyShape = this.flyShape[dName];
+                            this.$store.state.drone_infos[dName].startWay = this.startWay[dName];
 
                             this.position_selections_items[dName] = [];
                             for (let idx in this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines) {
@@ -2139,17 +2160,34 @@ export default {
                                 }
                             }
 
-                            console.log('setSurvey', parseInt(this.$store.state.drone_infos[dName].autoStartIndex), parseInt(this.$store.state.drone_infos[dName].autoEndIndex), this.$store.state.drone_infos[dName].autoDelay);
-                            if (parseInt(this.$store.state.drone_infos[dName].autoStartIndex) <= parseInt(this.$store.state.drone_infos[dName].autoEndIndex)) {
-                                let payload = {};
-                                payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
-                                EventBus.$emit('command-set-auto_goto-' + dName, payload);
+                            if(this.showMissionParam) {
+                                console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
 
-                                payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
-                                payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].period + ' keti';
-                                EventBus.$emit('do-publish-' + dName, payload);
-                            } else {
-                                console.log('setAutoGoto-', dName, 'auto index setting error!!!');
+                                let strPos = this.$store.state.drone_infos[dName].pausePosition.lat + ':' +
+                                    this.$store.state.drone_infos[dName].pausePosition.lng + ':' +
+                                    this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].alt + ':' +
+                                    this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].speed + ':' +
+                                    '100:5:16:0:0';
+
+                                let payload = {};
+                                payload.position = strPos;
+                                payload.mission_current_number = this.$store.state.drone_infos[dName].curMissionItemReached
+
+                                EventBus.$emit('command-set-mission_rewind-' + dName, payload);
+                            }
+                            else {
+                                console.log('setSurvey', parseInt(this.$store.state.drone_infos[dName].autoStartIndex), parseInt(this.$store.state.drone_infos[dName].autoEndIndex), this.$store.state.drone_infos[dName].autoDelay);
+                                if (parseInt(this.$store.state.drone_infos[dName].autoStartIndex) <= parseInt(this.$store.state.drone_infos[dName].autoEndIndex)) {
+                                    let payload = {};
+                                    payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
+                                    EventBus.$emit('command-set-auto_goto-' + dName, payload);
+
+                                    payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
+                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].period + ' keti';
+                                    EventBus.$emit('do-publish-' + dName, payload);
+                                } else {
+                                    console.log('setAutoGoto-', dName, 'auto index setting error!!!');
+                                }
                             }
                         }
                         else {
