@@ -1355,9 +1355,6 @@ export default {
                         this.targetTakeoffAlt[name] = this.$store.state.drone_infos[name].targetTakeoffAlt;
                         this.targetAlt[name] = this.$store.state.drone_infos[name].targetAlt;
                         this.targetSpeed[name] = this.$store.state.drone_infos[name].targetSpeed;
-                        if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'targetStayTime')) {
-                            this.$store.state.drone_infos[name].targetStayTime = 0;
-                        }
                         if(!Object.prototype.hasOwnProperty.call(this.rtlSpeed, name)) {
                             this.rtlSpeed[name] = 5;
                         }

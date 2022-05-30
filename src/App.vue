@@ -1,7 +1,5 @@
 <template>
     <v-app>
-        <GcsAppBar/>
-
         <v-main>
             <router-view></router-view>
             <!--            <DroneInfoList/>-->
@@ -12,13 +10,11 @@
 
 <script>
 
-import GcsAppBar from "./components/GcsAppBar";
-
 export default {
     name: 'App',
 
     components: {
-        GcsAppBar,
+//        GcsAppBar,
         // GcsMap,
         // DroneInfoList
     },

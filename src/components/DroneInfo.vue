@@ -6659,6 +6659,10 @@ export default {
             this.onMessageHandler(payload.topic, payload.message);
         });
 
+        EventBus.$on('on-drone-message-handler-' + this.name, (payload) => {
+            this.onDroneMessageHandler(payload.topic, payload.message);
+        });
+
         EventBus.$on('do-positions-elevation-' + this.name, () => {
             for (let idx in this.$store.state.tempMarkers[this.name]) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[this.name], idx)) {
@@ -6951,7 +6955,7 @@ export default {
             };
         // }
 
-        this.createConnection();
+        //this.createConnection();
     },
 
 
@@ -7049,6 +7053,7 @@ export default {
         EventBus.$off('command-set-mode-' + this.name);
         EventBus.$off('command-set-arm-' + this.name);
         EventBus.$off('on-message-handler-' + this.name);
+        EventBus.$off('on-drone-message-handler-' + this.name);
         EventBus.$off('command-set-roi-' + this.name);
 
         EventBus.$off('ClickADSBMonitor');

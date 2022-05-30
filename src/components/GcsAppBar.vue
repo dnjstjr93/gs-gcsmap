@@ -1,463 +1,463 @@
 <template>
     <div>
-    <v-app-bar app color="primary" dark dense>
-        <v-toolbar-title>
-            <v-row no-gutters align="center">
-                <v-icon left>mdi-monitor-dashboard</v-icon>
-                KETI GCS
-            </v-row>
-        </v-toolbar-title>
-
-        <v-spacer></v-spacer>
-
-        <v-btn text @click.stop="mapAngleDialog=true" :disabled="!MOBIUS_CONNECTION_CONNECTED">
-            <v-icon>mdi-format-rotate-90</v-icon>
-        </v-btn>
-
-        <v-btn text :disabled="!MOBIUS_CONNECTION_CONNECTED">
-            <v-icon>mdi-crosshairs-gps</v-icon>
-        </v-btn>
-
-        <v-btn text @click.stop="dialogProfile">
-<!--            <v-icon>mdi-quadcopter</v-icon>-->
-            <v-icon>mdi-cog-transfer</v-icon>
-        </v-btn>
-
-
-<!--        <v-btn text @click.stop="openCam">-->
-<!--            <v-icon>mdi-video</v-icon>-->
-<!--        </v-btn>-->
-
-        <v-btn text @click.stop="openCam2" :disabled="!MOBIUS_CONNECTION_CONNECTED">
-            <v-icon>mdi-video</v-icon>
-        </v-btn>
-
-<!--        <router-link-->
-<!--                to="/cam"-->
-<!--                target="_blank"-->
-<!--        >-->
-<!--            <v-btn text>-->
-<!--                <v-icon>mdi-video</v-icon>-->
-<!--            </v-btn>-->
-<!--        </router-link>-->
-
-        <v-btn text :disabled="!MOBIUS_CONNECTION_CONNECTED">
-            <v-icon>mdi-account</v-icon>
-        </v-btn>
-
-        <v-dialog
-            v-model="mapAngleDialog"
-            max-width="340"
-        >
-            <v-card class="pa-3 pt-5">
-                <v-row no-gutters align="center" justify="center">
-                    <v-spacer/>
-                    <v-col cols="2" class="text-center">
-                        <v-icon>
-                            mdi-format-rotate-90
-                        </v-icon>
-                    </v-col>
-                    <v-spacer/>
-                    <v-col cols="5">
-                        <v-text-field
-                            label="mapAngle(°)"
-                            v-model="mapAngle"
-                            class="ma-0 pa-0"
-                            type="number"
-                            outlined dense hide-details
-                            color="amber"
-                            min="-360"
-                            max="360"
-                        ></v-text-field>
-                    </v-col>
+        <v-app-bar app color="primary" dark dense>
+            <v-toolbar-title>
+                <v-row no-gutters align="center">
+                    <v-icon left>mdi-monitor-dashboard</v-icon>
+                    KETI GCS
                 </v-row>
-                <v-row no-gutters align="center" justify="center">
-                    <v-col cols="6">
-                        <v-card-actions>
-                            <v-btn
-                                color="green darken-1"
-                                text outlined
-                                @click="rotateMapAngle"
-                            >
-                                OK
-                            </v-btn>
-                            <v-btn
-                                color="red darken-1"
-                                text outlined
-                                @click="mapAngleDialog = false"
-                            >
-                                Cancel
-                            </v-btn>
-                        </v-card-actions>
-                    </v-col>
-                </v-row>
-            </v-card>
-        </v-dialog>
+            </v-toolbar-title>
 
-        <v-dialog v-model="dialog" persistent max-width="900px">
-            <v-card id="create" class="mx-auto">
-                <v-toolbar color="teal" dark>
-                    <v-icon left>mdi-quadcopter</v-icon>
-                    <v-toolbar-title>Settings</v-toolbar-title>
-                    <template v-slot:extension>
-                        <v-speed-dial
-                            v-model="fab"
-                            :top="true"
-                            :bottom="false"
-                            :right="false"
-                            :left="true"
-                            direction="right"
-                            :open-on-hover="true"
-                            transition="Scale"
-                        >
-                            <template v-slot:activator>
-                                <v-btn v-model="fab" color="blue darken-2" dark fab>
-                                    <v-icon v-if="fab">mdi-close</v-icon>
-                                    <v-icon v-else>mdi-card-bulleted-settings-outline</v-icon>
-                                </v-btn>
-                            </template>
-                            <v-btn disabled fab dark small color="green">
-                                <v-icon>mdi-pencil</v-icon>
-                            </v-btn>
-                            <v-btn fab dark small color="indigo" @click.stop="add_dialog = true">
-                                <v-icon>mdi-plus</v-icon>
-                            </v-btn>
-                            <v-btn disabled fab dark small color="red" @click.stop="delProfile">
-                                <v-icon>mdi-delete</v-icon>
-                            </v-btn>
-                        </v-speed-dial>
+            <v-spacer></v-spacer>
 
-                        <v-row no-gutters class="text-right justify-end mb-2">
-                            <v-col cols="4">
-                                <!--                            <v-text-field hide-details ref="host" v-model="host" :rules="host_rule" placeholder="203.253.128.177" label="Host*" required></v-text-field>-->
-                                <v-text-field
-                                    class="pl-16 mx-2 mt-1"
-                                    dense hide-details outlined
-                                    ref="host"
-                                    v-model="host" :rules="host_rule"
-                                    placeholder="203.253.128.177"
-                                    label="HOST*"
-                                    required
-                                    :disabled="MOBIUS_CONNECTION_CONNECTED"
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="3">
-                                <v-text-field
-                                    class="mt-1"
-                                    dense hide-details outlined
-                                    ref="gcs"
-                                    v-model="gcs" :rules="gcs_rule"
-                                    placeholder="KETI_GCS"
-                                    label="GCS*"
-                                    required
-                                    :disabled="MOBIUS_CONNECTION_CONNECTED"
-                                ></v-text-field>
-                            </v-col>
-                            <v-col cols="4">
-                                <v-btn
-                                    class="mx-2 mt-1"
-                                    tile @click="GcsAppBarCreated"
-                                    elevation="5"
-                                    color="primary"
-                                    :disabled="MOBIUS_CONNECTION_CONNECTED"
-                                > {{ MOBIUS_CONNECTION_TEXT }}
-                                </v-btn>
-                                <!--            </v-col>-->
-                                <!--            <v-col cols="2">-->
-                                <v-btn
-                                    class="mx-2 mt-1"
-                                    tile @click="GcsAppBarReseted"
-                                    elevation="2"
-                                    color="primary"
-                                    :disabled="!MOBIUS_CONNECTION_CONNECTED"
-                                > {{ MOBIUS_DISCONNECTION_TEXT }}
-                                </v-btn>
-                            </v-col>
-                        </v-row>
-                    </template>
-                </v-toolbar>
+            <v-btn text @click.stop="mapAngleDialog=true" :disabled="!MOBIUS_CONNECTION_CONNECTED">
+                <v-icon>mdi-format-rotate-90</v-icon>
+            </v-btn>
 
-                <v-container fluid>
-                    <v-row class="mb-1">
-                        <v-col cols="2">
-                            <v-subheader>Drone List</v-subheader>
+            <v-btn text :disabled="!MOBIUS_CONNECTION_CONNECTED">
+                <v-icon>mdi-crosshairs-gps</v-icon>
+            </v-btn>
+
+            <v-btn text @click.stop="dialogProfile">
+    <!--            <v-icon>mdi-quadcopter</v-icon>-->
+                <v-icon>mdi-cog-transfer</v-icon>
+            </v-btn>
+
+
+    <!--        <v-btn text @click.stop="openCam">-->
+    <!--            <v-icon>mdi-video</v-icon>-->
+    <!--        </v-btn>-->
+
+            <v-btn text @click.stop="openCam2" :disabled="!MOBIUS_CONNECTION_CONNECTED">
+                <v-icon>mdi-video</v-icon>
+            </v-btn>
+
+    <!--        <router-link-->
+    <!--                to="/cam"-->
+    <!--                target="_blank"-->
+    <!--        >-->
+    <!--            <v-btn text>-->
+    <!--                <v-icon>mdi-video</v-icon>-->
+    <!--            </v-btn>-->
+    <!--        </router-link>-->
+
+            <v-btn text :disabled="!MOBIUS_CONNECTION_CONNECTED">
+                <v-icon>mdi-account</v-icon>
+            </v-btn>
+
+            <v-dialog
+                v-model="mapAngleDialog"
+                max-width="340"
+            >
+                <v-card class="pa-3 pt-5">
+                    <v-row no-gutters align="center" justify="center">
+                        <v-spacer/>
+                        <v-col cols="2" class="text-center">
+                            <v-icon>
+                                mdi-format-rotate-90
+                            </v-icon>
                         </v-col>
-<!--                        <v-col cols="3">-->
-<!--&lt;!&ndash;                            <v-text-field hide-details ref="host" v-model="host" :rules="host_rule" placeholder="203.253.128.177" label="Host*" required></v-text-field>&ndash;&gt;-->
-<!--                            <v-text-field-->
-<!--                                    class="mx-2"-->
-<!--                                    dense hide-details-->
-<!--                                    ref="host"-->
-<!--                                    v-model="host" :rules="host_rule"-->
-<!--                                    placeholder="203.253.128.177"-->
-<!--                                    label="HOST*"-->
-<!--                                    required-->
-<!--                                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
-<!--                            ></v-text-field>-->
-<!--                        </v-col>-->
-<!--                        <v-col cols="3">-->
-<!--                            <v-text-field-->
-<!--                                    class="mx-2"-->
-<!--                                    dense hide-details-->
-<!--                                    ref="gcs"-->
-<!--                                    v-model="gcs" :rules="gcs_rule"-->
-<!--                                    placeholder="KETI_GCS"-->
-<!--                                    label="GCS*"-->
-<!--                                    required-->
-<!--                                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
-<!--                            ></v-text-field>-->
-<!--                        </v-col>-->
-<!--                        <v-col cols="2">-->
-<!--                            <v-btn-->
-<!--                                    class="mx-2"-->
-<!--                                    tile @click="GcsAppBarCreated"-->
-<!--                                    elevation="5"-->
-<!--                                    color="primary"-->
-<!--                                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
-<!--                            > {{ MOBIUS_CONNECTION_TEXT }}-->
-<!--                            </v-btn>-->
-<!--                        </v-col>-->
-<!--                        <v-col cols="2">-->
-<!--                            <v-btn-->
-<!--                                    class="mx-0"-->
-<!--                                    tile @click="GcsAppBarReseted"-->
-<!--                                    elevation="2"-->
-<!--                                    color="primary"-->
-<!--                                    :disabled="!MOBIUS_CONNECTION_CONNECTED"-->
-<!--                            > {{ MOBIUS_DISCONNECTION_TEXT }}-->
-<!--                            </v-btn>-->
-<!--                        </v-col>-->
-
+                        <v-spacer/>
+                        <v-col cols="5">
+                            <v-text-field
+                                label="mapAngle(°)"
+                                v-model="mapAngle"
+                                class="ma-0 pa-0"
+                                type="number"
+                                outlined dense hide-details
+                                color="amber"
+                                min="-360"
+                                max="360"
+                            ></v-text-field>
+                        </v-col>
                     </v-row>
-                    <v-data-table
-                        v-model="selected"
-                        :headers="headers"
-                        :items="drone_infos"
-                        :single-select="false"
-                        item-key="name"
-                        show-select
-                        class="elevation-1"
-                    >
-                        <template v-slot:item.color="{item}">
-                            <v-avatar
-                                    size="32"
-                                    class="white--text"
-                                    v-text="String(item.color).slice(0,1).toUpperCase()"
-                                    :color="item.color"
-                            ></v-avatar>
-                        </template>
-                        <template v-slot:item.update="{ item }">
-                            <v-btn fab dark x-small color="green" @click.stop="updateProfile(item)">
-                                <v-icon small>mdi-pencil</v-icon>
-                            </v-btn>
-                        </template>
-                        <template v-slot:item.del="{ item }">
-                            <v-btn fab dark x-small color="red" @click.stop="removeProfile(item)">
-                                <v-icon small>mdi-delete</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-data-table>
-                </v-container>
-                <v-row no-gutters class="justify-end pb-3 pr-3">
-                    <v-btn text outlined @click.stop="confirmSelected(false)">
-                        <v-icon left>mdi-ticket-confirmation-outline</v-icon> 확인
-                    </v-btn>
-                </v-row>
-            </v-card>
+                    <v-row no-gutters align="center" justify="center">
+                        <v-col cols="6">
+                            <v-card-actions>
+                                <v-btn
+                                    color="green darken-1"
+                                    text outlined
+                                    @click="rotateMapAngle"
+                                >
+                                    OK
+                                </v-btn>
+                                <v-btn
+                                    color="red darken-1"
+                                    text outlined
+                                    @click="mapAngleDialog = false"
+                                >
+                                    Cancel
+                                </v-btn>
+                            </v-card-actions>
+                        </v-col>
+                    </v-row>
+                </v-card>
+            </v-dialog>
 
-            <v-dialog v-model="add_dialog" persistent max-width="600px">
-                <v-card ref="form">
-                    <v-card-title>
-                        <span class="headline">Drone Profile</span>
-                    </v-card-title>
-                    <v-card-text>
-                        <v-container>
-                            <v-row>
-<!--                                <v-col cols="12" sm="6">-->
-<!--                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_rule" label="Drone Host*" required></v-text-field>-->
-<!--                                </v-col>-->
-                                <v-col cols="12" sm="6">
-                                    <v-text-field ref="drone_name" v-model="drone_name" :rules="drone_name_rule" label="Drone Name*" required></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field ref="drone_id" v-model="drone_id" :rules="drone_id_rule" label="Drone ID*" hint="Unique ID of Drone" persistent-hint required
+            <v-dialog v-model="dialog" persistent max-width="900px">
+                <v-card id="create" class="mx-auto">
+                    <v-toolbar color="teal" dark>
+                        <v-icon left>mdi-quadcopter</v-icon>
+                        <v-toolbar-title>Settings</v-toolbar-title>
+                        <template v-slot:extension>
+                            <v-speed-dial
+                                v-model="fab"
+                                :top="true"
+                                :bottom="false"
+                                :right="false"
+                                :left="true"
+                                direction="right"
+                                :open-on-hover="true"
+                                transition="Scale"
+                            >
+                                <template v-slot:activator>
+                                    <v-btn v-model="fab" color="blue darken-2" dark fab>
+                                        <v-icon v-if="fab">mdi-close</v-icon>
+                                        <v-icon v-else>mdi-card-bulleted-settings-outline</v-icon>
+                                    </v-btn>
+                                </template>
+                                <v-btn disabled fab dark small color="green">
+                                    <v-icon>mdi-pencil</v-icon>
+                                </v-btn>
+                                <v-btn fab dark small color="indigo" @click.stop="add_dialog = true">
+                                    <v-icon>mdi-plus</v-icon>
+                                </v-btn>
+                                <v-btn disabled fab dark small color="red" @click.stop="delProfile">
+                                    <v-icon>mdi-delete</v-icon>
+                                </v-btn>
+                            </v-speed-dial>
+
+                            <v-row no-gutters class="text-right justify-end mb-2">
+                                <v-col cols="4">
+                                    <!--                            <v-text-field hide-details ref="host" v-model="host" :rules="host_rule" placeholder="203.253.128.177" label="Host*" required></v-text-field>-->
+                                    <v-text-field
+                                        class="pl-16 mx-2 mt-1"
+                                        dense hide-details outlined
+                                        ref="host"
+                                        v-model="host" :rules="host_rule"
+                                        placeholder="203.253.128.177"
+                                        label="HOST*"
+                                        required
+                                        :disabled="MOBIUS_CONNECTION_CONNECTED"
                                     ></v-text-field>
                                 </v-col>
-<!--                                <v-col cols="12" sm="6">-->
-<!--                                    <v-text-field ref="gcs_name" v-model="gcs_name" :rules="gcs_name_rule" value="KETI_MUV" label="GCS Name*" hint="Name of Drone GCS" persistent-hint required></v-text-field>-->
-<!--                                </v-col>-->
-                                <v-col cols="12" sm="6">
-                                    <v-select
+                                <v-col cols="3">
+                                    <v-text-field
+                                        class="mt-1"
+                                        dense hide-details outlined
+                                        ref="gcs"
+                                        v-model="gcs" :rules="gcs_rule"
+                                        placeholder="KETI_GCS"
+                                        label="GCS*"
+                                        required
+                                        :disabled="MOBIUS_CONNECTION_CONNECTED"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="4">
+                                    <v-btn
+                                        class="mx-2 mt-1"
+                                        tile @click="GcsAppBarCreated"
+                                        elevation="5"
+                                        color="primary"
+                                        :disabled="MOBIUS_CONNECTION_CONNECTED"
+                                    > {{ MOBIUS_CONNECTION_TEXT }}
+                                    </v-btn>
+                                    <!--            </v-col>-->
+                                    <!--            <v-col cols="2">-->
+                                    <v-btn
+                                        class="mx-2 mt-1"
+                                        tile @click="GcsAppBarReseted"
+                                        elevation="2"
+                                        color="primary"
+                                        :disabled="!MOBIUS_CONNECTION_CONNECTED"
+                                    > {{ MOBIUS_DISCONNECTION_TEXT }}
+                                    </v-btn>
+                                </v-col>
+                            </v-row>
+                        </template>
+                    </v-toolbar>
+
+                    <v-container fluid>
+                        <v-row class="mb-1">
+                            <v-col cols="2">
+                                <v-subheader>Drone List</v-subheader>
+                            </v-col>
+    <!--                        <v-col cols="3">-->
+    <!--&lt;!&ndash;                            <v-text-field hide-details ref="host" v-model="host" :rules="host_rule" placeholder="203.253.128.177" label="Host*" required></v-text-field>&ndash;&gt;-->
+    <!--                            <v-text-field-->
+    <!--                                    class="mx-2"-->
+    <!--                                    dense hide-details-->
+    <!--                                    ref="host"-->
+    <!--                                    v-model="host" :rules="host_rule"-->
+    <!--                                    placeholder="203.253.128.177"-->
+    <!--                                    label="HOST*"-->
+    <!--                                    required-->
+    <!--                                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
+    <!--                            ></v-text-field>-->
+    <!--                        </v-col>-->
+    <!--                        <v-col cols="3">-->
+    <!--                            <v-text-field-->
+    <!--                                    class="mx-2"-->
+    <!--                                    dense hide-details-->
+    <!--                                    ref="gcs"-->
+    <!--                                    v-model="gcs" :rules="gcs_rule"-->
+    <!--                                    placeholder="KETI_GCS"-->
+    <!--                                    label="GCS*"-->
+    <!--                                    required-->
+    <!--                                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
+    <!--                            ></v-text-field>-->
+    <!--                        </v-col>-->
+    <!--                        <v-col cols="2">-->
+    <!--                            <v-btn-->
+    <!--                                    class="mx-2"-->
+    <!--                                    tile @click="GcsAppBarCreated"-->
+    <!--                                    elevation="5"-->
+    <!--                                    color="primary"-->
+    <!--                                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
+    <!--                            > {{ MOBIUS_CONNECTION_TEXT }}-->
+    <!--                            </v-btn>-->
+    <!--                        </v-col>-->
+    <!--                        <v-col cols="2">-->
+    <!--                            <v-btn-->
+    <!--                                    class="mx-0"-->
+    <!--                                    tile @click="GcsAppBarReseted"-->
+    <!--                                    elevation="2"-->
+    <!--                                    color="primary"-->
+    <!--                                    :disabled="!MOBIUS_CONNECTION_CONNECTED"-->
+    <!--                            > {{ MOBIUS_DISCONNECTION_TEXT }}-->
+    <!--                            </v-btn>-->
+    <!--                        </v-col>-->
+
+                        </v-row>
+                        <v-data-table
+                            v-model="selected"
+                            :headers="headers"
+                            :items="drone_infos"
+                            :single-select="false"
+                            item-key="name"
+                            show-select
+                            class="elevation-1"
+                        >
+                            <template v-slot:item.color="{item}">
+                                <v-avatar
+                                        size="32"
+                                        class="white--text"
+                                        v-text="String(item.color).slice(0,1).toUpperCase()"
+                                        :color="item.color"
+                                ></v-avatar>
+                            </template>
+                            <template v-slot:item.update="{ item }">
+                                <v-btn fab dark x-small color="green" @click.stop="updateProfile(item)">
+                                    <v-icon small>mdi-pencil</v-icon>
+                                </v-btn>
+                            </template>
+                            <template v-slot:item.del="{ item }">
+                                <v-btn fab dark x-small color="red" @click.stop="removeProfile(item)">
+                                    <v-icon small>mdi-delete</v-icon>
+                                </v-btn>
+                            </template>
+                        </v-data-table>
+                    </v-container>
+                    <v-row no-gutters class="justify-end pb-3 pr-3">
+                        <v-btn text outlined @click.stop="confirmSelected(false)">
+                            <v-icon left>mdi-ticket-confirmation-outline</v-icon> 확인
+                        </v-btn>
+                    </v-row>
+                </v-card>
+
+                <v-dialog v-model="add_dialog" persistent max-width="600px">
+                    <v-card ref="form">
+                        <v-card-title>
+                            <span class="headline">Drone Profile</span>
+                        </v-card-title>
+                        <v-card-text>
+                            <v-container>
+                                <v-row>
+    <!--                                <v-col cols="12" sm="6">-->
+    <!--                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_rule" label="Drone Host*" required></v-text-field>-->
+    <!--                                </v-col>-->
+                                    <v-col cols="12" sm="6">
+                                        <v-text-field ref="drone_name" v-model="drone_name" :rules="drone_name_rule" label="Drone Name*" required></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <v-text-field ref="drone_id" v-model="drone_id" :rules="drone_id_rule" label="Drone ID*" hint="Unique ID of Drone" persistent-hint required
+                                        ></v-text-field>
+                                    </v-col>
+    <!--                                <v-col cols="12" sm="6">-->
+    <!--                                    <v-text-field ref="gcs_name" v-model="gcs_name" :rules="gcs_name_rule" value="KETI_MUV" label="GCS Name*" hint="Name of Drone GCS" persistent-hint required></v-text-field>-->
+    <!--                                </v-col>-->
+                                    <v-col cols="12" sm="6">
+                                        <v-select
+                                                v-model="type_selected"
+                                                :items="['ardupilot', 'px4', 'dji', 'etc']"
+                                                label="Type*"
+                                                hint="Type of FC"
+                                                required
+                                                hide-details
+                                        ></v-select>
+                                    </v-col>
+                                    <v-col cols="12" sm="3">
+                                        <v-text-field ref="bat_cell" v-model="bat_cell" :rules="bat_cell_rule" label="Battery Cell*" required></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="4">
+                                        <v-text-field
+                                                ref="system_id"
+                                                v-model="system_id" :rules="system_id_rule"
+                                                label="System ID*"
+                                                hint="System id of Drone"
+                                                persistent-hint
+                                                required
+                                        ></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="5">
+                                        <v-combobox
+                                                v-model="color_selected"
+                                                :items="['red', 'pink', 'deep-purple', 'purple', 'indigo', 'blue', 'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey']"
+                                                label="Color"
+                                                chips
+                                                dense
+                                                hide-details
+                                        >
+                                            <template v-slot:selection="data">
+                                                <v-chip class="ma-0"
+                                                        :key="JSON.stringify(data.item)"
+                                                        v-bind="data.attrs"
+                                                        :input-value="data.selected"
+                                                        :disabled="data.disabled"
+                                                        @click:close="data.parent.selectItem(data.item)"
+                                                >
+                                                    <v-avatar
+                                                            class="white--text"
+                                                            left
+                                                            v-text="data.item.slice(0, 1).toUpperCase()"
+                                                            :color="data.item"
+                                                    ></v-avatar>
+                                                    {{ data.item }}
+                                                </v-chip>
+                                            </template>
+                                        </v-combobox>
+                                    </v-col>
+                                </v-row>
+                            </v-container>
+                            <small>*indicates required field</small>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="cancel"
+                            >
+                                Close
+                            </v-btn>
+                            <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="submitAddProfile"
+                            >
+                                Add
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+                <v-dialog v-model="update_dialog" persistent max-width="600px">
+                    <v-card ref="form">
+                        <v-card-title>
+                            <span class="headline">Drone Profile</span>
+                        </v-card-title>
+                        <v-card-text>
+                            <v-container>
+                                <v-row>
+    <!--                                <v-col cols="12" sm="6">-->
+    <!--                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_update_rule" label="Drone Host*" required></v-text-field>-->
+    <!--                                </v-col>-->
+                                    <v-col cols="12" sm="6">
+                                        <v-text-field disabled ref="drone_name" v-model="drone_name" :rules="drone_name_update_rule" label="Drone Name*" required></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="6">
+                                        <v-text-field disabled ref="drone_id" v-model="drone_id" :rules="drone_id_rule" label="Drone ID*" hint="Unique ID of Drone" persistent-hint required
+                                        ></v-text-field>
+                                    </v-col>
+    <!--                                <v-col cols="12" sm="6">-->
+    <!--                                    <v-text-field ref="gcs_name" v-model="gcs_name" :rules="gcs_name_rule" value="KETI_MUV" label="GCS Name*" hint="Name of Drone GCS" persistent-hint required></v-text-field>-->
+    <!--                                </v-col>-->
+                                    <v-col cols="12" sm="6">
+                                        <v-select
                                             v-model="type_selected"
                                             :items="['ardupilot', 'px4', 'dji', 'etc']"
                                             label="Type*"
                                             hint="Type of FC"
                                             required
                                             hide-details
-                                    ></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="3">
-                                    <v-text-field ref="bat_cell" v-model="bat_cell" :rules="bat_cell_rule" label="Battery Cell*" required></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="4">
-                                    <v-text-field
+                                        ></v-select>
+                                    </v-col>
+                                    <v-col cols="12" sm="3">
+                                        <v-text-field ref="bat_cell" v-model="bat_cell" :rules="bat_cell_rule" label="Battery Cell*" required></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="4">
+                                        <v-text-field
                                             ref="system_id"
                                             v-model="system_id" :rules="system_id_rule"
                                             label="System ID*"
                                             hint="System id of Drone"
                                             persistent-hint
                                             required
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="5">
-                                    <v-combobox
-                                            v-model="color_selected"
-                                            :items="['red', 'pink', 'deep-purple', 'purple', 'indigo', 'blue', 'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey']"
-                                            label="Color"
-                                            chips
-                                            dense
-                                            hide-details
-                                    >
-                                        <template v-slot:selection="data">
-                                            <v-chip class="ma-0"
-                                                    :key="JSON.stringify(data.item)"
-                                                    v-bind="data.attrs"
-                                                    :input-value="data.selected"
-                                                    :disabled="data.disabled"
-                                                    @click:close="data.parent.selectItem(data.item)"
-                                            >
-                                                <v-avatar
-                                                        class="white--text"
-                                                        left
-                                                        v-text="data.item.slice(0, 1).toUpperCase()"
-                                                        :color="data.item"
-                                                ></v-avatar>
-                                                {{ data.item }}
-                                            </v-chip>
-                                        </template>
-                                    </v-combobox>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                        <small>*indicates required field</small>
-                    </v-card-text>
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn
+                                        ></v-text-field>
+                                    </v-col>
+                                    <v-col cols="12" sm="5">
+                                        <v-combobox
+                                                v-model="color_selected"
+                                                :items="['red', 'pink', 'deep-purple', 'purple', 'indigo', 'blue', 'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey']"
+                                                label="Color"
+                                                chips
+                                                dense
+                                                hide-details
+                                        >
+                                            <template v-slot:selection="data">
+                                                <v-chip class="ma-0"
+                                                        :key="JSON.stringify(data.item)"
+                                                        v-bind="data.attrs"
+                                                        :input-value="data.selected"
+                                                        :disabled="data.disabled"
+                                                        @click:close="data.parent.selectItem(data.item)"
+                                                >
+                                                    <v-avatar
+                                                            class="white--text"
+                                                            left
+                                                            v-text="data.item.slice(0, 1).toUpperCase()"
+                                                            :color="data.item"
+                                                    ></v-avatar>
+                                                    {{ data.item }}
+                                                </v-chip>
+                                            </template>
+                                        </v-combobox>
+                                    </v-col>
+                                </v-row>
+                            </v-container>
+                            <small>*indicates required field</small>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn
                                 color="blue darken-1"
                                 text
-                                @click="cancel"
-                        >
-                            Close
-                        </v-btn>
-                        <v-btn
+                                @click="update_cancel"
+                            >
+                                Close
+                            </v-btn>
+                            <v-btn
                                 color="blue darken-1"
                                 text
-                                @click="submitAddProfile"
-                        >
-                            Add
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
+                                @click="update_submit"
+                            >
+                                Update
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
             </v-dialog>
-            <v-dialog v-model="update_dialog" persistent max-width="600px">
-                <v-card ref="form">
-                    <v-card-title>
-                        <span class="headline">Drone Profile</span>
-                    </v-card-title>
-                    <v-card-text>
-                        <v-container>
-                            <v-row>
-<!--                                <v-col cols="12" sm="6">-->
-<!--                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_update_rule" label="Drone Host*" required></v-text-field>-->
-<!--                                </v-col>-->
-                                <v-col cols="12" sm="6">
-                                    <v-text-field disabled ref="drone_name" v-model="drone_name" :rules="drone_name_update_rule" label="Drone Name*" required></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="6">
-                                    <v-text-field disabled ref="drone_id" v-model="drone_id" :rules="drone_id_rule" label="Drone ID*" hint="Unique ID of Drone" persistent-hint required
-                                    ></v-text-field>
-                                </v-col>
-<!--                                <v-col cols="12" sm="6">-->
-<!--                                    <v-text-field ref="gcs_name" v-model="gcs_name" :rules="gcs_name_rule" value="KETI_MUV" label="GCS Name*" hint="Name of Drone GCS" persistent-hint required></v-text-field>-->
-<!--                                </v-col>-->
-                                <v-col cols="12" sm="6">
-                                    <v-select
-                                        v-model="type_selected"
-                                        :items="['ardupilot', 'px4', 'dji', 'etc']"
-                                        label="Type*"
-                                        hint="Type of FC"
-                                        required
-                                        hide-details
-                                    ></v-select>
-                                </v-col>
-                                <v-col cols="12" sm="3">
-                                    <v-text-field ref="bat_cell" v-model="bat_cell" :rules="bat_cell_rule" label="Battery Cell*" required></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="4">
-                                    <v-text-field
-                                        ref="system_id"
-                                        v-model="system_id" :rules="system_id_rule"
-                                        label="System ID*"
-                                        hint="System id of Drone"
-                                        persistent-hint
-                                        required
-                                    ></v-text-field>
-                                </v-col>
-                                <v-col cols="12" sm="5">
-                                    <v-combobox
-                                            v-model="color_selected"
-                                            :items="['red', 'pink', 'deep-purple', 'purple', 'indigo', 'blue', 'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey']"
-                                            label="Color"
-                                            chips
-                                            dense
-                                            hide-details
-                                    >
-                                        <template v-slot:selection="data">
-                                            <v-chip class="ma-0"
-                                                    :key="JSON.stringify(data.item)"
-                                                    v-bind="data.attrs"
-                                                    :input-value="data.selected"
-                                                    :disabled="data.disabled"
-                                                    @click:close="data.parent.selectItem(data.item)"
-                                            >
-                                                <v-avatar
-                                                        class="white--text"
-                                                        left
-                                                        v-text="data.item.slice(0, 1).toUpperCase()"
-                                                        :color="data.item"
-                                                ></v-avatar>
-                                                {{ data.item }}
-                                            </v-chip>
-                                        </template>
-                                    </v-combobox>
-                                </v-col>
-                            </v-row>
-                        </v-container>
-                        <small>*indicates required field</small>
-                    </v-card-text>
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn
-                            color="blue darken-1"
-                            text
-                            @click="update_cancel"
-                        >
-                            Close
-                        </v-btn>
-                        <v-btn
-                            color="blue darken-1"
-                            text
-                            @click="update_submit"
-                        >
-                            Update
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-dialog>
-        </v-dialog>
 
-    </v-app-bar>
+        </v-app-bar>
 
 <!--    <WindowPortal v-model="open">-->
 <!--        <WebrtcCard></WebrtcCard>-->
@@ -719,7 +719,7 @@
                 // EventBus.$emit('do-setGCSHomePosition');
             },
 
-            createGcsToMobius(callback) {
+            postCntGcsToMobius(callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -754,7 +754,7 @@
                 );
             },
 
-            createLossLTEInfosToMobius(callback) {
+            postCntLossLTEInfosToMobius(callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -785,7 +785,7 @@
                 );
             },
 
-            createDroneInfoToMobius(callback) {
+            postCntDroneInfoToMobius(callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -816,7 +816,7 @@
                 );
             },
 
-            createEachLossLTEInfoToMobius(callback) {
+            postCinLossLTEInfoToMobius(callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -934,7 +934,7 @@
                 );
             },
 
-            getEachDroneInfoFromMobius(dName, callback) {
+            getCinDroneInfoFromMobius(dName, callback) {
                 let self = this;
 
                 axios({
@@ -952,11 +952,12 @@
                 }).then(
                     function (res) {
 
-                        console.log('getEachDroneInfoFromMobius', 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName + '/la', res.data['m2m:cin'].con);
+                        console.log('getCinDroneInfoFromMobius', 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName + '/la', res.data['m2m:cin'].con);
 
                         if (res.status === 200) {
                             callback(res.status, res.data['m2m:cin'].con);
-                        } else {
+                        }
+                        else {
                             callback(res.status, '');
                         }
                     }
@@ -967,7 +968,7 @@
                 );
             },
 
-            getGcsFromMobius(callback) {
+            getCntGcsFromMobius(callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -995,7 +996,7 @@
                 );
             },
 
-            getLossLTEInfosFromMobius(callback) {
+            getCinLossLTEInfosFromMobius(callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -1024,7 +1025,7 @@
                 );
             },
 
-            getDroneInfosFromMobius(callback) {
+            getCntListDroneInfosFromMobius(callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -1073,18 +1074,138 @@
             initDroneInfos(drones, count, callback) {
                 if (drones.length > count) {
                     let dName = drones[count].split('/')[3];
-                    this.getEachDroneInfoFromMobius(dName, (status, con) => {
+                    this.getCinDroneInfoFromMobius(dName, (status, con) => {
                         if (status === 200) {
                             console.log(count, dName, con);
+
                             this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(con));
 
+                            if(dName !== 'unknown') {
+                                if(localStorage.getItem(dName+'_selected')) {
+                                    this.$store.state.drone_infos[dName].selected = (localStorage.getItem(dName + '_selected') === 'true');
+                                }
+                                else {
+                                    localStorage.setItem(dName+'_selected', String(this.$store.state.drone_infos[dName].selected));
+                                }
+
+                                this.drone_infos.push(this.$store.state.drone_infos[dName]);
+
+                                if(this.$store.state.drone_infos[dName].selected) {
+                                    this.selected.push(this.$store.state.drone_infos[dName]);
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
+                                    this.$store.state.drone_infos[dName].targeted = false;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'home_position')) {
+                                    this.$store.state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'gotoType')) {
+                                    this.$store.state.drone_infos[dName].gotoType = '바로이동';
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'tagetModeSelection')) {
+                                    this.$store.state.drone_infos[dName].tagetModeSelection = 'ALT_HOLD';
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetSpeed')) {
+                                    this.$store.state.drone_infos[dName].targetSpeed = 5;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'alt')) {
+                                    this.$store.state.drone_infos[dName].alt = 0;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTurningSpeed')) {
+                                    this.$store.state.drone_infos[dName].targetTurningSpeed = 5;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetRadius')) {
+                                    this.$store.state.drone_infos[dName].targetRadius = 50;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTakeoffAlt')) {
+                                    this.$store.state.drone_infos[dName].targetTakeoffAlt = 20;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'circleType')) {
+                                    this.$store.state.drone_infos[dName].circleType = 'cw';
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetAlt')) {
+                                    this.$store.state.drone_infos[dName].targetAlt = 20;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'lastFlightTime')) {
+                                    this.$store.state.drone_infos[dName].lastFlightTime = 0;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoStartIndex')) {
+                                    this.$store.state.drone_infos[dName].autoStartIndex = '0';
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoEndIndex')) {
+                                    this.$store.state.drone_infos[dName].autoEndIndex = '0';
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoDelay')) {
+                                    this.$store.state.drone_infos[dName].autoDelay = 1;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoSpeed')) {
+                                    this.$store.state.drone_infos[dName].autoSpeed = 5;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curArmStatus')) {
+                                    this.$store.state.drone_infos[dName].curArmStatus = 'DISARMED';
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
+                                    this.$store.state.drone_infos[dName].targeted = false;
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'headingLine')) {
+                                    this.$store.state.drone_infos[dName].headingLine = [];
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'directionLine')) {
+                                    this.$store.state.drone_infos[dName].directionLine = [];
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'client')) {
+                                    this.$store.state.drone_infos[dName].client = {
+                                        connected: false,
+                                        loading: false
+                                    };
+                                }
+
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'pausePosition')) {
+                                    this.$store.state.drone_infos[dName].pausePosition = {
+                                        lat: 0,
+                                        lng: 0,
+                                        alt: 0,
+                                        heading: 0
+                                    };
+                                }
+
+                                if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetStayTime')) {
+                                    this.$store.state.drone_infos[dName].targetStayTime = 0;
+                                }
+                            }
+
                             this.initDroneInfos(drones, ++count, () => {
-                                callback();
+                                callback(0);
                             });
                         }
+                        else {
+                            callback(1);
+                        }
                     });
-                } else {
-                    callback();
+                }
+                else {
+                    callback(0);
                 }
             },
 
@@ -1539,15 +1660,15 @@
             },
 
             readyDroneInfos() {
-                let payload = JSON.parse(JSON.stringify(this.$store.state.drone_infos));
+                // let payload = JSON.parse(JSON.stringify(this.$store.state.drone_infos));
+                //
+                // this.$store.commit('resetDroneInfos', payload);
 
-                this.$store.commit('resetDroneInfos', payload);
+                //EventBus.$emit('do-selected-drone-profiles');
 
-                EventBus.$emit('do-selected-drone-profiles');
+                //console.log('GcsAppBar-created-drone_infos', this.$store.state.drone_infos);
 
-                console.log('GcsAppBar-created-drone_infos', this.$store.state.drone_infos);
-
-                this.$store.commit('updateDroneInfosSelected');
+                //this.$store.commit('updateDroneInfosSelected');
 
                 //let unknown = JSON.parse(JSON.stringify(this.$store.state.drone_infos.unknown));
 
@@ -1576,10 +1697,10 @@
                 localStorage.setItem('mobius_host', this.host);
                 localStorage.setItem('mobius_gcs', this.gcs);
 
-                this.getGcsFromMobius((status) => {
-                    console.log('------1---------------------------------GcsAppBarCreated-getGcsFromMobius', status);
+                this.getCntGcsFromMobius((status) => {
+                    console.log('------1---------------------------------GcsAppBarCreated-getCntGcsFromMobius', status);
                     if(status === 200) {
-                        this.getLossLTEInfosFromMobius((status, lossLTEs) => {
+                        this.getCinLossLTEInfosFromMobius((status, lossLTEs) => {
                             if(status === 200) {
                                 if(lossLTEs === undefined) {
                                     this.$store.state.loss_lte_infos = {};
@@ -1587,72 +1708,84 @@
                                 else {
                                     this.$store.state.loss_lte_infos = lossLTEs;
                                 }
-                                console.log('------1---------------------------------GcsAppBarCreated-getLossLTEInfosFromMobius', status, this.$store.state.loss_lte_infos);
+                                console.log('------1---------------------------------GcsAppBarCreated-getCinLossLTEInfosFromMobius', status, this.$store.state.loss_lte_infos);
                             }
                             else {
-                                this.createLossLTEInfosToMobius(() => {
+                                this.postCntLossLTEInfosToMobius(() => {
                                     this.$store.state.loss_lte_infos = {};
-                                     this.createEachLossLTEInfoToMobius(() => {
+                                     this.postCinLossLTEInfoToMobius(() => {
                                          console.log('this.$store.state.loss_lte_infos', this.$store.state.loss_lte_infos);
                                      });
                                 });
                             }
                         });
 
-                        this.getDroneInfosFromMobius((status, drones) => {
-                            console.log('------1---------------------------------GcsAppBarCreated-getDroneInfosFromMobius', status, drones.length, drones);
+                        this.getCntListDroneInfosFromMobius((status, drones) => {
+                            console.log('------1---------------------------------GcsAppBarCreated-getCntListDroneInfosFromMobius', status, drones.length, drones);
                             if(status === 200) {
                                 if(drones.length === 0) {
-                                    this.createEachDroneInfoToMobius('unknown', () => {
-                                        this.postUnknownDroneInfo((status) => {
-                                            if (status === 201) {
-                                                this.getDroneInfosFromMobius((status, drones) => {
-                                                    if(status === 200) {
-                                                        this.$store.state.drone_infos = {};
-                                                        this.initDroneInfos(drones, 0, () => {
-                                                            console.log(this.$store.state.drone_infos);
+                                    // this.createEachDroneInfoToMobius('unknown', () => {
+                                    //     this.postUnknownDroneInfo((status) => {
+                                    //         if (status === 201) {
+                                    //             this.getCntListDroneInfosFromMobius((status, drones) => {
+                                    //                 if(status === 200) {
+                                    //                     this.$store.state.drone_infos = {};
+                                    //                     this.initDroneInfos(drones, 0, () => {
+                                    //                         console.log(this.$store.state.drone_infos);
+                                    //
+                                    //                         setTimeout(() => {
+                                    //                             this.readyDroneInfos();
+                                    //                         }, 250);
+                                    //                     });
+                                    //                 }
+                                    //             });
+                                    //         }
+                                    //     });
+                                    // });
 
-                                                            setTimeout(() => {
-                                                                this.readyDroneInfos();
-                                                            }, 250);
-                                                        });
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    });
+                                    this.$store.state.drone_infos = {};
                                 }
                                 else {
                                     this.$store.state.drone_infos = {};
-                                    this.initDroneInfos(drones, 0, () => {
-                                        console.log(this.$store.state.drone_infos);
+                                    this.initDroneInfos(drones, 0, (result) => {
+                                        if(result === 0) {
+                                            console.log('initDroneInfos-success', result, this.$store.state.drone_infos);
 
-                                        setTimeout(() => {
-                                            this.readyDroneInfos();
-                                        }, 250);
+                                            setTimeout(() => {
+                                                this.readyDroneInfos();
+                                            }, 250);
+                                        }
+                                        else {
+                                            console.log('initDroneInfos-error', result, this.$store.state.drone_infos);
+                                        }
                                     });
                                 }
                             }
                             else {
-                                this.createDroneInfoToMobius(() => {
-                                    this.createEachDroneInfoToMobius('unknown', () => {
-                                        this.postUnknownDroneInfo((status) => {
-                                            if(status === 201) {
-                                                this.getDroneInfosFromMobius((status, drones) => {
+                                this.postCntDroneInfoToMobius(() => {
+                                    //this.createEachDroneInfoToMobius('unknown', () => {
+                                        //this.postUnknownDroneInfo((status) => {
+                                            //if(status === 201) {
+                                                this.getCntListDroneInfosFromMobius((status, drones) => {
                                                     if(status === 200) {
-                                                        this.$store.state.drone_infos = {};
-                                                        this.initDroneInfos(drones, 0, () => {
-                                                            console.log(this.$store.state.drone_infos);
+                                                        if(drones.length === 0) {
+                                                            this.$store.state.drone_infos = {};
+                                                        }
+                                                        else {
+                                                            this.$store.state.drone_infos = {};
+                                                            this.initDroneInfos(drones, 0, () => {
+                                                                console.log(this.$store.state.drone_infos);
 
-                                                            setTimeout(() => {
-                                                                this.readyDroneInfos();
-                                                            }, 250);
-                                                        });
+                                                                setTimeout(() => {
+                                                                    this.readyDroneInfos();
+                                                                }, 250);
+                                                            });
+                                                        }
                                                     }
                                                 });
-                                            }
-                                        });
-                                    });
+                                            //}
+                                        //});
+                                    //});
                                 });
                             }
                         });
@@ -1699,15 +1832,15 @@
                         });
                     }
                     else {
-                        this.createGcsToMobius(() => {
-                            this.getDroneInfosFromMobius((status, drones) => {
-                                console.log('------1---------------------------------GcsAppBarCreated-getDroneInfosFromMobius', status, drones.length, drones);
+                        this.postCntGcsToMobius(() => {
+                            this.getCntListDroneInfosFromMobius((status, drones) => {
+                                console.log('------1---------------------------------GcsAppBarCreated-getCntListDroneInfosFromMobius', status, drones.length, drones);
                                 if(status === 200) {
                                     if(drones.length === 0) {
                                         this.createEachDroneInfoToMobius('unknown', () => {
                                             this.postUnknownDroneInfo((status) => {
                                                 if (status === 201) {
-                                                    this.getDroneInfosFromMobius((status, drones) => {
+                                                    this.getCntListDroneInfosFromMobius((status, drones) => {
                                                         if(status === 200) {
                                                             this.$store.state.drone_infos = {};
                                                             this.initDroneInfos(drones, 0, () => {
@@ -1735,11 +1868,11 @@
                                     }
                                 }
                                 else {
-                                    this.createDroneInfoToMobius(() => {
+                                    this.postCntDroneInfoToMobius(() => {
                                         this.createEachDroneInfoToMobius('unknown', () => {
                                             this.postUnknownDroneInfo((status) => {
                                                 if(status === 201) {
-                                                    this.getDroneInfosFromMobius((status, drones) => {
+                                                    this.getCntListDroneInfosFromMobius((status, drones) => {
                                                         if(status === 200) {
                                                             this.$store.state.drone_infos = {};
                                                             this.initDroneInfos(drones, 0, () => {
@@ -1937,6 +2070,8 @@
                 this.dialog = dialog;
 
                 EventBus.$emit('confirm_selected', JSON.parse(JSON.stringify(this.selected)));
+
+                EventBus.$emit('clearDroneMarker', '');
 
                 this.$forceUpdate();
             },
@@ -2216,27 +2351,27 @@
         },
 
         created() {
-            EventBus.$on('do-selected-drone-profiles', () => {
-                console.log('do-selected-drone-profiles');
-
-                this.selected = null;
-                this.selected = [];
-                this.drone_infos = [];
-
-                for(let dName in this.$store.state.drone_infos) {
-                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if(dName !== 'unknown') {
-                            this.drone_infos.push(this.$store.state.drone_infos[dName]);
-                        }
-
-                        if(this.$store.state.drone_infos[dName].selected) {
-                            this.selected.push(this.$store.state.drone_infos[dName]);
-                        }
-                    }
-                }
-
-                this.$forceUpdate();
-            });
+            // EventBus.$on('do-selected-drone-profiles', () => {
+            //     console.log('do-selected-drone-profiles');
+            //
+            //     this.selected = null;
+            //     this.selected = [];
+            //     this.drone_infos = [];
+            //
+            //     for(let dName in this.$store.state.drone_infos) {
+            //         if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+            //             if(dName !== 'unknown') {
+            //                 this.drone_infos.push(this.$store.state.drone_infos[dName]);
+            //             }
+            //
+            //             if(this.$store.state.drone_infos[dName].selected) {
+            //                 this.selected.push(this.$store.state.drone_infos[dName]);
+            //             }
+            //         }
+            //     }
+            //
+            //     this.$forceUpdate();
+            // });
 
             // let self = this;
             //
@@ -2367,7 +2502,7 @@
         },
 
         beforeDestroy() {
-            EventBus.$off('do-selected-drone-profiles');
+            //EventBus.$off('do-selected-drone-profiles');
         }
     }
 </script>

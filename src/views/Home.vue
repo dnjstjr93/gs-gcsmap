@@ -1,11 +1,14 @@
 <template>
     <div>
+        <GcsAppBar/>
         <DroneInfoList/>
         <GcsMap/>
     </div>
 </template>
 
 <script>
+
+import GcsAppBar from "../components/GcsAppBar";
 import GcsMap from "../components/GcsMap";
 import DroneInfoList from "../components/DroneInfoList";
 
@@ -13,6 +16,7 @@ export default {
     name: 'Home',
 
     components: {
+        GcsAppBar,
         GcsMap,
         DroneInfoList
     },

@@ -193,7 +193,7 @@
                     username: 'keti_muv',
                     password: 'keti_muv',
                 },
-                //drone_topic: {},
+                drone_topic: {},
                 broadcast_topic: {},
                 droneSubscribeSuccess: {},
                 //wsUrl: 'wss://' + 'webrtc.intellicode.info:443' + '/webRTC',
@@ -241,6 +241,47 @@
                 }
             },
 
+            resetSubscription() {
+                let broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                this.doUnSubscribe(broadcast_gcsmap_topic);
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if (dName === 'unknown') {
+                            continue;
+                        }
+
+                        this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
+                        this.doUnSubscribe(this.drone_topic[dName]);
+
+                        this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
+                        this.doUnSubscribe(this.broadcast_topic[dName]);
+                    }
+                }
+
+                setTimeout(() => {
+                    for(let dName in this.$store.state.drone_infos) {
+                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if(dName === 'unknown') {
+                                continue;
+                            }
+
+                            if(this.$store.state.drone_infos[dName].selected) {
+                                this.doSubscribe(this.drone_topic[dName]);
+                                console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic[dName]);
+
+                                this.doSubscribe(this.broadcast_topic[dName]);
+                                console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
+                            }
+                        }
+                    }
+
+                    let broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                    this.doSubscribe(broadcast_gcsmap_topic);
+                    console.log('DroneInfoList-gcsmap_topic - Subscribe to ', broadcast_gcsmap_topic);
+                }, 200);
+            },
+
             createConnection() {
                 if (this.$store.state.client.connected) {
                     console.log('DroneInfoList - destroyConnection')
@@ -248,8 +289,6 @@
                 }
 
                 if (!this.$store.state.client.connected) {
-                    //var self = this;
-
                     this.$store.state.client.loading = true;
                     this.connection.clientId = 'mqttjs_' + this.name + '_' + nanoid(15);
                     this.connection.host = this.$store.state.VUE_APP_MOBIUS_HOST;
@@ -262,52 +301,11 @@
                             console.log(host, 'DroneInfoList Connection succeeded!');
 
                             this.$store.state.client.connected = true;
-
-                            // if(this.subscribeSuccess) {
-                            //     this.doUnSubscribe()
-                            // }
-
                             this.$store.state.client.loading = false;
 
                             localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
 
-                            for(let dName in this.$store.state.drone_infos) {
-                                if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                                    if(dName === 'unknown') {
-                                        continue;
-                                    }
-
-                                    //this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
-                                    //this.doUnSubscribe(this.drone_topic[dName]);
-                                    this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
-                                    this.doUnSubscribe(this.broadcast_topic[dName]);
-                                }
-                            }
-
-                            let broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
-                            this.doUnSubscribe(broadcast_gcsmap_topic);
-
-                            setTimeout(() => {
-                                for(let dName in this.$store.state.drone_infos) {
-                                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                                        if(dName === 'unknown') {
-                                            continue;
-                                        }
-
-                                        if(this.$store.state.drone_infos[dName].selected) {
-                                            //this.doSubscribe(this.drone_topic[dName]);
-                                            //console.log('DroneInfoList-drone_topic - Subscribe to ', this.drone_topic[dName]);
-
-                                            this.doSubscribe(this.broadcast_topic[dName]);
-                                            console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
-                                        }
-                                    }
-                                }
-
-                                let broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
-                                this.doSubscribe(broadcast_gcsmap_topic);
-                                console.log('DroneInfoList-gcsmap_topic - Subscribe to ', broadcast_gcsmap_topic);
-                            }, 200);
+                            this.resetSubscription();
                         });
 
                         this.$store.state.client.on('error', (error) => {
@@ -325,8 +323,8 @@
                         });
 
                         this.$store.state.client.on('message', (topic, message) => {
-                            // this.receiveNews = this.receiveNews.concat(message)
-                            //console.log(`Received message ${message} from topic ${topic}`);
+
+                            let arr_topic = topic.split('/');
 
                             //console.log(topic.split('/')[4], message.toString());
 
@@ -334,7 +332,12 @@
                             payload.topic = topic;
                             payload.message = message;
 
-                            EventBus.$emit('on-message-handler-' + topic.split('/')[4], payload);
+                            if(arr_topic[3] === 'Drone_Data') {
+                                EventBus.$emit('on-drone-message-handler-' + arr_topic[4], payload);
+                            }
+                            else {
+                                EventBus.$emit('on-message-handler-' + arr_topic[4], payload);
+                            }
                         });
                     }
                     catch (error) {
@@ -586,15 +589,6 @@
                 this.drones_selected = [];
                 for(let name in this.$store.state.drone_infos) {
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'pausePosition')) {
-                            this.$store.state.drone_infos[name].pausePosition = {
-                                lat: 0,
-                                lng: 0,
-                                alt: 0,
-                                heading: 0
-                            };
-                        }
-
                         if(this.$store.state.drone_infos[name].selected) {
                             this.drones_selected.push(this.$store.state.drone_infos[name]);
                         }
@@ -623,11 +617,6 @@
             });
 
             EventBus.$on('confirm_selected', (selected) => {
-
-                EventBus.$emit('clearDroneMarker', '');
-
-                EventBus.$emit('do-refresh-DroneAlt');
-
                 this.drones_selected = null;
                 this.drones_selected = [];
                 for(let idx in selected) {
@@ -656,26 +645,7 @@
                 }
                 selected = null;
 
-                for(let dName in this.$store.state.drone_infos) {
-                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if(dName === 'unknown') {
-                            continue;
-                        }
-
-                        //this.drone_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Drone_Data/' + dName + '/#';
-                        //this.doUnSubscribe(this.drone_topic[dName]);
-                        this.broadcast_topic[dName] = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/' + dName;
-                        this.doUnSubscribe(this.broadcast_topic[dName]);
-
-                        if(this.$store.state.drone_infos[dName].selected) {
-                            //this.doSubscribe(this.drone_topic[dName]);
-                            //console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.drone_topic[dName]);
-
-                            this.doSubscribe(this.broadcast_topic[dName]);
-                            console.log('DroneInfoList-broadcast_topic - Subscribe to ', this.broadcast_topic[dName]);
-                        }
-                    }
-                }
+                this.resetSubscription();
 
                 setTimeout(this.onResize, 500);
             });
