@@ -838,6 +838,7 @@
                         if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                             if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
                                 if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
+                                    this.$store.state.curTargetedTempMarkerIndex[dName] = null;
                                     this.$store.state.tempMarkers[dName].forEach((marker) => {
                                         marker.selected = false;
                                         marker.targeted = false;
@@ -1965,6 +1966,7 @@
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
                             if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
+                                this.$store.state.curTargetedTempMarkerIndex[dName] = null;
                                 this.$store.state.tempMarkers[dName].forEach((marker) => {
                                     marker.selected = false;
                                     marker.targeted = false;
@@ -2037,6 +2039,7 @@
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
                             if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
+                                this.$store.state.curTargetedTempMarkerIndex[dName] = null;
                                 this.$store.state.tempMarkers[dName].forEach((marker) => {
                                     marker.selected = false;
                                     marker.targeted = false;
@@ -2108,6 +2111,7 @@
                     }
                 });
 
+                this.$store.state.curTargetedTempMarkerIndex[dName] = null;
                 this.$store.state.tempMarkers[dName].forEach((marker) => {
                     marker.selected = false;
                     marker.targeted = false;

@@ -1962,8 +1962,8 @@ export default {
             EventBus.$emit('do-centerCurrentPosition', {lat: this.gpi.lat / 10000000, lng: this.gpi.lon / 10000000})
         },
 
-        checkDroneSelected(event) {
-            console.log('checkDroneSelected', event);
+        checkDroneSelected(checked) {
+            console.log('checkDroneSelected', checked);
 
             // if(event) {
             //     this.$store.state.dronesChecked[this.name] = null;
@@ -1980,7 +1980,9 @@ export default {
 
             //EventBus.$emit('do-targetDroneMarker', this.name);
 
-            EventBus.$emit('do-targetDrone');
+            //EventBus.$emit('do-targetDrone');
+
+            this.$store.state.drone_command_prepared = checked;
         },
 
         onMessageBroadcast(message) {
@@ -2287,6 +2289,14 @@ export default {
         doPublish(topic, payload) {
             if (this.client.connected) {
                 this.client.publish(topic, payload, 0, error => {
+                    if (error) {
+                        console.log('Publish error', error)
+                    }
+                });
+            }
+
+            if (this.$store.state.client.connected) {
+                this.$store.state.client.publish(topic, payload, 0, error => {
                     if (error) {
                         console.log('Publish error', error)
                     }
@@ -6407,12 +6417,12 @@ export default {
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
             var lon = parseFloat(arr_cur_goto_position[1]);
-            //var alt = parseFloat(arr_cur_goto_position[2]);
-            //var speed = parseFloat(arr_cur_goto_position[3]);
+            var alt = parseFloat(arr_cur_goto_position[2]);
+            var speed = parseFloat(arr_cur_goto_position[3]);
 
             //this.$store.state.drone_infos[this.name].targetSpeed = speed;
-            var alt = this.$store.state.drone_infos[this.name].targetAlt;
-            var speed = this.$store.state.drone_infos[this.name].targetSpeed;
+            //var alt = this.$store.state.drone_infos[this.name].targetAlt;
+            //var speed = this.$store.state.drone_infos[this.name].targetSpeed;
 
             delete this.$store.state.missionCircles[this.name];
             delete this.$store.state.missionLines[this.name];
@@ -6437,7 +6447,7 @@ export default {
 
             setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, speed) => {
 
-                if (this.$store.state.drone_infos[name].gotoType === 'alt_first') {
+                if (this.$store.state.drone_infos[name].gotoType === '고도먼저') {
                     this.$store.state.drone_infos[name].targetAlt = alt;
 
                     console.log('send_goto_alt_command - alt: ', alt);

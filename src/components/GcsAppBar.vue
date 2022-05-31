@@ -1106,8 +1106,8 @@
                                     this.$store.state.drone_infos[dName].gotoType = '바로이동';
                                 }
 
-                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'tagetModeSelection')) {
-                                    this.$store.state.drone_infos[dName].tagetModeSelection = 'ALT_HOLD';
+                                if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetModeSelection')) {
+                                    this.$store.state.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
                                 }
 
                                 if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetSpeed')) {
@@ -1193,6 +1193,12 @@
                                 if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetStayTime')) {
                                     this.$store.state.drone_infos[dName].targetStayTime = 0;
                                 }
+
+                                if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'yawBehavior')) {
+                                    this.$store.state.drone_infos[dName].yawBehavior = 'YAW고정';
+                                }
+
+                                this.$store.state.drone_infos[dName].targeted = false;
                             }
 
                             this.initDroneInfos(drones, ++count, () => {

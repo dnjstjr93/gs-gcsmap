@@ -5,7 +5,7 @@
         :style="{top:(context_top+2)+'px', left:(context_left+10)+'px', width: ($store.state.command_tab_max_width-41)+'px'}"
     >
         <v-tabs
-            v-if="prepared"
+            v-if="$store.state.drone_command_prepared"
             class="font-weight-medium"
             background-color="blue-grey darken-4"
             dark center-active show-arrows
@@ -63,7 +63,7 @@
                                                 <v-col cols="10">
                                                     <v-card v-if="command.title === '모드'">
                                                         <v-chip-group
-                                                            v-model="targetModeSelection[d.name]"
+                                                            v-model="d.targetModeSelection"
                                                             mandatory show-arrows
                                                             active-class="deep-purple--text text--accent-5"
                                                             :center-active="true"
@@ -103,7 +103,7 @@
                                                                 <v-text-field
                                                                     label="이륙고도"
                                                                     hide-details dense outlined
-                                                                    v-model="targetTakeoffAlt[d.name]"
+                                                                    v-model="d.targetTakeoffAlt"
                                                                     type="number"
                                                                     class="pa-1"
                                                                 ></v-text-field>
@@ -112,7 +112,7 @@
                                                                 <v-text-field
                                                                     label="시동 후 지연 시간(초): "
                                                                     outlined dense hide-details
-                                                                    v-model="takeoffDelay[d.name]"
+                                                                    v-model="d.takeoffDelay"
                                                                     type="number"
                                                                     min="6" max="20"
                                                                     class="pa-1"
@@ -124,7 +124,7 @@
                                                         <v-row no-gutters>
                                                             <v-col cols="12">
                                                                 <v-text-field
-                                                                    v-model="targetAlt[d.name]"
+                                                                    v-model="d.targetAlt"
                                                                     dense outlined hide-details
                                                                     label="비행고도(m)"
                                                                     type="number"
@@ -155,23 +155,31 @@
                                                         <v-row no-gutters>
                                                             <v-col cols="2">
                                                                 <v-select
-                                                                    @change="changeGotoType($event, d.name)"
                                                                     dense outlined hide-details
-                                                                    :items="['고도먼저', '바로이동']"
+                                                                    :items="['바로이동', '고도먼저']"
                                                                     label="이동설정"
-                                                                    v-model="gotoType[d.name]"
+                                                                    v-model="d.gotoType"
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-select
-                                                                    @change="changeYawBehavior($event, d.name)"
                                                                     dense outlined hide-details
                                                                     :items="['YAW고정', 'YAW회전']"
                                                                     label="YAW설정"
-                                                                    v-model="yawBehavior[d.name]"
+                                                                    v-model="d.yawBehavior"
                                                                     class="pa-1"
                                                                 ></v-select>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="이동고도(m)"
+                                                                    class="pa-1 text-right"
+                                                                    outlined dense hide-details
+                                                                    v-model="d.targetAlt"
+                                                                    type="number"
+                                                                    :class="parseFloat(position_selections_elevation[d.name])>d.targetAlt ? 'red' : ''"
+                                                                ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
@@ -184,20 +192,10 @@
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
-                                                                    label="이동고도(m)"
-                                                                    class="pa-1 text-right"
-                                                                    outlined dense hide-details
-                                                                    v-model="targetAlt[d.name]"
-                                                                    type="number"
-                                                                    :class="parseFloat(position_selections_elevation[d.name])>targetAlt[d.name] ? 'red' : ''"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col cols="2">
-                                                                <v-text-field
                                                                     label="이동속도(m/s)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    v-model="targetSpeed[d.name]"
+                                                                    v-model="d.targetSpeed"
                                                                     type="number"
                                                                 ></v-text-field>
                                                             </v-col>
@@ -564,7 +562,7 @@
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-select
-                                                                    dense outlined :items="Object.keys(position_selections_items[d.name])"
+                                                                    dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
                                                                     label="Start Index" v-model="autoStartIndex[d.name]"
                                                                     class="pa-1"
                                                                     hide-details
@@ -572,7 +570,7 @@
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-select
-                                                                    dense outlined :items="Object.keys(position_selections_items[d.name])"
+                                                                    dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
                                                                     label="End Index" v-model="autoEndIndex[d.name]"
                                                                     hide-details
                                                                     class="pa-1"
@@ -1119,7 +1117,7 @@ export default {
             curTab: 'virtual',
             selection: [],
             //items: ['Foo', 'Bar', 'Fizz', 'Buzz'],
-            prepared: false,
+            //prepared: false,
             mode_sheet: false,
             loading: false,
 
@@ -1173,7 +1171,35 @@ export default {
             }
         }
     },
+
+    computed: {
+        color() {
+            if (this.target_alt < 25) return 'indigo'
+            if (this.target_alt < 50) return 'teal'
+            if (this.target_alt < 75) return 'green'
+            if (this.target_alt < 100) return 'orange'
+            return 'red'
+        },
+
+        // selectedDrone() {
+        //     return (this.$store.state.selectedDrone);
+        // },
+
+        command_tab_left_x() {
+            return (this.$store.state.command_tab_left_x);
+        },
+
+        check_prepared(){
+            return this.$store.state.drone_command_prepared;
+        }
+    },
+
+
     watch: {
+        check_prepared(oldVal, newVal){
+            console.log('drone_command_prepared', oldVal, ' -> ', newVal);
+        },
+
         ['$store.state.tempMarkers']: {
             deep: true,
             handler: function (newData) {
@@ -1243,13 +1269,13 @@ export default {
         //         for(let name in newVal) {
         //             if (Object.prototype.hasOwnProperty.call(newVal, name)) {
         //                 if(newVal[name]) {
-        //                     this.prepared = true;
+        //                     this.$store.state.drone_command_prepared = true;
         //                     return;
         //                 }
         //             }
         //         }
         //
-        //         this.prepared = false;
+        //         this.$store.state.drone_command_prepared = false;
         //     }
         // },
 
@@ -1262,223 +1288,10 @@ export default {
             this.context_max_height = newVal;
         }
     },
-    computed: {
-        color() {
-            if (this.target_alt < 25) return 'indigo'
-            if (this.target_alt < 50) return 'teal'
-            if (this.target_alt < 75) return 'green'
-            if (this.target_alt < 100) return 'orange'
-            return 'red'
-        },
 
-        // selectedDrone() {
-        //     return (this.$store.state.selectedDrone);
-        // },
-
-        command_tab_left_x() {
-            return (this.$store.state.command_tab_left_x);
-        }
-    },
-    created() {
-        this.context_left = this.$store.state.command_tab_left_x;
-
-        for (let dName in this.$store.state.drone_infos) {
-            if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                if (this.$store.state.drone_infos[dName].selected) {
-                    this.targetSurveyMarkerIndex[dName] = -1;
-                    for (let pIndex in this.$store.state.surveyMarkers[dName]) {
-                        if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName], pIndex)) {
-                            if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
-                                this.targetSurveyMarkerIndex[dName] = pIndex;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-        EventBus.$on('gcs-map-ready', () => {
-            setTimeout(() => {
-                console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%DroneCommand', 'gcs-map-ready', this.$store.state.tempMarkers);
-                for (let dName in this.$store.state.tempMarkers) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
-                        this.position_selections_items[dName] = [];
-                        for (let pIndex in this.$store.state.tempMarkers[dName]) {
-                            if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
-                                let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].alt + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].speed + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].radius + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].turningSpeed + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].targetMavCmd + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].targetStayTime + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].elevation;
-                                this.position_selections_items[dName].push(strPos);
-                            }
-                        }
-                    }
-                }
-
-                console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%DroneCommand', 'gcs-map-ready', this.position_selections_items);
-            }, 2000);
-        });
-
-        EventBus.$on('do-targetDrone', () => {
-            console.log('DroneCommand-do-targetDrone');
-
-            this.prepared = false;
-
-            this.tagetModeSelection = {};
-            this.takeoffDelay = {};
-            this.targetTakeoffAlt = {};
-            this.targetAlt = {};
-            this.targetSpeed = {};
-            this.targetStayTime = {};
-            this.targetTurningSpeed = {};
-            this.targetRadius = {};
-            this.autoStartIndex = {};
-            this.autoEndIndex = {};
-            this.autoSpeed = {};
-            this.autoDelay = {};
-            this.gotoType = {};
-            this.yawBehavior = {};
-            this.flyShape = {};
-            this.startWay = {};
-            this.circleType = {};
-            for (let name in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        this.tagetModeSelection[name] = this.$store.state.drone_infos[name].tagetModeSelection;
-                        this.takeoffDelay[name] = this.$store.state.drone_infos[name].takeoffDelay;
-                        this.targetTakeoffAlt[name] = this.$store.state.drone_infos[name].targetTakeoffAlt;
-                        this.targetAlt[name] = this.$store.state.drone_infos[name].targetAlt;
-                        this.targetSpeed[name] = this.$store.state.drone_infos[name].targetSpeed;
-                        if(!Object.prototype.hasOwnProperty.call(this.rtlSpeed, name)) {
-                            this.rtlSpeed[name] = 5;
-                        }
-                        if(!Object.prototype.hasOwnProperty.call(this.takeoffDelay, name)) {
-                            this.takeoffDelay[name] = 6;
-                        }
-                        this.targetStayTime[name] = this.$store.state.drone_infos[name].targetStayTime;
-                        this.targetTurningSpeed[name] = this.$store.state.drone_infos[name].targetTurningSpeed;
-                        this.targetRadius[name] = this.$store.state.drone_infos[name].targetRadius;
-                        this.autoStartIndex[name] = this.$store.state.drone_infos[name].autoStartIndex;
-                        this.autoEndIndex[name] = this.$store.state.drone_infos[name].autoEndIndex;
-                        this.autoSpeed[name] = this.$store.state.drone_infos[name].autoSpeed;
-                        this.autoDelay[name] = this.$store.state.drone_infos[name].autoDelay;
-                        // if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'gotoType')) {
-                        //     this.$store.state.drone_infos[name].gotoType = '바로이동';
-                        // }
-                        this.gotoType[name] = this.$store.state.drone_infos[name].gotoType;
-                        this.yawBehavior[name] = 'YAW고정';
-                        this.flyShape[name] = '곡선비행';
-                        this.startWay[name] = '처음부터';
-                        this.circleType[name] = (this.$store.state.drone_infos[name].circleType === 'cw')?'시계방향':'반시계방향';
-
-                        this.prepared = true;
-
-                        if (this.$cookies.isKey('target_mission_num')) {
-                            this.target_mission_num = this.$cookies.get('target_mission_num');
-                            this.mission_value = this.$cookies.get('mission_value');
-                        }
-                        else {
-                            for (let i = 0; i < this.channels.length; i++) {
-                                let num = this.channels[i];
-                                this.mission_value[`ch${num}`][name] = (this.mission_ch_max + this.mission_ch_min) / 2;
-                                this.target_mission_num[`targetCh${num}`][name] = num;
-                            }
-
-                            this.$cookies.set('target_mission_num', this.target_mission_num);
-                            this.$cookies.set('mission_value', this.mission_value);
-                        }
-                    }
-                }
-            }
-        });
-
-
-        EventBus.$on('do-selected-position', (payload) => {
-            console.log('do-selected-position', payload);
-
-            if(payload.value) {
-                let strPos = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].alt + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].speed + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].turningSpeed + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetStayTime + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation;
-
-                this.position_selections_index[payload.pName] = payload.pIndex;
-                this.position_selections[payload.pName] = strPos;
-                this.position_selections_elevation[payload.pName] = parseFloat(this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation).toFixed(1);
-            }
-            else {
-                this.position_selections_index[payload.pName] = 0;
-                this.position_selections[payload.pName] = '';
-                this.position_selections_elevation[payload.pName]= 0;
-            }
-
-            this.$forceUpdate();
-        });
-
-        EventBus.$on('update-goto-positions', (payload) => {
-            console.log('update-goto-positions', payload);
-
-            this.position_selections[payload.pName] = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].alt + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].speed + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].turningSpeed + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetStayTime + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation;
-
-            this.$forceUpdate();
-        });
-
-        EventBus.$on('do-target-survey-marker', (payload) => {
-            console.log('do-selected-position', payload);
-
-            if(payload.targeted) {
-                this.targetSurveyMarkerIndex[payload.dName] = payload.pIndex;
-            }
-            else {
-                this.targetSurveyMarkerIndex[payload.dName] = -1;
-            }
-
-            this.$forceUpdate();
-        });
-
-        // eslint-disable-next-line no-unused-vars
-        // EventBus.$on('selected-drone', (payload) => {
-        //
-        //     // console.log(this.$store.state.selectedDrone);
-        //     //
-        //     // this.selectedDrone = this.$store.state.selectedDrone;
-        //     //
-        //     for(let name in this.$store.state.selectedDrone) {
-        //         if (Object.prototype.hasOwnProperty.call(this.$store.state.selectedDrone, name)) {
-        //             if(this.$store.state.selectedDrone[name]) {
-        //                 this.prepared = true;
-        //                 this.$forceUpdate();
-        //                 return;
-        //             }
-        //         }
-        //     }
-        //
-        //     this.prepared = false;
-        //     this.$forceUpdate();
-        // });
-    },
     methods: {
         changeGotoType(gotoType, dName) {
-            this.gotoType[dName] = gotoType;
+            //this.gotoType[dName] = gotoType;
             this.$store.state.drone_infos[dName].gotoType = gotoType;
         },
 
@@ -1756,14 +1569,14 @@ export default {
                 }
             }
             else if (this.$store.state.currentCommandTab === '모드') {
-                for (let dName in this.$store.state.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                            console.log('targetModeSelection', dName, this.targetModeSelection[dName], this.$store.state.drone_infos[dName].curMode);
-                            this.targetModeSelection[dName] = this.$store.state.drone_infos[dName].curMode;
-                        }
-                    }
-                }
+                // for (let dName in this.$store.state.drone_infos) {
+                //     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                //         if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                //             console.log('targetModeSelection', dName, this.targetModeSelection[dName], this.$store.state.drone_infos[dName].curMode);
+                //             this.targetModeSelection[dName] = this.$store.state.drone_infos[dName].curMode;
+                //         }
+                //     }
+                // }
             }
         },
 
@@ -1836,8 +1649,9 @@ export default {
             for(let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        this.$store.state.drone_infos[name].tagetModeSelection = parseInt(this.tagetModeSelection[name]);
-                        EventBus.$emit('command-set-mode-' + name, this.targetModeSelection[name]);
+                        console.log('**********************************************************', this.$store.state.drone_infos[name].targetModeSelection)
+                        //this.$store.state.drone_infos[name].targetModeSelection = parseInt(this.targetModeSelection[name]);
+                        EventBus.$emit('command-set-mode-' + name, this.$store.state.drone_infos[name].targetModeSelection);
                     }
                 }
             }
@@ -1858,42 +1672,40 @@ export default {
                 }
             }
 
-            let self = this;
-            setTimeout(function () {
-                self.mode_sheet = !self.mode_sheet;
-                self.loading = false;
-                self.$forceUpdate();
+            setTimeout(() => {
+                this.mode_sheet = !this.mode_sheet;
+                this.loading = false;
+                this.$forceUpdate();
             }, 100);
         },
 
         setTakeoff() {
-            for(let name in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        if (this.takeoffDelay[name] < 6) {
-                            this.takeoffDelay[name] = 6;
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.state.drone_infos[dName].takeoffDelay = parseInt(this.$store.state.drone_infos[dName].takeoffDelay);
+                        if (this.$store.state.drone_infos[dName].takeoffDelay < 6) {
+                            this.$store.state.drone_infos[dName].takeoffDelay = 6;
                         }
-                        this.$store.state.drone_infos[name].takeoffDelay = parseInt(this.takeoffDelay[name]);
 
-                        if (this.targetTakeoffAlt[name] < 3) {
-                            this.targetTakeoffAlt[name] = 3;
+                        this.$store.state.drone_infos[dName].targetTakeoffAlt = parseInt(this.$store.state.drone_infos[dName].targetTakeoffAlt);
+                        if (this.$store.state.drone_infos[dName].targetTakeoffAlt < 3) {
+                            this.$store.state.drone_infos[dName].targetTakeoffAlt = 3;
                         }
-                        this.$store.state.drone_infos[name].targetTakeoffAlt = parseInt(this.targetTakeoffAlt[name]);
 
                         let payload = {};
-                        payload.targetTakeoffAlt = this.$store.state.drone_infos[name].targetTakeoffAlt
-                        payload.takeoffDelay = this.$store.state.drone_infos[name].takeoffDelay;
+                        payload.targetTakeoffAlt = this.$store.state.drone_infos[dName].targetTakeoffAlt
+                        payload.takeoffDelay = this.$store.state.drone_infos[dName].takeoffDelay;
 
-                        EventBus.$emit('command-set-takeoff-' + name, payload);
+                        EventBus.$emit('command-set-takeoff-' + dName, payload);
                     }
                 }
             }
 
-            let self = this;
-            setTimeout(function () {
-                self.mode_sheet = !self.mode_sheet;
-                self.loading = false;
-                self.$forceUpdate();
+            setTimeout(() => {
+                this.mode_sheet = !this.mode_sheet;
+                this.loading = false;
+                this.$forceUpdate();
             }, 100);
         },
 
@@ -1910,26 +1722,37 @@ export default {
                 }
             }
 
-            let self = this;
-            setTimeout(function () {
-                self.mode_sheet = !self.mode_sheet;
-                self.loading = false;
-                self.$forceUpdate();
+            setTimeout(() => {
+                this.mode_sheet = !this.mode_sheet;
+                this.loading = false;
+                this.$forceUpdate();
             }, 100);
         },
 
         setGoto() {
-            for(let name in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        console.log('DroneCommand-setGoto', this.position_selections[name]);
-                        if(this.position_selections[name] && this.position_selections[name] !== '' && this.position_selections[name] !== "") {
-                            this.$store.state.drone_infos[name].gotoType = this.gotoType[name];
-                            this.$store.state.drone_infos[name].yawBehavior = this.yawBehavior[name];
-                            this.$store.state.drone_infos[name].targetSpeed = parseInt(this.targetSpeed[name]);
-                            this.$store.state.drone_infos[name].targetAlt = parseInt(this.targetAlt[name]);
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        console.log('setGoto ', dName, this.$store.state.curTargetedTempMarkerIndex[dName]);
+                        let pIndex = this.$store.state.curTargetedTempMarkerIndex[dName];
+                        if(pIndex !== null) {
+                            let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
+                                this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
+                                this.$store.state.drone_infos[dName].targetAlt + ':' +
+                                this.$store.state.drone_infos[dName].targetSpeed + ':' +
+                                this.$store.state.tempMarkers[dName][pIndex].radius + ':' +
+                                this.$store.state.tempMarkers[dName][pIndex].turningSpeed + ':' +
+                                this.$store.state.tempMarkers[dName][pIndex].targetMavCmd + ':' +
+                                this.$store.state.tempMarkers[dName][pIndex].targetStayTime + ':' +
+                                this.$store.state.tempMarkers[dName][pIndex].elevation;
 
-                            EventBus.$emit('command-set-goto-' + name, this.position_selections[name]);
+                            console.log('DroneCommand-setGoto', strPos);
+                            //this.$store.state.drone_infos[name].gotoType = this.gotoType[name];
+                            //this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
+                            //this.$store.state.drone_infos[dName].targetSpeed = parseInt(this.targetSpeed[dName]);
+                            //this.$store.state.drone_infos[dName].targetAlt = parseInt(this.targetAlt[dName]);
+
+                            EventBus.$emit('command-set-goto-' + dName, strPos);
                         }
                     }
                 }
@@ -2030,19 +1853,18 @@ export default {
         },
 
         setLand() {
-            for(let name in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        EventBus.$emit('command-set-land-' + name);
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        EventBus.$emit('command-set-land-' + dName);
                     }
                 }
             }
 
-            let self = this;
-            setTimeout(function () {
-                self.mode_sheet = !self.mode_sheet;
-                self.loading = false;
-                self.$forceUpdate();
+            setTimeout(() => {
+                this.mode_sheet = !this.mode_sheet;
+                this.loading = false;
+                this.$forceUpdate();
             }, 100);
         },
 
@@ -2098,6 +1920,23 @@ export default {
                         this.$store.state.drone_infos[name].autoSpeed = parseInt(this.autoSpeed[name]);
                         console.log('setAutoGoto', parseInt(this.$store.state.drone_infos[name].autoStartIndex), parseInt(this.$store.state.drone_infos[name].autoEndIndex), this.$store.state.drone_infos[name].autoDelay);
                         if(parseInt(this.$store.state.drone_infos[name].autoStartIndex) <= parseInt(this.$store.state.drone_infos[name].autoEndIndex)) {
+
+                            this.position_selections_items[name] = [];
+                            for (let pIndex in this.$store.state.tempMarkers[name]) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[name], pIndex)) {
+                                    let strPos = this.$store.state.tempMarkers[name][pIndex].lat + ':' +
+                                        this.$store.state.tempMarkers[name][pIndex].lng + ':' +
+                                        this.$store.state.tempMarkers[name][pIndex].alt + ':' +
+                                        this.$store.state.tempMarkers[name][pIndex].speed + ':' +
+                                        this.$store.state.tempMarkers[name][pIndex].radius + ':' +
+                                        this.$store.state.tempMarkers[name][pIndex].turningSpeed + ':' +
+                                        this.$store.state.tempMarkers[name][pIndex].targetMavCmd + ':' +
+                                        this.$store.state.tempMarkers[name][pIndex].targetStayTime + ':' +
+                                        this.$store.state.tempMarkers[name][pIndex].elevation;
+                                    this.position_selections_items[name].push(strPos);
+                                }
+                            }
+
                             let payload = {};
                             payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[name]));
                             EventBus.$emit('command-set-auto_goto-' + name, payload);
@@ -2243,6 +2082,211 @@ export default {
             }, 100);
         },
     },
+
+    created() {
+        console.log('DroneCommand-created()');
+
+        this.context_left = this.$store.state.command_tab_left_x;
+
+        for (let dName in this.$store.state.drone_infos) {
+            if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                if (this.$store.state.drone_infos[dName].selected) {
+                    this.targetSurveyMarkerIndex[dName] = -1;
+                    for (let pIndex in this.$store.state.surveyMarkers[dName]) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName], pIndex)) {
+                            if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
+                                this.targetSurveyMarkerIndex[dName] = pIndex;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        EventBus.$on('gcs-map-ready', () => {
+            setTimeout(() => {
+                console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%DroneCommand', 'gcs-map-ready', this.$store.state.tempMarkers);
+                for (let dName in this.$store.state.tempMarkers) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
+                        this.position_selections_items[dName] = [];
+                        for (let pIndex in this.$store.state.tempMarkers[dName]) {
+                            if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
+                                let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
+                                    this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
+                                    this.$store.state.tempMarkers[dName][pIndex].alt + ':' +
+                                    this.$store.state.tempMarkers[dName][pIndex].speed + ':' +
+                                    this.$store.state.tempMarkers[dName][pIndex].radius + ':' +
+                                    this.$store.state.tempMarkers[dName][pIndex].turningSpeed + ':' +
+                                    this.$store.state.tempMarkers[dName][pIndex].targetMavCmd + ':' +
+                                    this.$store.state.tempMarkers[dName][pIndex].targetStayTime + ':' +
+                                    this.$store.state.tempMarkers[dName][pIndex].elevation;
+                                this.position_selections_items[dName].push(strPos);
+                            }
+                        }
+                    }
+                }
+
+                console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%DroneCommand', 'gcs-map-ready', this.position_selections_items);
+            }, 2000);
+        });
+
+        EventBus.$on('do-targetDrone', () => {
+            console.log('DroneCommand-do-targetDrone');
+
+            this.$store.state.drone_command_prepared = false;
+
+            this.targetModeSelection = {};
+            this.takeoffDelay = {};
+            this.targetTakeoffAlt = {};
+            this.targetAlt = {};
+            this.targetSpeed = {};
+            this.targetStayTime = {};
+            this.targetTurningSpeed = {};
+            this.targetRadius = {};
+            this.autoStartIndex = {};
+            this.autoEndIndex = {};
+            this.autoSpeed = {};
+            this.autoDelay = {};
+            this.gotoType = {};
+            this.yawBehavior = {};
+            this.flyShape = {};
+            this.startWay = {};
+            this.circleType = {};
+            for (let name in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                        this.targetModeSelection[name] = this.$store.state.drone_infos[name].targetModeSelection;
+                        this.takeoffDelay[name] = this.$store.state.drone_infos[name].takeoffDelay;
+                        this.targetTakeoffAlt[name] = this.$store.state.drone_infos[name].targetTakeoffAlt;
+                        this.targetAlt[name] = this.$store.state.drone_infos[name].targetAlt;
+                        this.targetSpeed[name] = this.$store.state.drone_infos[name].targetSpeed;
+                        if(!Object.prototype.hasOwnProperty.call(this.rtlSpeed, name)) {
+                            this.rtlSpeed[name] = 5;
+                        }
+                        if(!Object.prototype.hasOwnProperty.call(this.takeoffDelay, name)) {
+                            this.takeoffDelay[name] = 6;
+                        }
+                        this.targetStayTime[name] = this.$store.state.drone_infos[name].targetStayTime;
+                        this.targetTurningSpeed[name] = this.$store.state.drone_infos[name].targetTurningSpeed;
+                        this.targetRadius[name] = this.$store.state.drone_infos[name].targetRadius;
+                        this.autoStartIndex[name] = this.$store.state.drone_infos[name].autoStartIndex;
+                        this.autoEndIndex[name] = this.$store.state.drone_infos[name].autoEndIndex;
+                        this.autoSpeed[name] = this.$store.state.drone_infos[name].autoSpeed;
+                        this.autoDelay[name] = this.$store.state.drone_infos[name].autoDelay;
+                        // if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'gotoType')) {
+                        //     this.$store.state.drone_infos[name].gotoType = '바로이동';
+                        // }
+                        this.gotoType[name] = this.$store.state.drone_infos[name].gotoType;
+                        this.yawBehavior[name] = 'YAW고정';
+                        this.flyShape[name] = '곡선비행';
+                        this.startWay[name] = '처음부터';
+                        this.circleType[name] = (this.$store.state.drone_infos[name].circleType === 'cw')?'시계방향':'반시계방향';
+
+                        this.$store.state.drone_command_prepared = true;
+
+                        if (this.$cookies.isKey('target_mission_num')) {
+                            this.target_mission_num = this.$cookies.get('target_mission_num');
+                            this.mission_value = this.$cookies.get('mission_value');
+                        }
+                        else {
+                            for (let i = 0; i < this.channels.length; i++) {
+                                let num = this.channels[i];
+                                this.mission_value[`ch${num}`][name] = (this.mission_ch_max + this.mission_ch_min) / 2;
+                                this.target_mission_num[`targetCh${num}`][name] = num;
+                            }
+
+                            this.$cookies.set('target_mission_num', this.target_mission_num);
+                            this.$cookies.set('mission_value', this.mission_value);
+                        }
+                    }
+                }
+            }
+        });
+
+
+        EventBus.$on('do-selected-position', (payload) => {
+            console.log('do-selected-position', payload);
+
+            if(payload.value) {
+                let strPos = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].alt + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].speed + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].turningSpeed + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetStayTime + ':' +
+                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation;
+
+                this.position_selections_index[payload.pName] = payload.pIndex;
+                this.position_selections[payload.pName] = strPos;
+                this.position_selections_elevation[payload.pName] = parseFloat(this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation).toFixed(1);
+            }
+            else {
+                this.position_selections_index[payload.pName] = 0;
+                this.position_selections[payload.pName] = '';
+                this.position_selections_elevation[payload.pName]= 0;
+            }
+
+            this.$forceUpdate();
+        });
+
+        EventBus.$on('update-goto-positions', (payload) => {
+            console.log('update-goto-positions', payload);
+
+            this.position_selections[payload.pName] = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].alt + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].speed + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].turningSpeed + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetStayTime + ':' +
+                this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation;
+
+            this.$forceUpdate();
+        });
+
+        EventBus.$on('do-target-survey-marker', (payload) => {
+            console.log('do-selected-position', payload);
+
+            if(payload.targeted) {
+                this.targetSurveyMarkerIndex[payload.dName] = payload.pIndex;
+            }
+            else {
+                this.targetSurveyMarkerIndex[payload.dName] = -1;
+            }
+
+            this.$forceUpdate();
+        });
+
+        // eslint-disable-next-line no-unused-vars
+        // EventBus.$on('selected-drone', (payload) => {
+        //
+        //     // console.log(this.$store.state.selectedDrone);
+        //     //
+        //     // this.selectedDrone = this.$store.state.selectedDrone;
+        //     //
+        //     for(let name in this.$store.state.selectedDrone) {
+        //         if (Object.prototype.hasOwnProperty.call(this.$store.state.selectedDrone, name)) {
+        //             if(this.$store.state.selectedDrone[name]) {
+        //                 this.$store.state.drone_command_prepared = true;
+        //                 this.$forceUpdate();
+        //                 return;
+        //             }
+        //         }
+        //     }
+        //
+        //     this.$store.state.drone_command_prepared = false;
+        //     this.$forceUpdate();
+        // });
+    },
+
+    mounted() {
+        console.log('DroneCommand-mounted()');
+    },
+
     beforeDestroy() {
         EventBus.$off('gcs-map-ready');
         EventBus.$off('do-targetDrone');

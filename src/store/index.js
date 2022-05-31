@@ -331,6 +331,8 @@ const _defaultDroneInfo = {
 
 export default new Vuex.Store({
     state: {
+        drone_command_prepared: false,
+
         loss_lte_infos: {},
 
         rtlModeMonitor: {},
@@ -1633,11 +1635,11 @@ export default new Vuex.Store({
                         }
 
                         if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'gotoType')) {
-                            state.drone_infos[dName].gotoType = 'alt_first';
+                            state.drone_infos[dName].gotoType = '바로이동';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'tagetModeSelection')) {
-                            state.drone_infos[dName].tagetModeSelection = 'ALT_HOLD';
+                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetModeSelection')) {
+                            state.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
                         }
 
                         if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetSpeed')) {
