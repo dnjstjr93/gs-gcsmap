@@ -733,7 +733,6 @@ export default new Vuex.Store({
         trackingLines: {},
         homeCircle: {},
 
-        targetLines: {},
         missionLines: {},
 
         targetCircles: {},

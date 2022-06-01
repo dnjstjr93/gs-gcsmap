@@ -8,7 +8,7 @@
                             <v-card flat tile :color="$store.state.drone_infos[name].color">
                                 <v-checkbox
                                     dense hide-details
-                                    @change="checkDroneSelected" class="pt-0 pl-1 ma-0 shadow"
+                                    @change="checkDroneTargeted" class="pt-0 pl-1 ma-0 shadow"
                                     v-model="$store.state.drone_infos[name].targeted"
                                 >
                                     <template v-slot:label>
@@ -1962,8 +1962,8 @@ export default {
             EventBus.$emit('do-centerCurrentPosition', {lat: this.gpi.lat / 10000000, lng: this.gpi.lon / 10000000})
         },
 
-        checkDroneSelected(checked) {
-            console.log('checkDroneSelected', checked);
+        checkDroneTargeted(checked) {
+            console.log('checkDroneTargeted', checked);
 
             // if(event) {
             //     this.$store.state.dronesChecked[this.name] = null;
@@ -1982,7 +1982,19 @@ export default {
 
             //EventBus.$emit('do-targetDrone');
 
-            this.$store.state.drone_command_prepared = checked;
+            this.$store.state.drone_infos[this.name].targeted = checked;
+
+            this.$store.state.drone_command_prepared = false;
+            for (let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        console.log('checkDroneTargeted', dName)
+                        this.$store.state.drone_command_prepared = true;
+
+                        break;
+                    }
+                }
+            }
         },
 
         onMessageBroadcast(message) {
@@ -4564,22 +4576,6 @@ export default {
                                         // console.log(this.$store.state.curTargetedTempMarkerIndex[this.name]);
                                         // console.log(this.$store.state.tempMarkers[this.name][0]);
                                         // console.log(this.$store.state.curTargetedTempMarkerIndex);
-                                        this.$store.state.targetLines[this.name] = null;
-                                        delete this.$store.state.targetLines[this.name]
-                                        this.$store.state.targetLines[this.name] = {
-                                            path: [],
-                                            options: {
-                                                strokeColor: this.$store.state.drone_infos[this.name].color,
-                                                strokeOpacity: 0.9,
-                                                strokeWeight: 5
-                                            }
-                                        };
-
-                                        this.$store.state.targetLines[this.name].path.push({
-                                            lat: this.gpi.lat / 10000000,
-                                            lng: this.gpi.lon / 10000000
-                                        });
-                                        this.$store.state.targetLines[this.name].path.push(this.$store.state.tempMarkers[this.name][this.$store.state.curTargetedTempMarkerIndex[this.name]]);
 
                                         let cur_lat = this.gpi.lat / 10000000;
                                         let cur_lon = this.gpi.lon / 10000000;
@@ -6206,8 +6202,6 @@ export default {
 
             console.log('send_set_roi_command - lat: ', lat, ', lng: ', lng, ', alt: ', alt);
             setTimeout(this.send_set_roi_command, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lng, alt);
-
-            delete this.$store.state.targetLines[this.name];
         });
 
         EventBus.$on('command-set-rtl-' + this.name, (rtl_speed) => {
@@ -6262,20 +6256,14 @@ export default {
         });
 
         EventBus.$on('command-set-goto-circle-' + this.name, (position) => {
+            var dir = (this.$store.state.drone_infos[this.name].circleType === 'cw') ? (1) : (-1);
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
             var lon = parseFloat(arr_cur_goto_position[1]);
-            //var alt = parseFloat(arr_cur_goto_position[2]);
+            var alt = parseFloat(arr_cur_goto_position[2]);
             //var speed = parseFloat(arr_cur_goto_position[3]);
-            //var radius = parseFloat(arr_cur_goto_position[4]);
-            //var circle_speed = parseFloat(arr_cur_goto_position[5]);
-            //var degree_speed = parseInt((circle_speed / radius) * (180 / 3.14), 10);
-
-            var dir = (this.$store.state.drone_infos[this.name].circleType === 'cw') ? (1) : (-1);
-
-            var alt = this.$store.state.drone_infos[this.name].targetAlt;
-            var radius = this.$store.state.drone_infos[this.name].targetRadius;
-            var circle_speed = this.$store.state.drone_infos[this.name].targetTurningSpeed;
+            var radius = parseFloat(arr_cur_goto_position[4]);
+            var circle_speed = parseFloat(arr_cur_goto_position[5]);
             var degree_speed = dir * parseInt((circle_speed / radius) * (180 / 3.14), 10);
 
             setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed) => {
@@ -6328,9 +6316,7 @@ export default {
                         let cur_lon = this.gpi.lon / 10000000;
                         let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
-                        let tar_lat = lat;
-                        let tar_lon = lon;
-                        var result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
+                        var result2 = dfs_xy_conv('toXY', lat, lon);
 
                         this.$store.state.drone_infos[name].targetLat = lat;
                         this.$store.state.drone_infos[name].targetLng = lon;
@@ -6441,8 +6427,6 @@ export default {
             });
             this.$store.state.missionLines[this.name].path.push({lat: lat, lng: lon});
 
-            delete this.$store.state.targetLines[this.name];
-
             this.$store.state.missionLines = this.clone(this.$store.state.missionLines)
 
             setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, speed) => {
@@ -6495,8 +6479,6 @@ export default {
                                 });
                                 this.$store.state.missionLines[name].path.push({lat: lat, lng: lon});
 
-                                delete this.$store.state.targetLines[name];
-
                                 this.$store.state.missionLines = this.clone(this.$store.state.missionLines);
 
                                 let cur_lat = this.gpi.lat / 10000000;
@@ -6544,14 +6526,12 @@ export default {
             }, 35 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lon, alt, speed);
         });
 
-        EventBus.$on('command-set-goto-alt-' + this.name, () => {
+        EventBus.$on('command-set-goto-alt-' + this.name, (_alt) => {
             let target_mode = 'GUIDED';
             if(this.fcType === 'px4') {
                 target_mode = 'AUTO_LOITER';
             }
             setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
-
-            let _alt = this.$store.state.drone_infos[this.name].targetAlt;
 
             this.watchingMission = 'goto-alt';
             this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;

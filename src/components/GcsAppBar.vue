@@ -232,7 +232,7 @@
                         <v-data-table
                             v-model="selected"
                             :headers="headers"
-                            :items="drone_infos"
+                            :items="drone_infos_list"
                             :single-select="false"
                             item-key="name"
                             show-select
@@ -506,25 +506,25 @@
                 drone_name_rule: [
                     v => !!v || '드론 이름은 필수 입력사항입니다.',
                     v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.',
-                    v => (this.drone_infos.findIndex((element) => {return(element.name === v)}) === -1) || '드론 이름이 이미 존재합니다.'
+                    v => (this.drone_infos_list.findIndex((element) => {return(element.name === v)}) === -1) || '드론 이름이 이미 존재합니다.'
                 ],
                 init_drone_name: null,
                 drone_name_update_rule: [
                     v => !!v || '드론 이름은 필수 입력사항입니다.',
                     v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.',
-                    v => (this.drone_infos.findIndex((element) => {return((element.name === v) && (this.init_drone_name !== v))}) === -1) || '드론 이름이 이미 존재합니다.'
+                    v => (this.drone_infos_list.findIndex((element) => {return((element.name === v) && (this.init_drone_name !== v))}) === -1) || '드론 이름이 이미 존재합니다.'
                 ],
                 drone_id: null,
                 drone_id_rule: [
                     v => !!v || '드론 아이디는 필수 입력사항입니다.',
                     v => /^[a-zA-Z0-9]*$/.test(v) || '드론 아이디는 영문+숫자만 입력 가능합니다.',
-                    v => (this.drone_infos.findIndex((element) => {return(element.id === v)}) === -1) || '드론 아이디가 이미 존재합니다.'
+                    v => (this.drone_infos_list.findIndex((element) => {return(element.id === v)}) === -1) || '드론 아이디가 이미 존재합니다.'
                 ],
                 init_drone_id: null,
                 drone_id_update_rule: [
                     v => !!v || '드론 아이디는 필수 입력사항입니다.',
                     v => /^[a-zA-Z0-9]*$/.test(v) || '드론 아이디는 영문+숫자만 입력 가능합니다.',
-                    v => (this.drone_infos.findIndex((element) => {return((element.id === v) && (this.init_drone_id !== v))}) === -1) || '드론 이름이 이미 존재합니다.'
+                    v => (this.drone_infos_list.findIndex((element) => {return((element.id === v) && (this.init_drone_id !== v))}) === -1) || '드론 이름이 이미 존재합니다.'
                 ],
                 bat_cell: null,
                 bat_cell_rule: [
@@ -558,7 +558,7 @@
                 type_selected: 'ardupilot',
                 color_selected: 'teal',
                 selected: [],
-                drone_infos: [],
+                drone_infos_list: [],
                 dialog: false,
                 add_dialog: false,
                 update_dialog: false,
@@ -1078,9 +1078,9 @@
                         if (status === 200) {
                             console.log(count, dName, con);
 
-                            this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(con));
-
                             if(dName !== 'unknown') {
+                                this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(con));
+
                                 if(localStorage.getItem(dName+'_selected')) {
                                     this.$store.state.drone_infos[dName].selected = (localStorage.getItem(dName + '_selected') === 'true');
                                 }
@@ -1088,7 +1088,7 @@
                                     localStorage.setItem(dName+'_selected', String(this.$store.state.drone_infos[dName].selected));
                                 }
 
-                                this.drone_infos.push(this.$store.state.drone_infos[dName]);
+                                this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
 
                                 if(this.$store.state.drone_infos[dName].selected) {
                                     this.selected.push(this.$store.state.drone_infos[dName]);
@@ -1903,7 +1903,7 @@
 
             GcsAppBarReseted() {
                 this.selected = [];
-                this.drone_infos = [];
+                this.drone_infos_list = [];
 
                 this.MOBIUS_CONNECTION_CONNECTED = false;
                 this.$store.state.MOBIUS_CONNECTION_CONNECTED = false;
@@ -2118,7 +2118,7 @@
                 const isId = (element) => {
                     return (element.id === item.id)
                 };
-                this.update_idx = this.drone_infos.findIndex(isId);
+                this.update_idx = this.drone_infos_list.findIndex(isId);
 
                 this.update_dialog = true;
             },
@@ -2137,13 +2137,13 @@
 
                 this.selected = null;
                 this.selected = [];
-                this.drone_infos = null;
-                this.drone_infos = [];
+                this.drone_infos_list = null;
+                this.drone_infos_list = [];
 
                 for(let dName in this.$store.state.drone_infos) {
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if(dName !== 'unknown') {
-                            this.drone_infos.push(this.$store.state.drone_infos[dName]);
+                            this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
                         }
 
                         if(this.$store.state.drone_infos[dName].selected) {
@@ -2219,13 +2219,13 @@
 
                     this.selected = null;
                     this.selected = [];
-                    this.drone_infos = null;
-                    this.drone_infos = [];
+                    this.drone_infos_list = null;
+                    this.drone_infos_list = [];
 
                     for(let dName in this.$store.state.drone_infos) {
                         if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                             if(dName !== 'unknown') {
-                                this.drone_infos.push(this.$store.state.drone_infos[dName]);
+                                this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
                             }
 
                             if(this.$store.state.drone_infos[dName].selected) {
@@ -2290,13 +2290,13 @@
 
                     this.selected = null;
                     this.selected = [];
-                    this.drone_infos = null;
-                    this.drone_infos = [];
+                    this.drone_infos_list = null;
+                    this.drone_infos_list = [];
 
                     for(let dName in this.$store.state.drone_infos) {
                         if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                             if(dName !== 'unknown') {
-                                this.drone_infos.push(this.$store.state.drone_infos[dName]);
+                                this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
                             }
 
                             if(this.$store.state.drone_infos[dName].selected) {

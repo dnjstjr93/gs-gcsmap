@@ -620,8 +620,8 @@
             },
 
             curDroneColorMap() {
-                console.log('curDroneColorMap', this.targetSelect, this.$store.state.drone_infos[this.targetSelect])
-                return (this.$store.state.drone_infos[this.targetSelect].color);
+                //console.log('curDroneColorMap', this.targetSelect, this.$store.state.drone_infos[this.targetSelect])
+                return ((this.targetSelect === 'unknown') ? 'grey' : this.$store.state.drone_infos[this.targetSelect].color);
             },
 
             formIsValid() {
