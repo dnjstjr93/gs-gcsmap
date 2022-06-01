@@ -3490,8 +3490,6 @@ export default {
 
                 this.$store.state.missionCircles = this.clone(this.$store.state.missionCircles);
 
-                delete this.$store.state.targetCircles[target_name];
-
                 setTimeout(this.send_set_mode_command, 50, this.name, this.target_pub_topic, this.sys_id, 'AUTO');
             }
             else {
@@ -5251,8 +5249,6 @@ export default {
                             };
 
                             this.$store.state.missionCircles = this.clone(this.$store.state.missionCircles);
-
-                            delete this.$store.state.targetCircles[this.droneStatus.target_name];
                         }
 
                         this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, 'AUTO');
@@ -5876,7 +5872,7 @@ export default {
         //     this.heading = payload.heading;
         // });
 
-        EventBus.$on('setWpYawBehavior', (param_value) => {
+        EventBus.$on('setWpYawBehavior-' + this.name, (param_value) => {
             let pre_custom_mode = this.curMode;
 
             let target_mode = 'LOITER';
@@ -6308,8 +6304,6 @@ export default {
 
                         this.$store.state.missionCircles = this.clone(this.$store.state.missionCircles);
 
-                        delete this.$store.state.targetCircles[name];
-
                         console.log('send_goto_circle_command', this.$store.state.missionCircles);
 
                         let cur_lat = this.gpi.lat / 10000000;
@@ -6356,8 +6350,6 @@ export default {
                         //     };
                         //
                         //     this.$store.state.missionCircles = this.clone(this.$store.state.missionCircles);
-                        //
-                        //     delete this.$store.state.targetCircles[name];
                         //
                         //     console.log('send_goto_circle_command', this.$store.state.missionCircles);
                         //
@@ -7048,7 +7040,7 @@ export default {
 
         EventBus.$off('ClickADSBMonitor');
         EventBus.$off('do-positions-elevation-' + this.name);
-        EventBus.$off('setWpYawBehavior');
+        EventBus.$off('setWpYawBehavior-' + this.name);
 
         EventBus.$off('do-publish-' + this.name);
 

@@ -555,7 +555,7 @@
                                     this.$store.state.drone_infos[dName].curArmStatus === 'ARMED') {
 
                                     if (parseInt(this.$store.state.params.wpYawBehavior[dName]) !== 1) {
-                                        EventBus.$emit('setWpYawBehavior', 1);
+                                        EventBus.$emit('setWpYawBehavior-' + dName, 1);
                                     }
                                 }
                             }

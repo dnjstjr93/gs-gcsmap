@@ -259,7 +259,6 @@
                                                                     type="number"
                                                                     min="10" max="255"
                                                                     hint="10 ~ 255"
-                                                                    @input="drawCircle($event, d.name, position_selections_index[d.name])"
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
@@ -281,7 +280,7 @@
                                                                     label="Index"
                                                                     class="text-right pa-1"
                                                                     outlined dense hide-details
-                                                                    v-model="targetSurveyMarkerIndex[d.name]"
+                                                                    v-model="$store.state.curTargetedSurveyMarkerIndex[d.name]"
                                                                     type="number"
                                                                     readonly
                                                                 ></v-text-field>
@@ -297,9 +296,8 @@
 <!--                                                                    class="pa-1"-->
 <!--                                                                ></v-select>-->
                                                                 <v-radio-group
-                                                                    v-model="yawBehavior[d.name]"
+                                                                    v-model="d.yawBehavior"
                                                                     column mandatory hide-details
-                                                                    @change="changeYawBehavior($event, d.name)"
                                                                 >
                                                                     <v-radio
                                                                         label="YAW고정"
@@ -315,18 +313,17 @@
                                                             </v-col>
                                                             <v-col cols="2" class="pl-4 px-1 mt-n4 mb-1">
                                                                 <v-radio-group
-                                                                    v-model="flyShape[d.name]"
+                                                                    v-model="d.flyShape"
                                                                     column mandatory hide-details
-                                                                    @change="changeFlyShape($event, d.name)"
                                                                 >
-                                                                    <v-radio
-                                                                        label="곡선비행"
-                                                                        value="곡선비행"
-                                                                        color="red"
-                                                                    ></v-radio>
                                                                     <v-radio
                                                                         label="직선비행"
                                                                         value="직선비행"
+                                                                        color="red"
+                                                                    ></v-radio>
+                                                                    <v-radio
+                                                                        label="곡선비행"
+                                                                        value="곡선비행"
                                                                         color="primary"
                                                                     ></v-radio>
                                                                 </v-radio-group>
@@ -334,9 +331,8 @@
                                                             <v-spacer/>
                                                             <v-col cols="2" class="pl-4 px-1 mt-n4 mb-1">
                                                                 <v-radio-group
-                                                                    v-model="startWay[d.name]"
+                                                                    v-model="d.startWay"
                                                                     column mandatory hide-details
-                                                                    @change="changeStartWay($event, d.name)"
                                                                 >
                                                                     <v-radio
                                                                         label="처음부터"
@@ -352,7 +348,7 @@
                                                             </v-col>
                                                             <v-col cols="2" v-show="showMissionParam" class="pa-1 pt-2">
                                                                 <v-text-field
-                                                                    v-model="$store.state.drone_infos[d.name].curMissionItemReached"
+                                                                    v-model="d.curMissionItemReached"
                                                                     dense outlined hide-details
                                                                     label="Current Mission Count"
                                                                     type="number"
@@ -384,7 +380,7 @@
                                                                     label="지점대기(sec)"
                                                                     class="text-right pa-1"
                                                                     outlined dense hide-details
-                                                                    v-model="targetStayTime[d.name]"
+                                                                    v-model="d.targetStayTime"
                                                                     type="number"
                                                                     min="0" max="60"
                                                                     hint="0 ~ 60초"
@@ -1390,48 +1386,6 @@ export default {
             }
         },
 
-        drawCircle(radius, dName, pIndex) {
-            this.$store.state.targetCircles[dName] = {
-                lat: this.$store.state.tempMarkers[dName][pIndex].lat,
-                lng: this.$store.state.tempMarkers[dName][pIndex].lng,
-                radius: radius,
-            };
-
-            //console.log('radius: ', radius);
-            //this.$store.state.drone_infos[dName].targetRadius = parseInt(this.targetRadius[dName]);
-
-            // if (this.$store.state.drone_infos[dName].targeted && this.$store.state.tempMarkers[dName][pIndex].targeted) {
-            //     if(this.drawRadiusUpdateTimer !== null) {
-            //         clearTimeout(this.drawRadiusUpdateTimer);
-            //     }
-            //
-            //     this.drawRadiusUpdateTimer = setTimeout((radius, dName, pIndex) => {
-            //         this.$store.state.tempMarkers[dName][pIndex].radius = this.$store.state.drone_infos[dName].targetRadius;
-            //
-            //         //delete this.$store.state.targetCircles[dName];
-            //         this.$store.state.targetCircles[dName] = {
-            //             lat: this.$store.state.tempMarkers[dName][pIndex].lat,
-            //             lng: this.$store.state.tempMarkers[dName][pIndex].lng,
-            //             radius: this.$store.state.tempMarkers[dName][pIndex].radius,
-            //             options: {
-            //                 strokeColor: this.$store.state.drone_infos[dName].color,
-            //                 strokeOpacity: 0.9,
-            //                 strokeWeight: 5
-            //             }
-            //         };
-            //     }, 100, radius, dName, pIndex);
-            // }
-            // else {
-            //     delete this.$store.state.targetCircles[dName];
-            // }
-
-            //EventBus.$emit('do-drawLineAllTarget');
-        },
-
-        clearCircle(dName) {
-            delete this.$store.state.targetCircles[dName];
-        },
-
         handleLeftChange(dName, id, {x, y, speed, angle}) {
             const stick = this[`${id}Stick`];
             stick.x[dName] = x;
@@ -1545,48 +1499,17 @@ export default {
                 this.$store.state.currentCommandTab = 'virtual';
             }
 
-            EventBus.$emit('do-deleteLineAllTarget');
-
             if (this.$store.state.currentCommandTab === '이동') {
-                //EventBus.$emit('do-drawLineAllTarget');
-
-
+                console.log(this.$store.state.currentCommandTab);
             }
             else if(this.$store.state.currentCommandTab === '선회') {
-                for (let dName in this.$store.state.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                            let pIndex = this.$store.state.curTargetedTempMarkerIndex[dName];
-                            if(pIndex !== null) {
-                                 this.drawCircle(this.$store.state.drone_infos[dName].targetRadius, dName, pIndex);
-                            }
-                            else {
-                                this.clearCircle(dName);
-                            }
-                        }
-                    }
-                }
+                console.log(this.$store.state.currentCommandTab);
             }
             else if(this.$store.state.currentCommandTab === '패턴') {
-                for (let dName in this.$store.state.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                            if(Object.prototype.hasOwnProperty.call(this.$store.state.targetCircles, dName)) {
-                                delete this.$store.state.targetCircles[dName];
-                            }
-                        }
-                    }
-                }
+                console.log(this.$store.state.currentCommandTab);
             }
             else if (this.$store.state.currentCommandTab === '모드') {
-                // for (let dName in this.$store.state.drone_infos) {
-                //     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                //         if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                //             console.log('targetModeSelection', dName, this.targetModeSelection[dName], this.$store.state.drone_infos[dName].curMode);
-                //             this.targetModeSelection[dName] = this.$store.state.drone_infos[dName].curMode;
-                //         }
-                //     }
-                // }
+                console.log(this.$store.state.currentCommandTab);
             }
         },
 
@@ -1982,28 +1905,28 @@ export default {
             for(let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                        if(this.targetSurveyMarkerIndex[dName] !== -1) {
+                        let pIndex = this.$store.state.curTargetedSurveyMarkerIndex[dName];
+                        if(pIndex !== null) {
                             this.$store.state.drone_infos[dName].autoStartIndex = 0;
-                            this.$store.state.drone_infos[dName].autoEndIndex = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines.length - 1;
-                            this.$store.state.drone_infos[dName].autoDelay = parseInt(this.targetStayTime[dName]);
-                            this.$store.state.drone_infos[dName].targetStayTime = parseInt(this.targetStayTime[dName]);
+                            this.$store.state.drone_infos[dName].autoEndIndex = this.$store.state.surveyMarkers[dName][pIndex].pathLines.length - 1;
+                            this.$store.state.drone_infos[dName].autoDelay = parseInt(this.$store.state.drone_infos[dName].targetStayTime);
                             //this.$store.state.drone_infos[dName].autoSpeed = parseInt(this.targetSpeed[dName]);
-                            this.$store.state.drone_infos[dName].autoSpeed = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].speed;
-                            this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
-                            this.$store.state.drone_infos[dName].flyShape = this.flyShape[dName];
-                            this.$store.state.drone_infos[dName].startWay = this.startWay[dName];
+                            this.$store.state.drone_infos[dName].autoSpeed = this.$store.state.surveyMarkers[dName][pIndex].speed;
+                            //this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
+                            //this.$store.state.drone_infos[dName].flyShape = this.flyShape[dName];
+                            //this.$store.state.drone_infos[dName].startWay = this.startWay[dName];
 
                             this.position_selections_items[dName] = [];
-                            for (let idx in this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines) {
-                                if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines, idx)) {
-                                    let strPos = this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines[idx].lat + ':' +
-                                        this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].pathLines[idx].lng + ':' +
-                                        this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].alt + ':' +
-                                        this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].speed + ':' +
+                            for (let idx in this.$store.state.surveyMarkers[dName][pIndex].pathLines) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName][pIndex].pathLines, idx)) {
+                                    let strPos = this.$store.state.surveyMarkers[dName][pIndex].pathLines[idx].lat + ':' +
+                                        this.$store.state.surveyMarkers[dName][pIndex].pathLines[idx].lng + ':' +
+                                        this.$store.state.surveyMarkers[dName][pIndex].alt + ':' +
+                                        this.$store.state.surveyMarkers[dName][pIndex].speed + ':' +
                                         // this.targetAlt[dName] + ':' +
                                         // this.targetSpeed[dName] + ':' +
                                         '100:5:16:' +
-                                        this.targetStayTime[dName] + ':0';
+                                        this.$store.state.drone_infos[dName].targetStayTime + ':0';
                                     this.position_selections_items[dName].push(strPos);
                                 }
                             }
@@ -2013,8 +1936,8 @@ export default {
 
                                 let strPos = this.$store.state.drone_infos[dName].pausePosition.lat + ':' +
                                     this.$store.state.drone_infos[dName].pausePosition.lng + ':' +
-                                    this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].alt + ':' +
-                                    this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].speed + ':' +
+                                    this.$store.state.surveyMarkers[dName][pIndex].alt + ':' +
+                                    this.$store.state.surveyMarkers[dName][pIndex].speed + ':' +
                                     '100:5:16:0:0';
 
                                 let payload = {};
@@ -2031,7 +1954,7 @@ export default {
                                     EventBus.$emit('command-set-auto_goto-' + dName, payload);
 
                                     payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
-                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][this.targetSurveyMarkerIndex[dName]].period + ' keti';
+                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' keti';
                                     EventBus.$emit('do-publish-' + dName, payload);
                                 } else {
                                     console.log('setAutoGoto-', dName, 'auto index setting error!!!');

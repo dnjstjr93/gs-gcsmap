@@ -729,13 +729,12 @@ export default new Vuex.Store({
         // dronesChecked: {},
 
         curTargetedTempMarkerIndex: {},
+        curTargetedSurveyMarkerIndex: {},
 
         trackingLines: {},
         homeCircle: {},
 
         missionLines: {},
-
-        targetCircles: {},
         missionCircles: {},
 
         distanceTarget: {},

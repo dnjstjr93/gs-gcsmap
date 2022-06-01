@@ -1198,6 +1198,18 @@
                                     this.$store.state.drone_infos[dName].yawBehavior = 'YAW고정';
                                 }
 
+                                if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'flyShape')) {
+                                    this.$store.state.drone_infos[dName].flyShape = '직선비행';
+                                }
+
+                                if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'startWay')) {
+                                    this.$store.state.drone_infos[dName].startWay = '처음부터';
+                                }
+
+                                if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curMissionItemReached')) {
+                                    this.$store.state.drone_infos[dName].curMissionItemReached = 0;
+                                }
+
                                 this.$store.state.drone_infos[dName].targeted = false;
                             }
 
@@ -1610,6 +1622,8 @@
 
                             console.log(count, dName, con);
 
+                            this.$store.state.curTargetedSurveyMarkerIndex[dName] = null;
+
                             if(con.length === 0) {
                                 this.$store.state.surveyMarkers[dName] = [];
                             }
@@ -1647,6 +1661,50 @@
 
                                     if(!Object.prototype.hasOwnProperty.call(marker, 'polygonEditable')) {
                                         marker.polygonEditable = false;
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'wayOfSurvey')) {
+                                        marker.wayOfSurvey = 'forShooting';
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'angle')) {
+                                        marker.angle = 0;
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'alt')) {
+                                        marker.alt = 100;
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'focal')) {
+                                        marker.focal = 16;
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'sensor_w')) {
+                                        marker.sensor_w = 23.5;
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'sensor_h')) {
+                                        marker.sensor_h = 15.6;
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'overlap')) {
+                                        marker.overlap = 0.7;
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'speed')) {
+                                        marker.speed = 5;
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'period')) {
+                                        marker.period = 5;
+                                    }
+
+                                    if (!Object.prototype.hasOwnProperty.call(marker, 'total_dist')) {
+                                        marker.total_dist = 400;
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'area')) {
+                                        marker.area = 0;
                                     }
 
                                     marker.polygonDraggable = false;
