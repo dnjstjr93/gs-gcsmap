@@ -728,9 +728,6 @@ export default new Vuex.Store({
         currentCommandTab: 'virtual',
         // dronesChecked: {},
 
-        curTargetedTempMarkerIndex: {},
-        curTargetedSurveyMarkerIndex: {},
-
         trackingLines: {},
         homeCircle: {},
 
@@ -807,18 +804,6 @@ export default new Vuex.Store({
             state.tempMarkers[payload.pName][payload.pIndex].lng = payload.lng;
             state.tempMarkers[payload.pName][payload.pIndex].targeted = payload.value;
 
-            if(!Object.hasOwnProperty.call(state.tempMarkers[payload.pName][payload.pIndex], 'type')) {
-                state.tempMarkers[payload.pName][payload.pIndex].type = 'Goto';
-            }
-
-            if(!Object.hasOwnProperty.call(state.tempMarkers[payload.pName][payload.pIndex], 'mavCmd')) {
-                state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd = 16;
-            }
-
-            if(!Object.hasOwnProperty.call(state.tempMarkers[payload.pName][payload.pIndex], 'targetStayTime')) {
-                state.tempMarkers[payload.pName][payload.pIndex].targetStayTime = 1;
-            }
-
             let temp = JSON.parse(JSON.stringify(state.tempMarkers));
             state.tempMarkers = null;
             state.tempMarkers = JSON.parse(JSON.stringify(temp));
@@ -839,33 +824,33 @@ export default new Vuex.Store({
                 this.commit('updateDroneInfosSelected');
             }
 
-            let dName = payload.pName;
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName,
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=4'
-                },
-                data: {
-                    'm2m:cin': {
-                        con: state.tempMarkers[dName]
-                    }
-                }
-            }).then(
-                function (res) {
-                    console.log('-------------------------------------------------------updateTempPosition-axios', res.data);
-                }
-            ).catch(
-                function (err) {
-                    console.log(err.message);
-                }
-            );
+            // let dName = payload.pName;
+            // axios({
+            //     validateStatus: function (status) {
+            //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+            //         return status < 500;
+            //     },
+            //     method: 'post',
+            //     url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName,
+            //     headers: {
+            //         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+            //         'X-M2M-Origin': 'SVue',
+            //         'Content-Type': 'application/json;ty=4'
+            //     },
+            //     data: {
+            //         'm2m:cin': {
+            //             con: state.tempMarkers[dName]
+            //         }
+            //     }
+            // }).then(
+            //     function (res) {
+            //         console.log('-------------------------------------------------------updateTempPosition-axios', res.data);
+            //     }
+            // ).catch(
+            //     function (err) {
+            //         console.log(err.message);
+            //     }
+            // );
         },
 
         selectTempMarker(state, payload) {
@@ -883,120 +868,6 @@ export default new Vuex.Store({
 
             payload.targeted = true;
             EventBus.$emit('do-targetTempMarker', payload);
-        },
-
-        setAllTempMarker(state, value) {
-            console.log(value);
-
-            if (value) {
-                for (let pName in state.tempMarkers) {
-                    if (Object.prototype.hasOwnProperty.call(state.tempMarkers, pName)) {
-                        state.tempMarkers[pName].forEach((pos) => {
-                            if (!pos.selected) {
-                                pos.selected = true;
-                            }
-                        });
-                    }
-                }
-            }
-            else {
-                for (let pName in state.tempMarkers) {
-                    if (Object.prototype.hasOwnProperty.call(state.tempMarkers, pName)) {
-                        state.tempMarkers[pName].forEach((pos) => {
-                            if (pos.selected) {
-                                pos.selected = false;
-                            }
-                        });
-                    }
-                }
-            }
-        },
-
-        initAllTempMarker(state) {
-            for (let pName in state.tempMarkers) {
-                if (Object.prototype.hasOwnProperty.call(state.tempMarkers, pName)) {
-                    state.tempMarkers[pName].forEach((pos) => {
-                        if (pos.selected) {
-                            pos.selected = false;
-                            pos.targeted = false;
-                            state.curTargetedTempMarkerIndex[pName] = null;
-                        }
-                    });
-                }
-            }
-
-            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-            state.tempMarkers = null;
-            state.tempMarkers = {};
-            state.tempMarkers = JSON.parse(JSON.stringify(temp));
-            temp = null;
-        },
-
-        setTargetAllTempMarker(state, payload) {
-            console.log(payload);
-
-            if (payload.value) {
-                state.tempMarkers[payload.pName].forEach((pos, pIndex) => {
-                    if (!pos.selected) {
-                        if (!pos.targeted) {
-                            pos.targeted = true;
-                            state.curTargetedTempMarkerIndex[payload.pName] = pIndex;
-                        }
-                    }
-                });
-            }
-            else {
-                state.tempMarkers[payload.pName].forEach((pos) => {
-                    if (!pos.selected) {
-                        if (pos.targeted) {
-                            pos.targeted = false;
-                            state.curTargetedTempMarkerIndex[payload.pName] = null;
-                        }
-                    }
-                });
-            }
-        },
-
-        setTempMarker(state, payload) {
-            console.log(payload);
-
-            let value = payload.value;
-            let pName = payload.pName;
-            let pIndex = payload.pIndex;
-
-            if (value) {
-                if (!state.tempMarkers[pName][pIndex].selected) {
-                    state.tempMarkers[pName][pIndex].selected = true;
-                }
-            }
-            else {
-                if (state.tempMarkers[pName][pIndex].selected) {
-                    state.tempMarkers[pName][pIndex].selected = false;
-                }
-            }
-        },
-
-        setTargetTempMarker(state, payload) {
-            console.log(payload);
-
-            let value = payload.value;
-            let pName = payload.pName;
-            let pIndex = payload.pIndex;
-
-            if (value) {
-                if (!state.tempMarkers[pName][pIndex].targeted) {
-                    state.tempMarkers[pName][pIndex].targeted = true;
-                    state.curTargetedTempMarkerIndex[pName] = pIndex;
-                }
-            }
-            else {
-                if (state.tempMarkers[pName][pIndex].targeted) {
-                    state.tempMarkers[pName][pIndex].targeted = false;
-                    state.curTargetedTempMarkerIndex[pName] = null;
-                }
-            }
-
-
         },
 
         addTempMarker(state, payload) {

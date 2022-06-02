@@ -178,7 +178,7 @@
                                                                     outlined dense hide-details
                                                                     v-model="d.targetAlt"
                                                                     type="number"
-                                                                    :class="parseFloat(position_selections_elevation[d.name])>d.targetAlt ? 'red' : ''"
+                                                                    :class="(d.curTargetedTempMarkerIndex === -1) ? '' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation)>d.targetAlt ? 'red' : ''"
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
@@ -186,7 +186,7 @@
                                                                     label="지형높이(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="parseFloat(position_selections_elevation[d.name]).toFixed(1)"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? 'NaN' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
                                                                     readonly
                                                                 ></v-text-field>
                                                             </v-col>
@@ -280,7 +280,7 @@
                                                                     label="Index"
                                                                     class="text-right pa-1"
                                                                     outlined dense hide-details
-                                                                    v-model="$store.state.curTargetedSurveyMarkerIndex[d.name]"
+                                                                    v-model="d.curTargetedSurveyMarkerIndex"
                                                                     type="number"
                                                                     readonly
                                                                 ></v-text-field>
@@ -545,20 +545,19 @@
                                                                     ></v-switch>
                                                                 </v-subheader>
                                                             </v-col>
-                                                            <v-col cols="3">
+                                                            <v-col cols="2">
                                                                 <v-select
-                                                                    @change="changeYawBehavior($event, d.name)"
                                                                     dense outlined hide-details
                                                                     :items="['YAW고정', 'YAW회전']"
                                                                     label="YAW설정"
-                                                                    v-model="yawBehavior[d.name]"
+                                                                    v-model="d.yawBehavior"
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-select
                                                                     dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
-                                                                    label="Start Index" v-model="autoStartIndex[d.name]"
+                                                                    label="Start Index" v-model="d.autoStartIndex"
                                                                     class="pa-1"
                                                                     hide-details
                                                                 ></v-select>
@@ -566,17 +565,26 @@
                                                             <v-col cols="2">
                                                                 <v-select
                                                                     dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
-                                                                    label="End Index" v-model="autoEndIndex[d.name]"
+                                                                    label="End Index" v-model="d.autoEndIndex"
                                                                     hide-details
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
+                                                                    label="자동고도(m)"
+                                                                    class="pa-1 text-right"
+                                                                    outlined dense hide-details
+                                                                    v-model="d.targetAlt"
+                                                                    type="number"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
                                                                     label="Speed"
                                                                     class="pa-1"
                                                                     outlined dense hide-details
-                                                                    v-model="autoSpeed[d.name]"
+                                                                    v-model="d.autoSpeed"
                                                                     type="number"
                                                                     min="1"
                                                                     max="15"
@@ -587,7 +595,7 @@
                                                                     label="Delay"
                                                                     class="pa-1"
                                                                     outlined dense hide-details
-                                                                    v-model="autoDelay[d.name]"
+                                                                    v-model="d.autoDelay"
                                                                     type="number"
                                                                 ></v-text-field>
                                                             </v-col>
@@ -1667,8 +1675,8 @@ export default {
             for(let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                        let pIndex = this.$store.state.curTargetedTempMarkerIndex[dName];
-                        if(pIndex !== null) {
+                        let pIndex = this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex;
+                        if(pIndex !== -1) {
                             let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
                                 this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
                                 this.$store.state.drone_infos[dName].targetAlt + ':' +
@@ -1705,8 +1713,8 @@ export default {
             for(let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                        let pIndex = this.$store.state.curTargetedTempMarkerIndex[dName];
-                        if(pIndex !== null) {
+                        let pIndex = this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex;
+                        if(pIndex !== -1) {
                             let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
                                 this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
                                 this.$store.state.drone_infos[dName].targetAlt + ':' +
@@ -1846,39 +1854,65 @@ export default {
         },
 
         setAutoGoto() {
-            for(let name in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        this.$store.state.drone_infos[name].autoStartIndex = this.autoStartIndex[name];
-                        this.$store.state.drone_infos[name].autoEndIndex = this.autoEndIndex[name];
-                        this.$store.state.drone_infos[name].autoDelay = parseInt(this.autoDelay[name]);
-                        this.$store.state.drone_infos[name].autoSpeed = parseInt(this.autoSpeed[name]);
-                        console.log('setAutoGoto', parseInt(this.$store.state.drone_infos[name].autoStartIndex), parseInt(this.$store.state.drone_infos[name].autoEndIndex), this.$store.state.drone_infos[name].autoDelay);
-                        if(parseInt(this.$store.state.drone_infos[name].autoStartIndex) <= parseInt(this.$store.state.drone_infos[name].autoEndIndex)) {
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
 
-                            this.position_selections_items[name] = [];
-                            for (let pIndex in this.$store.state.tempMarkers[name]) {
-                                if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[name], pIndex)) {
-                                    let strPos = this.$store.state.tempMarkers[name][pIndex].lat + ':' +
-                                        this.$store.state.tempMarkers[name][pIndex].lng + ':' +
-                                        this.$store.state.tempMarkers[name][pIndex].alt + ':' +
-                                        this.$store.state.tempMarkers[name][pIndex].speed + ':' +
-                                        this.$store.state.tempMarkers[name][pIndex].radius + ':' +
-                                        this.$store.state.tempMarkers[name][pIndex].turningSpeed + ':' +
-                                        this.$store.state.tempMarkers[name][pIndex].targetMavCmd + ':' +
-                                        this.$store.state.tempMarkers[name][pIndex].targetStayTime + ':' +
-                                        this.$store.state.tempMarkers[name][pIndex].elevation;
-                                    this.position_selections_items[name].push(strPos);
+                        //this.$store.state.drone_infos[name].autoStartIndex = this.autoStartIndex[name];
+                        //this.$store.state.drone_infos[name].autoEndIndex = this.autoEndIndex[name];
+                        //this.$store.state.drone_infos[name].autoDelay = parseInt(this.autoDelay[name]);
+                        //this.$store.state.drone_infos[name].autoSpeed = parseInt(this.autoSpeed[name]);
+
+                        let start_index = parseInt(this.$store.state.drone_infos[dName].autoStartIndex);
+                        let end_index = parseInt(this.$store.state.drone_infos[dName].autoEndIndex);
+
+                        let payload = {};
+
+                        this.position_selections_items[dName] = [];
+
+                        if(start_index <= end_index) {
+                            for (let pIndex = start_index; pIndex <= end_index; pIndex++) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
+                                    let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
+                                        this.$store.state.drone_infos[dName].targetAlt + ':' +
+                                        this.$store.state.drone_infos[dName].autoSpeed + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].radius + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].turningSpeed + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].targetMavCmd + ':' +
+                                        this.$store.state.drone_infos[dName].autoDelay + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].elevation;
+                                    this.position_selections_items[dName].push(strPos);
                                 }
                             }
 
-                            let payload = {};
-                            payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[name]));
-                            EventBus.$emit('command-set-auto_goto-' + name, payload);
+                            payload.start_index = start_index;
+                            payload.end_index = end_index;
                         }
                         else {
-                            console.log('setAutoGoto-', name, 'auto index setting error!!!');
+                            for (let pIndex = start_index; pIndex >= end_index; pIndex--) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
+                                    let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
+                                        this.$store.state.drone_infos[dName].targetAlt + ':' +
+                                        this.$store.state.drone_infos[dName].autoSpeed + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].radius + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].turningSpeed + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].targetMavCmd + ':' +
+                                        this.$store.state.drone_infos[dName].autoDelay + ':' +
+                                        this.$store.state.tempMarkers[dName][pIndex].elevation;
+                                    this.position_selections_items[dName].push(strPos);
+                                }
+                            }
+
+                            payload.start_index = end_index;
+                            payload.end_index = start_index;
                         }
+
+                        console.log('setAutoGoto', parseInt(this.$store.state.drone_infos[dName].autoStartIndex), parseInt(this.$store.state.drone_infos[dName].autoEndIndex), this.$store.state.drone_infos[dName].autoDelay);
+
+                        payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
+                        EventBus.$emit('command-set-auto_goto-' + dName, payload);
                     }
                 }
             }
@@ -1905,10 +1939,8 @@ export default {
             for(let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                        let pIndex = this.$store.state.curTargetedSurveyMarkerIndex[dName];
-                        if(pIndex !== null) {
-                            this.$store.state.drone_infos[dName].autoStartIndex = 0;
-                            this.$store.state.drone_infos[dName].autoEndIndex = this.$store.state.surveyMarkers[dName][pIndex].pathLines.length - 1;
+                        let pIndex = this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex;
+                        if(pIndex !== -1) {
                             this.$store.state.drone_infos[dName].autoDelay = parseInt(this.$store.state.drone_infos[dName].targetStayTime);
                             //this.$store.state.drone_infos[dName].autoSpeed = parseInt(this.targetSpeed[dName]);
                             this.$store.state.drone_infos[dName].autoSpeed = this.$store.state.surveyMarkers[dName][pIndex].speed;
@@ -1947,18 +1979,16 @@ export default {
                                 EventBus.$emit('command-set-mission_rewind-' + dName, payload);
                             }
                             else {
-                                console.log('setSurvey', parseInt(this.$store.state.drone_infos[dName].autoStartIndex), parseInt(this.$store.state.drone_infos[dName].autoEndIndex), this.$store.state.drone_infos[dName].autoDelay);
-                                if (parseInt(this.$store.state.drone_infos[dName].autoStartIndex) <= parseInt(this.$store.state.drone_infos[dName].autoEndIndex)) {
-                                    let payload = {};
-                                    payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
-                                    EventBus.$emit('command-set-auto_goto-' + dName, payload);
+                                console.log('setSurvey', 0, parseInt(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length - 1), this.$store.state.drone_infos[dName].autoDelay);
+                                let payload = {};
+                                payload.start_index = 0;
+                                payload.end_index = this.$store.state.surveyMarkers[dName][pIndex].pathLines.length - 1;
+                                payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
+                                EventBus.$emit('command-set-auto_goto-' + dName, payload);
 
-                                    payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
-                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' keti';
-                                    EventBus.$emit('do-publish-' + dName, payload);
-                                } else {
-                                    console.log('setAutoGoto-', dName, 'auto index setting error!!!');
-                                }
+                                payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
+                                payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' keti';
+                                EventBus.$emit('do-publish-' + dName, payload);
                             }
                         }
                         else {

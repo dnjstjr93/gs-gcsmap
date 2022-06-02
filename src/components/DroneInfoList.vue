@@ -447,7 +447,7 @@
         mounted() {
             window.addEventListener('resize', this.onResize);
 
-            setTimeout(this.onResize, 2000);
+            setTimeout(this.onResize, 2250);
 
             EventBus.$on('onResize-DroneInfoList', () => {
                 this.onResize();

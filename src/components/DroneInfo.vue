@@ -4536,10 +4536,6 @@ export default {
 
                             let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
-                            // let tar_lat = this.$store.state.tempMarkers[this.name][this.$store.state.curTargetedTempMarkerIndex[this.name]].lat;
-                            // let tar_lon = this.$store.state.tempMarkers[this.name][this.$store.state.curTargetedTempMarkerIndex[this.name]].lng;
-                            // let tar_alt = this.$store.state.tempMarkers[this.name][this.$store.state.curTargetedTempMarkerIndex[this.name]].alt;
-
                             let tar_lat = this.$store.state.drone_infos[this.name].home_position.lat;
                             let tar_lon = this.$store.state.drone_infos[this.name].home_position.lng;
                             let tar_alt = 0;
@@ -4568,33 +4564,26 @@ export default {
                         }
 
                         if (this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회' || this.$store.state.currentCommandTab === '관심') {
-                            if (this.$store.state.drone_infos[this.name].selected && this.$store.state.drone_infos[this.name].targeted) {
-                                if (Object.prototype.hasOwnProperty.call(this.$store.state.curTargetedTempMarkerIndex, this.name)) {
-                                    if (this.$store.state.curTargetedTempMarkerIndex[this.name] !== null) {
-                                        // console.log(this.$store.state.curTargetedTempMarkerIndex[this.name]);
-                                        // console.log(this.$store.state.tempMarkers[this.name][0]);
-                                        // console.log(this.$store.state.curTargetedTempMarkerIndex);
+                            let pIndex = this.$store.state.drone_infos[this.name].curTargetedTempMarkerIndex;
+                            if (this.$store.state.drone_infos[this.name].selected && this.$store.state.drone_infos[this.name].targeted &&  pIndex !== -1) {
+                                let cur_lat = this.gpi.lat / 10000000;
+                                let cur_lon = this.gpi.lon / 10000000;
+                                let cur_alt = this.gpi.relative_alt / 1000;
 
-                                        let cur_lat = this.gpi.lat / 10000000;
-                                        let cur_lon = this.gpi.lon / 10000000;
-                                        let cur_alt = this.gpi.relative_alt / 1000;
+                                let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
-                                        let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
+                                let tar_lat = this.$store.state.tempMarkers[this.name][pIndex].lat;
+                                let tar_lon = this.$store.state.tempMarkers[this.name][pIndex].lng;
+                                let tar_alt = this.$store.state.tempMarkers[this.name][pIndex].alt;
 
-                                        let tar_lat = this.$store.state.tempMarkers[this.name][this.$store.state.curTargetedTempMarkerIndex[this.name]].lat;
-                                        let tar_lon = this.$store.state.tempMarkers[this.name][this.$store.state.curTargetedTempMarkerIndex[this.name]].lng;
-                                        let tar_alt = this.$store.state.tempMarkers[this.name][this.$store.state.curTargetedTempMarkerIndex[this.name]].alt;
+                                let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
-                                        let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
+                                this.$store.state.distanceTarget[this.name] = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2));
 
-                                        this.$store.state.distanceTarget[this.name] = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2));
-
-                                        this.$store.state.distanceTarget = this.clone(this.$store.state.distanceTarget);
-                                    }
-                                    else {
-                                        this.$store.state.distanceTarget[this.name] = 0;
-                                    }
-                                }
+                                this.$store.state.distanceTarget = this.clone(this.$store.state.distanceTarget);
+                            }
+                            else {
+                                this.$store.state.distanceTarget[this.name] = 0;
                             }
                         }
                     }
@@ -6055,10 +6044,9 @@ export default {
         });
 
         EventBus.$on('command-set-auto_goto-' + this.name, (payload) => {
-            let start_idx = parseInt(this.$store.state.drone_infos[this.name].autoStartIndex);
-            let end_idx = parseInt(this.$store.state.drone_infos[this.name].autoEndIndex);
+            let start_idx = payload.start_index;
+            let end_idx = payload.end_index;
             let delay = this.$store.state.drone_infos[this.name].autoDelay;
-
             let auto_speed = this.$store.state.drone_infos[this.name].autoSpeed;
 
             this.send_wpnav_speed_param_set_command(this.name, this.target_pub_topic, this.sys_id, auto_speed);
