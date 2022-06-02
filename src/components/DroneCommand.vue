@@ -204,7 +204,7 @@
                                                                     label="지점거리(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="isNaN(Math.ceil($store.state.distanceTarget[d.name]))?0:Math.ceil($store.state.distanceTarget[d.name])"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : Math.ceil($store.state.distanceTarget[d.name])"
                                                                     type="number"
                                                                     readonly
                                                                 ></v-text-field>
@@ -236,7 +236,7 @@
                                                                     label="지형높이(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="position_selections_elevation[d.name]"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? 'NaN' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
                                                                     readonly
                                                                 ></v-text-field>
                                                             </v-col>
@@ -247,7 +247,7 @@
                                                                     outlined dense hide-details
                                                                     v-model="d.targetAlt"
                                                                     type="number"
-                                                                    :class="parseFloat(position_selections_elevation[d.name])>targetAlt[d.name] ? 'red' : ''"
+                                                                    :class="(d.curTargetedTempMarkerIndex === -1) ? '' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation)>d.targetAlt ? 'red' : ''"
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
@@ -427,7 +427,7 @@
                                                                     label="지형높이(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="parseFloat(position_selections_elevation[d.name]).toFixed(1)"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? 'NaN' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
                                                                     readonly
                                                                 ></v-text-field>
                                                             </v-col>
@@ -436,7 +436,7 @@
                                                                     label="지점거리(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="isNaN(Math.ceil($store.state.distanceTarget[d.name]))?0:Math.ceil($store.state.distanceTarget[d.name])"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : Math.ceil($store.state.distanceTarget[d.name])"
                                                                     type="number"
                                                                     readonly
                                                                 ></v-text-field>
@@ -447,7 +447,7 @@
                                                         <v-row no-gutters>
                                                             <v-col cols="12">
                                                                 <v-text-field
-                                                                    v-model="rtlSpeed[d.name]"
+                                                                    v-model="d.rtlSpeed"
                                                                     dense outlined hide-details
                                                                     label="귀환속도(m/s)"
                                                                     type="number"
@@ -883,7 +883,7 @@
                                                                                                 step="1"
                                                                                                 color="indigo"
                                                                                                 track-color="orange"
-                                                                                                @input ="handlePwmSlide(d.name, num, $event)"
+                                                                                                @change ="handlePwmSlide($event, d.name, num)"
                                                                                             >
                                                                                             </v-slider>
                                                                                         </v-col>
@@ -1199,8 +1199,40 @@ export default {
 
 
     watch: {
-        check_prepared(oldVal, newVal){
+        check_prepared(newVal, oldVal){
             console.log('drone_command_prepared', oldVal, ' -> ', newVal);
+
+            if(newVal) {
+                for (let dName in this.$store.state.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                            if (localStorage.getItem('target_mission_num-' + dName)) {
+                                this.target_mission_num = JSON.parse(localStorage.getItem('target_mission_num-' + dName));
+                            } else {
+                                for (let i = 0; i < this.channels.length; i++) {
+                                    let num = this.channels[i];
+                                    this.target_mission_num[`targetCh${num}`][dName] = num;
+                                }
+
+                                localStorage.setItem('target_mission_num-' + dName, JSON.stringify(this.target_mission_num));
+                            }
+
+                            console.log('///////////////////////////////////////////////////////////target_mission_num', this.target_mission_num);
+
+                            if (localStorage.getItem('mission_value-' + dName)) {
+                                this.mission_value = JSON.parse(localStorage.getItem('mission_value-' + dName));
+                            } else {
+                                for (let i = 0; i < this.channels.length; i++) {
+                                    let num = this.channels[i];
+                                    this.mission_value[`ch${num}`][dName] = num;
+                                }
+
+                                localStorage.setItem('mission_value-' + dName, JSON.stringify(this.mission_value));
+                            }
+                        }
+                    }
+                }
+            }
         },
 
         ['$store.state.tempMarkers']: {
@@ -1401,7 +1433,7 @@ export default {
             stick.speed[dName] = speed;
             stick.angle[dName] = angle;
 
-            //console.log(dName, angle, stick.angle[dName]);
+            console.log(dName, x, y, speed, angle);
 
             let temp = JSON.parse(JSON.stringify(stick));
             this[`${id}Stick`] = null;
@@ -1430,7 +1462,7 @@ export default {
             stick.speed[dName] = speed;
             stick.angle[dName] = angle;
 
-            //console.log(dName, angle, stick.angle[dName]);
+            console.log(dName, x, y, speed, angle);
 
             let temp = JSON.parse(JSON.stringify(stick));
             this[`${id}Stick`] = null;
@@ -1463,7 +1495,9 @@ export default {
             this.$cookies.set('mission_value', this.mission_value);
         },
 
-        handlePwmSlide(dName, num) {
+        handlePwmSlide(e, dName, num) {
+            console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++', e, dName, num);
+
             let payload = {};
             payload.num = this.target_mission_num[`targetCh${num}`][dName];
             payload.value = parseInt(this.mission_ch_max - ((this.mission_ch_max - this.mission_value[`ch${num}`][dName]) / (this.mission_ch_max - this.mission_ch_min)) * (this.mission_ch_max - this.mission_ch_min));
@@ -1583,10 +1617,15 @@ export default {
                     }
                 }
             }
+
+            setTimeout(() => {
+                this.mode_sheet = !this.mode_sheet;
+                this.loading = false;
+                this.$forceUpdate();
+            }, 200);
         },
 
         setMode() {
-            let self = this;
             for(let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
@@ -1596,12 +1635,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(function () {
-                self.mode_sheet = !self.mode_sheet;
-                self.loading = false;
-                self.$forceUpdate();
-            }, 100);
         },
 
         setArm() {
@@ -1612,12 +1645,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         setTakeoff() {
@@ -1642,12 +1669,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         setGotoAlt() {
@@ -1663,12 +1684,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         setGoto() {
@@ -1698,12 +1713,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         setGotoCircle() {
@@ -1731,36 +1740,25 @@ export default {
                     }
                 }
             }
-
-            let self = this;
-            setTimeout(function () {
-                self.mode_sheet = !self.mode_sheet;
-                self.loading = false;
-                self.$forceUpdate();
-            }, 100);
         },
 
         setRoi() {
-            for(let name in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        console.log('DroneCommand-setRoi', this.position_selections[name]);
-                        if(this.position_selections[name] && this.position_selections[name] !== '' && this.position_selections[name] !== "") {
-                            this.$store.state.drone_infos[name].gotoType = this.gotoType[name];
-                            this.$store.state.drone_infos[name].yawBehavior = this.yawBehavior[name];
-                            this.$store.state.drone_infos[name].targetSpeed = parseInt(this.targetSpeed[name]);
-                            this.$store.state.drone_infos[name].targetAlt = parseInt(this.targetAlt[name]);
-                            EventBus.$emit('command-set-roi-' + name, this.position_selections[name]);
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        let pIndex = this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex;
+                        if(pIndex !== -1) {
+                            let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
+                                this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
+                                this.$store.state.drone_infos[dName].targetAlt + ':' +
+                                '5:50:5:16:1:' +
+                                this.$store.state.tempMarkers[dName][pIndex].elevation;
+
+                            EventBus.$emit('command-set-roi-' + dName, strPos);
                         }
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         setChangeSpeed() {
@@ -1771,12 +1769,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         setStop() {
@@ -1787,12 +1779,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         setLand() {
@@ -1803,29 +1789,16 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         setRtl() {
             for(let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        EventBus.$emit('command-set-rtl-' + name, this.rtlSpeed[name]);
+                        EventBus.$emit('command-set-rtl-' + name, this.$store.state.drone_infos[name].rtlSpeed);
                     }
                 }
             }
-
-            let self = this;
-            setTimeout(function () {
-                self.mode_sheet = !self.mode_sheet;
-                self.loading = false;
-                self.$forceUpdate();
-            }, 100);
         },
 
         setPwms() {
@@ -1837,20 +1810,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-
-                this.pwms = {
-                    ch9: {},
-                    ch10: {},
-                    ch11: {},
-                    ch12: {}
-                };
-
-            }, 100);
         },
 
         setAutoGoto() {
@@ -1916,12 +1875,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         doMissionRewind(dName) {
@@ -1997,12 +1950,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-            }, 100);
         },
 
         setDisarm() {
@@ -2013,13 +1960,6 @@ export default {
                     }
                 }
             }
-
-            let self = this;
-            setTimeout(function () {
-                self.mode_sheet = !self.mode_sheet;
-                self.loading = false;
-                self.$forceUpdate();
-            }, 100);
         },
 
         setParams() {
@@ -2031,20 +1971,6 @@ export default {
                     }
                 }
             }
-
-            setTimeout(() => {
-                this.mode_sheet = !this.mode_sheet;
-                this.loading = false;
-                this.$forceUpdate();
-
-                // this.params = {
-                //     wpYawBehavior: {},
-                //     atcSlewYaw: {},
-                //     wpnavSpeedUp: {},
-                //     wpnavSpeedDn: {},
-                //     rtlAlt: {}
-                // };
-            }, 100);
         },
     },
 
@@ -2126,12 +2052,6 @@ export default {
                         this.targetTakeoffAlt[name] = this.$store.state.drone_infos[name].targetTakeoffAlt;
                         this.targetAlt[name] = this.$store.state.drone_infos[name].targetAlt;
                         this.targetSpeed[name] = this.$store.state.drone_infos[name].targetSpeed;
-                        if(!Object.prototype.hasOwnProperty.call(this.rtlSpeed, name)) {
-                            this.rtlSpeed[name] = 5;
-                        }
-                        if(!Object.prototype.hasOwnProperty.call(this.takeoffDelay, name)) {
-                            this.takeoffDelay[name] = 6;
-                        }
                         this.targetStayTime[name] = this.$store.state.drone_infos[name].targetStayTime;
                         this.targetTurningSpeed[name] = this.$store.state.drone_infos[name].targetTurningSpeed;
                         this.targetRadius[name] = this.$store.state.drone_infos[name].targetRadius;
@@ -2249,7 +2169,6 @@ export default {
     },
 
     mounted() {
-        console.log('DroneCommand-mounted()');
     },
 
     beforeDestroy() {

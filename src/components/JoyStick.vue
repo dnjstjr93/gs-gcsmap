@@ -30,7 +30,11 @@
                 y: 0,
                 angle: 0,
                 speed: 0,
-                isMouseDown: false
+                isMouseDown: false,
+                pre_x: 0,
+                pre_y: 0,
+                pre_angle: 0,
+                pre_speed: 0,
             };
         },
         computed: {
@@ -106,7 +110,15 @@
                 );
                 this.x = this.speed >= offset ? Math.cos(radians) * offset : x;
                 this.y = this.speed >= offset ? Math.sin(radians) * offset : y;
-                this.emitAll();
+
+                if(this.x !== this.pre_x || this.y !== this.pre_y || this.angle !== this.pre_angle || this.speed !== this.pre_speed) {
+                    this.emitAll();
+                }
+
+                this.pre_x = this.x;
+                this.pre_y = this.y;
+                this.pre_angle = this.angle;
+                this.pre_speed = this.speed;
             },
 
             emitAll(name = "change") {
@@ -119,7 +131,9 @@
             }
         },
         mounted() {
-            this.emitAll();
+            if(this.x !== this.pre_x || this.y !== this.pre_y || this.angle !== this.pre_angle || this.speed !== this.pre_speed) {
+                this.emitAll();
+            }
         }
     }
 </script>

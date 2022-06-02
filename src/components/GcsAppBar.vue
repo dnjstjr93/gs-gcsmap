@@ -1232,6 +1232,14 @@
                                 this.$store.state.drone_infos[dName].absolute_alt = 0;
                             }
 
+                            if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'rtlSpeed')) {
+                                this.$store.state.drone_infos[dName].rtlSpeed = 5;
+                            }
+
+                            if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffDelay')) {
+                                this.$store.state.drone_infos[dName].takeoffDelay = 6;
+                            }
+
                             this.$store.state.drone_infos[dName].targeted = false;
 
                             this.initDroneInfos(drones, ++count, () => {

@@ -1312,6 +1312,7 @@ export default {
 
             this.$store.state.drone_infos[this.name].curMode = newVal;
             this.info.curMode = newVal;
+            this.$store.state.drone_infos[this.name].targetModeSelection = newVal;
 
             if(this.$store.state.drone_infos[this.name].preMode === 'AUTO' && this.curArmStatus === 'ARMED') {
                 this.$store.state.drone_infos[this.name].pausePosition = {
@@ -6182,7 +6183,7 @@ export default {
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
             var lng = parseFloat(arr_cur_goto_position[1]);
-            let alt = this.$store.state.drone_infos[this.name].targetAlt;
+            let alt = parseFloat(arr_cur_goto_position[2]);
 
             console.log('send_set_roi_command - lat: ', lat, ', lng: ', lng, ', alt: ', alt);
             setTimeout(this.send_set_roi_command, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lng, alt);
