@@ -1217,8 +1217,6 @@ export default {
                                 localStorage.setItem('target_mission_num-' + dName, JSON.stringify(this.target_mission_num));
                             }
 
-                            console.log('///////////////////////////////////////////////////////////target_mission_num', this.target_mission_num);
-
                             if (localStorage.getItem('mission_value-' + dName)) {
                                 this.mission_value = JSON.parse(localStorage.getItem('mission_value-' + dName));
                             } else {

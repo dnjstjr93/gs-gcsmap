@@ -1989,9 +1989,7 @@ export default {
             for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                        console.log('checkDroneTargeted', dName)
                         this.$store.state.drone_command_prepared = true;
-
                         break;
                     }
                 }

@@ -1701,7 +1701,7 @@ export default new Vuex.Store({
                 }
             }
 
-            EventBus.$emit('do-targetDrone');
+            //EventBus.$emit('do-targetDrone');
 
 
             let temp = JSON.parse(JSON.stringify(state.tempMarkers));

@@ -2111,7 +2111,7 @@
                     }
                 }
 
-                EventBus.$emit('do-targetDrone');
+                //EventBus.$emit('do-targetDrone');
 
                 this.cancelMarker();
             },
@@ -2435,7 +2435,17 @@
             targetDrones(dName) {
                 this.$store.state.drone_infos[dName].targeted = !this.$store.state.drone_infos[dName].targeted;
 
-                EventBus.$emit('do-targetDrone');
+                this.$store.state.drone_command_prepared = false;
+                for (let dName in this.$store.state.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                            this.$store.state.drone_command_prepared = true;
+                            break;
+                        }
+                    }
+                }
+
+                //EventBus.$emit('do-targetDrone');
             },
 
             // targetDroneMarker(e, dMarker, dName) {
