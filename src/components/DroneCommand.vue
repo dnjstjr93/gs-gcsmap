@@ -186,7 +186,7 @@
                                                                     label="지형높이(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? 'NaN' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
                                                                     readonly
                                                                 ></v-text-field>
                                                             </v-col>
@@ -236,7 +236,7 @@
                                                                     label="지형높이(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? 'NaN' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
                                                                     readonly
                                                                 ></v-text-field>
                                                             </v-col>
@@ -427,7 +427,7 @@
                                                                     label="지형높이(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? 'NaN' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
                                                                     readonly
                                                                 ></v-text-field>
                                                             </v-col>

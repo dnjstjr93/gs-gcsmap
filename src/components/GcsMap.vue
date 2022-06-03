@@ -3,11 +3,11 @@
         <v-row no-gutters>
             <v-col cols="12">
                 <v-card flat tile class="info_markers" v-if="curInfoTempMarkerFlag">
-                    <InfoMarker v-model="curInfoTempMarkerFlag"
+                    <InfoTempMarker v-model="curInfoTempMarkerFlag"
                                 :marker-name="curNameMarker"
                                 :marker-index="curIndexMarker"
                                 :marker="curSelectedMarker"
-                    ></InfoMarker>
+                    ></InfoTempMarker>
                 </v-card>
                 <v-card flat tile class="info_markers" v-if="curInfoSurveyMarkerFlag">
                     <InfoSurveyMarker
@@ -648,7 +648,7 @@
 
 <script>
 
-    import InfoMarker from "./InfoMarker";
+    import InfoTempMarker from "./InfoTempMarker";
     import InfoSurveyMarker from "./InfoSurveyMarker";
     import EventBus from "@/EventBus";
     import {nanoid} from "nanoid";
@@ -753,7 +753,7 @@
 
         components: {
             InfoLossMarker,
-            InfoMarker,
+            InfoTempMarker,
             InfoSurveyMarker,
         },
 
@@ -1468,12 +1468,12 @@
                         console.log("No results found");
                     }
 
-                    EventBus.$emit('on-update-survey-infomarker');
+                    EventBus.$emit('on-update-info-survey-marker');
                 })
                 .catch((e) => {
                     console.log(location, "Elevation service failed due to: " + e);
 
-                    EventBus.$emit('on-update-survey-infomarker');
+                    EventBus.$emit('on-update-info-survey-marker');
                 });
             },
 
@@ -2286,13 +2286,12 @@
                         payload.pIndex = pIndex;
                         payload.lat = lat;
                         payload.lng = lng;
-                        payload.value = false;
+                        payload.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
+                        payload.selected = this.$store.state.tempMarkers[dName][pIndex].selected;
 
                         this.$store.state.didIPublish = true;
 
-                        this.doBroadcastTempPosition(payload);
-
-                        EventBus.$emit('on-update-infomarker');
+                        this.doBroadcastUpdateTempMarkerPosition(payload);
 
                         this.postCinTempMarkerInfoToMobius(dName);
                     });
@@ -2591,18 +2590,57 @@
                 }
             },
 
+            getCinTempMarkerInfoFromMobius(dName, callback) {
+                let self = this;
+
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'get',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName + '/la',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(
+                    function (res) {
+
+                        console.log('getCinDroneInfoFromMobius', 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName + '/la', res.data['m2m:cin'].con);
+
+                        if (res.status === 200) {
+                            callback(res.status, res.data['m2m:cin'].con);
+                        }
+                        else {
+                            callback(res.status, '');
+                        }
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
             onMessageBroadcast(topic, message) {
                 if(!this.$store.state.didIPublish) {
                     console.log(topic, message.toString());
                     try {
                         let watchingPayload = JSON.parse(message.toString());
-                        if (watchingPayload.broadcastMission === 'updateTempPosition') {
+                        if (watchingPayload.broadcastMission === 'broadcastUpdateTempMarkerPosition') {
                             let payload = watchingPayload.payload;
 
-                            this.$store.commit('updateTempPosition', payload);
+                            this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat = payload.lat;
+                            this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng = payload.lng;
+                            this.$store.state.tempMarkers[payload.pName][payload.pIndex].targeted = payload.targeted;
+                            this.$store.state.tempMarkers[payload.pName][payload.pIndex].selected = payload.selected;
 
-                            payload.value = false;
-                            this.$store.commit('setSelected', payload);
+                            let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers));
+                            this.$store.state.tempMarkers = null;
+                            this.$store.state.tempMarkers = JSON.parse(JSON.stringify(temp));
+                            temp = null;
                         }
                         else if (watchingPayload.broadcastMission === 'confirmAddTempMarker') {
                             //this.$store.state.tempPayload = JSON.parse(JSON.stringify(watchingPayload.payload));
@@ -2612,17 +2650,14 @@
 
                             this.$store.commit('confirmAddTempMarker', false);
                         }
-                        else if (watchingPayload.broadcastMission === 'registerMarker') {
-                            this.$store.commit('registerMarker', watchingPayload.payload);
-                        }
-
-                        else if (watchingPayload.broadcastMission === 'deleteMarker') {
-                            if(watchingPayload.payload.pName === 'unknown') {
-                                this.$store.commit('removeMarker', watchingPayload.payload);
-                            }
-                            else {
-                                this.$store.commit('deleteMarker', watchingPayload.payload);
-                            }
+                        else if (watchingPayload.broadcastMission === 'broadcastRegisterTempMarker') {
+                            let payload = watchingPayload.payload;
+                            this.getCinTempMarkerInfoFromMobius(payload.dName, (status, con) => {
+                                if(status === 200) {
+                                    this.$store.state.tempMarkers[payload.dName] = null;
+                                    this.$store.state.tempMarkers[payload.dName] = JSON.parse(JSON.stringify(con));
+                                }
+                            });
                         }
 
                         else if (watchingPayload.broadcastMission === 'removeSurveyMarker') {
@@ -2643,9 +2678,9 @@
                 this.$store.state.didIPublish = false;
             },
 
-            doBroadcastTempPosition(payload) {
+            doBroadcastUpdateTempMarkerPosition(payload) {
                 let watchingPayload = {};
-                watchingPayload.broadcastMission = 'updateTempPosition';
+                watchingPayload.broadcastMission = 'broadcastUpdateTempMarkerPosition';
                 watchingPayload.payload = payload;
 
                 this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
@@ -3210,21 +3245,9 @@
                 this.onMessageBroadcast(payload.topic, payload.message);
             });
 
-            EventBus.$on('doBroadcastRegisterMaker', (payload)=>{
+            EventBus.$on('doBroadcastRegisterTempMaker', (payload)=>{
                 let watchingPayload = {};
-                watchingPayload.broadcastMission = 'registerMarker';
-                watchingPayload.payload = payload;
-
-                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
-                console.log('broadcast_gcsmap_topic', this.broadcast_gcsmap_topic, '-', JSON.stringify(watchingPayload));
-                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
-
-                this.$store.state.didIPublish = true;
-            });
-
-            EventBus.$on('doBroadcastDeleteMaker', (payload)=>{
-                let watchingPayload = {};
-                watchingPayload.broadcastMission = 'deleteMarker';
+                watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
                 watchingPayload.payload = payload;
 
                 this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
@@ -3253,8 +3276,7 @@
             EventBus.$off('updateDroneMarker');
             EventBus.$off('clearDroneMarker');
             EventBus.$off('on-message-handler-gcsmap');
-            EventBus.$off('doBroadcastRegisterMaker');
-            EventBus.$off('doBroadcastDeleteMaker');
+            EventBus.$off('doBroadcastRegisterTempMaker');
 
             EventBus.$off('updatePlaneMarker');
             EventBus.$off('clearPlaneMarker');

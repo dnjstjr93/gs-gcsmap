@@ -600,18 +600,9 @@
 
                 return (arrIndex);
             },
-            likesAllFruit () {
-                return this.selectedFruits.length === this.fruits.length
-            },
-            likesSomeFruit () {
-                return this.selectedFruits.length > 0 && !this.likesAllFruit
-            },
+
             icon () {
                 return 'mdi-checkbox-blank-outline'
-            },
-
-            form() {
-                return (this.$store.state.form);
             },
 
             conditions() {
@@ -620,17 +611,7 @@
             },
 
             curDroneColorMap() {
-                //console.log('curDroneColorMap', this.targetSelect, this.$store.state.drone_infos[this.targetSelect])
                 return ((this.targetSelect === 'unknown') ? 'grey' : this.$store.state.drone_infos[this.targetSelect].color);
-            },
-
-            formIsValid() {
-                return (
-                    this.form.first &&
-                    this.form.last &&
-                    this.form.favoriteAnimal &&
-                    this.form.terms
-                );
             },
         },
 
@@ -1062,7 +1043,7 @@
             selectTargetType(event) {
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type = event;
 
-                console.log('InfoMarker:selectTargetType - ' + this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type);
+                console.log('InfoSurveyMarker:selectTargetType - ' + this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type);
 
                 let temp = JSON.parse(JSON.stringify(this.$store.state.surveyMarkers));
                 this.$store.state.surveyMarkers = null;
@@ -1155,7 +1136,7 @@
 
             console.log('InfoSurveyMarker', this.$store.state.surveyMarkers[this.markerName]);
 
-            EventBus.$on('on-update-survey-infomarker', () => {
+            EventBus.$on('on-update-info-survey-marker', () => {
                 this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
                 this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
                 this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
@@ -1167,7 +1148,7 @@
         },
 
         beforeDestroy() {
-            EventBus.$off('on-update-survey-infomarker');
+            EventBus.$off('on-update-info-survey-marker');
 
             this.myChart.destroy();
         }

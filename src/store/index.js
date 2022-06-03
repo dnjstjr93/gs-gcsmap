@@ -27,15 +27,6 @@ import { faMapMarkerAlt, faMapPin, faFlag, faPlaneSlash, faHourglassHalf } from 
 import { faDotCircle, faLocationArrow } from "@fortawesome/free-solid-svg-icons";
 //import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 
-const defaultForm = Object.freeze({
-    first: '',
-    last: '',
-    bio: '',
-    favoriteAnimal: '',
-    age: null,
-    terms: false,
-});
-
 const _defaultPosition = Object(
     {
         type: 'Goto',
@@ -546,8 +537,6 @@ export default new Vuex.Store({
         //     'blue-grey'
         // ],
 
-        form: Object.assign({}, defaultForm),
-
         defaultPosition: Object.assign({}, _defaultPosition),
         defaultMarkerIcon: Object.assign({}, _defaultMarkerIcon),
         __defaultCircleMarkerIcon: Object.assign({}, _defaultCircleMarkerIcon),
@@ -601,8 +590,6 @@ export default new Vuex.Store({
         drone_infos: {},
 
         //selectedDrone: {},
-
-        unknown_info: {},
 
         countFlying: 0,
 
@@ -764,95 +751,6 @@ export default new Vuex.Store({
             state.gotoMarkers[payload.mIndex].positions[payload.pIndex].lng = payload.lng;
         },
 
-        // initUnknownInfo(state, unknown) {
-        //     state.unknown_info = null;
-        //     state.unknown_info = {};
-        //     state.unknown_info = JSON.parse(JSON.stringify(unknown));
-        //
-        //     // for (let idx in state.unknown_info.goto_positions) {
-        //     //     if (Object.prototype.hasOwnProperty.call(state.unknown_info.goto_positions, idx)) {
-        //     //         let pos_arr = state.unknown_info.goto_positions[idx].split(':');
-        //     //
-        //     //         let pos = JSON.parse(JSON.stringify(state.defaultPosition));
-        //     //         pos.lat = parseFloat(pos_arr[0]);
-        //     //         pos.lng = parseFloat(pos_arr[1]);
-        //     //         pos.alt = parseFloat(pos_arr[2]);
-        //     //         pos.speed = parseFloat(pos_arr[3]);
-        //     //         pos.radius = parseFloat(pos_arr[4]);
-        //     //         pos.turningSpeed = parseFloat(pos_arr[5]);
-        //     //         pos.targetMavCmd = (typeof pos_arr[6] === 'undefined') ? 16 : parseInt(pos_arr[6]);
-        //     //         pos.targetStayTime = (typeof pos_arr[7] === 'undefined') ? 1 : parseInt(pos_arr[7]);
-        //     //         pos.elevation = (typeof pos_arr[8] === 'undefined') ? 0.0 : parseInt(pos_arr[8]);
-        //     //         pos.type = (typeof pos_arr[9] === 'undefined') ? 0 : parseInt(pos_arr[9]);
-        //     //         pos.color = 'grey';
-        //     //         pos.m_icon.fillColor = 'grey';
-        //     //         pos.m_label.fontSize = '14px';
-        //     //         pos.m_label.text = 'T:' + String(pos.alt);
-        //     //
-        //     //         state.drone_infos.unknown.color = pos.color;
-        //     //         state.tempMarkers.unknown.push(pos);
-        //     //         pos = null;
-        //     //     }
-        //     // }
-        // },
-
-        updateTempPosition(state, payload) {
-            console.log('vuex', 'updateTempPosition', payload);
-
-            // let self = this;
-            state.tempMarkers[payload.pName][payload.pIndex].lat = payload.lat;
-            state.tempMarkers[payload.pName][payload.pIndex].lng = payload.lng;
-            state.tempMarkers[payload.pName][payload.pIndex].targeted = payload.value;
-
-            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-            state.tempMarkers = null;
-            state.tempMarkers = JSON.parse(JSON.stringify(temp));
-            temp = null;
-
-            let _temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-            state.drone_infos[payload.pName] = null;
-            state.drone_infos[payload.pName] = {};
-            state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(_temp));
-            _temp = null;
-
-            if (payload.pName === 'unknown') {
-                state.unknown_info = null;
-                state.unknown_info = {};
-                state.unknown_info = JSON.parse(JSON.stringify(state.drone_infos.unknown));
-            }
-            else {
-                this.commit('updateDroneInfosSelected');
-            }
-
-            // let dName = payload.pName;
-            // axios({
-            //     validateStatus: function (status) {
-            //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-            //         return status < 500;
-            //     },
-            //     method: 'post',
-            //     url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName,
-            //     headers: {
-            //         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-            //         'X-M2M-Origin': 'SVue',
-            //         'Content-Type': 'application/json;ty=4'
-            //     },
-            //     data: {
-            //         'm2m:cin': {
-            //             con: state.tempMarkers[dName]
-            //         }
-            //     }
-            // }).then(
-            //     function (res) {
-            //         console.log('-------------------------------------------------------updateTempPosition-axios', res.data);
-            //     }
-            // ).catch(
-            //     function (err) {
-            //         console.log(err.message);
-            //     }
-            // );
-        },
-
         selectTempMarker(state, payload) {
             console.log(payload);
 
@@ -939,10 +837,6 @@ export default new Vuex.Store({
 
             // console.log('confirmAddTempMarker', payload.pName, payload.pIndex, state.drone_infos.unknown.goto_positions[payload.pIndex]);
 
-            state.unknown_info = null;
-            state.unknown_info = {};
-            state.unknown_info = JSON.parse(JSON.stringify(state.drone_infos.unknown));
-
             axios({
                 validateStatus: function (status) {
                     // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -971,466 +865,6 @@ export default new Vuex.Store({
             );
 
             state.adding = false;
-        },
-
-        deleteMarker(state, payload) {
-            console.log('deleteMarker', payload);
-
-            let oldPos = JSON.parse(JSON.stringify(state.tempMarkers[payload.pName][payload.pIndex]));
-
-            state.tempMarkers[payload.pName].splice(payload.pIndex, 1);
-
-            let count = state.tempMarkers.unknown.push(oldPos);
-
-            oldPos = null;
-
-            let _payload = {};
-            _payload.pOldName = payload.pName;
-            _payload.pOldIndex = payload.pIndex;
-            _payload.pName = 'unknown';
-            _payload.pIndex = count - 1;
-
-            this.commit('deleteMarkerDroneInfo', _payload);
-
-            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-            state.tempMarkers = null;
-            state.tempMarkers = {};
-            state.tempMarkers = JSON.parse(JSON.stringify(temp));
-            temp = null;
-
-        },
-
-        removeMarker(state, payload) {
-            console.log('removeMarker', payload);
-
-            state.tempMarkers[payload.pName].splice(payload.pIndex, 1);
-
-            let _payload = {};
-            _payload.pOldName = payload.pName;
-            _payload.pOldIndex = payload.pIndex;
-            _payload.pName = payload.pName;
-            _payload.pIndex = payload.pName;
-
-            this.commit('removeMarkerDroneInfo', _payload);
-
-            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-            state.tempMarkers = null;
-            state.tempMarkers = {};
-            state.tempMarkers = JSON.parse(JSON.stringify(temp));
-            temp = null;
-        },
-
-        removeAllMarker(state, payload) {
-            console.log('removeAllMarker', payload);
-
-            let unknownMarker = JSON.parse(JSON.stringify(state.tempMarkers.unknown));
-            state.tempMarkers = null;
-            state.tempMarkers = {};
-            state.tempMarkers.unknown = JSON.parse(JSON.stringify(unknownMarker));
-            unknownMarker = null;
-
-            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-            state.tempMarkers = null;
-            state.tempMarkers = {};
-            state.tempMarkers = JSON.parse(JSON.stringify(temp));
-            temp = null;
-        },
-
-        registerMarker(state, payload) {
-            console.log('registerMarker', payload);
-
-            state.tempMarkers[payload.pOldName][payload.pOldIndex].alt = payload.targetAlt;
-            state.tempMarkers[payload.pOldName][payload.pOldIndex].speed = payload.targetSpeed;
-            state.tempMarkers[payload.pOldName][payload.pOldIndex].radius = payload.targetRadius;
-            state.tempMarkers[payload.pOldName][payload.pOldIndex].turningSpeed = payload.targetTurningSpeed;
-            state.tempMarkers[payload.pOldName][payload.pOldIndex].targetMavCmd = payload.targetMavCmd;
-            state.tempMarkers[payload.pOldName][payload.pOldIndex].targetStayTime = payload.targetStayTime;
-
-            let oldPos = JSON.parse(JSON.stringify(state.tempMarkers[payload.pOldName][payload.pOldIndex]));
-
-            if (payload.pOldName !== payload.pName) {
-                state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
-
-                state.drone_infos[payload.pName].color = (payload.pName === 'unknown') ? 'grey' : payload.targetColor;
-
-                console.log('+++++++++++++++++++++++++++++++++++++++++ registerMarker', state.tempMarkers);
-                console.log('+++++++++++++++++++++++++++++++++++++++++ registerMarker', state.tempMarkers[payload.pName]);
-
-                let count = state.tempMarkers[payload.pName].push(oldPos);
-                payload.pIndex = count - 1;
-
-                // state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
-                this.commit('regMarkerNameDroneInfo', payload);
-
-                let payload2 = {};
-                payload2.pName = payload.pOldName;
-                this.commit('regMarkerNameDroneInfo', payload2);
-            }
-
-            else if (payload.pOldIndex !== payload.pIndex) {
-                state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
-
-                console.log(state.tempMarkers[payload.pOldName]);
-
-                state.tempMarkers[payload.pOldName].splice(payload.pIndex, 0, oldPos);
-
-                // state.drone_infos[payload.pName].goto_positions.splice(payload.pOldIndex, 1);
-                this.commit('regMarkerIndexDroneInfo', payload);
-
-                let payload2 = {};
-                payload2.pName = payload.pOldName;
-                this.commit('regMarkerNameDroneInfo', payload2);
-            }
-
-            else {
-                console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                state.tempMarkers[payload.pOldName].splice(payload.pOldIndex, 1);
-
-                console.log(state.tempMarkers[payload.pOldName]);
-
-                state.tempMarkers[payload.pOldName].splice(payload.pIndex, 0, oldPos);
-
-                // state.drone_infos[payload.pName].goto_positions.splice(payload.pOldIndex, 1);
-                this.commit('regMarkerIndexDroneInfo', payload);
-
-                let payload2 = {};
-                payload2.pName = payload.pOldName;
-                this.commit('regMarkerNameDroneInfo', payload2);
-            }
-
-            oldPos = null;
-            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-            state.tempMarkers = null;
-            state.tempMarkers = {};
-            state.tempMarkers = JSON.parse(JSON.stringify(temp));
-            temp = null;
-        },
-
-        removeMarkerDroneInfo(state, payload) {
-            // state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
-
-            console.log('removeMarkerDroneInfo', payload);
-
-            // state.unknown_info = null;
-            // state.unknown_info = {};
-            // state.unknown_info = JSON.parse(JSON.stringify(state.drone_infos.unknown));
-            //
-            // let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-            // state.drone_infos[payload.pName] = null;
-            // state.drone_infos[payload.pName] = {};
-            // state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-            // temp = null;
-
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + payload.pName,
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=4'
-                },
-                data: {
-                    'm2m:cin': {
-                        con: state.tempMarkers[payload.pName]
-                    }
-                }
-            }).then(
-                function (res) {
-                    console.log('removeMarkerDroneInfo-axios', res);
-                }
-            ).catch(
-                function (err) {
-                    console.log(err.message);
-                }
-            );
-        },
-
-        deleteMarkerDroneInfo(state, payload) {
-            // let oldPos = state.drone_infos[payload.pOldName].goto_positions.splice(payload.pOldIndex, 1);
-
-            console.log('deleteMarkerDroneInfo', payload);
-
-            // let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed);
-
-            // state.drone_infos[payload.pName].goto_positions.push(oldPos[0]);
-
-            // let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-            // state.drone_infos[payload.pName] = null;
-            // state.drone_infos[payload.pName] = {};
-            // state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-            // temp = null;
-
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + payload.pOldName,
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=4'
-                },
-                data: {
-                    'm2m:cin': {
-                        con: state.tempMarkers[payload.pOldName]
-                    }
-                }
-            }).then(
-                (res) => {
-                    console.log('deleteMarker-axios-', payload.pOldName, res);
-
-                    axios({
-                        validateStatus: function (status) {
-                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                            return status < 500;
-                        },
-                        method: 'post',
-                        url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + payload.pName,
-                        headers: {
-                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                            'X-M2M-Origin': 'SVue',
-                            'Content-Type': 'application/json;ty=4'
-                        },
-                        data: {
-                            'm2m:cin': {
-                                con: state.tempMarkers[payload.pName]
-                            }
-                        }
-                    }).then(
-                        function (res) {
-                            console.log('deleteMarker-axios-', payload.pName, res);
-                        }
-                    ).catch(
-                        function (err) {
-                            console.log(err.message);
-                        }
-                    );
-                }
-            ).catch(
-                (err) => {
-                    console.log(err.message);
-                }
-            );
-        },
-
-        regMarkerNameDroneInfo(state, payload) {
-            console.log('regMarkerNameDroneInfo', payload);
-
-            // let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].elevation);
-            //
-            // state.drone_infos[payload.pName].goto_positions.push(pos_str);
-            //
-            // let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-            // state.drone_infos[payload.pName] = null;
-            // state.drone_infos[payload.pName] = {};
-            // state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-            // temp = null;
-
-            // let _selected = [];
-            // for(let dName in state.drone_infos) {
-            //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-            //         if(state.drone_infos[dName].selected) {
-            //             _selected.push(state.drone_infos[dName]);
-            //         }
-            //     }
-            // }
-
-            this.commit('updateDroneInfosSelected');
-
-            // state.dronesChecked[payload.dName] = null;
-            // state.dronesChecked[payload.dName] = state.drone_infos[payload.dName];
-            //
-            // temp = JSON.parse(JSON.stringify(state.dronesChecked));
-            // state.dronesChecked = null;
-            // state.dronesChecked = JSON.parse(JSON.stringify(temp));
-            // temp = null;
-
-            //EventBus.$emit('do-targetDroneMarker', payload.pName);
-
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + payload.pName,
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=4'
-                },
-                data: {
-                    'm2m:cin': {
-                        con: state.tempMarkers[payload.pName]
-                    }
-                }
-            }).then(
-                function (res) {
-                    console.log('--------------------------------------------------------------------regMarkerNameDroneInfo-axios', res.data);
-                }
-            ).catch(
-                function (err) {
-                    console.log(err.message);
-                }
-            );
-        },
-
-        regMarkerDroneInfo(state, payload) {
-            console.log('regMarkerDroneInfo', payload);
-
-            // state.drone_infos[payload.pName].goto_positions[payload.pIndex] = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].elevation);
-            //
-            // let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-            // state.drone_infos[payload.pName] = null;
-            // state.drone_infos[payload.pName] = {};
-            // state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-            // temp = null;
-
-            // let _selected = [];
-            // for(let dName in state.drone_infos) {
-            //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-            //         if(state.drone_infos[dName].selected) {
-            //             _selected.push(state.drone_infos[dName]);
-            //         }
-            //     }
-            // }
-
-            this.commit('updateDroneInfosSelected');
-
-            // state.dronesChecked[payload.dName] = null;
-            // state.dronesChecked[payload.dName] = state.drone_infos[payload.dName];
-            //
-            // temp = JSON.parse(JSON.stringify(state.dronesChecked));
-            // state.dronesChecked = null;
-            // state.dronesChecked = JSON.parse(JSON.stringify(temp));
-            // temp = null;
-
-            //EventBus.$emit('do-targetDroneMarker', payload.pName);
-
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + payload.pName,
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=4'
-                },
-                data: {
-                    'm2m:cin': {
-                        con: state.tempMarkers[payload.pName]
-                    }
-                }
-            }).then(
-                function (res) {
-                    console.log('regMarkerDroneInfo-axios', res.data);
-                }
-            ).catch(
-                function (err) {
-                    console.log(err.message);
-                }
-            );
-        },
-
-        regMarkerIndexDroneInfo(state, payload) {
-            console.log('regMarkerIndexDroneInfo', payload);
-
-            // let pos_str = String(state.tempMarkers[payload.pName][payload.pIndex].lat) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].lng) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].alt) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].speed) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].radius) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].turningSpeed) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].targetStayTime) + ':' +
-            //     String(state.tempMarkers[payload.pName][payload.pIndex].elevation);
-            //
-            // state.drone_infos[payload.pName].goto_positions.splice(payload.pIndex, 0, pos_str);
-            //
-            // let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-            // state.drone_infos[payload.pName] = null;
-            // state.drone_infos[payload.pName] = {};
-            // state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-            // temp = null;
-
-            // let _selected = [];
-            // for(let dName in state.drone_infos) {
-            //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-            //         if(state.drone_infos[dName].selected) {
-            //             _selected.push(state.drone_infos[dName]);
-            //         }
-            //     }
-            // }
-
-            this.commit('updateDroneInfosSelected');
-
-            // state.dronesChecked[payload.dName] = null;
-            // state.dronesChecked[payload.dName] = state.drone_infos[payload.dName];
-            //
-            // temp = JSON.parse(JSON.stringify(state.dronesChecked));
-            // state.dronesChecked = null;
-            // state.dronesChecked = {};
-            // state.dronesChecked = JSON.parse(JSON.stringify(temp));
-            // temp = null;
-
-            //EventBus.$emit('do-targetDroneMarker', payload.pName);
-
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + payload.pName,
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=4'
-                },
-                data: {
-                    'm2m:cin': {
-                        con: state.tempMarkers[payload.pName]
-                    }
-                }
-            }).then(
-                function (res) {
-                    console.log('regMarkerIndexDroneInfo-axios', res.data);
-                }
-            ).catch(
-                function (err) {
-                    console.log(err.message);
-                }
-            );
         },
 
         resetDroneInfos(state, payload) {
@@ -1477,239 +911,239 @@ export default new Vuex.Store({
             // console.log('resetDroneInfos', state.drone_infos);
         },
 
-        updateDroneInfosSelected(state) {
-
-            console.log('updateDroneInfosSelected', state.drone_infos);
-
-            for (let dName in state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-
-                    if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'color')) {
-                        state.drone_infos[dName].color = 'grey';
-                    }
-
-                    // if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'goto_positions')) {
-                    //     state.drone_infos[dName].goto_positions = [];
-                    // }
-
-                    if (dName !== 'unknown') {
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
-                            state.drone_infos[dName].targeted = false;
-                        }
-                        state.drone_infos[dName].targeted = false;
-                        EventBus.$emit('do-drone-selected' + dName, state.drone_infos[dName].targeted);
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'home_position')) {
-                            state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'gotoType')) {
-                            state.drone_infos[dName].gotoType = '바로이동';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetModeSelection')) {
-                            state.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetSpeed')) {
-                            state.drone_infos[dName].targetSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'alt')) {
-                            state.drone_infos[dName].alt = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTurningSpeed')) {
-                            state.drone_infos[dName].targetTurningSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetRadius')) {
-                            state.drone_infos[dName].targetRadius = 50;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTakeoffAlt')) {
-                            state.drone_infos[dName].targetTakeoffAlt = 20;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'circleType')) {
-                            state.drone_infos[dName].circleType = 'cw';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetAlt')) {
-                            state.drone_infos[dName].targetAlt = 20;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'lastFlightTime')) {
-                            state.drone_infos[dName].lastFlightTime = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoStartIndex')) {
-                            state.drone_infos[dName].autoStartIndex = '0';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoEndIndex')) {
-                            state.drone_infos[dName].autoEndIndex = '0';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoDelay')) {
-                            state.drone_infos[dName].autoDelay = 1;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoSpeed')) {
-                            state.drone_infos[dName].autoSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'curArmStatus')) {
-                            state.drone_infos[dName].curArmStatus = 'DISARMED';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
-                            state.drone_infos[dName].targeted = false;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'headingLine')) {
-                            state.drone_infos[dName].headingLine = [];
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'directionLine')) {
-                            state.drone_infos[dName].directionLine = [];
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'client')) {
-
-                            state.drone_infos[dName].client = {
-                                connected: false,
-                                loading: false
-                            };
-                        }
-
-                        // if(Object.hasOwnProperty.call(state.tempMarkers, dName)) {
-                        //     var preTempMarkersArray = Array.from(state.tempMarkers[dName]);
-                        //     console.log('updateDroneInfosSelected - preTempMarkersArray', dName, preTempMarkersArray);
-                        //
-                        //     state.tempMarkers[dName] = null;
-                        //     state.tempMarkers[dName] = Array.from(preTempMarkersArray);
-                        // }
-                        // else {
-                        //     state.tempMarkers[dName] = null;
-                        //     state.tempMarkers[dName] = [];
-                        //     // state.trackingLines[dName] = null;
-                        //     // state.trackingLines[dName] = [];
-                        // }
-                        //
-                        // if (state.drone_infos[dName].selected) {
-                        //     let drone = state.drone_infos[dName];
-                        //
-                        //     console.log('---------------------------updateDroneInfosSelected - drone_infos', state.drone_infos[dName]);
-                        //
-                        //     for (let idx in drone.goto_positions) {
-                        //         if (Object.prototype.hasOwnProperty.call(drone.goto_positions, idx)) {
-                        //             let pos_arr = drone.goto_positions[idx].split(':');
-                        //             if(typeof state.tempMarkers[dName][idx] === 'undefined') {
-                        //                 var pos = JSON.parse(JSON.stringify(state.defaultPosition));
-                        //             }
-                        //             else {
-                        //                 pos = JSON.parse(JSON.stringify(state.tempMarkers[dName][idx]));
-                        //             }
-                        //             pos.lat = parseFloat(pos_arr[0]);
-                        //             pos.lng = parseFloat(pos_arr[1]);
-                        //             pos.alt = parseFloat(pos_arr[2]);
-                        //             pos.speed = parseFloat(pos_arr[3]);
-                        //             pos.radius = parseFloat(pos_arr[4]);
-                        //             pos.turningSpeed = parseFloat(pos_arr[5]);
-                        //             pos.targetMavCmd = parseFloat(pos_arr[6]);
-                        //             pos.targetStayTime = parseFloat(pos_arr[7]);
-                        //             pos.elevation = parseFloat(pos_arr[8]);
-                        //
-                        //             const strType = ['Goto', 'Circle', 'Survey'];
-                        //             pos.type = (typeof pos_arr[9] === 'undefined') ? 'Goto' : strType[parseInt(pos_arr[9])];
-                        //             if(pos.type === 'Goto') {
-                        //                 pos.m_icon = JSON.parse(JSON.stringify(state.defaultGotoMarkerIcon));
-                        //             }
-                        //             else if(pos.type === 'Circle') {
-                        //                 pos.m_icon = JSON.parse(JSON.stringify(state.defaultCircleMarkerIcon));
-                        //             }
-                        //             else {
-                        //                 pos.m_icon = JSON.parse(JSON.stringify(state.defaultGotoMarkerIcon));
-                        //             }
-                        //
-                        //             pos.color = drone.color;
-                        //             pos.m_icon.fillColor = drone.color;
-                        //             pos.m_label.fontSize = '14px';
-                        //             pos.m_label.text = ((drone.name === 'unknown') ? 'T' : String(idx)) + ':' + String(pos.alt);
-                        //
-                        //             state.tempMarkers[drone.name].splice(idx, 1, pos);
-                        //             pos = null;
-                        //         }
-                        //     }
-                        // }
-                        // else {
-                        //     delete state.tempMarkers[dName];
-                        //     delete state.trackingLines[dName];
-                        // }
-                    }
-                    // else {
-                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
-                    //         state.drone_infos[dName].targeted = false;
-                    //     }
-                    //     state.drone_infos[dName].targeted = false;
-                    //
-                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetSpeed')) {
-                    //         state.drone_infos[dName].targetSpeed = 5;
-                    //     }
-                    //
-                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTurningSpeed')) {
-                    //         state.drone_infos[dName].targetTurningSpeed = 5;
-                    //     }
-                    //
-                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetRadius')) {
-                    //         state.drone_infos[dName].targetRadius = 50;
-                    //     }
-                    //
-                    //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetAlt')) {
-                    //         state.drone_infos[dName].targetAlt = 20;
-                    //     }
-                    //
-                    //     delete state.tempMarkers[dName];
-                    //     state.tempMarkers[dName] = [];
-                    //
-                    //     let drone = state.drone_infos[dName];
-                    //
-                    //     console.log('unknown', drone);
-                    //     console.log('tempMarkers[unknown]', state.tempMarkers[dName]);
-                    //
-                    //     for (let idx in drone.goto_positions) {
-                    //         if (Object.prototype.hasOwnProperty.call(drone.goto_positions, idx)) {
-                    //             let pos_arr = drone.goto_positions[idx].split(':');
-                    //             let pos = JSON.parse(JSON.stringify(state.defaultPosition));
-                    //             pos.lat = parseFloat(pos_arr[0]);
-                    //             pos.lng = parseFloat(pos_arr[1]);
-                    //             pos.alt = parseFloat(pos_arr[2]);
-                    //             pos.speed = parseFloat(pos_arr[3]);
-                    //             pos.radius = parseFloat(pos_arr[4]);
-                    //             pos.turningSpeed = parseFloat(pos_arr[5]);
-                    //             pos.color = drone.color;
-                    //             pos.m_icon.fillColor = drone.color;
-                    //             pos.m_label.fontSize = '14px';
-                    //             pos.m_label.text = 'T';
-                    //
-                    //             state.tempMarkers[dName].push(pos);
-                    //             pos = null;
-                    //         }
-                    //     }
-                    // }
-                }
-            }
-
-            //EventBus.$emit('do-targetDrone');
-
-
-            let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-            state.tempMarkers = null;
-            state.tempMarkers = {};
-            state.tempMarkers = JSON.parse(JSON.stringify(temp));
-            temp = null;
-        },
+        // updateDroneInfosSelected(state) {
+        //
+        //     console.log('updateDroneInfosSelected', state.drone_infos);
+        //
+        //     for (let dName in state.drone_infos) {
+        //         if (Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
+        //
+        //             if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'color')) {
+        //                 state.drone_infos[dName].color = 'grey';
+        //             }
+        //
+        //             // if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'goto_positions')) {
+        //             //     state.drone_infos[dName].goto_positions = [];
+        //             // }
+        //
+        //             if (dName !== 'unknown') {
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
+        //                     state.drone_infos[dName].targeted = false;
+        //                 }
+        //                 state.drone_infos[dName].targeted = false;
+        //                 EventBus.$emit('do-drone-selected' + dName, state.drone_infos[dName].targeted);
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'home_position')) {
+        //                     state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'gotoType')) {
+        //                     state.drone_infos[dName].gotoType = '바로이동';
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetModeSelection')) {
+        //                     state.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetSpeed')) {
+        //                     state.drone_infos[dName].targetSpeed = 5;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'alt')) {
+        //                     state.drone_infos[dName].alt = 0;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTurningSpeed')) {
+        //                     state.drone_infos[dName].targetTurningSpeed = 5;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetRadius')) {
+        //                     state.drone_infos[dName].targetRadius = 50;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTakeoffAlt')) {
+        //                     state.drone_infos[dName].targetTakeoffAlt = 20;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'circleType')) {
+        //                     state.drone_infos[dName].circleType = 'cw';
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetAlt')) {
+        //                     state.drone_infos[dName].targetAlt = 20;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'lastFlightTime')) {
+        //                     state.drone_infos[dName].lastFlightTime = 0;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoStartIndex')) {
+        //                     state.drone_infos[dName].autoStartIndex = '0';
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoEndIndex')) {
+        //                     state.drone_infos[dName].autoEndIndex = '0';
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoDelay')) {
+        //                     state.drone_infos[dName].autoDelay = 1;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'autoSpeed')) {
+        //                     state.drone_infos[dName].autoSpeed = 5;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'curArmStatus')) {
+        //                     state.drone_infos[dName].curArmStatus = 'DISARMED';
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
+        //                     state.drone_infos[dName].targeted = false;
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'headingLine')) {
+        //                     state.drone_infos[dName].headingLine = [];
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'directionLine')) {
+        //                     state.drone_infos[dName].directionLine = [];
+        //                 }
+        //
+        //                 if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'client')) {
+        //
+        //                     state.drone_infos[dName].client = {
+        //                         connected: false,
+        //                         loading: false
+        //                     };
+        //                 }
+        //
+        //                 // if(Object.hasOwnProperty.call(state.tempMarkers, dName)) {
+        //                 //     var preTempMarkersArray = Array.from(state.tempMarkers[dName]);
+        //                 //     console.log('updateDroneInfosSelected - preTempMarkersArray', dName, preTempMarkersArray);
+        //                 //
+        //                 //     state.tempMarkers[dName] = null;
+        //                 //     state.tempMarkers[dName] = Array.from(preTempMarkersArray);
+        //                 // }
+        //                 // else {
+        //                 //     state.tempMarkers[dName] = null;
+        //                 //     state.tempMarkers[dName] = [];
+        //                 //     // state.trackingLines[dName] = null;
+        //                 //     // state.trackingLines[dName] = [];
+        //                 // }
+        //                 //
+        //                 // if (state.drone_infos[dName].selected) {
+        //                 //     let drone = state.drone_infos[dName];
+        //                 //
+        //                 //     console.log('---------------------------updateDroneInfosSelected - drone_infos', state.drone_infos[dName]);
+        //                 //
+        //                 //     for (let idx in drone.goto_positions) {
+        //                 //         if (Object.prototype.hasOwnProperty.call(drone.goto_positions, idx)) {
+        //                 //             let pos_arr = drone.goto_positions[idx].split(':');
+        //                 //             if(typeof state.tempMarkers[dName][idx] === 'undefined') {
+        //                 //                 var pos = JSON.parse(JSON.stringify(state.defaultPosition));
+        //                 //             }
+        //                 //             else {
+        //                 //                 pos = JSON.parse(JSON.stringify(state.tempMarkers[dName][idx]));
+        //                 //             }
+        //                 //             pos.lat = parseFloat(pos_arr[0]);
+        //                 //             pos.lng = parseFloat(pos_arr[1]);
+        //                 //             pos.alt = parseFloat(pos_arr[2]);
+        //                 //             pos.speed = parseFloat(pos_arr[3]);
+        //                 //             pos.radius = parseFloat(pos_arr[4]);
+        //                 //             pos.turningSpeed = parseFloat(pos_arr[5]);
+        //                 //             pos.targetMavCmd = parseFloat(pos_arr[6]);
+        //                 //             pos.targetStayTime = parseFloat(pos_arr[7]);
+        //                 //             pos.elevation = parseFloat(pos_arr[8]);
+        //                 //
+        //                 //             const strType = ['Goto', 'Circle', 'Survey'];
+        //                 //             pos.type = (typeof pos_arr[9] === 'undefined') ? 'Goto' : strType[parseInt(pos_arr[9])];
+        //                 //             if(pos.type === 'Goto') {
+        //                 //                 pos.m_icon = JSON.parse(JSON.stringify(state.defaultGotoMarkerIcon));
+        //                 //             }
+        //                 //             else if(pos.type === 'Circle') {
+        //                 //                 pos.m_icon = JSON.parse(JSON.stringify(state.defaultCircleMarkerIcon));
+        //                 //             }
+        //                 //             else {
+        //                 //                 pos.m_icon = JSON.parse(JSON.stringify(state.defaultGotoMarkerIcon));
+        //                 //             }
+        //                 //
+        //                 //             pos.color = drone.color;
+        //                 //             pos.m_icon.fillColor = drone.color;
+        //                 //             pos.m_label.fontSize = '14px';
+        //                 //             pos.m_label.text = ((drone.name === 'unknown') ? 'T' : String(idx)) + ':' + String(pos.alt);
+        //                 //
+        //                 //             state.tempMarkers[drone.name].splice(idx, 1, pos);
+        //                 //             pos = null;
+        //                 //         }
+        //                 //     }
+        //                 // }
+        //                 // else {
+        //                 //     delete state.tempMarkers[dName];
+        //                 //     delete state.trackingLines[dName];
+        //                 // }
+        //             }
+        //             // else {
+        //             //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targeted')) {
+        //             //         state.drone_infos[dName].targeted = false;
+        //             //     }
+        //             //     state.drone_infos[dName].targeted = false;
+        //             //
+        //             //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetSpeed')) {
+        //             //         state.drone_infos[dName].targetSpeed = 5;
+        //             //     }
+        //             //
+        //             //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetTurningSpeed')) {
+        //             //         state.drone_infos[dName].targetTurningSpeed = 5;
+        //             //     }
+        //             //
+        //             //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetRadius')) {
+        //             //         state.drone_infos[dName].targetRadius = 50;
+        //             //     }
+        //             //
+        //             //     if (!Object.prototype.hasOwnProperty.call(state.drone_infos[dName], 'targetAlt')) {
+        //             //         state.drone_infos[dName].targetAlt = 20;
+        //             //     }
+        //             //
+        //             //     delete state.tempMarkers[dName];
+        //             //     state.tempMarkers[dName] = [];
+        //             //
+        //             //     let drone = state.drone_infos[dName];
+        //             //
+        //             //     console.log('unknown', drone);
+        //             //     console.log('tempMarkers[unknown]', state.tempMarkers[dName]);
+        //             //
+        //             //     for (let idx in drone.goto_positions) {
+        //             //         if (Object.prototype.hasOwnProperty.call(drone.goto_positions, idx)) {
+        //             //             let pos_arr = drone.goto_positions[idx].split(':');
+        //             //             let pos = JSON.parse(JSON.stringify(state.defaultPosition));
+        //             //             pos.lat = parseFloat(pos_arr[0]);
+        //             //             pos.lng = parseFloat(pos_arr[1]);
+        //             //             pos.alt = parseFloat(pos_arr[2]);
+        //             //             pos.speed = parseFloat(pos_arr[3]);
+        //             //             pos.radius = parseFloat(pos_arr[4]);
+        //             //             pos.turningSpeed = parseFloat(pos_arr[5]);
+        //             //             pos.color = drone.color;
+        //             //             pos.m_icon.fillColor = drone.color;
+        //             //             pos.m_label.fontSize = '14px';
+        //             //             pos.m_label.text = 'T';
+        //             //
+        //             //             state.tempMarkers[dName].push(pos);
+        //             //             pos = null;
+        //             //         }
+        //             //     }
+        //             // }
+        //         }
+        //     }
+        //
+        //     //EventBus.$emit('do-targetDrone');
+        //
+        //
+        //     let temp = JSON.parse(JSON.stringify(state.tempMarkers));
+        //     state.tempMarkers = null;
+        //     state.tempMarkers = {};
+        //     state.tempMarkers = JSON.parse(JSON.stringify(temp));
+        //     temp = null;
+        // },
 
         addDroneInfos(state, payload) {
             state.drone_infos[payload.name] = payload;

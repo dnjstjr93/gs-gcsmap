@@ -2174,7 +2174,7 @@
                     });
                 });
 
-                this.$store.commit('updateDroneInfosSelected');
+                //this.$store.commit('updateDroneInfosSelected');
                 this.dialog = dialog;
 
                 EventBus.$emit('confirm_selected', JSON.parse(JSON.stringify(this.selected)));

@@ -22,7 +22,7 @@
                 <v-row align="center" justify="center">
                     <v-col cols="2">
                         <v-combobox
-                            v-model="targetSelect"
+                            v-model="targetSelectName"
                             :items="targets"
                             label="Target"
                             chips dense hide-details single-line
@@ -364,7 +364,7 @@
                     Register
                 </v-btn>
                 <v-spacer></v-spacer>
-                <v-btn text color="warning" fab dark @click="deleteMarker" outlined>
+                <v-btn text color="warning" fab dark @click="deleteTempMarker" outlined>
                     <v-icon>mdi-delete</v-icon>
                 </v-btn>
                 <v-spacer></v-spacer>
@@ -375,9 +375,10 @@
 
 <script>
     import EventBus from "@/EventBus";
+    import axios from "axios";
 
     export default {
-        name: "InfoMarker",
+        name: "InfoTempMarker",
 
         props: [
             'value',
@@ -409,7 +410,7 @@
 
                 targetTypes: ['Goto', 'Circle', 'Survey'],
                 targetType: 'Goto',
-                targetSelect: '',
+                targetSelectName: '',
                 targetSelectIndex: '0',
                 oldTargetSelect: '',
                 targetLat: 0,
@@ -492,8 +493,8 @@
         },
 
         watch: {
-            // targetSelect: function (newVal, oldVal) {
-            //     console.log('targetSelect - watch', oldVal, ' -> ', newVal);
+            // targetSelectName: function (newVal, oldVal) {
+            //     console.log('targetSelectName - watch', oldVal, ' -> ', newVal);
             //     if(this.markerName !== newVal) {
             //
             //         this.oldTargetSelet = oldVal;
@@ -549,14 +550,14 @@
 
                 console.log('InfoMaker - watch', newVal);
 
-                this.targetSelect = newVal;
+                this.targetSelectName = newVal;
             },
 
             marker: {
                 deep: true,
                 handler: function (newVal) {
 
-                    this.targetSelect = this.markerName;
+                    this.targetSelectName = this.markerName;
 
                     this.targetSelectIndex = String(this.markerIndex);
 
@@ -587,7 +588,7 @@
                 }
             },
 
-            targetSelect: function (newVal) {
+            targetSelectName: function (newVal) {
                 this.disableTargetSelectIndex = (this.markerName !== newVal);
             },
 
@@ -608,22 +609,12 @@
 
                 return (arrIndex);
             },
-            likesAllFruit () {
-                return this.selectedFruits.length === this.fruits.length
-            },
-            likesSomeFruit () {
-                return this.selectedFruits.length > 0 && !this.likesAllFruit
-            },
             icon () {
                 return 'mdi-checkbox-blank-outline'
             },
 
-            form() {
-                return (this.$store.state.form);
-            },
-
             conditions() {
-                return !((this.markerName !== this.targetSelect) || (this.marker.alt !== this.targetAlt) ||
+                return !((this.markerName !== this.targetSelectName) || (this.marker.alt !== this.targetAlt) ||
                     (this.marker.speed !== this.targetSpeed) || (this.marker.radius !== this.targetRadius) ||
                     (this.marker.turningSpeed !== this.targetTurningSpeed) ||
                     (this.marker.targetStayTime !== this.targetStayTime) ||
@@ -631,36 +622,45 @@
             },
 
             curDroneColorMap() {
-                console.log('curDroneColorMap', this.targetSelect, this.$store.state.drone_infos[this.targetSelect])
-                return (this.$store.state.drone_infos[this.targetSelect].color);
-            },
-
-            formIsValid() {
-                return (
-                    this.form.first &&
-                    this.form.last &&
-                    this.form.favoriteAnimal &&
-                    this.form.terms
-                );
+                return (this.$store.state.drone_infos[this.targetSelectName].color);
             },
         },
 
         methods: {
-            deleteMarker() {
-                console.log(this.markerName, this.markerIndex, this.marker);
-
-                let payload = {};
-                payload.pName = this.markerName;
-                payload.pIndex = this.markerIndex;
-
+            deleteTempMarker() {
                 if(this.markerName === 'unknown') {
-                    this.$store.commit('removeMarker', payload);
+                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
+                    this.$store.state.tempMarkers[this.markerName].splice(this.markerIndex, 1);
+
+                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName]));
+                    this.$store.state.tempMarkers[this.markerName] = null;
+                    this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
+
+                    let payload = {};
+
+                    this.postCinTempMarkerInfoToMobius(this.markerName);
+                    payload.dName = this.markerName;
+                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
                 }
                 else {
-                    this.$store.commit('deleteMarker', payload);
-                }
+                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
+                    let targetTempMarker = this.$store.state.tempMarkers[this.markerName].splice(this.markerIndex, 1);
+                    this.$store.state.tempMarkers['unknown'].push(targetTempMarker[0]);
 
-                EventBus.$emit('doBroadcastDeleteMaker', payload);
+                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName]));
+                    this.$store.state.tempMarkers[this.markerName] = null;
+                    this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
+
+                    let payload = {};
+
+                    this.postCinTempMarkerInfoToMobius(this.markerName);
+                    payload.dName = this.markerName;
+                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+
+                    this.postCinTempMarkerInfoToMobius('unknown');
+                    payload.dName = 'unknown';
+                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+                }
 
                 this.snackbar = true;
 
@@ -676,62 +676,82 @@
                 this.$emit('input', false);
             },
 
+            postCinTempMarkerInfoToMobius(dName) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                    data: {
+                        'm2m:cin': {
+                            con: this.$store.state.tempMarkers[dName]
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        console.log('-------------------------------------------------------postCinTempMarkerInfoToMobius-axios', res.data);
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
             submit() {
-                let payload = {};
-                payload.pOldName = this.markerName;
-                payload.pName = this.targetSelect;
-                payload.pIndex = parseInt(this.targetSelectIndex);
-                payload.targetAlt = this.targetAlt;
-                payload.targetSpeed = this.targetSpeed;
-                payload.targetRadius = this.targetRadius;
-                payload.targetTurningSpeed = this.targetTurningSpeed;
-                payload.targetMavCmd = 16;
-                payload.targetStayTime = this.targetStayTime;
-                payload.pOldIndex = this.markerIndex;
-                payload.targetColor = this.curDroneColorMap;
+                if(this.markerName !== this.targetSelectName) {
+                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
+                    let targetTempMarker = this.$store.state.tempMarkers[this.markerName].splice(this.markerIndex, 1);
+                    this.$store.state.tempMarkers[this.targetSelectName].push(targetTempMarker[0]);
 
-                this.$store.commit('registerMarker', payload);
+                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName]));
+                    this.$store.state.tempMarkers[this.markerName] = null;
+                    this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
 
-                EventBus.$emit('doBroadcastRegisterMaker', payload);
+                    let payload = {};
 
-                payload = null;
+                    this.postCinTempMarkerInfoToMobius(this.markerName);
+                    payload.dName = this.markerName;
+                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+
+                    this.postCinTempMarkerInfoToMobius(this.targetSelectName);
+                    payload.dName = this.targetSelectName;
+                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+                }
+                else if(this.markerIndex !== this.targetSelectIndex) {
+                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
+                    let targetTempMarker = this.$store.state.tempMarkers[this.markerName].splice(this.markerIndex, 1);
+                    this.$store.state.tempMarkers[this.markerName].splice(this.targetSelectIndex, 0, targetTempMarker[0]);
+
+                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName]));
+                    this.$store.state.tempMarkers[this.markerName] = null;
+                    this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
+
+                    this.postCinTempMarkerInfoToMobius(this.markerName);
+
+                    let payload = {};
+                    payload.dName = this.markerName;
+                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+                }
 
                 this.snackbar = true;
 
                 setTimeout(() => {
                     this.resetForm();
                 }, 100);
-
-            },
-            decrementAlt () {
-                this.targetAlt--;
-            },
-            incrementAlt () {
-                this.targetAlt++;
-            },
-            decrementSpeed () {
-                this.targetSpeed--;
-            },
-            incrementSpeed () {
-                this.targetSpeed++;
-            },
-            decrementRadius () {
-                this.targetRadius--;
-            },
-            incrementRadius () {
-                this.targetRadius++;
-            },
-            decrementTurningSpeed () {
-                this.targetTurningSpeed--;
-            },
-            incrementTurningSpeed () {
-                this.targetTurningSpeed++;
             },
 
             selectTargetType(event) {
                 this.$store.state.tempMarkers[this.markerName][this.markerIndex].type = event;
 
-                console.log('InfoMarker:selectTargetType - ' + this.$store.state.tempMarkers[this.markerName][this.markerIndex].type);
+                console.log('InfoTempMarker:selectTargetType - ' + this.$store.state.tempMarkers[this.markerName][this.markerIndex].type);
 
                 let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers));
                 this.$store.state.tempMarkers = null;
@@ -755,7 +775,7 @@
         },
 
         mounted() {
-            this.targetSelect = this.markerName;
+            this.targetSelectName = this.markerName;
             this.targetSelectIndex = String(this.markerIndex);
             this.targetLat = this.marker.lat;
             this.targetLng = this.marker.lng;
@@ -775,20 +795,10 @@
 
             this.targetType = this.marker.type;
 
-            console.log('InfoMarker', this.$store.state.tempMarkers[this.markerName]);
-
-            EventBus.$on('on-update-infomarker', () => {
-                this.targetLat = this.$store.state.tempMarkers[this.markerName][this.markerIndex].lat;
-                this.targetLng = this.$store.state.tempMarkers[this.markerName][this.markerIndex].lng;
-                this.targetAlt = this.$store.state.tempMarkers[this.markerName][this.markerIndex].alt;
-                this.elevation = this.$store.state.tempMarkers[this.markerName][this.markerIndex].elevation;
-
-                this.$forceUpdate();
-            });
+            console.log('InfoTempMarker', this.$store.state.tempMarkers[this.markerName]);
         },
 
         beforeDestroy() {
-            EventBus.$off('on-update-infomarker');
         }
     }
 </script>

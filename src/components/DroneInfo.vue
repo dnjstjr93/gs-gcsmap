@@ -1846,7 +1846,7 @@ export default {
                 // }
                 // this.$forceUpdate();
 
-                this.$store.commit('updateDroneInfosSelected');
+                //this.$store.commit('updateDroneInfosSelected');
 
                 this.postMarkerInfos(this.name, () => {
                     console.log('DroneInfo.vue', 'postMarkerInfos');
