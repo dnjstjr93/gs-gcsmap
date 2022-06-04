@@ -4406,7 +4406,7 @@ export default {
                                     //console.log(this.droneStatus.initHeading, this.heading)
                                     let cur_heading = this.heading;
                                     let diff = 0;
-                                    if(this.$store.state.drone_infos[this.name].circleType === 'cw') {
+                                    if(this.$store.state.drone_infos[this.name].circleType === '시계방향') {
                                         diff = cur_heading - this.droneStatus.initHeading;
                                     }
                                     else {
@@ -6209,7 +6209,7 @@ export default {
         });
 
         EventBus.$on('command-set-goto-circle-' + this.name, (position) => {
-            var dir = (this.$store.state.drone_infos[this.name].circleType === 'cw') ? (1) : (-1);
+            var dir = (this.$store.state.drone_infos[this.name].circleType === '시계방향') ? (1) : (-1);
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
             var lon = parseFloat(arr_cur_goto_position[1]);

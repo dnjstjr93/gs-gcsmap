@@ -346,7 +346,7 @@
                                                                     ></v-radio>
                                                                 </v-radio-group>
                                                             </v-col>
-                                                            <v-col cols="2" v-show="showMissionParam" class="pa-1 pt-2">
+                                                            <v-col cols="2" v-show="(d.startWay === '중간부터')" class="pa-1 pt-2">
                                                                 <v-text-field
                                                                     v-model="d.curMissionItemReached"
                                                                     dense outlined hide-details
@@ -1323,40 +1323,6 @@ export default {
     },
 
     methods: {
-        changeGotoType(gotoType, dName) {
-            //this.gotoType[dName] = gotoType;
-            this.$store.state.drone_infos[dName].gotoType = gotoType;
-        },
-
-        changeYawBehavior(yawBehavior, dName) {
-            this.yawBehavior[dName] = yawBehavior;
-            this.$store.state.drone_infos[dName].yawBehavior = yawBehavior;
-        },
-
-        changeFlyShape(flyShape, dName) {
-            this.flyShape[dName] = flyShape;
-            this.$store.state.drone_infos[dName].flyShape = flyShape;
-        },
-
-        changeStartWay(startWay, dName) {
-            this.startWay[dName] = startWay;
-            this.$store.state.drone_infos[dName].startWay = startWay;
-
-            if(startWay === '중간부터') {
-                this.showMissionParam = true;
-            }
-            else {
-                this.showMissionParam = false;
-            }
-
-            console.log(this.startWay[dName]);
-        },
-
-        changeCircleType(circleType, dName) {
-            this.circleType[dName] = circleType;
-            this.$store.state.drone_infos[dName].circleType = (circleType === '시계방향') ? 'cw' : 'ccw';
-        },
-
         setPoint(point) {
             this.point = point
             console.log('setPoint', this.point);
@@ -1387,9 +1353,9 @@ export default {
             for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        var data = '{\n    "m2m:cin": {\n        "con": "' + this.point + '"\n    }\n}';
+                        let data = '{\n    "m2m:cin": {\n        "con": "' + this.point + '"\n    }\n}';
 
-                        var config = {
+                        let config = {
                             method: 'post',
                             url: 'http://' + this.$store.state.drone_infos[name].host + ':7579/Mobius/' + this.$store.state.drone_infos[name].gcs + '/Mission_Data/' + this.$store.state.drone_infos[name].name + '/msw_sparrow_gun/MICRO',
                             headers: {
@@ -1914,7 +1880,7 @@ export default {
                                 }
                             }
 
-                            if(this.showMissionParam) {
+                            if(this.$store.state.surveyMarkers[dName].startWay === '중간부터') {
                                 console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
 
                                 let strPos = this.$store.state.drone_infos[dName].pausePosition.lat + ':' +
@@ -2064,7 +2030,7 @@ export default {
                         this.yawBehavior[name] = 'YAW고정';
                         this.flyShape[name] = '곡선비행';
                         this.startWay[name] = '처음부터';
-                        this.circleType[name] = (this.$store.state.drone_infos[name].circleType === 'cw')?'시계방향':'반시계방향';
+                        this.circleType[name] = '시계방향';
 
                         this.$store.state.drone_command_prepared = true;
 

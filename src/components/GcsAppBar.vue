@@ -1141,7 +1141,7 @@
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'circleType')) {
-                                this.$store.state.drone_infos[dName].circleType = 'cw';
+                                this.$store.state.drone_infos[dName].circleType = '시계방향';
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetAlt')) {
@@ -1523,47 +1523,6 @@
                         console.log(err.message);
                     }
                 );
-            },
-
-            postUnknownMarkerInfo(callback) {
-                let con = {
-                    "goto_positions": [
-                        "37.405054653488136:127.16040222144906:20:5:250:10:16:1:105.4482803344727",
-                        "37.40421730637441:127.16212419963662:20:5:250:10:16:1:111.3732528686523",
-                        "37.404489150641176:127.1597453785183:20:5:250:10:16:1:99.04309844970703",
-                        "37.40469369356923:127.16217545988579:20:5:250:10:16:1:116.4570770263672",
-                        "37.404063017747674:127.16102211000938:20:5:250:10:16:1:107.547248840332"
-                    ],
-                    "color": "grey",
-                    "selected": false
-                };
-
-                let unknownMarkers = [];
-
-                for (let idx in con.goto_positions) {
-                    if (Object.prototype.hasOwnProperty.call(con.goto_positions, idx)) {
-                        let pos_arr = con.goto_positions[idx].split(':');
-                        let pos = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
-                        pos.lat = parseFloat(pos_arr[0]);
-                        pos.lng = parseFloat(pos_arr[1]);
-                        pos.alt = parseFloat(pos_arr[2]);
-                        pos.speed = parseFloat(pos_arr[3]);
-                        pos.radius = parseFloat(pos_arr[4]);
-                        pos.turningSpeed = parseFloat(pos_arr[5]);
-                        pos.targetMavCmd = (typeof pos_arr[6] === 'undefined') ? 16 : parseInt(pos_arr[6]);
-                        pos.targetStayTime = (typeof pos_arr[7] === 'undefined') ? 1 : parseInt(pos_arr[7]);
-                        pos.elevation = (typeof pos_arr[8] === 'undefined') ? 0.0 : parseInt(pos_arr[8]);
-                        pos.type = (typeof pos_arr[9] === 'undefined') ? 0 : parseInt(pos_arr[9]);
-                        pos.color = 'grey';
-
-                        unknownMarkers.push(pos);
-                        pos = null;
-                    }
-                }
-
-                this.setEachMarkerInfoToMobius('unknown', unknownMarkers, function (status) {
-                    callback(status, '');
-                });
             },
 
             postMarkerInfos(dName, callback) {
