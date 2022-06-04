@@ -1567,7 +1567,7 @@
                     }
 
                     this.idPostTimer = setTimeout((dName) => {
-                        this.postEachSurveyMarkerInfo(dName);
+                        this.postCinSurveyMarkerInfoToMobius(dName);
                     }, 2000, dName);
                 }, 500, dName, pIndex);
 
@@ -1802,7 +1802,7 @@
                 );
             },
 
-            postEachSurveyMarkerInfo(dName) {
+            postCinSurveyMarkerInfoToMobius(dName) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -1963,7 +1963,7 @@
 
                 survey = null;
 
-                this.postEachSurveyMarkerInfo('unknown');
+                this.postCinSurveyMarkerInfoToMobius('unknown');
 
                 this.$store.state.adding = false;
                 //});
@@ -1972,7 +1972,12 @@
             cancelMarker() {
                 this.context_flag = false;
 
-                this.$store.commit('cancelTempMarker', false);
+                if (this.$store.state.adding) {
+                    this.$store.state.tempMarkers['unknown'].pop();
+                    this.$store.state.tempPayload = {};
+                }
+
+                this.$store.state.adding = false;
             },
 
             addingMarker(e) {
@@ -2242,28 +2247,6 @@
                 }
             },
 
-            // f_icon(mIndex) {
-            //     let payload = {};
-            //     payload.mIndex = mIndex;
-            //     payload.fillColor = this.markerColor[(mIndex % 10)];
-            //
-            //     this.$store.commit('updateFillColor', payload);
-            //
-            //     //      this.$forceUpdate();
-            //
-            // },
-            //
-            // f_label(mIndex, pIndex) {
-            //     let payload = {};
-            //     payload.mIndex = mIndex;
-            //     payload.pIndex = pIndex;
-            //     payload.text = String(pIndex);
-            //
-            //     this.$store.commit('updateLabelText', payload);
-            //
-            //     //   this.$forceUpdate();
-            // },
-
             updateTempMarkerPosition(e, dName, pIndex) {
                 if(!this.$store.state.adding) {
                     let lat = e.latLng.lat();
@@ -2281,19 +2264,20 @@
                         this.$store.state.tempMarkers[dName][pIndex].lng = lng;
                         this.$store.state.tempMarkers[dName][pIndex].elevation = elevation_val;
 
-                        let payload = {};
-                        payload.pName = dName;
-                        payload.pIndex = pIndex;
-                        payload.lat = lat;
-                        payload.lng = lng;
-                        payload.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
-                        payload.selected = this.$store.state.tempMarkers[dName][pIndex].selected;
-
-                        this.$store.state.didIPublish = true;
-
-                        this.doBroadcastUpdateTempMarkerPosition(payload);
-
                         this.postCinTempMarkerInfoToMobius(dName);
+
+                        let watchingPayload = {};
+                        watchingPayload.broadcastMission = 'broadcastUpdateTempMarkerPosition';
+                        watchingPayload.payload = {};
+                        watchingPayload.payload.pName = dName;
+                        watchingPayload.payload.pIndex = pIndex;
+                        watchingPayload.payload.lat = lat;
+                        watchingPayload.payload.lng = lng;
+                        watchingPayload.payload.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
+                        watchingPayload.payload.selected = this.$store.state.tempMarkers[dName][pIndex].selected;
+                        this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                        this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+                        this.$store.state.didIPublish = true;
                     });
                 }
             },
@@ -2678,18 +2662,6 @@
                 this.$store.state.didIPublish = false;
             },
 
-            doBroadcastUpdateTempMarkerPosition(payload) {
-                let watchingPayload = {};
-                watchingPayload.broadcastMission = 'broadcastUpdateTempMarkerPosition';
-                watchingPayload.payload = payload;
-
-                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
-                console.log('broadcast_gcsmap_topic', this.broadcast_gcsmap_topic, '-', JSON.stringify(watchingPayload));
-                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
-
-                this.$store.state.didIPublish = true;
-            },
-
             doBroadcastAddMarker(payload) {
                 let watchingPayload = {};
                 watchingPayload.broadcastMission = 'confirmAddTempMarker';
@@ -2909,90 +2881,32 @@
             //
             // }, 5000);
 
-            EventBus.$on('do-update-survey-angle-GcsMap', (payload) => {
-                let dName = payload.dName;
-                let pIndex = payload.pIndex;
-                let angle = payload.angle;
-                let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
-                let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
+            EventBus.$on('do-update-survey-GcsMap', (payload) => {
+                let eName = payload.eName;
 
-                this.updateSurveyPath(dName, pIndex, gap, angle, dir);
-
-                this.postEachSurveyMarkerInfo(dName);
-            });
-
-            EventBus.$on('do-update-survey-alt-GcsMap', (payload) => {
-                let dName = payload.dName;
-                let pIndex = payload.pIndex;
-                this.$store.state.surveyMarkers[dName][pIndex].alt = payload.alt;
-
-                this.postEachSurveyMarkerInfo(dName);
-            });
-
-            EventBus.$on('do-update-way-of-survey-GcsMap', (payload) => {
-                let dName = payload.dName;
-                let pIndex = payload.pIndex;
-                this.$store.state.surveyMarkers[dName][pIndex].wayOfSurvey = payload.wayOfSurvey;
-
-                this.postEachSurveyMarkerInfo(dName);
-            });
-
-            EventBus.$on('do-update-survey-gap-GcsMap', (payload) => {
-                let dName = payload.dName;
-                let pIndex = payload.pIndex;
-                let angle = this.$store.state.surveyMarkers[dName][pIndex].angle;
-                let gap = payload.gap;
-                let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
-
-                this.updateSurveyPath(dName, pIndex, gap, angle, dir);
-
-                this.postEachSurveyMarkerInfo(dName);
-            });
-
-            EventBus.$on('do-update-survey-dir-GcsMap', (payload) => {
                 let dName = payload.dName;
                 let pIndex = payload.pIndex;
                 let angle = this.$store.state.surveyMarkers[dName][pIndex].angle;
                 let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
-                let dir = payload.dir;
+                let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
+
+                if(eName === 'angle') {
+                    angle = payload.angle;
+                }
+                else if(eName === 'gap') {
+                    gap = payload.gap;
+                }
+                else if(eName === 'dir') {
+                    dir = payload.dir;
+                }
 
                 this.updateSurveyPath(dName, pIndex, gap, angle, dir);
 
-                this.postEachSurveyMarkerInfo(dName);
+                this.postCinSurveyMarkerInfoToMobius(dName);
             });
 
             EventBus.$on('do-centerCurrentPosition', (positionCenter) => {
                 this.center = positionCenter;
-            });
-
-            EventBus.$on('do-drawMovingLines', (payload) => {
-                if (this.$store.state.movingMarkers[payload.pName].targeted) {
-                    this.movingLines[payload.pName] = null;
-                    this.movingLines[payload.pName] = [];
-                    this.movingLinesOptions[payload.pName] = null;
-                    this.movingLinesOptions[payload.pName] = {};
-                    let _options = {};
-                    _options.strokeColor = this.droneMarkers[payload.pName].color;
-                    _options.strokeOpacity = 0.9;
-                    _options.strokeWeight = 5;
-                    this.movingLinesOptions[payload.pName] = JSON.parse(JSON.stringify(_options));
-                    _options = null;
-
-                    this.movingLines[payload.pName].push(this.droneMarkers[payload.pName]);
-                    this.movingLines[payload.pName].push(this.movingMarkers[payload.pName]);
-
-                    this.movingLines = this.clone(this.movingLines);
-                }
-                else {
-                    this.movingLines[payload.pName] = null;
-                    this.movingLines[payload.pName] = [];
-                    this.movingLinesOptions[payload.pName] = null;
-                    this.movingLinesOptions[payload.pName] = {};
-
-                    this.movingLines = this.clone(this.movingLines);
-                }
-
-                this.$forceUpdate();
             });
 
             EventBus.$on('do-targetTempMarker', (payload) => {
@@ -3131,13 +3045,12 @@
             //     }
             // });
 
-            EventBus.$on('updateDroneMarker', (payload) => {
+            EventBus.$on('updateDroneAlt', (payload) => {
 
                 var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
                 var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
                 var scale = Math.pow(2, this.map.getZoom());
                 var worldPoint = this.map.getProjection().fromLatLngToPoint({lat:payload.lat, lng:payload.lng});
-                //console.log(new this.google.maps.Point((worldPoint.x - bottomLeft.x) * scale, (worldPoint.y - topRight.y) * scale));
 
                 let _payload = {};
                 _payload.name = payload.name;
@@ -3146,99 +3059,6 @@
                 _payload.y = (worldPoint.y - topRight.y) * scale;
                 _payload.alt = payload.alt;
                 EventBus.$emit('do-draw-DroneCommand', _payload);
-
-                // if(!Object.hasOwnProperty.call(this.boundaryCircles,  payload.name)) {
-                //     this.boundaryCircles[payload.name] = {};
-                // }
-                // else {
-                //     delete this.boundaryCircles[payload.name];
-                //     this.boundaryCircles[payload.name] = {};
-                // }
-                //
-                // this.boundaryCircles[payload.name].lat = payload.lat;
-                // this.boundaryCircles[payload.name].lng = payload.lng;
-                // this.boundaryCircles[payload.name].radius = this.curBoundaryRadius;
-                // this.boundaryCircles[payload.name].options = {
-                //     strokeColor: this.$store.state.drone_infos[payload.name].color,
-                //     fillOpacity: 0,
-                //     strokeOpacity: 0.15,
-                //     strokeWeight: 6,
-                // };
-
-                //this.drawBoundaryCircles(100);
-
-                //this.droneMarkers[payload.name] = null;
-
-
-                // this.$refs.mapRef.$mapPromise.then((map) => {
-                //     this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
-                //     this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
-                // });
-
-                // if(!Object.prototype.hasOwnProperty.call(this.droneMarkers, payload.name)) {
-                //     this.droneMarkers[payload.name] = {};
-                //     this.droneMarkers[payload.name].selected = false;
-                // }
-                //
-                // this.droneMarkers[payload.name].name = payload.name;
-                // this.droneMarkers[payload.name].lat = payload.lat;
-                // this.droneMarkers[payload.name].lng = payload.lng;
-                // this.droneMarkers[payload.name].alt = payload.alt;
-                // this.droneMarkers[payload.name].icon = null;
-                // this.droneMarkers[payload.name].icon = {};
-                //
-                // this.droneMarkers[payload.name].icon = JSON.parse(JSON.stringify(this.$store.state.defaultDroneIcon));
-                //
-                // if(this.$store.state.drone_infos[payload.name].targeted) {
-                //     this.droneMarkers[payload.name].selected = true;
-                //     this.droneMarkers[payload.name].icon.strokeWeight = 2;
-                //     this.droneMarkers[payload.name].icon.strokeColor = 'springgreen';
-                // }
-                // else {
-                //     this.droneMarkers[payload.name].selected = false;
-                //     this.droneMarkers[payload.name].icon.strokeWeight = 1;
-                //     this.droneMarkers[payload.name].icon.strokeColor = 'grey';
-                // }
-                //
-                //
-                // this.droneMarkers[payload.name].color = this.$store.state.drone_infos[payload.name].color;
-                // if(payload.iconArming === 'mdi-airplane') {
-                //     this.droneMarkers[payload.name].icon.fillColor = this.$store.state.drone_infos[payload.name].color;
-                // }
-                // else {
-                //     this.droneMarkers[payload.name].icon.fillColor = '#E0E0E0';
-                // }
-                //
-                // this.droneMarkers[payload.name].home_position
-                // this.droneMarkers[payload.name].icon.rotation = payload.heading;
-                // this.droneMarkers[payload.name].label = null;
-                // this.droneMarkers[payload.name].label = {};
-                // this.droneMarkers[payload.name].label = JSON.parse(JSON.stringify(this.$store.state.defaultDroneLabel));
-                // this.droneMarkers[payload.name].label.fontSize = '14px'
-                // this.droneMarkers[payload.name].label.text = payload.name.slice(0, 1).toUpperCase() + ':' + String(this.droneMarkers[payload.name].alt.toFixed(0));
-                //
-                // // let temp = JSON.parse(JSON.stringify(this.droneMarkers));
-                // // this.droneMarkers = null;
-                // // this.droneMarkers = {};
-                // this.droneMarkers = this.clone(this.droneMarkers);
-
-                //temp = null;
-                payload = null;
-            });
-
-            EventBus.$on('clearDroneMarker', () => {
-                for(let dName in this.droneMarkers) {
-                    if (Object.prototype.hasOwnProperty.call(this.droneMarkers, dName)) {
-                        this.droneMarkers[dName] = null;
-                        this.droneMarkers[dName] = {}
-                    }
-                }
-
-                this.droneMarkers = null;
-                this.droneMarkers = {};
-
-                this.boundaryCircles = null;
-                this.boundaryCircles = {};
             });
 
             EventBus.$on('on-message-handler-gcsmap', (payload) => {
@@ -3257,24 +3077,16 @@
 
         beforeDestroy() {
             EventBus.$off('do-centerCurrentPosition');
-            EventBus.$off('do-drawMovingLines');
             EventBus.$off('do-targetTempMarker');
             //EventBus.$off('do-targetDroneMarker');
             EventBus.$off('gcs-map-ready');
-            EventBus.$off('updateDroneMarker');
-            EventBus.$off('clearDroneMarker');
+            EventBus.$off('updateDroneAlt');
             EventBus.$off('on-message-handler-gcsmap');
 
             EventBus.$off('updatePlaneMarker');
             EventBus.$off('clearPlaneMarker');
             EventBus.$off('clearAllPlaneMarker');
             // EventBus.$off('draw-gotoLines');
-
-            EventBus.$off('do-update-survey-angle-GcsMap');
-            EventBus.$off('do-update-survey-dir-GcsMap');
-            EventBus.$off('do-update-survey-gap-GcsMap');
-            EventBus.$off('do-update-survey-alt-GcsMap');
-            EventBus.$off('do-update-way-of-survey-GcsMap');
 
             EventBus.$off('do-rotate-map');
         }

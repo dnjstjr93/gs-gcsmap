@@ -674,7 +674,7 @@
                                         <draggable v-model="positions">
                                             <v-chip
                                                 v-for="(position, i) in positions" :key="'pos_chip'+i"
-                                                @click="selectedPosition(i)"
+                                                @click="targetTempMarkerPosition(i)"
                                                 label outlined class="ma-0 pa-0 mx-1 px-1"
                                             >
                                                 {{ String(i) }}
@@ -1440,20 +1440,6 @@ export default {
                 // }
             });
         },
-        // iconArming: function (newData) {
-        //     if (newData === 'mdi-airplane-off') {
-        //         this.stopFlightTimer();
-        //     }
-        //     else if (newData === 'mdi-airplane') {
-        //         this.startFlightTimer();
-        //     }
-        // },
-        // targeted: function (newData) {
-        //     let infoSelectedDrone = {};
-        //     infoSelectedDrone.drone_name = this.name;
-        //     infoSelectedDrone.selected = newData;
-        //     this.$store.commit('setSelectedDrone', infoSelectedDrone);
-        // },
     },
 
     methods: {
@@ -1750,13 +1736,13 @@ export default {
             a.dispatchEvent(e);
         },
 
-        selectedPosition: function (i) {
+        targetTempMarkerPosition: function (i) {
             let payload = {};
             payload.pName = this.name;
             payload.pIndex = i;
             payload.targeted = true;
 
-            console.log('selectedPosition', this.selectedItem);
+            console.log('targetTempMarkerPosition', this.selectedItem);
 
             //this.selectedItem = -1;
 
@@ -4491,10 +4477,10 @@ export default {
                             _payload.lat = (this.gpi.lat / 10000000);
                             _payload.lng = (this.gpi.lon / 10000000);
                             _payload.alt = (this.gpi.relative_alt / 1000);
-                            _payload.heading = this.heading;
-                            this.$store.commit('setFlyingDroneInfo', JSON.parse(JSON.stringify(_payload)));
 
-                            EventBus.$emit('updateDroneMarker', JSON.parse(JSON.stringify(_payload)));
+                            this.$store.state.drone_infos[this.name].heading = this.heading;
+
+                            EventBus.$emit('updateDroneAlt', JSON.parse(JSON.stringify(_payload)));
 
                             this.pre_lat = this.gpi.lat;
                             this.pre_lng = this.gpi.lon;
@@ -4508,16 +4494,13 @@ export default {
 
                             if(this.curArmStatus === 'ARMED') {
                                 this.$store.state.trackingLines[this.name].push({lat: _payload.lat, lng: _payload.lng});
+
+                                localStorage.setItem('trackingLines-' + this.name, JSON.stringify(this.$store.state.trackingLines[this.name]));
+
+                                let temp = JSON.parse(JSON.stringify(this.$store.state.trackingLines[this.name]));
+                                this.$store.state.trackingLines[this.name] = null;
+                                this.$store.state.trackingLines[this.name] = JSON.parse(JSON.stringify(temp));
                             }
-
-                            localStorage.setItem('trackingLines-' + this.name, JSON.stringify(this.$store.state.trackingLines[this.name]));
-
-                            let temp = JSON.parse(JSON.stringify(this.$store.state.trackingLines[this.name]));
-                            this.$store.state.trackingLines[this.name] = null;
-                            delete this.$store.state.trackingLines[this.name];
-                            this.$store.state.trackingLines[this.name] = [];
-                            this.$store.state.trackingLines[this.name] = JSON.parse(JSON.stringify(temp));
-                            temp = null;
 
                             _payload = null;
 
@@ -5907,19 +5890,6 @@ export default {
             this.flagReceiving = false;
 
             console.log('DroneInfo-initialize-' + this.name, payload);
-
-            let _payload = {};
-            _payload.name = this.name;
-            _payload.iconArming = this.iconArming;
-            _payload.lat = payload.lat;
-            _payload.lng = payload.lng;
-            _payload.alt = payload.alt;
-            _payload.heading = payload.heading;
-
-            this.$store.commit('setFlyingDroneInfo', JSON.parse(JSON.stringify(_payload)));
-
-            EventBus.$emit('updateDroneMarker', JSON.parse(JSON.stringify(_payload)));
-            _payload = null;
 
             this.pre_lat = payload.lat;
             this.pre_lng = payload.lng;

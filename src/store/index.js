@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from "axios";
-import EventBus from '../EventBus';
 
 Vue.use(Vuex)
 
@@ -761,13 +760,6 @@ export default new Vuex.Store({
             state.tempMarkers[payload.pName][payload.pIndex].selected = payload.selected;
         },
 
-        setSelected(state, payload) {
-            state.tempMarkers[payload.pName][payload.pIndex].selected = payload.value;
-
-            payload.targeted = true;
-            EventBus.$emit('do-targetTempMarker', payload);
-        },
-
         addTempMarker(state, payload) {
             if (!Object.prototype.hasOwnProperty.call(state.tempMarkers, payload.pName)) {
                 state.tempMarkers[payload.pName] = [];
@@ -807,15 +799,6 @@ export default new Vuex.Store({
             state.tempPayload = JSON.parse(JSON.stringify(payload));
 
             payload = null;
-        },
-
-        cancelTempMarker(state) {
-            if (state.adding) {
-                state.tempMarkers.unknown.pop();
-                state.tempPayload = {};
-            }
-
-            state.adding = false;
         },
 
         confirmAddTempMarker(state) {
@@ -1177,18 +1160,6 @@ export default new Vuex.Store({
             temp = null;
         },
 
-        // setSelectedDrone(state, payload) {
-        //
-        //     state.selectedDrone[payload.drone_name] = payload.selected;
-        //     let temp = JSON.parse(JSON.stringify(state.selectedDrone));
-        //     state.selectedDrone = null;
-        //     state.selectedDrone = {};
-        //     state.selectedDrone = JSON.parse(JSON.stringify(temp));
-        //     temp = null;
-        //
-        //     //EventBus.$emit('selected-drone', payload);
-        // },
-
         setCommandTabLeftX(state, value) {
             state.command_tab_left_x = value;
         },
@@ -1197,66 +1168,7 @@ export default new Vuex.Store({
             state.command_tab_max_height = value;
         },
 
-        // setSelectedDroneInfo(state, payload) {
-        //     state.drone_infos[payload.dName].selected = payload.selected;
-        // },
-
-        setFlyingDroneInfo(state, payload) {
-            state.drone_infos[payload.name].heading = payload.heading;
-            state.drone_infos[payload.name].lat = payload.lat;
-            state.drone_infos[payload.name].lng = payload.lng;
-
-            // let temp = JSON.parse(JSON.stringify(state.drone_infos[payload.pName]));
-            // state.drone_infos[payload.pName] = null;
-            // state.drone_infos[payload.pName] = {};
-            // state.drone_infos[payload.pName] = JSON.parse(JSON.stringify(temp));
-            // temp = null;
-
-            // state.drone_infos_selected = [];
-            // for(let dName in state.drone_infos) {
-            //     if(Object.prototype.hasOwnProperty.call(state.drone_infos, dName)) {
-            //         if(state.drone_infos[dName].selected) {
-            //             state.drone_infos_selected.push(state.drone_infos[dName]);
-            //         }
-            //     }
-            // }
-
-            state.countFlying++;
-            if (state.countFlying >= 30) {
-                state.countFlying = 0;
-
-                // axios({
-                //     validateStatus: function (status) {
-                //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                //         return status < 500;
-                //     },
-                //     method: 'post',
-                //     url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/Info',
-                //     headers: {
-                // 'X-M2M-RI': String(parseInt(Math.random()*10000)),
-                //         'X-M2M-Origin': 'SVue',
-                //         'Content-Type': 'application/json;ty=4'
-                //     },
-                //     data: {
-                //         'm2m:cin': {
-                //             con: state.drone_infos
-                //         }
-                //     }
-                // }).then(
-                //     function (res) {
-                //         console.log('setFlyingDroneInfo-axios', res.data);
-                //     }
-                // ).catch(
-                //     function (err) {
-                //         console.log(err.message);
-                //     }
-                // );
-            }
-'/'
-            payload = null;
-        },
-
-        saveCurrentDroneInfos(state, name) {
+        saveCurrentDroneInfos(state, dName) {
             if (state.MOBIUS_CONNECTION_CONNECTED) {
                 axios({
                     validateStatus: function (status) {
@@ -1264,7 +1176,7 @@ export default new Vuex.Store({
                         return status < 500;
                     },
                     method: 'post',
-                    url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + name,
+                    url: 'http://' + state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName,
                     headers: {
                         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                         'X-M2M-Origin': 'SVue',
@@ -1272,12 +1184,12 @@ export default new Vuex.Store({
                     },
                     data: {
                         'm2m:cin': {
-                            con: state.drone_infos[name]
+                            con: state.drone_infos[dName]
                         }
                     }
                 }).then(
                     function (res) {
-                        console.log('setFlyingDroneInfo-axios', res.data);
+                        console.log('saveCurrentDroneInfos-axios', res.data);
                     }
                 ).catch(
                     function (err) {

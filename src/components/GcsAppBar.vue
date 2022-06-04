@@ -2179,8 +2179,6 @@
 
                 EventBus.$emit('confirm_selected', JSON.parse(JSON.stringify(this.selected)));
 
-                EventBus.$emit('clearDroneMarker', '');
-
                 this.$forceUpdate();
             },
 

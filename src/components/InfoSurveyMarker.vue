@@ -535,9 +535,10 @@
                     clearTimeout(this.idWayUpdateTimer);
                 }
 
-                this.idWayUpdateTimer = setTimeout((dName, pIndex) => {
-                    EventBus.$emit('do-update-way-of-survey-GcsMap', {dName: dName, pIndex: pIndex, wayOfSurvey: val});
-                }, 500, this.markerName, this.markerIndex);
+                this.idWayUpdateTimer = setTimeout((dName) => {
+                    this.postCinSurveyMarkerInfoToMobius(dName);
+
+                }, 500, this.markerName);
             },
 
             calcFactorSurvey(focal, sensor_h, overlap, alt, speed) {
@@ -632,7 +633,8 @@
                     }
 
                     this.idGapUpdateTimer = setTimeout((dName, pIndex) => {
-                        EventBus.$emit('do-update-survey-gap-GcsMap', {
+                        EventBus.$emit('do-update-survey-GcsMap', {
+                            eName: 'gap',
                             dName: dName,
                             pIndex: pIndex,
                             gap: parseInt(gap)
@@ -648,7 +650,8 @@
                     }
 
                     this.idAngleUpdateTimer = setTimeout((dName, pIndex) => {
-                        EventBus.$emit('do-update-survey-angle-GcsMap', {
+                        EventBus.$emit('do-update-survey-GcsMap', {
+                            eName: 'angle',
                             dName: dName,
                             pIndex: pIndex,
                             angle: parseInt(angle)
@@ -668,7 +671,12 @@
                 }
 
                 this.idDirUpdateTimer = setTimeout((dName, pIndex) => {
-                    EventBus.$emit('do-update-survey-dir-GcsMap', {dName: dName, pIndex: pIndex, dir: parseInt(dir)});
+                    EventBus.$emit('do-update-survey-GcsMap', {
+                        eName: 'dir',
+                        dName: dName,
+                        pIndex: pIndex,
+                        dir: parseInt(dir)
+                    });
                 }, 500, this.markerName, this.markerIndex);
             },
 

@@ -1608,10 +1608,10 @@ export default {
             this.curTab = 'virtual';
             this.$store.state.active_tab = 'virtual';
 
-            for(let name in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        this.$store.commit('saveCurrentDroneInfos', name);
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.commit('saveCurrentDroneInfos', dName);
                     }
                 }
             }
