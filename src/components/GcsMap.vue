@@ -2651,11 +2651,11 @@
                             this.$store.commit('confirmAddTempMarker', false);
                         }
                         else if (watchingPayload.broadcastMission === 'broadcastRegisterTempMarker') {
-                            let payload = watchingPayload.payload;
-                            this.getCinTempMarkerInfoFromMobius(payload.dName, (status, con) => {
+                            let dName = watchingPayload.dName;
+                            this.getCinTempMarkerInfoFromMobius(dName, (status, con) => {
                                 if(status === 200) {
-                                    this.$store.state.tempMarkers[payload.dName] = null;
-                                    this.$store.state.tempMarkers[payload.dName] = JSON.parse(JSON.stringify(con));
+                                    this.$store.state.tempMarkers[dName] = null;
+                                    this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(con));
                                 }
                             });
                         }
@@ -3245,18 +3245,6 @@
                 this.onMessageBroadcast(payload.topic, payload.message);
             });
 
-            EventBus.$on('doBroadcastRegisterTempMaker', (payload)=>{
-                let watchingPayload = {};
-                watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
-                watchingPayload.payload = payload;
-
-                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
-                console.log('broadcast_gcsmap_topic', this.broadcast_gcsmap_topic, '-', JSON.stringify(watchingPayload));
-                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
-
-                this.$store.state.didIPublish = true;
-            });
-
             EventBus.$on('do-rotate-map', (angle)=>{
 
 
@@ -3276,7 +3264,6 @@
             EventBus.$off('updateDroneMarker');
             EventBus.$off('clearDroneMarker');
             EventBus.$off('on-message-handler-gcsmap');
-            EventBus.$off('doBroadcastRegisterTempMaker');
 
             EventBus.$off('updatePlaneMarker');
             EventBus.$off('clearPlaneMarker');

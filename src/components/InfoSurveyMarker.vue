@@ -12,7 +12,7 @@
                     <v-spacer/>
                     <v-col cols="2">
                         <v-combobox
-                            v-model="targetSelect"
+                            v-model="targetSelectName"
                             :items="targets"
                             label="Target"
                             chips dense hide-details single-line
@@ -248,44 +248,6 @@
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
-                            <!--                            <v-row align="center" justify="center">-->
-                            <!--                                <v-col cols="4">-->
-                            <!--                                    <v-text-field class="py-1 pl-4"-->
-                            <!--                                                  v-model.number="targetLat"-->
-                            <!--                                                  color="purple darken-2"-->
-                            <!--                                                  label="Latitude"-->
-                            <!--                                                  readonly-->
-                            <!--                                                  filled-->
-                            <!--                                                  dense-->
-                            <!--                                                  hide-details-->
-                            <!--                                                  outlined-->
-                            <!--                                    ></v-text-field>-->
-                            <!--                                </v-col>-->
-                            <!--                                <v-col cols="4">-->
-                            <!--                                    <v-text-field class="py-1 px-0"-->
-                            <!--                                                  v-model.number="targetLng"-->
-                            <!--                                                  color="blue darken-2"-->
-                            <!--                                                  label="Longitude"-->
-                            <!--                                                  readonly-->
-                            <!--                                                  filled-->
-                            <!--                                                  dense-->
-                            <!--                                                  hide-details-->
-                            <!--                                                  outlined-->
-                            <!--                                    ></v-text-field>-->
-                            <!--                                </v-col>-->
-                            <!--                                <v-col cols="4">-->
-                            <!--                                    <v-text-field class="py-1 pr-4"-->
-                            <!--                                                  v-model.number="elevation"-->
-                            <!--                                                  color="blue darken-2"-->
-                            <!--                                                  label="Elevation"-->
-                            <!--                                                  readonly-->
-                            <!--                                                  filled-->
-                            <!--                                                  dense-->
-                            <!--                                                  hide-details-->
-                            <!--                                                  outlined-->
-                            <!--                                    ></v-text-field>-->
-                            <!--                                </v-col>-->
-                            <!--                            </v-row>-->
                         </v-card>
                     </v-col>
                 </v-row>
@@ -358,44 +320,6 @@
                                     ></v-text-field>
                                 </v-col>
                             </v-row>
-                            <!--                            <v-row align="center" justify="center">-->
-                            <!--                                <v-col cols="4">-->
-                            <!--                                    <v-text-field class="py-1 pl-4"-->
-                            <!--                                                  v-model.number="targetLat"-->
-                            <!--                                                  color="purple darken-2"-->
-                            <!--                                                  label="Latitude"-->
-                            <!--                                                  readonly-->
-                            <!--                                                  filled-->
-                            <!--                                                  dense-->
-                            <!--                                                  hide-details-->
-                            <!--                                                  outlined-->
-                            <!--                                    ></v-text-field>-->
-                            <!--                                </v-col>-->
-                            <!--                                <v-col cols="4">-->
-                            <!--                                    <v-text-field class="py-1 px-0"-->
-                            <!--                                                  v-model.number="targetLng"-->
-                            <!--                                                  color="blue darken-2"-->
-                            <!--                                                  label="Longitude"-->
-                            <!--                                                  readonly-->
-                            <!--                                                  filled-->
-                            <!--                                                  dense-->
-                            <!--                                                  hide-details-->
-                            <!--                                                  outlined-->
-                            <!--                                    ></v-text-field>-->
-                            <!--                                </v-col>-->
-                            <!--                                <v-col cols="4">-->
-                            <!--                                    <v-text-field class="py-1 pr-4"-->
-                            <!--                                                  v-model.number="elevation"-->
-                            <!--                                                  color="blue darken-2"-->
-                            <!--                                                  label="Elevation"-->
-                            <!--                                                  readonly-->
-                            <!--                                                  filled-->
-                            <!--                                                  dense-->
-                            <!--                                                  hide-details-->
-                            <!--                                                  outlined-->
-                            <!--                                    ></v-text-field>-->
-                            <!--                                </v-col>-->
-                            <!--                            </v-row>-->
                         </v-card>
                     </v-col>
                 </v-row>
@@ -444,15 +368,6 @@
         ],
 
         data() {
-            const defaultForm = Object.freeze({
-                first: '',
-                last: '',
-                bio: '',
-                favoriteAnimal: '',
-                age: null,
-                terms: false,
-            });
-
             return {
                 wayOfSurvey: 'forShooting',
                 total_count: 0,
@@ -465,23 +380,10 @@
                 targets: [],
 
                 area: 0,
-                select: 'Vuetify',
-                items: [
-                    'Programming',
-                    'Design',
-                    'Vue',
-                    'Vuetify',
-                ],
 
                 flyAltType: "상대고도",
-                targetTypes: ['Goto', 'Circle', 'Survey'],
-                targetType: 'Goto',
-                targetSelect: '',
+                targetSelectName: '',
                 targetSelectIndex: '0',
-                oldTargetSelect: '',
-                targetLat: 0,
-                targetLng: 0,
-                targetAlt: 20,
                 targetSpeed: 5,
                 targetRadius: 10,
                 targetTurningSpeed: 10,
@@ -500,86 +402,20 @@
                 paramSpeed: 5,
 
                 elevation: 0,
-                //form: Object.assign({}, defaultForm),
-                rules: {
-                    age: [
-                        val => val < 10 || `I don't believe you!`,
-                    ],
-                    animal: [val => (val || '').length > 0 || 'This field is required'],
-                    name: [val => (val || '').length > 0 || 'This field is required'],
-                },
-                animals: ['Dog', 'Cat', 'Rabbit', 'Turtle', 'Snake'],
-                // conditions: true,
-                content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc.',
-                snackbar: false,
-                terms: false,
-                defaultForm,
-                fruits: [
-                    'Apples',
-                    'Apricots',
-                    'Avocado',
-                    'Bananas',
-                    'Blueberries',
-                    'Blackberries',
-                    'Boysenberries',
-                    'Bread fruit',
-                    'Cantaloupes (cantalope)',
-                    'Cherries',
-                    'Cranberries',
-                    'Cucumbers',
-                    'Currants',
-                    'Dates',
-                    'Eggplant',
-                    'Figs',
-                    'Grapes',
-                    'Grapefruit',
-                    'Guava',
-                    'Honeydew melons',
-                    'Huckleberries',
-                    'Kiwis',
-                    'Kumquat',
-                    'Lemons',
-                    'Limes',
-                    'Mangos',
-                    'Mulberries',
-                    'Muskmelon',
-                    'Nectarines',
-                    'Olives',
-                    'Oranges',
-                    'Papaya',
-                    'Peaches',
-                    'Pears',
-                    'Persimmon',
-                    'Pineapple',
-                    'Plums',
-                    'Pomegranate',
-                    'Raspberries',
-                    'Rose Apple',
-                    'Starfruit',
-                    'Strawberries',
-                    'Tangerines',
-                    'Tomatoes',
-                    'Watermelons',
-                    'Zucchini',
-                ],
 
-                selectedFruits: [],
+                snackbar: false,
 
                 disableTargetSelectIndex: false,
                 disableTargetSelect: false,
-
             }
         },
 
         watch: {
             markerName: function (newVal) {
-
-                console.log('InfoMaker - watch', newVal);
-
-                this.targetSelect = newVal;
+                this.targetSelectName = newVal;
             },
 
-            targetSelect: function (newVal) {
+            targetSelectName: function (newVal) {
                 this.disableTargetSelectIndex = (this.markerName !== newVal);
             },
 
@@ -601,17 +437,13 @@
                 return (arrIndex);
             },
 
-            icon () {
-                return 'mdi-checkbox-blank-outline'
-            },
-
             conditions() {
-                return !((this.markerName !== this.targetSelect) ||
+                return !((this.markerName !== this.targetSelectName) ||
                     (String(this.markerIndex) !== this.targetSelectIndex));
             },
 
             curDroneColorMap() {
-                return ((this.targetSelect === 'unknown') ? 'grey' : this.$store.state.drone_infos[this.targetSelect].color);
+                return (this.$store.state.drone_infos[this.targetSelectName].color);
             },
         },
 
@@ -793,18 +625,6 @@
                 }
             },
 
-            changeAltSurveyPath(alt) {
-                this.$store.state.drone_infos[this.markerName].targetAlt = alt;
-
-                if(this.idAltUpdateTimer !== null) {
-                    clearTimeout(this.idAltUpdateTimer);
-                }
-
-                this.idAltUpdateTimer = setTimeout((dName, pIndex) => {
-                    EventBus.$emit('do-update-survey-alt-GcsMap', {dName: dName, pIndex: pIndex, alt: parseInt(alt)});
-                }, 500, this.markerName, this.markerIndex);
-            },
-
             changeGapSurveyPath(gap) {
                 if(gap !== '') {
                     if (this.idGapUpdateTimer !== null) {
@@ -860,13 +680,15 @@
                 };
 
                 if(this.markerName === 'unknown') {
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].selected = false;
                     this.$store.state.surveyMarkers[this.markerName].splice(this.markerIndex, 1);
 
                     watchingPayload.broadcastMission = 'removeSurveyMarker';
 
-                    this.postEachSurveyMarkerInfo(this.markerName);
+                    this.postCinSurveyMarkerInfoToMobius(this.markerName);
                 }
                 else {
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].selected = false;
                     this.$store.state.surveyMarkers.unknown.push(
                         JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[this.markerName][this.markerIndex]))
                     );
@@ -874,9 +696,9 @@
 
                     watchingPayload.broadcastMission = 'deleteSurveyMarker';
 
-                    this.postEachSurveyMarkerInfo(this.markerName);
+                    this.postCinSurveyMarkerInfoToMobius(this.markerName);
 
-                    this.postEachSurveyMarkerInfo('unknown');
+                    this.postCinSurveyMarkerInfoToMobius('unknown');
 
                     // let temp = JSON.parse(JSON.stringify(state.tempMarkers));
                     // state.tempMarkers = null;
@@ -950,7 +772,7 @@
                 );
             },
 
-            postEachSurveyMarkerInfo(dName) {
+            postCinSurveyMarkerInfoToMobius(dName) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -988,9 +810,9 @@
                 );
                 this.$store.state.surveyMarkers[oldName].splice(oldIndex, 1);
 
-                this.postEachSurveyMarkerInfo(newName);
+                this.postCinSurveyMarkerInfoToMobius(newName);
 
-                this.postEachSurveyMarkerInfo(oldName);
+                this.postCinSurveyMarkerInfoToMobius(oldName);
 
                 this.snackbar = true;
 
@@ -1000,57 +822,20 @@
             },
 
             submit() {
-                console.log("999999999999999999999999999999999999999999999999999", this.targetSelect, this.$store.state.surveyMarkers[this.targetSelect]);
+                console.log("999999999999999999999999999999999999999999999999999", this.targetSelectName, this.$store.state.surveyMarkers[this.targetSelectName]);
 
-                if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, this.targetSelect)) {
-                    this.$store.state.surveyMarkers[this.targetSelect] = [];
+                if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, this.targetSelectName)) {
+                    this.$store.state.surveyMarkers[this.targetSelectName] = [];
 
-                    this.createEachSurveyMarkerInfoToMobius(this.targetSelect, (res) => {
+                    this.createEachSurveyMarkerInfoToMobius(this.targetSelectName, (res) => {
                         console.log('InfoSurveyMarker', 'createEachSurveyMarkerInfoToMobius', res);
 
-                        this.registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelect);
+                        this.registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
                     });
                 }
                 else {
-                    this.registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelect);
+                    this.registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
                 }
-            },
-            decrementAlt () {
-                this.targetAlt--;
-            },
-            incrementAlt () {
-                this.targetAlt++;
-            },
-            decrementSpeed () {
-                this.targetSpeed--;
-            },
-            incrementSpeed () {
-                this.targetSpeed++;
-            },
-            decrementRadius () {
-                this.targetRadius--;
-            },
-            incrementRadius () {
-                this.targetRadius++;
-            },
-            decrementTurningSpeed () {
-                this.targetTurningSpeed--;
-            },
-            incrementTurningSpeed () {
-                this.targetTurningSpeed++;
-            },
-
-            selectTargetType(event) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type = event;
-
-                console.log('InfoSurveyMarker:selectTargetType - ' + this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type);
-
-                let temp = JSON.parse(JSON.stringify(this.$store.state.surveyMarkers));
-                this.$store.state.surveyMarkers = null;
-                this.$store.state.surveyMarkers = JSON.parse(JSON.stringify(temp));
-                temp = null;
-
-                this.targetType = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].type;
             },
         },
 
@@ -1067,7 +852,7 @@
         },
 
         mounted() {
-            this.targetSelect = this.markerName;
+            this.targetSelectName = this.markerName;
             this.targetSelectIndex = String(this.markerIndex);
 
             if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'wayOfSurvey')) {

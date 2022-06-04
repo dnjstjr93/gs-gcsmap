@@ -8,17 +8,6 @@
         </v-snackbar>
         <v-form ref="form" @submit.prevent="submit">
             <v-card tile flat>
-<!--                <v-row align="center" justify="center">-->
-<!--                    <v-col cols="12">-->
-<!--                        <v-card flat tile class="px-5">-->
-<!--                            <v-radio-group label="Marker Type:" v-model="targetType" row hide-details @change="selectTargetType($event)">-->
-<!--                                <v-radio label="Goto" value="Goto"></v-radio>-->
-<!--                                <v-radio label="Circle" value="Circle"></v-radio>-->
-<!--                                <v-radio label="Survey" value="Survey"></v-radio>-->
-<!--                            </v-radio-group>-->
-<!--                        </v-card>-->
-<!--                    </v-col>-->
-<!--                </v-row>-->
                 <v-row align="center" justify="center">
                     <v-col cols="2">
                         <v-combobox
@@ -26,7 +15,7 @@
                             :items="targets"
                             label="Target"
                             chips dense hide-details single-line
-                            :disabled="disableTargetSelect"
+                            :disabled="disableTargetSelectName"
                             class="px-1"
                         >
                             <template v-slot:selection="data">
@@ -225,133 +214,6 @@
 <!--                            </v-row>-->
 <!--                        </v-card>-->
                     </v-col>
-<!--                    <v-col cols="2" v-if="targetType === 'Circle'" class="text-center">-->
-<!--                        <v-card flat tile>-->
-<!--                            <span class="display-0 font-weight-bold">선회반지름</span>-->
-<!--                            <span class="pl-6 display-1 font-weight-light">{{targetRadius}}</span>-->
-<!--                            <span class="subheading font-weight-light mx-1">m</span>-->
-<!--                        </v-card>-->
-<!--                        <v-card flat tile class="pl-2 pt-12">-->
-<!--                            <v-row align="center" justify="center">-->
-<!--                                <v-col cols="8">-->
-<!--                                    <v-slider-->
-<!--                                        v-model="targetRadius"-->
-<!--                                        color="blue"-->
-<!--                                        hint="Speed"-->
-<!--                                        min="5"-->
-<!--                                        max="255"-->
-<!--                                        thumb-label="always"-->
-<!--                                        track-fill-color="orange"-->
-<!--                                        dense-->
-<!--                                        ticks-->
-<!--                                        hide-details-->
-<!--                                    >-->
-<!--                                        <template v-slot:prepend>-->
-<!--                                            <v-icon-->
-<!--                                                color="primary"-->
-<!--                                                @click="decrementRadius"-->
-<!--                                            >-->
-<!--                                                mdi-minus-->
-<!--                                            </v-icon>-->
-<!--                                        </template>-->
-
-<!--                                        <template v-slot:append>-->
-<!--                                            <v-icon-->
-<!--                                                color="secondary"-->
-<!--                                                @click="incrementRadius"-->
-<!--                                            >-->
-<!--                                                mdi-plus-->
-<!--                                            </v-icon>-->
-<!--                                        </template>-->
-<!--                                    </v-slider>-->
-<!--                                </v-col>-->
-<!--                                <v-col cols="4">-->
-<!--                                    <v-text-field-->
-<!--                                        v-model="targetRadius"-->
-<!--                                        class="mt-0 pt-0"-->
-<!--                                        hide-details-->
-<!--                                        single-line-->
-<!--                                        type="number"-->
-<!--                                        outlined dense-->
-<!--                                        color="blue"-->
-<!--                                    ></v-text-field>-->
-<!--                                </v-col>-->
-<!--                            </v-row>-->
-<!--                        </v-card>-->
-<!--                    </v-col>-->
-<!--                    <v-col cols="2" v-if="targetType === 'Circle'" class="text-center">-->
-<!--                        <v-card flat tile>-->
-<!--                            <span class="display-0 font-weight-bold">선회속도</span>-->
-<!--                            <span class="pl-6 display-1 font-weight-light">{{targetTurningSpeed}}</span>-->
-<!--                            <span class="subheading font-weight-light mx-1">m/rad</span>-->
-<!--                        </v-card>-->
-<!--                        <v-card flat tile class="pl-2 pt-12">-->
-<!--                            <v-row align="center" justify="center">-->
-<!--                                <v-col cols="8">-->
-<!--                                    <v-slider-->
-<!--                                            v-model="targetTurningSpeed"-->
-<!--                                            color="purple"-->
-<!--                                            hint="Speed"-->
-<!--                                            min="5"-->
-<!--                                            max="20"-->
-<!--                                            thumb-label="always"-->
-<!--                                            track-fill-color="orange"-->
-<!--                                            dense-->
-<!--                                            ticks-->
-<!--                                            hide-details-->
-<!--                                    >-->
-<!--                                        <template v-slot:prepend>-->
-<!--                                            <v-icon-->
-<!--                                                    color="primary"-->
-<!--                                                    @click="decrementTurningSpeed"-->
-<!--                                            >-->
-<!--                                                mdi-minus-->
-<!--                                            </v-icon>-->
-<!--                                        </template>-->
-
-<!--                                        <template v-slot:append>-->
-<!--                                            <v-icon-->
-<!--                                                    color="secondary"-->
-<!--                                                    @click="incrementTurningSpeed"-->
-<!--                                            >-->
-<!--                                                mdi-plus-->
-<!--                                            </v-icon>-->
-<!--                                        </template>-->
-<!--                                    </v-slider>-->
-<!--                                </v-col>-->
-<!--                                <v-col cols="4">-->
-<!--                                    <v-text-field-->
-<!--                                        v-model="targetTurningSpeed"-->
-<!--                                        class="mt-0 pr-2"-->
-<!--                                        hide-details-->
-<!--                                        single-line-->
-<!--                                        type="number"-->
-<!--                                        outlined dense-->
-<!--                                        color="purple"-->
-<!--                                    ></v-text-field>-->
-<!--                                </v-col>-->
-<!--                            </v-row>-->
-<!--                        </v-card>-->
-<!--                    </v-col>-->
-<!--                    <v-col cols="12" sm="1" class="text-center">-->
-<!--                        <v-card flat tile>-->
-<!--                            <span class="display-0 font-weight-bold">대기시간</span>-->
-<!--                            <span class="pl-6 display-1 font-weight-light">{{targetStayTime}}</span>-->
-<!--                            <span class="subheading font-weight-light mx-1">sec</span>-->
-<!--                        </v-card>-->
-<!--                        <v-card flat tile class="px-2 pt-12">-->
-<!--                            <v-text-field-->
-<!--                                v-model="targetStayTime"-->
-<!--                                class="mt-0 pt-0"-->
-<!--                                hide-details-->
-<!--                                single-line-->
-<!--                                type="number"-->
-<!--                                style="width: 80px"-->
-<!--                                outlined dense-->
-<!--                                color="amber"-->
-<!--                            ></v-text-field>-->
-<!--                        </v-card>-->
-<!--                    </v-col>-->
                 </v-row>
             </v-card>
             <v-card-actions>
@@ -374,7 +236,6 @@
 </template>
 
 <script>
-    import EventBus from "@/EventBus";
     import axios from "axios";
 
     export default {
@@ -388,31 +249,11 @@
         ],
 
         data() {
-            const defaultForm = Object.freeze({
-                first: '',
-                last: '',
-                bio: '',
-                favoriteAnimal: '',
-                age: null,
-                terms: false,
-            });
-
             return {
                 targets: [],
 
-                select: 'Vuetify',
-                items: [
-                    'Programming',
-                    'Design',
-                    'Vue',
-                    'Vuetify',
-                ],
-
-                targetTypes: ['Goto', 'Circle', 'Survey'],
-                targetType: 'Goto',
                 targetSelectName: '',
                 targetSelectIndex: '0',
-                oldTargetSelect: '',
                 targetLat: 0,
                 targetLng: 0,
                 targetAlt: 20,
@@ -421,135 +262,16 @@
                 targetTurningSpeed: 10,
                 targetStayTime: 1,
                 elevation: 0,
-                //form: Object.assign({}, defaultForm),
-                rules: {
-                    age: [
-                        val => val < 10 || `I don't believe you!`,
-                    ],
-                    animal: [val => (val || '').length > 0 || 'This field is required'],
-                    name: [val => (val || '').length > 0 || 'This field is required'],
-                },
-                animals: ['Dog', 'Cat', 'Rabbit', 'Turtle', 'Snake'],
-                // conditions: true,
-                content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Curabitur sodales ligula in libero. Sed dignissim lacinia nunc.',
-                snackbar: false,
-                terms: false,
-                defaultForm,
-                fruits: [
-                    'Apples',
-                    'Apricots',
-                    'Avocado',
-                    'Bananas',
-                    'Blueberries',
-                    'Blackberries',
-                    'Boysenberries',
-                    'Bread fruit',
-                    'Cantaloupes (cantalope)',
-                    'Cherries',
-                    'Cranberries',
-                    'Cucumbers',
-                    'Currants',
-                    'Dates',
-                    'Eggplant',
-                    'Figs',
-                    'Grapes',
-                    'Grapefruit',
-                    'Guava',
-                    'Honeydew melons',
-                    'Huckleberries',
-                    'Kiwis',
-                    'Kumquat',
-                    'Lemons',
-                    'Limes',
-                    'Mangos',
-                    'Mulberries',
-                    'Muskmelon',
-                    'Nectarines',
-                    'Olives',
-                    'Oranges',
-                    'Papaya',
-                    'Peaches',
-                    'Pears',
-                    'Persimmon',
-                    'Pineapple',
-                    'Plums',
-                    'Pomegranate',
-                    'Raspberries',
-                    'Rose Apple',
-                    'Starfruit',
-                    'Strawberries',
-                    'Tangerines',
-                    'Tomatoes',
-                    'Watermelons',
-                    'Zucchini',
-                ],
 
-                selectedFruits: [],
+                snackbar: false,
 
                 disableTargetSelectIndex: false,
-                disableTargetSelect: false,
-
+                disableTargetSelectName: false,
             }
         },
 
         watch: {
-            // targetSelectName: function (newVal, oldVal) {
-            //     console.log('targetSelectName - watch', oldVal, ' -> ', newVal);
-            //     if(this.markerName !== newVal) {
-            //
-            //         this.oldTargetSelet = oldVal;
-            //
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-            //
-            // targetAlt: function (newVal, oldVal) {
-            //     console.log('targetAlt - watch', oldVal, ' -> ', newVal);
-            //     if(this.marker.alt !== newVal) {
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-            //
-            // targetSpeed: function (newVal, oldVal) {
-            //     console.log('targetSpeed - watch', oldVal, ' -> ', newVal);
-            //     if(this.marker.speed !== newVal) {
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-            //
-            // targetRadius: function (newVal, oldVal) {
-            //     console.log('targetRadius - watch', oldVal, ' -> ', newVal);
-            //     if(this.marker.radius !== newVal) {
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-            //
-            // targetTurningSpeed: function (newVal, oldVal) {
-            //     console.log('targetTurningSpeed - watch', oldVal, ' -> ', newVal);
-            //     if(this.marker.turningSpeed !== newVal) {
-            //         this.conditions = false;
-            //     }
-            //     else {
-            //         this.conditions = true;
-            //     }
-            // },
-
             markerName: function (newVal) {
-
-                console.log('InfoMaker - watch', newVal);
-
                 this.targetSelectName = newVal;
             },
 
@@ -569,21 +291,8 @@
                     this.targetSpeed = newVal.speed;
                     this.targetRadius = newVal.radius;
                     this.targetTurningSpeed = newVal.turningSpeed;
-
-                    if(Object.hasOwnProperty.call(newVal, 'targetMavCmd')) {
-                        this.targetMavCmd = newVal.targetMavCmd;
-                    }
-                    else {
-                        this.targetMavCmd = 16;
-                    }
-
-                    if(Object.hasOwnProperty.call(newVal, 'targetStayTime')) {
-                        this.targetStayTime = newVal.targetStayTime;
-                    }
-                    else {
-                        this.targetStayTime = 1;
-                    }
-
+                    this.targetMavCmd = newVal.targetMavCmd;
+                    this.targetStayTime = newVal.targetStayTime;
                     this.elevation = newVal.elevation.toFixed(1);
                 }
             },
@@ -593,7 +302,7 @@
             },
 
             targetSelectIndex: function (newVal) {
-                this.disableTargetSelect = (String(this.markerIndex) !== newVal);
+                this.disableTargetSelectName = (String(this.markerIndex) !== newVal);
             },
         },
 
@@ -608,9 +317,6 @@
                 }
 
                 return (arrIndex);
-            },
-            icon () {
-                return 'mdi-checkbox-blank-outline'
             },
 
             conditions() {
@@ -629,18 +335,22 @@
         methods: {
             deleteTempMarker() {
                 if(this.markerName === 'unknown') {
-                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
                     this.$store.state.tempMarkers[this.markerName].splice(this.markerIndex, 1);
 
                     let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName]));
                     this.$store.state.tempMarkers[this.markerName] = null;
                     this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
 
-                    let payload = {};
-
                     this.postCinTempMarkerInfoToMobius(this.markerName);
-                    payload.dName = this.markerName;
-                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+
+                    this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                    let watchingPayload = {};
+                    watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
+                    watchingPayload.dName = this.markerName;
+
+                    this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+
+                    this.$store.state.didIPublish = true;
                 }
                 else {
                     this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
@@ -651,15 +361,20 @@
                     this.$store.state.tempMarkers[this.markerName] = null;
                     this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
 
-                    let payload = {};
-
                     this.postCinTempMarkerInfoToMobius(this.markerName);
-                    payload.dName = this.markerName;
-                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+
+                    this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                    let watchingPayload = {};
+                    watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
+                    watchingPayload.dName = this.markerName;
+                    this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+                    this.$store.state.didIPublish = true;
 
                     this.postCinTempMarkerInfoToMobius('unknown');
-                    payload.dName = 'unknown';
-                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+
+                    watchingPayload.dName = 'unknown';
+                    this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+                    this.$store.state.didIPublish = true;
                 }
 
                 this.snackbar = true;
@@ -669,10 +384,17 @@
                 }, 100);
             },
 
-            resetForm() {
-                // this.form = Object.assign({}, this.defaultForm)
-                // this.$refs.form.reset()
+            doPublish(topic, payload) {
+                if (this.$store.state.client.connected) {
+                    this.$store.state.client.publish(topic, payload, 0, error => {
+                        if (error) {
+                            console.log('Publish error', error)
+                        }
+                    });
+                }
+            },
 
+            resetForm() {
                 this.$emit('input', false);
             },
 
@@ -715,15 +437,20 @@
                     this.$store.state.tempMarkers[this.markerName] = null;
                     this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
 
-                    let payload = {};
-
                     this.postCinTempMarkerInfoToMobius(this.markerName);
-                    payload.dName = this.markerName;
-                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+
+                    this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                    let watchingPayload = {};
+                    watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
+                    watchingPayload.dName = this.markerName;
+                    this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+                    this.$store.state.didIPublish = true;
 
                     this.postCinTempMarkerInfoToMobius(this.targetSelectName);
-                    payload.dName = this.targetSelectName;
-                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+
+                    watchingPayload.dName = this.targetSelectName;
+                    this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+                    this.$store.state.didIPublish = true;
                 }
                 else if(this.markerIndex !== this.targetSelectIndex) {
                     this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
@@ -736,9 +463,12 @@
 
                     this.postCinTempMarkerInfoToMobius(this.markerName);
 
-                    let payload = {};
-                    payload.dName = this.markerName;
-                    EventBus.$emit('doBroadcastRegisterTempMaker', payload);
+                    this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                    let watchingPayload = {};
+                    watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
+                    watchingPayload.dName = this.markerName;
+                    this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+                    this.$store.state.didIPublish = true;
                 }
 
                 this.snackbar = true;
@@ -746,20 +476,7 @@
                 setTimeout(() => {
                     this.resetForm();
                 }, 100);
-            },
-
-            selectTargetType(event) {
-                this.$store.state.tempMarkers[this.markerName][this.markerIndex].type = event;
-
-                console.log('InfoTempMarker:selectTargetType - ' + this.$store.state.tempMarkers[this.markerName][this.markerIndex].type);
-
-                let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers));
-                this.$store.state.tempMarkers = null;
-                this.$store.state.tempMarkers = JSON.parse(JSON.stringify(temp));
-                temp = null;
-
-                this.targetType = this.$store.state.tempMarkers[this.markerName][this.markerIndex].type;
-            },
+            }
         },
 
         created() {
@@ -783,17 +500,8 @@
             this.targetSpeed = this.marker.speed;
             this.targetRadius = this.marker.radius;
             this.targetTurningSpeed = this.marker.turningSpeed;
-
-            if(Object.hasOwnProperty.call(this.marker, 'targetStayTime')) {
-                this.targetStayTime = this.marker.targetStayTime;
-            }
-            else {
-                this.targetStayTime = 1;
-            }
-
+            this.targetStayTime = this.marker.targetStayTime;
             this.elevation = this.marker.elevation.toFixed(1);
-
-            this.targetType = this.marker.type;
 
             console.log('InfoTempMarker', this.$store.state.tempMarkers[this.markerName]);
         },
