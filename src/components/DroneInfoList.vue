@@ -548,14 +548,16 @@
 
                 for (let dName in this.$store.state.drone_infos) {
                     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if (Object.prototype.hasOwnProperty.call(this.$store.state.rtlModeMonitor, dName)) {
-                            if(this.$store.state.rtlModeMonitor[dName]) {
-                                if (this.$store.state.drone_infos[dName].selected &&
-                                    this.$store.state.drone_infos[dName].curMode === 'RTL' &&
-                                    this.$store.state.drone_infos[dName].curArmStatus === 'ARMED') {
+                        if(this.$store.state.drone_infos[dName].selected) {
+                            if (Object.prototype.hasOwnProperty.call(this.$store.state.rtlModeMonitor, dName)) {
+                                if (this.$store.state.rtlModeMonitor[dName]) {
+                                    if (this.$store.state.drone_infos[dName].selected &&
+                                        this.$store.state.drone_infos[dName].curMode === 'RTL' &&
+                                        this.$store.state.drone_infos[dName].curArmStatus === 'ARMED') {
 
-                                    if (parseInt(this.$store.state.params.wpYawBehavior[dName]) !== 1) {
-                                        EventBus.$emit('setWpYawBehavior-' + dName, 1);
+                                        if (parseInt(this.$store.state.params.wpYawBehavior[dName]) !== 1) {
+                                            EventBus.$emit('setWpYawBehavior-' + dName, 1);
+                                        }
                                     }
                                 }
                             }

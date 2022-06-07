@@ -23,13 +23,12 @@ Vue.use(Vuex)
 // <v-row justify="space-between"></v-row> // not centered - spaced evenly between
 
 import { faMapMarkerAlt, faMapPin, faFlag, faPlaneSlash, faHourglassHalf } from "@fortawesome/free-solid-svg-icons";
-import { faDotCircle, faLocationArrow } from "@fortawesome/free-solid-svg-icons";
+import { faLocationArrow } from "@fortawesome/free-solid-svg-icons";
 //import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 
 const _defaultPosition = Object(
     {
         type: 'Goto',
-        owner: 'unknown',
         selected: false,
         targeted: false,
         lat: 37.404523241167965,
@@ -55,20 +54,6 @@ const _defaultMarkerIcon = Object(
         scale: 2,
         anchor: {x: 12, y: 24},
         labelOrigin: {x: 12, y: 12}
-    }
-);
-
-const _defaultCircleMarkerIcon = Object(
-    {
-        path: faDotCircle.icon[4],
-        fillColor: "grey",
-        fillOpacity: 0.9,
-        strokeWeight: 0.9,
-        strokeColor: 'grey',
-        rotation: 0,
-        scale: 0.06,
-        anchor: {x: faDotCircle.icon[0] / 2, y: faDotCircle.icon[1]},
-        labelOrigin: {x: faDotCircle.icon[0] / 2, y: 0},
     }
 );
 
@@ -287,19 +272,6 @@ const planeSvgPath = "M496.469,353.365l-197.781-197.76V67.904c0-13.845-3.072-27.
     "\t\t\tc3.307,2.133,7.467,2.24,10.859,0.384c3.435-1.856,5.568-5.44,5.568-9.344v-25.003\n" +
     "\t\t\tC512.021,376.768,506.496,363.392,496.469,353.365z";
 
-//
-// const _defaultDroneIcon = {
-//         path: droneSvgPath,
-//         fillColor: "grey",
-//         fillOpacity: 1,
-//         strokeWeight: 1,
-//         strokeColor: 'grey',
-//         rotation: 0,
-//         scale: 0.2,
-//         anchor: {x: 12, y: 24},
-//         labelOrigin: {x: 12, y: 12}
-// };
-
 const _defaultDroneInfo = {
     name: "KETI_Air_01",
     id: "Zeus",
@@ -491,29 +463,6 @@ export default new Vuex.Store({
             '#607D8B': 'blue-grey'
         },
 
-        defaultGotoMarkerIcon: {
-            path: faMapMarkerAlt.icon[4],
-            fillColor: "grey",
-            fillOpacity: 0.9,
-            strokeWeight: 0.9,
-            strokeColor: 'grey',
-            rotation: 0,
-            scale: 0.06,
-            anchor: {x: faMapMarkerAlt.icon[0] / 2, y: faMapMarkerAlt.icon[1]},
-            labelOrigin: {x: faMapMarkerAlt.icon[0] / 2, y: 0},
-        },
-
-        defaultCircleMarkerIcon: {
-            path: faDotCircle.icon[4],
-            fillColor: "grey",
-            fillOpacity: 0.9,
-            strokeWeight: 0.9,
-            strokeColor: 'grey',
-            rotation: 0,
-            scale: 0.06,
-            anchor: {x: faDotCircle.icon[0] / 2, y: faDotCircle.icon[1] / 2},
-            labelOrigin: {x: faDotCircle.icon[0] / 2, y: 0},
-        },
 
         // markerColor: [
         //     'red',
@@ -538,7 +487,6 @@ export default new Vuex.Store({
 
         defaultPosition: Object.assign({}, _defaultPosition),
         defaultMarkerIcon: Object.assign({}, _defaultMarkerIcon),
-        __defaultCircleMarkerIcon: Object.assign({}, _defaultCircleMarkerIcon),
 
         adding: false,
         gotoMarkers: [],
@@ -562,19 +510,6 @@ export default new Vuex.Store({
             scale: 0.08,
             anchor: {x: 256, y: 256},
             labelOrigin: {x: 256, y: 256}
-        },
-
-        defaultDroneIcon: {
-            // path: droneSvgPath,
-            path: faLocationArrow.icon[4],
-            fillColor: "grey",
-            fillOpacity: 0.8,
-            strokeWeight: 0.8,
-            strokeColor: 'white',
-            rotation: 0,
-            scale: 0.1,
-            anchor: {x: 350, y: 351},
-            labelOrigin: {x: 350, y: 370}
         },
 
         defaultDroneLabel: {
@@ -758,47 +693,6 @@ export default new Vuex.Store({
             });
 
             state.tempMarkers[payload.pName][payload.pIndex].selected = payload.selected;
-        },
-
-        addTempMarker(state, payload) {
-            if (!Object.prototype.hasOwnProperty.call(state.tempMarkers, payload.pName)) {
-                state.tempMarkers[payload.pName] = [];
-            }
-            else {
-                let temp = JSON.parse(JSON.stringify(state.tempMarkers[payload.pName]));
-                state.tempMarkers[payload.pName] = null;
-                state.tempMarkers[payload.pName] = [];
-                state.tempMarkers[payload.pName] = JSON.parse(JSON.stringify(temp));
-                temp = null;
-            }
-
-            let marker = JSON.parse(JSON.stringify(state.defaultPosition));
-            marker.lat = payload.lat;
-            marker.lng = payload.lng;
-            marker.alt = payload.alt;
-            marker.speed = payload.speed;
-            marker.radius = payload.radius;
-            marker.turningSpeed = payload.turningSpeed;
-            marker.elevation = payload.elevation;
-            marker.targetMavCmd = payload.targetMavCmd;
-            marker.targetStayTime = payload.targetStayTime;
-            marker.type = 'Goto';
-
-            state.tempMarkers[payload.pName].push(marker);
-
-            marker = null;
-
-            //console.log('addTempMarker', JSON.stringify(state.tempMarkers));
-        },
-
-        addingTempMarker(state, payload) {
-            state.adding = true;
-            this.commit('addTempMarker', payload);
-
-            payload.pIndex = state.tempMarkers[payload.pName].length - 1;
-            state.tempPayload = JSON.parse(JSON.stringify(payload));
-
-            payload = null;
         },
 
         confirmAddTempMarker(state) {

@@ -103,11 +103,11 @@
                     <v-col cols="1">
                         <div class="ml-20 text-subtitle-2">
                             예상비행시간 : <br>
-                            <span v-if="((total_dist / paramSpeed) + total_count) > 60" style="font-size: 20px">
-                                {{ ((total_dist / paramSpeed) / 60).toFixed(1) }} 분
+                            <span v-if="((total_dist / paramSpeed) + (total_count * 5)) > 60" style="font-size: 20px">
+                                {{ ((total_dist / paramSpeed + (total_count * 5)) / 60).toFixed(1) }} 분
                             </span>
                             <span v-else style="font-size: 20px">
-                                {{ (total_dist / paramSpeed + total_count).toFixed(1) }} 초
+                                {{ (total_dist / paramSpeed + (total_count * 5)).toFixed(1) }} 초
                             </span>
                         </div>
                     </v-col>

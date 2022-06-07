@@ -925,7 +925,6 @@ export default {
             colorArm: 'td-text-gray',
             curArmStatus: 'DISARMED',
 
-            iconArming: 'mdi-airplane-off',
             // colorArming: this.$store.state.drone_infos[this.name].color + ' darken-4',
             colorArming: 'white',
             iconDistance: 'mdi-map-marker-distance',
@@ -1781,16 +1780,13 @@ export default {
                 let temp = JSON.parse(this.strMyDroneInfo);
 
                 this.$store.state.drone_infos[this.name] = null;
-                delete this.$store.state.drone_infos[this.name];
                 this.$store.state.drone_infos[this.name] = JSON.parse(JSON.stringify(temp));
-                temp = null;
 
                 this.$store.state.tempMarkers[this.name] = [];
                 this.$store.state.drone_infos[this.name].goto_positions.forEach((ele) => {
                     let pos_arr = ele.split(':');
 
-                    let marker = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
-
+                    let marker = {};
                     marker.lat = parseFloat(pos_arr[0]);
                     marker.lng = parseFloat(pos_arr[1]);
                     marker.alt = parseFloat(pos_arr[2]);
@@ -1801,7 +1797,8 @@ export default {
                     marker.targetStayTime = (typeof pos_arr[7] === 'undefined') ? 1 : parseInt(pos_arr[7]);
                     marker.elevation = (typeof pos_arr[8] === 'undefined') ? 0.0 : parseInt(pos_arr[8]);
                     marker.type = 'Goto';
-
+                    marker.selected = false;
+                    marker.targeted = false;
                     marker.color = this.$store.state.drone_infos[this.name].color;
 
                     this.$store.state.tempMarkers[this.name].push(marker);
@@ -2467,7 +2464,6 @@ export default {
                         this.postLossLTEInfoToMobius();
                     }
 
-                    this.iconArming = 'mdi-airplane-off';
                     this.colorArming = 'white';
                     this.iconDistance = 'mdi-map-marker-distance';
 
@@ -4066,7 +4062,6 @@ export default {
                         //     this.$store.state.trackingLines[this.name] = [];
                         // }
                         // if(this.$store.state.drone_infos[this.name].curArmStatus !== 'ARMED') {
-                            this.iconArming = 'mdi-airplane';
                             this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
                             this.curArmStatus = 'ARMED';
                             this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
@@ -4094,7 +4089,6 @@ export default {
                     }
                     else {
                         // if(this.$store.state.drone_infos[this.name].curArmStatus !== 'DISARMED') {
-                            this.iconArming = 'mdi-airplane-off';
                             this.colorArming = 'white';
                             this.curArmStatus = 'DISARMED';
                             this.$store.state.drone_infos[this.name].curArmStatus = 'DISARMED';
@@ -4526,23 +4520,15 @@ export default {
 
                             this.valueDistance = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2));
                             this.info.valueDistance = (this.valueDistance > 1000) ? (this.valueDistance / 1000).toFixed(1) + ' km' : (this.valueDistance.toFixed(0) + ' m')
+
+                            this.$store.state.curDronePositions[this.name] = {};
+                            this.$store.state.curDronePositions[this.name].brake = false;
                         }
                         else {
                             this.valueDistance = 0;
                             this.info.valueDistance = (this.valueDistance > 1000) ? (this.valueDistance / 1000).toFixed(1) + ' km' : (this.valueDistance.toFixed(0) + ' m')
-                        }
 
-                        if (this.iconArming === 'mdi-airplane') {
-                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.curDronePositions, this.name)) {
-                                this.$store.state.curDronePositions[this.name] = {};
-                                this.$store.state.curDronePositions[this.name].brake = false;
-                            }
-                        }
-                        else {
-                            if (Object.prototype.hasOwnProperty.call(this.$store.state.curDronePositions, this.name)) {
-                                this.$store.state.curDronePositions[this.name] = null;
-                                delete this.$store.state.curDronePositions[this.name];
-                            }
+                            delete this.$store.state.curDronePositions[this.name];
                         }
 
                         if (this.$store.state.currentCommandTab === '이동' || this.$store.state.currentCommandTab === '선회' || this.$store.state.currentCommandTab === '관심') {

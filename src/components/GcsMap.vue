@@ -525,7 +525,12 @@
                                 <div v-if="$store.state.drone_infos[dName].selected">
                                     <GmapPolyline
                                         :path.sync="line.path"
-                                        :options="line.options"
+                                        :options="{
+                                                strokeColor: 'white',
+                                                strokeOpacity: 1,
+                                                strokeWeight: 4,
+                                                zIndex: 0
+                                            }"
                                     ></GmapPolyline>
                                 </div>
                             </div>
@@ -896,12 +901,6 @@
         computed: {
             gotoMarkers() {
                 return (this.$store.state.gotoMarkers);
-            },
-            // tempMarkers() {
-            //     return (this.$store.state.tempMarkers);
-            // },
-            defaultDroneIcon() {
-                return (this.$store.state.defaultDroneIcon);
             },
             defaultDroneLabel() {
                 return (this.$store.state.defaultDroneLabel);
@@ -1688,7 +1687,7 @@
                 this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
                     console.log('__________________________________confirmAddTempMarker', 'curElevation', val);
 
-                    let marker = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
+                    let marker = {};
                     marker.lat = this.click_lat;
                     marker.lng = this.click_lng;
                     marker.alt = 20;
@@ -1699,13 +1698,13 @@
                     marker.targetStayTime = 1;
                     marker.elevation = val;
                     marker.type = 'Goto';
-                    marker.type = 0;
+                    marker.selected = false;
+                    marker.targeted = false;
+                    marker.color = 'grey';
 
-                    this.$store.state.tempMarkers.unknown.push(marker);
+                    this.$store.state.tempMarkers['unknown'].push(marker);
 
                     this.doBroadcastAddMarker(JSON.parse(JSON.stringify(marker)));
-
-                    marker = null;
 
                     axios({
                         validateStatus: function (status) {
@@ -1920,21 +1919,10 @@
                 survey.turningSpeed = 10;
                 survey.targetMavCmd = 16;
                 survey.targetStayTime = 1;
-                // survey.elevation = val;
                 survey.type = 'Survey';
-                survey.color = 'orange';
-                survey.type = 0;
-                survey.options = {
-                    strokeColor: "#0000FF",
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: "#0000FF",
-                    fillOpacity: 0.35,
-                    draggable: true,
-                    geodesic: false,
-                    editable: true,
-                    zIndex: 6,
-                }
+                survey.color = 'grey';
+                survey.selected = false;
+                survey.targeted = false;
 
                 let lat = this.click_lat;
                 let lng = this.click_lng;
@@ -1954,7 +1942,7 @@
                 survey.dir = 1;
                 survey.angle = 0;
 
-                this.$store.state.surveyMarkers.unknown.push(survey);
+                this.$store.state.surveyMarkers['unknown'].push(survey);
                 console.log('elevation-confirmAddSurveyMarker', this.$store.state.surveyMarkers);
 
                 this.updateSurveyPath('unknown', this.$store.state.surveyMarkers.unknown.length-1, 20, 0, 1);
@@ -2170,6 +2158,9 @@
                         if (pIndex !== index) {
                             marker.targeted = false;
                         }
+
+                        marker.polygonDraggable = false;
+                        marker.polygonEditable = false;
                     });
 
                     this.$store.state.surveyMarkers[dName][pIndex].targeted = !this.$store.state.surveyMarkers[dName][pIndex].targeted;
@@ -2627,12 +2618,13 @@
                             temp = null;
                         }
                         else if (watchingPayload.broadcastMission === 'confirmAddTempMarker') {
-                            //this.$store.state.tempPayload = JSON.parse(JSON.stringify(watchingPayload.payload));
-
-                            this.$store.commit('addingTempMarker', watchingPayload.payload);
-                            this.context_flag = false;
-
-                            this.$store.commit('confirmAddTempMarker', false);
+                            let dName = watchingPayload.payload.dName;
+                            this.getCinTempMarkerInfoFromMobius(dName, (status, con) => {
+                                if(status === 200) {
+                                    this.$store.state.tempMarkers[dName] = null;
+                                    this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(con));
+                                }
+                            });
                         }
                         else if (watchingPayload.broadcastMission === 'broadcastRegisterTempMarker') {
                             let dName = watchingPayload.dName;
@@ -2689,120 +2681,6 @@
 
         created() {
             console.log(window.innerHeight);
-
-            // for (let pName in this.tempMarkers) {
-            //     if(Object.prototype.hasOwnProperty.call(this.tempMarkers, pName)) {
-            //
-            //         let pos = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
-            //         pos.lat = 37.404523241167965;
-            //         pos.lng = 127.15821741355862;
-            //         pos.m_icon.fillColor = 'grey';
-            //
-            //         let payload = {};
-            //         payload.pName = pName;
-            //         payload.pos = pos;
-            //         this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
-            //
-            //         pos = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
-            //         pos.lat = 37.40350051861734;
-            //         pos.lng = 127.15752003921475;
-            //         pos.m_icon.fillColor = 'grey';
-            //         payload = {};
-            //         payload.pName = pName;
-            //         payload.pos = pos;
-            //         this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
-            //
-            //     }
-            // }
-
-            // let payload = {};
-            // payload.pName = 'unknown';
-            //
-            // if(!Object.prototype.hasOwnProperty.call(this.$store.state.droneColorMap, payload.pName)) {
-            //     payload.color = (payload.pName === 'unknown') ? 'grey' : this.$store.state.markerColor[parseInt(Math.random()*this.$store.state.markerColor.length)];
-            //     this.$store.commit('setDroneColorMap', JSON.parse(JSON.stringify(payload)));
-            // }
-            //
-            // payload.lat = 37.404523241167965;
-            // payload.lng = 127.15821741355862;
-            // payload.alt = 20;
-            // payload.speed = 5;
-            // payload.radius = 250;
-            // payload.turningSpeed = 10;
-            //
-            // this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
-            //
-            // payload.lat = 37.40350051861734;
-            // payload.lng = 127.15752003921475;
-            // payload.alt = 20;
-            // payload.speed = 5;
-            // payload.radius = 250;
-            // payload.turningSpeed = 10;
-            // this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
-            //
-            //
-            // payload.pName = 'KETI_Air_01';
-            //
-            // if(!Object.prototype.hasOwnProperty.call(this.$store.state.droneColorMap, payload.pName)) {
-            //     payload.color = (payload.pName === 'unknown') ? 'grey' : this.$store.state.markerColor[parseInt(Math.random()*this.$store.state.markerColor.length)];
-            //     this.$store.commit('setDroneColorMap', JSON.parse(JSON.stringify(payload)));
-            // }
-            //
-            // payload.lat = 37.40444175959039;
-            // payload.lng = 127.1613059212351;
-            // payload.alt = 20;
-            // payload.speed = 5;
-            // payload.radius = 250;
-            // payload.turningSpeed = 10;
-            // this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
-            //
-            //
-            // payload.lat = 37.40423934664011;
-            // payload.lng = 127.16160364643575;
-            // payload.alt = 20;
-            // payload.speed = 5;
-            // payload.radius = 250;
-            // payload.turningSpeed = 10;
-            // this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
-            //
-            // payload.lat = 37.403376938697185;
-            // payload.lng = 127.15910254253353;
-            // payload.alt = 20;
-            // payload.speed = 5;
-            // payload.radius = 250;
-            // payload.turningSpeed = 10;
-            // this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
-            //
-            //
-            // payload.pName = 'KETI_Air_02';
-            // if(!Object.prototype.hasOwnProperty.call(this.$store.state.droneColorMap, payload.pName)) {
-            //     payload.color = (payload.pName === 'unknown') ? 'grey' : this.$store.state.markerColor[parseInt(Math.random()*this.$store.state.markerColor.length)];
-            //     this.$store.commit('setDroneColorMap', JSON.parse(JSON.stringify(payload)));
-            // }
-            //
-            // payload.lat = 37.40316386939071;
-            // payload.lng = 127.16200469268765;
-            // payload.alt = 20;
-            // payload.speed = 5;
-            // payload.radius = 250;
-            // payload.turningSpeed = 10;
-            // this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
-            //
-            // payload.lat = 37.40266954626633;
-            // payload.lng = 127.1604114605328;
-            // payload.alt = 20;
-            // payload.speed = 5;
-            // payload.radius = 250;
-            // payload.turningSpeed = 10;
-            // this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
-            //
-            // payload.lat = 37.40279312735314;
-            // payload.lng = 127.15881286395992;
-            // payload.alt = 20;
-            // payload.speed = 5;
-            // payload.radius = 250;
-            // payload.turningSpeed = 10;
-            // this.$store.commit('addTempMarker', JSON.parse(JSON.stringify(payload)));
         },
 
         mounted() {
@@ -2844,7 +2722,7 @@
                 // console.log('map', map.getZoom());
 
                 // this.$refs.mapRef.$mapPromise.then((map) => {
-                    this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
+                //     this.$store.state.defaultDroneIcon.scale = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
                     //this.scaleDroneIcon = (map.getZoom() < 15)?(1.4/15):(1.4/map.getZoom());
 
                 // });
@@ -3046,7 +2924,6 @@
             // });
 
             EventBus.$on('updateDroneAlt', (payload) => {
-
                 var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
                 var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
                 var scale = Math.pow(2, this.map.getZoom());

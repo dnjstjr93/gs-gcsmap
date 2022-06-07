@@ -204,7 +204,7 @@
                                                                     label="지점거리(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : Math.ceil($store.state.distanceTarget[d.name])"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : (isNaN($store.state.distanceTarget[d.name]) ? -1 : parseInt($store.state.distanceTarget[d.name]))"
                                                                     type="number"
                                                                     readonly
                                                                 ></v-text-field>
