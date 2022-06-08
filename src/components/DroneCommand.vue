@@ -17,32 +17,34 @@
         >
             <v-tabs-slider color="red"></v-tabs-slider>
             <v-tab class="pa-0 ma-0" style="min-width:0" href="virtual"></v-tab>
-            <v-tab v-for="(command) in $store.state.commands" :key="command.title" :href="'#'+command.title" @click="tab_click(command.title)">
-                {{command.title}}
+            <v-tab v-for="(command) in $store.state.commands" :key="command.title" :href="'#'+command.title"
+                   @click="tab_click(command.title)">
+                {{ command.title }}
             </v-tab>
 
             <v-tab-item value="virtual" class=""></v-tab-item>
             <v-tab-item v-for="(command) in $store.state.commands" :key="command.title" :value="command.title" class="">
-                <v-card outlined color="grey lighten-4" style="opacity: 0.86" class="pa-0 overflow-y-auto" :max-height="$store.state.command_tab_max_height+'px'">
-<!--                    <v-card-title primary-title class="headline">-->
-<!--                        {{command.title}}-->
-<!--                    </v-card-title>-->
+                <v-card outlined color="grey lighten-4" style="opacity: 0.86" class="pa-0 overflow-y-auto"
+                        :max-height="$store.state.command_tab_max_height+'px'">
+                    <!--                    <v-card-title primary-title class="headline">-->
+                    <!--                        {{command.title}}-->
+                    <!--                    </v-card-title>-->
                     <v-card-subtitle class="pl-1 pa-0">
-                        {{command.text}}
+                        {{ command.text }}
                     </v-card-subtitle>
                     <v-card style="opacity: 0.86" class="pa-0">
                         <v-row class="mb-2" no-gutters align="center">
                             <v-col cols="10">
                                 <v-card>
-<!--                                        <v-toolbar flat dense-->
-<!--                                            v-if="((command.title === $store.state.commands[0].title) || (command.title === $store.state.commands[2].title) || (command.title === $store.state.commands[3].title))"-->
-<!--                                        >-->
-<!--                                            <v-toolbar-title>-->
-<!--                                                <span class="subheading" v-if="command.title === $store.state.commands[0].title">모드 설정</span>-->
-<!--                                                <span class="subheading" v-else-if="command.title === $store.state.commands[2].title">이륙 고도 설정</span>-->
-<!--                                                <span class="subheading" v-else-if="command.title === $store.state.commands[3].title">비행 고도 설정</span>-->
-<!--                                            </v-toolbar-title>-->
-<!--                                        </v-toolbar>-->
+                                    <!--                                        <v-toolbar flat dense-->
+                                    <!--                                            v-if="((command.title === $store.state.commands[0].title) || (command.title === $store.state.commands[2].title) || (command.title === $store.state.commands[3].title))"-->
+                                    <!--                                        >-->
+                                    <!--                                            <v-toolbar-title>-->
+                                    <!--                                                <span class="subheading" v-if="command.title === $store.state.commands[0].title">모드 설정</span>-->
+                                    <!--                                                <span class="subheading" v-else-if="command.title === $store.state.commands[2].title">이륙 고도 설정</span>-->
+                                    <!--                                                <span class="subheading" v-else-if="command.title === $store.state.commands[3].title">비행 고도 설정</span>-->
+                                    <!--                                            </v-toolbar-title>-->
+                                    <!--                                        </v-toolbar>-->
                                     <div v-for="(d, dIndex) in $store.state.drone_infos" :key="'mode'+dIndex">
                                         <div v-if="d.selected && d.targeted">
                                             <v-row no-gutters align="center">
@@ -56,7 +58,8 @@
                                                         >
                                                             <v-icon left>
                                                                 mdi-airplane
-                                                            </v-icon> {{dIndex}}
+                                                            </v-icon>
+                                                            {{ dIndex }}
                                                         </v-chip>
                                                     </v-card>
                                                 </v-col>
@@ -70,7 +73,8 @@
                                                             class="ma-0 px-0 py-0"
                                                         >
                                                             <v-chip
-                                                                v-for="(item, idx) in $store.state[d.type + '_mode_items']" :key="'mode_items_'+idx"
+                                                                v-for="(item, idx) in $store.state[d.type + '_mode_items']"
+                                                                :key="'mode_items_'+idx"
                                                                 label outlined
                                                                 :color="d.color"
                                                                 :value="item"
@@ -82,24 +86,24 @@
                                                     <v-card v-if="command.title === '이륙'">
                                                         <v-row no-gutters>
                                                             <v-col cols="6">
-<!--                                                                    <v-slider-->
-<!--                                                                        v-model="targetTakeoffAlt[d.name]"-->
-<!--                                                                        class="mx-2 my-3 align-center"-->
-<!--                                                                        :max="500"-->
-<!--                                                                        :min="3"-->
-<!--                                                                        hide-details-->
-<!--                                                                    >-->
-<!--                                                                        <template v-slot:append>-->
-<!--                                                                            <v-text-field-->
-<!--                                                                                v-model="targetTakeoffAlt[d.name]"-->
-<!--                                                                                class="mt-0 pt-0"-->
-<!--                                                                                hide-details-->
-<!--                                                                                single-line-->
-<!--                                                                                type="number"-->
-<!--                                                                                style="width: 60px"-->
-<!--                                                                            ></v-text-field>-->
-<!--                                                                        </template>-->
-<!--                                                                    </v-slider>-->
+                                                                <!--                                                                    <v-slider-->
+                                                                <!--                                                                        v-model="targetTakeoffAlt[d.name]"-->
+                                                                <!--                                                                        class="mx-2 my-3 align-center"-->
+                                                                <!--                                                                        :max="500"-->
+                                                                <!--                                                                        :min="3"-->
+                                                                <!--                                                                        hide-details-->
+                                                                <!--                                                                    >-->
+                                                                <!--                                                                        <template v-slot:append>-->
+                                                                <!--                                                                            <v-text-field-->
+                                                                <!--                                                                                v-model="targetTakeoffAlt[d.name]"-->
+                                                                <!--                                                                                class="mt-0 pt-0"-->
+                                                                <!--                                                                                hide-details-->
+                                                                <!--                                                                                single-line-->
+                                                                <!--                                                                                type="number"-->
+                                                                <!--                                                                                style="width: 60px"-->
+                                                                <!--                                                                            ></v-text-field>-->
+                                                                <!--                                                                        </template>-->
+                                                                <!--                                                                    </v-slider>-->
                                                                 <v-text-field
                                                                     label="이륙고도"
                                                                     hide-details dense outlined
@@ -130,24 +134,24 @@
                                                                     type="number"
                                                                     class="pa-1"
                                                                 ></v-text-field>
-<!--                                                                <v-slider-->
-<!--                                                                    v-model="targetAlt[d.name]"-->
-<!--                                                                    class="mx-2 my-3 align-center"-->
-<!--                                                                    :max="500"-->
-<!--                                                                    :min="3"-->
-<!--                                                                    hide-details-->
-<!--                                                                >-->
-<!--                                                                    <template v-slot:append>-->
-<!--                                                                        <v-text-field-->
-<!--                                                                            v-model="targetAlt[d.name]"-->
-<!--                                                                            class="mt-0 pt-0"-->
-<!--                                                                            hide-details-->
-<!--                                                                            label="고도(m)"-->
-<!--                                                                            type="number"-->
-<!--                                                                            style="width: 60px"-->
-<!--                                                                        ></v-text-field>-->
-<!--                                                                    </template>-->
-<!--                                                                </v-slider>-->
+                                                                <!--                                                                <v-slider-->
+                                                                <!--                                                                    v-model="targetAlt[d.name]"-->
+                                                                <!--                                                                    class="mx-2 my-3 align-center"-->
+                                                                <!--                                                                    :max="500"-->
+                                                                <!--                                                                    :min="3"-->
+                                                                <!--                                                                    hide-details-->
+                                                                <!--                                                                >-->
+                                                                <!--                                                                    <template v-slot:append>-->
+                                                                <!--                                                                        <v-text-field-->
+                                                                <!--                                                                            v-model="targetAlt[d.name]"-->
+                                                                <!--                                                                            class="mt-0 pt-0"-->
+                                                                <!--                                                                            hide-details-->
+                                                                <!--                                                                            label="고도(m)"-->
+                                                                <!--                                                                            type="number"-->
+                                                                <!--                                                                            style="width: 60px"-->
+                                                                <!--                                                                        ></v-text-field>-->
+                                                                <!--                                                                    </template>-->
+                                                                <!--                                                                </v-slider>-->
                                                             </v-col>
                                                         </v-row>
                                                     </v-card>
@@ -222,15 +226,15 @@
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
-<!--                                                            <v-col cols="4">-->
-<!--                                                                <v-select-->
-<!--                                                                    dense outlined hide-details-->
-<!--                                                                    :items="position_selections_items[d.name]" label="Center positions"-->
-<!--                                                                    v-model="position_selections[d.name]"-->
-<!--                                                                    @change="selectedPosition($event, d)"-->
-<!--                                                                    class="px-1"-->
-<!--                                                                ></v-select>-->
-<!--                                                            </v-col>-->
+                                                            <!--                                                            <v-col cols="4">-->
+                                                            <!--                                                                <v-select-->
+                                                            <!--                                                                    dense outlined hide-details-->
+                                                            <!--                                                                    :items="position_selections_items[d.name]" label="Center positions"-->
+                                                            <!--                                                                    v-model="position_selections[d.name]"-->
+                                                            <!--                                                                    @change="selectedPosition($event, d)"-->
+                                                            <!--                                                                    class="px-1"-->
+                                                            <!--                                                                ></v-select>-->
+                                                            <!--                                                            </v-col>-->
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="지형높이(m)"
@@ -287,14 +291,14 @@
                                                             </v-col>
                                                             <v-spacer/>
                                                             <v-col cols="2" class="pl-4 px-1 mt-n4 mb-1">
-<!--                                                                <v-select-->
-<!--                                                                    @change="changeYawBehavior($event, d.name)"-->
-<!--                                                                    dense outlined hide-details-->
-<!--                                                                    :items="['YAW고정', 'YAW회전']"-->
-<!--                                                                    label="YAW설정"-->
-<!--                                                                    v-model="yawBehavior[d.name]"-->
-<!--                                                                    class="pa-1"-->
-<!--                                                                ></v-select>-->
+                                                                <!--                                                                <v-select-->
+                                                                <!--                                                                    @change="changeYawBehavior($event, d.name)"-->
+                                                                <!--                                                                    dense outlined hide-details-->
+                                                                <!--                                                                    :items="['YAW고정', 'YAW회전']"-->
+                                                                <!--                                                                    label="YAW설정"-->
+                                                                <!--                                                                    v-model="yawBehavior[d.name]"-->
+                                                                <!--                                                                    class="pa-1"-->
+                                                                <!--                                                                ></v-select>-->
                                                                 <v-radio-group
                                                                     v-model="d.yawBehavior"
                                                                     column mandatory hide-details
@@ -346,7 +350,8 @@
                                                                     ></v-radio>
                                                                 </v-radio-group>
                                                             </v-col>
-                                                            <v-col cols="2" v-show="(d.startWay === '중간부터')" class="pa-1 pt-2">
+                                                            <v-col cols="2" v-show="(d.startWay === '중간부터')"
+                                                                   class="pa-1 pt-2">
                                                                 <v-text-field
                                                                     v-model="d.curMissionItemReached"
                                                                     dense outlined hide-details
@@ -356,24 +361,24 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-spacer/>
-<!--                                                            <v-col cols="1" class="pa-1 pt-3">-->
-<!--                                                                <v-tooltip top>-->
-<!--                                                                    <template v-slot:activator="{ on, attrs }">-->
-<!--                                                                        <v-btn-->
-<!--                                                                            v-show="startWay[d.name] === '중간부터'"-->
-<!--                                                                            :disabled="($store.state.drone_infos[d.name].curMissionItemReached === 0)"-->
-<!--                                                                            color="red"-->
-<!--                                                                            v-bind="attrs"-->
-<!--                                                                            v-on="on"-->
-<!--                                                                            elevation="4"-->
-<!--                                                                            @click="doMissionRewind(d.name)"-->
-<!--                                                                        >-->
-<!--                                                                            연결-->
-<!--                                                                        </v-btn>-->
-<!--                                                                    </template>-->
-<!--                                                                    <span>미종료 미션 존재 - {{ $store.state.drone_infos[d.name].curMissionItemReached }}번째 부터</span>-->
-<!--                                                                </v-tooltip>-->
-<!--                                                            </v-col>-->
+                                                            <!--                                                            <v-col cols="1" class="pa-1 pt-3">-->
+                                                            <!--                                                                <v-tooltip top>-->
+                                                            <!--                                                                    <template v-slot:activator="{ on, attrs }">-->
+                                                            <!--                                                                        <v-btn-->
+                                                            <!--                                                                            v-show="startWay[d.name] === '중간부터'"-->
+                                                            <!--                                                                            :disabled="($store.state.drone_infos[d.name].curMissionItemReached === 0)"-->
+                                                            <!--                                                                            color="red"-->
+                                                            <!--                                                                            v-bind="attrs"-->
+                                                            <!--                                                                            v-on="on"-->
+                                                            <!--                                                                            elevation="4"-->
+                                                            <!--                                                                            @click="doMissionRewind(d.name)"-->
+                                                            <!--                                                                        >-->
+                                                            <!--                                                                            연결-->
+                                                            <!--                                                                        </v-btn>-->
+                                                            <!--                                                                    </template>-->
+                                                            <!--                                                                    <span>미종료 미션 존재 - {{ $store.state.drone_infos[d.name].curMissionItemReached }}번째 부터</span>-->
+                                                            <!--                                                                </v-tooltip>-->
+                                                            <!--                                                            </v-col>-->
                                                             <v-spacer/>
                                                             <v-col cols="2" class="pa-1 pt-2">
                                                                 <v-text-field
@@ -401,24 +406,24 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                         </v-row>
-<!--                                                        <v-slider-->
-<!--                                                            v-model="targetSpeed[d.name]"-->
-<!--                                                            class="align-center"-->
-<!--                                                            :max="20"-->
-<!--                                                            :min="1"-->
-<!--                                                            hide-details :label="d.name+' 속도: '"-->
-<!--                                                        >-->
-<!--                                                            <template v-slot:append>-->
-<!--                                                                <v-text-field-->
-<!--                                                                    v-model="targetSpeed[d.name]"-->
-<!--                                                                    class="mt-0 pt-0"-->
-<!--                                                                    hide-details-->
-<!--                                                                    label="m/s"-->
-<!--                                                                    type="number"-->
-<!--                                                                    style="width: 60px"-->
-<!--                                                                ></v-text-field>-->
-<!--                                                            </template>-->
-<!--                                                        </v-slider>-->
+                                                        <!--                                                        <v-slider-->
+                                                        <!--                                                            v-model="targetSpeed[d.name]"-->
+                                                        <!--                                                            class="align-center"-->
+                                                        <!--                                                            :max="20"-->
+                                                        <!--                                                            :min="1"-->
+                                                        <!--                                                            hide-details :label="d.name+' 속도: '"-->
+                                                        <!--                                                        >-->
+                                                        <!--                                                            <template v-slot:append>-->
+                                                        <!--                                                                <v-text-field-->
+                                                        <!--                                                                    v-model="targetSpeed[d.name]"-->
+                                                        <!--                                                                    class="mt-0 pt-0"-->
+                                                        <!--                                                                    hide-details-->
+                                                        <!--                                                                    label="m/s"-->
+                                                        <!--                                                                    type="number"-->
+                                                        <!--                                                                    style="width: 60px"-->
+                                                        <!--                                                                ></v-text-field>-->
+                                                        <!--                                                            </template>-->
+                                                        <!--                                                        </v-slider>-->
                                                     </v-card>
                                                     <v-card tile flat v-if="(command.title === '관심')">
                                                         <v-row no-gutters>
@@ -455,32 +460,32 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                         </v-row>
-<!--                                                        <v-row no-gutters>-->
-<!--                                                            <v-col cols="12">-->
-<!--                                                                <v-subheader>-->
-<!--                                                                    {{ d.name }} 귀환 속도-->
-<!--                                                                </v-subheader>-->
-<!--                                                            </v-col>-->
-<!--                                                            <v-col cols="12">-->
-<!--                                                                <v-slider-->
-<!--                                                                    v-model="rtlSpeed[d.name]"-->
-<!--                                                                    class="mx-2 my-3 align-center"-->
-<!--                                                                    :max="20"-->
-<!--                                                                    :min="5"-->
-<!--                                                                    hide-details-->
-<!--                                                                >-->
-<!--                                                                    <template v-slot:append>-->
-<!--                                                                        <v-text-field-->
-<!--                                                                            v-model="rtlSpeed[d.name]"-->
-<!--                                                                            class="mt-0 pt-0"-->
-<!--                                                                            hide-details-->
-<!--                                                                            type="number"-->
-<!--                                                                            label="m/s"-->
-<!--                                                                        ></v-text-field>-->
-<!--                                                                    </template>-->
-<!--                                                                </v-slider>-->
-<!--                                                            </v-col>-->
-<!--                                                        </v-row>-->
+                                                        <!--                                                        <v-row no-gutters>-->
+                                                        <!--                                                            <v-col cols="12">-->
+                                                        <!--                                                                <v-subheader>-->
+                                                        <!--                                                                    {{ d.name }} 귀환 속도-->
+                                                        <!--                                                                </v-subheader>-->
+                                                        <!--                                                            </v-col>-->
+                                                        <!--                                                            <v-col cols="12">-->
+                                                        <!--                                                                <v-slider-->
+                                                        <!--                                                                    v-model="rtlSpeed[d.name]"-->
+                                                        <!--                                                                    class="mx-2 my-3 align-center"-->
+                                                        <!--                                                                    :max="20"-->
+                                                        <!--                                                                    :min="5"-->
+                                                        <!--                                                                    hide-details-->
+                                                        <!--                                                                >-->
+                                                        <!--                                                                    <template v-slot:append>-->
+                                                        <!--                                                                        <v-text-field-->
+                                                        <!--                                                                            v-model="rtlSpeed[d.name]"-->
+                                                        <!--                                                                            class="mt-0 pt-0"-->
+                                                        <!--                                                                            hide-details-->
+                                                        <!--                                                                            type="number"-->
+                                                        <!--                                                                            label="m/s"-->
+                                                        <!--                                                                        ></v-text-field>-->
+                                                        <!--                                                                    </template>-->
+                                                        <!--                                                                </v-slider>-->
+                                                        <!--                                                            </v-col>-->
+                                                        <!--                                                        </v-row>-->
                                                     </v-card>
                                                     <v-card tile flat v-if="(command.title === '제어')">
                                                         <v-row no-gutters>
@@ -556,7 +561,8 @@
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-select
-                                                                    dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
+                                                                    dense outlined
+                                                                    :items="Object.keys($store.state.tempMarkers[d.name])"
                                                                     label="Start Index" v-model="d.autoStartIndex"
                                                                     class="pa-1"
                                                                     hide-details
@@ -564,7 +570,8 @@
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-select
-                                                                    dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
+                                                                    dense outlined
+                                                                    :items="Object.keys($store.state.tempMarkers[d.name])"
                                                                     label="End Index" v-model="d.autoEndIndex"
                                                                     hide-details
                                                                     class="pa-1"
@@ -702,7 +709,9 @@
                                                             <v-col cols="2">
                                                                 <v-row no-gutters align="center" justify="center">
                                                                     <v-col cols="6" class="text-center">
-                                                                        <v-icon small class="mb-1">mdi-arrow-left-right</v-icon>
+                                                                        <v-icon small class="mb-1">
+                                                                            mdi-arrow-left-right
+                                                                        </v-icon>
                                                                         <v-select
                                                                             dense outlined hide-details
                                                                             :items="channels"
@@ -712,7 +721,8 @@
                                                                         ></v-select>
                                                                     </v-col>
                                                                     <v-col cols="6" class="text-center">
-                                                                        <v-icon small class="mb-1">mdi-arrow-up-down</v-icon>
+                                                                        <v-icon small class="mb-1">mdi-arrow-up-down
+                                                                        </v-icon>
                                                                         <v-select
                                                                             dense outlined hide-details
                                                                             :items="channels"
@@ -727,15 +737,25 @@
                                                                     <v-col cols="12">
                                                                         <v-card flat tile class="text-center">
                                                                             <div>
-                                                                                <JoyStick v-bind:joystick_size="128" @change="handleLeftChange(d.name, 'left', $event);" />
-                                                                                <div style="display: inline-block; margin: 8px">
+                                                                                <JoyStick v-bind:joystick_size="128"
+                                                                                          @change="handleLeftChange(d.name, 'left', $event);"/>
+                                                                                <div
+                                                                                    style="display: inline-block; margin: 8px">
                                                                                     <div>
-                                                                                        <span>X {{ leftStick.x[d.name] }} </span>
-                                                                                        <span>Y {{ leftStick.y[d.name] }} </span>
+                                                                                        <span>X {{
+                                                                                                leftStick.x[d.name]
+                                                                                            }} </span>
+                                                                                        <span>Y {{
+                                                                                                leftStick.y[d.name]
+                                                                                            }} </span>
                                                                                     </div>
                                                                                     <div>
-                                                                                        <span>Angle {{ leftStick.angle[d.name] }} </span>
-                                                                                        <span>Speed {{ leftStick.speed[d.name] }} </span>
+                                                                                        <span>Angle {{
+                                                                                                leftStick.angle[d.name]
+                                                                                            }} </span>
+                                                                                        <span>Speed {{
+                                                                                                leftStick.speed[d.name]
+                                                                                            }} </span>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -746,7 +766,9 @@
                                                             <v-col cols="2">
                                                                 <v-row no-gutters align="center" justify="center">
                                                                     <v-col cols="6" class="text-center">
-                                                                        <v-icon small class="mb-1">mdi-arrow-left-right</v-icon>
+                                                                        <v-icon small class="mb-1">
+                                                                            mdi-arrow-left-right
+                                                                        </v-icon>
                                                                         <v-select
                                                                             dense outlined hide-details
                                                                             :items="channels"
@@ -756,7 +778,8 @@
                                                                         ></v-select>
                                                                     </v-col>
                                                                     <v-col cols="6" class="text-center">
-                                                                        <v-icon small class="mb-1">mdi-arrow-up-down</v-icon>
+                                                                        <v-icon small class="mb-1">mdi-arrow-up-down
+                                                                        </v-icon>
                                                                         <v-select
                                                                             dense outlined hide-details
                                                                             :items="channels"
@@ -770,15 +793,25 @@
                                                                     <v-col cols="12">
                                                                         <v-card flat tile class="text-center">
                                                                             <div>
-                                                                                <JoyStick v-bind:joystick_size="128" @change="handleRightChange(d.name, 'right', $event);" />
-                                                                                <div style="display: inline-block; margin: 8px">
+                                                                                <JoyStick v-bind:joystick_size="128"
+                                                                                          @change="handleRightChange(d.name, 'right', $event);"/>
+                                                                                <div
+                                                                                    style="display: inline-block; margin: 8px">
                                                                                     <div>
-                                                                                        <span>X {{ rightStick.x[d.name] }} </span>
-                                                                                        <span>Y {{ rightStick.y[d.name] }} </span>
+                                                                                        <span>X {{
+                                                                                                rightStick.x[d.name]
+                                                                                            }} </span>
+                                                                                        <span>Y {{
+                                                                                                rightStick.y[d.name]
+                                                                                            }} </span>
                                                                                     </div>
                                                                                     <div>
-                                                                                        <span>Angle {{ rightStick.angle[d.name] }} </span>
-                                                                                        <span>Speed {{ rightStick.speed[d.name] }} </span>
+                                                                                        <span>Angle {{
+                                                                                                rightStick.angle[d.name]
+                                                                                            }} </span>
+                                                                                        <span>Speed {{
+                                                                                                rightStick.speed[d.name]
+                                                                                            }} </span>
                                                                                     </div>
                                                                                 </div>
                                                                             </div>
@@ -792,10 +825,13 @@
                                                                         <v-col class="my-2" cols="6">
                                                                             <div v-for="(num) in channels" :key="num">
                                                                                 <div v-if="5 <= num && num <= 8">
-                                                                                    <v-row no-gutters align="center" justify="center" class="text-center">
+                                                                                    <v-row no-gutters align="center"
+                                                                                           justify="center"
+                                                                                           class="text-center">
                                                                                         <v-col cols="4">
                                                                                             <v-select
-                                                                                                dense outlined hide-details
+                                                                                                dense outlined
+                                                                                                hide-details
                                                                                                 :items="channels"
                                                                                                 :label="'CH'+num"
                                                                                                 v-model="target_mission_num[`targetCh${num}`][d.name]"
@@ -809,17 +845,28 @@
                                                                                                 class="text-center align-center mx-0"
                                                                                             >
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-left</v-icon>
+                                                                                                    <v-icon small>
+                                                                                                        mdi-format-align-left
+                                                                                                    </v-icon>
                                                                                                 </v-btn>
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-center</v-icon>
+                                                                                                    <v-icon small>
+                                                                                                        mdi-format-align-center
+                                                                                                    </v-icon>
                                                                                                 </v-btn>
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-right</v-icon>
+                                                                                                    <v-icon small>
+                                                                                                        mdi-format-align-right
+                                                                                                    </v-icon>
                                                                                                 </v-btn>
                                                                                             </v-btn-toggle>
 
-                                                                                            <v-btn small color="primary" class="mx-1 mb-1" @click="handlePwmClick(d.name, num, $event);"><v-icon>mdi-send</v-icon></v-btn>
+                                                                                            <v-btn small color="primary"
+                                                                                                   class="mx-1 mb-1"
+                                                                                                   @click="handlePwmClick(d.name, num, $event);">
+                                                                                                <v-icon>mdi-send
+                                                                                                </v-icon>
+                                                                                            </v-btn>
                                                                                         </v-col>
                                                                                     </v-row>
                                                                                 </div>
@@ -828,12 +875,16 @@
                                                                         <v-col class="my-2" cols="6">
                                                                             <div v-for="(num) in channels" :key="num">
                                                                                 <div v-if="9 <= num && num <= 12">
-                                                                                    <v-row no-gutters align="center" justify="center" class="text-center">
+                                                                                    <v-row no-gutters align="center"
+                                                                                           justify="center"
+                                                                                           class="text-center">
                                                                                         <v-col cols="4">
                                                                                             <v-select
-                                                                                                dense outlined hide-details
+                                                                                                dense outlined
+                                                                                                hide-details
                                                                                                 :items="channels"
-                                                                                                :label="'CH'+num" v-model="target_mission_num[`targetCh${num}`][d.name]"
+                                                                                                :label="'CH'+num"
+                                                                                                v-model="target_mission_num[`targetCh${num}`][d.name]"
                                                                                                 class="ml-1 mx-1 mb-2"
                                                                                             ></v-select>
                                                                                         </v-col>
@@ -844,17 +895,28 @@
                                                                                                 class="text-center align-center mx-0"
                                                                                             >
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-left</v-icon>
+                                                                                                    <v-icon small>
+                                                                                                        mdi-format-align-left
+                                                                                                    </v-icon>
                                                                                                 </v-btn>
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-center</v-icon>
+                                                                                                    <v-icon small>
+                                                                                                        mdi-format-align-center
+                                                                                                    </v-icon>
                                                                                                 </v-btn>
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-right</v-icon>
+                                                                                                    <v-icon small>
+                                                                                                        mdi-format-align-right
+                                                                                                    </v-icon>
                                                                                                 </v-btn>
                                                                                             </v-btn-toggle>
 
-                                                                                            <v-btn small color="lime" class="mx-1 mb-1" @click="handlePwmClick(d.name, num, $event);"><v-icon>mdi-send</v-icon></v-btn>
+                                                                                            <v-btn small color="lime"
+                                                                                                   class="mx-1 mb-1"
+                                                                                                   @click="handlePwmClick(d.name, num, $event);">
+                                                                                                <v-icon>mdi-send
+                                                                                                </v-icon>
+                                                                                            </v-btn>
                                                                                         </v-col>
                                                                                     </v-row>
                                                                                 </div>
@@ -863,12 +925,15 @@
                                                                         <v-col class="my-2" cols="12">
                                                                             <div v-for="(num) in channels" :key="num">
                                                                                 <div v-if="13 <= num && num <= 16">
-                                                                                    <v-row no-gutters align="center" justify="center">
+                                                                                    <v-row no-gutters align="center"
+                                                                                           justify="center">
                                                                                         <v-col cols="3">
                                                                                             <v-select
-                                                                                                dense outlined hide-details
+                                                                                                dense outlined
+                                                                                                hide-details
                                                                                                 :items="channels"
-                                                                                                :label="'CH'+num" v-model="target_mission_num[`targetCh${num}`][d.name]"
+                                                                                                :label="'CH'+num"
+                                                                                                v-model="target_mission_num[`targetCh${num}`][d.name]"
                                                                                                 class="mx-1"
                                                                                             ></v-select>
                                                                                         </v-col>
@@ -883,7 +948,7 @@
                                                                                                 step="1"
                                                                                                 color="indigo"
                                                                                                 track-color="orange"
-                                                                                                @change ="handlePwmSlide($event, d.name, num)"
+                                                                                                @change="handlePwmSlide($event, d.name, num)"
                                                                                             >
                                                                                             </v-slider>
                                                                                         </v-col>
@@ -906,6 +971,39 @@
                                                             </v-col>
                                                         </v-row>
                                                     </v-card>
+                                                    <v-card tile flat v-if="(command.title === '투하')">
+                                                        <div v-for="(d, dName) in $store.state.drone_infos"
+                                                             :key="'params'+dName">
+                                                            <div v-if="d.selected && d.targeted">
+                                                                <v-row no-gutters>
+                                                                    <v-col cols="12">
+                                                                        <v-subheader>{{ d.name }} 투하 장치 제어:
+                                                                        </v-subheader>
+                                                                    </v-col>
+                                                                    <table>
+                                                                        <tr v-for="item in items" :key="item.first">
+                                                                            <td @click="setPoint(item.first)"><span
+                                                                                v-html="item.first"></span></td>
+                                                                            <td @click="setPoint(item.second)"><span
+                                                                                v-html="item.second"></span></td>
+                                                                            <td @click="setPoint(item.third)"><span
+                                                                                v-html="item.third"></span></td>
+                                                                            <td @click="setPoint(item.fourth)"><span
+                                                                                v-html="item.fourth"></span></td>
+                                                                            <td @click="setPoint(item.fifth)"><span
+                                                                                v-html="item.fifth"></span></td>
+                                                                            <td @click="setPoint(item.sixth)"><span
+                                                                                v-html="item.sixth"></span></td>
+                                                                            <td @click="setPoint(item.seventh)"><span
+                                                                                v-html="item.seventh"></span></td>
+                                                                            <td @click="setPoint(item.eighth)"><span
+                                                                                v-html="item.eighth"></span></td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </v-row>
+                                                            </div>
+                                                        </div>
+                                                    </v-card>
                                                 </v-col>
                                             </v-row>
                                         </div>
@@ -915,7 +1013,8 @@
                             <v-col cols="2">
                                 <v-card class="pa-1 align-self-center text-center" outlined tile>
                                     <v-btn
-                                        v-if="command.title !== '투하'" color="blue" @click="curTab = command.title; mode_sheet = !mode_sheet;"
+                                        v-if="command.title !== '투하'" color="blue"
+                                        @click="curTab = command.title; mode_sheet = !mode_sheet;"
                                         :disabled="(command.title === '임무')"
                                     >
                                         <span v-if="command.title === '모드'">모드확인</span>
@@ -943,15 +1042,15 @@
                                     </v-btn>
                                 </v-card>
                             </v-col>
-<!--                            <v-col cols="1">-->
-<!--                                <v-card class="pa-2" outlined tile>-->
-<!--                                    <v-progress-linear-->
-<!--                                            color="red lighten-2"-->
-<!--                                            buffer-value="0"-->
-<!--                                            stream-->
-<!--                                    ></v-progress-linear>-->
-<!--                                </v-card>-->
-<!--                            </v-col>-->
+                            <!--                            <v-col cols="1">-->
+                            <!--                                <v-card class="pa-2" outlined tile>-->
+                            <!--                                    <v-progress-linear-->
+                            <!--                                            color="red lighten-2"-->
+                            <!--                                            buffer-value="0"-->
+                            <!--                                            stream-->
+                            <!--                                    ></v-progress-linear>-->
+                            <!--                                </v-card>-->
+                            <!--                            </v-col>-->
                         </v-row>
                     </v-card>
                 </v-card>
@@ -963,19 +1062,19 @@
                     실 행
                 </v-btn>
                 <v-btn
-                        class="mt-6 mx-6 px-6"
-                        text
-                        color="error"
-                        @click="mode_sheet = !mode_sheet"
-                        outlined
+                    class="mt-6 mx-6 px-6"
+                    text
+                    color="error"
+                    @click="mode_sheet = !mode_sheet"
+                    outlined
                 >
                     취 소
                 </v-btn>
-                <div class="my-3" >
+                <div class="my-3">
                     <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                         <div v-if="drone.selected && drone.targeted">
-                            <span  class="mr-2">
-                                [ {{drone.name}} ]
+                            <span class="mr-2">
+                                [ {{ drone.name }} ]
                             </span>
                         </div>
                     </div>
@@ -988,16 +1087,19 @@
                     <div v-else-if="curTab === '이륙'">
                         <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                             <span v-if="drone.selected && drone.targeted">
-                                {{i}} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{  targetTakeoffAlt[i] }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">이륙</span> 명령 전송.
+                                {{ i }} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{
+                                    targetTakeoffAlt[i]
+                                }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">이륙</span> 명령 전송.
                             </span>
                         </div>
                     </div>
                     <div v-else-if="curTab === '고도'">
-                         <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
+                        <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                              <span v-if="drone.selected && drone.targeted">
-                                 {{i}} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ targetAlt[i] }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">고도 변경</span> 명령 전송.
+                                 {{ i }} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ targetAlt[i] }}</span>미터로 <span
+                                 class="ml-2 mr-2" style="font-size: 20px">고도 변경</span> 명령 전송.
                              </span>
-                         </div>
+                        </div>
                     </div>
                     <span v-else-if="curTab === '이동'">
                         비행체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">이동</span> 명령 전송.
@@ -1054,6 +1156,7 @@ export default {
         return {
             drawRadiusUpdateTimer: null,
 
+            items: [],
             point: '8,8',
             dropped_point: [],
 
@@ -1191,17 +1294,17 @@ export default {
             return (this.$store.state.command_tab_left_x);
         },
 
-        check_prepared(){
+        check_prepared() {
             return this.$store.state.drone_command_prepared;
         }
     },
 
 
     watch: {
-        check_prepared(newVal, oldVal){
+        check_prepared(newVal, oldVal) {
             console.log('drone_command_prepared', oldVal, ' -> ', newVal);
 
-            if(newVal) {
+            if (newVal) {
                 for (let dName in this.$store.state.drone_infos) {
                     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                         if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
@@ -1324,7 +1427,7 @@ export default {
     methods: {
         setPoint(point) {
             this.point = point
-            console.log('setPoint', this.point);
+            // console.log('setPoint', this.point);
             let td = document.querySelectorAll('td');
             let point_arr = this.point.split(',');
             let tar_point = parseInt(point_arr[1]) + (8 * parseInt(point_arr[0]));
@@ -1381,9 +1484,7 @@ export default {
                         td[tar_point].style.color = '#FFFFFF';
                         td[tar_point].style['font-weight'] = 'bold';
 
-                        this.dropped_point.push(tar_point)
-                        console.log('setDropCommand', this.dropped_point);
-
+                        this.dropped_point.push(tar_point);
                     }
                 }
             }
@@ -1506,14 +1607,11 @@ export default {
 
             if (this.$store.state.currentCommandTab === '이동') {
                 console.log(this.$store.state.currentCommandTab);
-            }
-            else if(this.$store.state.currentCommandTab === '선회') {
+            } else if (this.$store.state.currentCommandTab === '선회') {
                 console.log(this.$store.state.currentCommandTab);
-            }
-            else if(this.$store.state.currentCommandTab === '패턴') {
+            } else if (this.$store.state.currentCommandTab === '패턴') {
                 console.log(this.$store.state.currentCommandTab);
-            }
-            else if (this.$store.state.currentCommandTab === '모드') {
+            } else if (this.$store.state.currentCommandTab === '모드') {
                 console.log(this.$store.state.currentCommandTab);
             }
         },
@@ -1521,61 +1619,46 @@ export default {
         sendCommand() {
             this.loading = true;
             console.log(this.curTab);
-            if(this.curTab === '모드') {
+            if (this.curTab === '모드') {
                 this.setMode();
-            }
-            else if(this.curTab === '시동') {
+            } else if (this.curTab === '시동') {
                 this.setArm();
-            }
-            else if(this.curTab === '이륙') {
+            } else if (this.curTab === '이륙') {
                 this.setTakeoff();
-            }
-            else if(this.curTab === '고도') {
+            } else if (this.curTab === '고도') {
                 this.setGotoAlt();
-            }
-            else if(this.curTab === '이동') {
+            } else if (this.curTab === '이동') {
                 this.setGoto();
-            }
-            else if(this.curTab === '패턴') {
+            } else if (this.curTab === '패턴') {
                 this.setSurvey();
-            }
-            else if(this.curTab === '선회') {
+            } else if (this.curTab === '선회') {
                 this.setGotoCircle();
-            }
-            else if(this.curTab === '속도') {
+            } else if (this.curTab === '속도') {
                 this.setChangeSpeed();
-            }
-            else if(this.curTab === '관심') {
+            } else if (this.curTab === '관심') {
                 this.setRoi();
-            }
-            else if(this.curTab === '정지') {
+            } else if (this.curTab === '정지') {
                 this.setStop();
-            }
-            else if(this.curTab === '착륙') {
+            } else if (this.curTab === '착륙') {
                 this.setLand();
-            }
-            else if(this.curTab === '귀환') {
+            } else if (this.curTab === '귀환') {
                 this.setRtl();
-            }
-            else if(this.curTab === '제어') {
+            } else if (this.curTab === '제어') {
                 this.setPwms();
-            }
-            else if(this.curTab === '자동') {
+            } else if (this.curTab === '자동') {
                 this.setAutoGoto();
-            }
-            else if(this.curTab === '종료') {
+            } else if (this.curTab === '종료') {
                 this.setDisarm();
-            }
-            else if(this.curTab === '설정') {
+            } else if (this.curTab === '설정') {
                 this.setParams();
             }
 
             this.curTab = 'virtual';
             this.$store.state.active_tab = 'virtual';
 
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         this.$store.commit('saveCurrentDroneInfos', dName);
                     }
                 }
@@ -1589,9 +1672,9 @@ export default {
         },
 
         setMode() {
-            for(let name in this.$store.state.drone_infos) {
+            for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         console.log('**********************************************************', this.$store.state.drone_infos[name].targetModeSelection)
                         //this.$store.state.drone_infos[name].targetModeSelection = parseInt(this.targetModeSelection[name]);
                         EventBus.$emit('command-set-mode-' + name, this.$store.state.drone_infos[name].targetModeSelection);
@@ -1601,9 +1684,9 @@ export default {
         },
 
         setArm() {
-            for(let name in this.$store.state.drone_infos) {
+            for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         EventBus.$emit('command-set-arm-' + name, '');
                     }
                 }
@@ -1611,9 +1694,9 @@ export default {
         },
 
         setTakeoff() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         this.$store.state.drone_infos[dName].takeoffDelay = parseInt(this.$store.state.drone_infos[dName].takeoffDelay);
                         if (this.$store.state.drone_infos[dName].takeoffDelay < 6) {
                             this.$store.state.drone_infos[dName].takeoffDelay = 6;
@@ -1635,11 +1718,11 @@ export default {
         },
 
         setGotoAlt() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         this.$store.state.drone_infos[dName].targetAlt = parseInt(this.$store.state.drone_infos[dName].targetAlt);
-                        if(this.$store.state.drone_infos[dName].targetAlt < 3) {
+                        if (this.$store.state.drone_infos[dName].targetAlt < 3) {
                             this.$store.state.drone_infos[dName].targetAlt = 3;
                         }
 
@@ -1650,11 +1733,11 @@ export default {
         },
 
         setGoto() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         let pIndex = this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex;
-                        if(pIndex !== -1) {
+                        if (pIndex !== -1) {
                             let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
                                 this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
                                 this.$store.state.drone_infos[dName].targetAlt + ':' +
@@ -1682,11 +1765,11 @@ export default {
             // this.$store.state.missionCircles = null;
             // delete this.$store.state.missionCircles;
             // this.$store.state.missionCircles = JSON.parse(JSON.stringify({}));
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         let pIndex = this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex;
-                        if(pIndex !== -1) {
+                        if (pIndex !== -1) {
                             let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
                                 this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
                                 this.$store.state.drone_infos[dName].targetAlt + ':' +
@@ -1706,11 +1789,11 @@ export default {
         },
 
         setRoi() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         let pIndex = this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex;
-                        if(pIndex !== -1) {
+                        if (pIndex !== -1) {
                             let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
                                 this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
                                 this.$store.state.drone_infos[dName].targetAlt + ':' +
@@ -1725,9 +1808,9 @@ export default {
         },
 
         setChangeSpeed() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         EventBus.$emit('command-set-change-speed-' + dName, this.$store.state.drone_infos[dName].targetSpeed);
                     }
                 }
@@ -1735,9 +1818,9 @@ export default {
         },
 
         setStop() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         EventBus.$emit('command-set-stop-' + dName);
                     }
                 }
@@ -1745,9 +1828,9 @@ export default {
         },
 
         setLand() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         EventBus.$emit('command-set-land-' + dName);
                     }
                 }
@@ -1755,9 +1838,9 @@ export default {
         },
 
         setRtl() {
-            for(let name in this.$store.state.drone_infos) {
+            for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         EventBus.$emit('command-set-rtl-' + name, this.$store.state.drone_infos[name].rtlSpeed);
                     }
                 }
@@ -1766,9 +1849,9 @@ export default {
 
         setPwms() {
             console.log(this.pwms);
-            for(let name in this.$store.state.drone_infos) {
+            for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         EventBus.$emit('command-set-pwms-' + name, this.pwms);
                     }
                 }
@@ -1776,9 +1859,9 @@ export default {
         },
 
         setAutoGoto() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
 
                         //this.$store.state.drone_infos[name].autoStartIndex = this.autoStartIndex[name];
                         //this.$store.state.drone_infos[name].autoEndIndex = this.autoEndIndex[name];
@@ -1792,7 +1875,7 @@ export default {
 
                         this.position_selections_items[dName] = [];
 
-                        if(start_index <= end_index) {
+                        if (start_index <= end_index) {
                             for (let pIndex = start_index; pIndex <= end_index; pIndex++) {
                                 if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
                                     let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
@@ -1810,8 +1893,7 @@ export default {
 
                             payload.start_index = start_index;
                             payload.end_index = end_index;
-                        }
-                        else {
+                        } else {
                             for (let pIndex = start_index; pIndex >= end_index; pIndex--) {
                                 if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
                                     let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
@@ -1852,11 +1934,11 @@ export default {
         },
 
         setSurvey() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         let pIndex = this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex;
-                        if(pIndex !== -1) {
+                        if (pIndex !== -1) {
                             this.$store.state.drone_infos[dName].autoDelay = parseInt(this.$store.state.drone_infos[dName].targetStayTime);
                             //this.$store.state.drone_infos[dName].autoSpeed = parseInt(this.targetSpeed[dName]);
                             this.$store.state.drone_infos[dName].autoSpeed = this.$store.state.surveyMarkers[dName][pIndex].speed;
@@ -1879,7 +1961,7 @@ export default {
                                 }
                             }
 
-                            if(this.$store.state.surveyMarkers[dName].startWay === '중간부터') {
+                            if (this.$store.state.surveyMarkers[dName].startWay === '중간부터') {
                                 console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
 
                                 let strPos = this.$store.state.drone_infos[dName].pausePosition.lat + ':' +
@@ -1893,8 +1975,7 @@ export default {
                                 payload.mission_current_number = this.$store.state.drone_infos[dName].curMissionItemReached
 
                                 EventBus.$emit('command-set-mission_rewind-' + dName, payload);
-                            }
-                            else {
+                            } else {
                                 console.log('setSurvey', 0, parseInt(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length - 1), this.$store.state.drone_infos[dName].autoDelay);
                                 let payload = {};
                                 payload.start_index = 0;
@@ -1906,8 +1987,7 @@ export default {
                                 payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' keti';
                                 EventBus.$emit('do-publish-' + dName, payload);
                             }
-                        }
-                        else {
+                        } else {
                             console.error(dName, ' no targeting');
                         }
                     }
@@ -1916,9 +1996,9 @@ export default {
         },
 
         setDisarm() {
-            for(let name in this.$store.state.drone_infos) {
+            for (let name in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         EventBus.$emit('command-set-disarm-' + name);
                     }
                 }
@@ -1942,6 +2022,19 @@ export default {
     },
 
     mounted() {
+        for (let i = 0; i < 8; i++) {
+            let row = {
+                "first": i+",0",
+                "second": i+",1",
+                "third": i+",2",
+                "fourth": i+",3",
+                "fifth": i+",4",
+                "sixth": i+",5",
+                "seventh": i+",6",
+                "eighth": i+",7"
+            };
+            this.items.push(row);
+        }
     },
 
     beforeDestroy() {
@@ -1950,36 +2043,36 @@ export default {
 </script>
 
 <style scoped>
-    @keyframes metronome-example {
-        from {
-            transform: scale(.5);
-        }
-
-        to {
-            transform: scale(1);
-        }
+@keyframes metronome-example {
+    from {
+        transform: scale(.5);
     }
 
-    /*.v-avatar--metronome {*/
-    /*    animation-name: metronome-example;*/
-    /*    animation-iteration-count: infinite;*/
-    /*    animation-direction: alternate;*/
-    /*}*/
-
-    .tab_position {
-        position: absolute;
-        opacity: 1; /* for demo purpose  */
-        z-index: 2;
+    to {
+        transform: scale(1);
     }
+}
 
-    td, th {
-        font-weight: normal;
-        padding: 10px;
-        border: 1px solid #ccc;
-    }
+/*.v-avatar--metronome {*/
+/*    animation-name: metronome-example;*/
+/*    animation-iteration-count: infinite;*/
+/*    animation-direction: alternate;*/
+/*}*/
 
-    body {
-        padding: 1rem;
-    }
+.tab_position {
+    position: absolute;
+    opacity: 1; /* for demo purpose  */
+    z-index: 2;
+}
+
+td, th {
+    font-weight: normal;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+body {
+    padding: 1rem;
+}
 
 </style>
