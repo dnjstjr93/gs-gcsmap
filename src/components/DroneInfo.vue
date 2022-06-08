@@ -1305,6 +1305,14 @@ export default {
             }
         },
 
+        curArmStatus: function (newVal) {
+            if(newVal === 'ARMED') {
+                this.$store.state.drone_infos[this.name].takeoffAbsoluteAlt = (this.$store.state.drone_infos[this.name].absolute_alt - this.$store.state.drone_infos[this.name].alt);
+
+                this.$store.state.rtlModeMonitor[this.name] = true;
+            }
+        },
+
         curMode: function (newVal) {
             this.colorMode = 'td-text-blue';
             this.info.colorMode = 'blue';
@@ -4066,8 +4074,6 @@ export default {
                             this.curArmStatus = 'ARMED';
                             this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
                             this.colorArm = 'td-text-red';
-
-                            this.$store.state.rtlModeMonitor[this.name] = true;
 
                             // this.$store.state.commands = [];
                             // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);

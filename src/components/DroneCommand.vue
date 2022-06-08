@@ -1141,7 +1141,6 @@ export default {
             targetAlt: {},
             targetSpeed: {},
             targetStayTime: {},
-            targetSurveyMarkerIndex: {},
             targetTurningSpeed: {},
             targetRadius: {},
             autoStartIndex: {},
@@ -1479,20 +1478,20 @@ export default {
             this.target_alt++
         },
 
-        selectedPosition: function(event, d) {
-            this.position_selections_index[d.name] = this.position_selections_items[d.name].indexOf(event);
-
-            let pIndex = this.position_selections_index[d.name];
-            let pName = d.name;
-            this.position_selections_elevation[pName] = parseFloat(this.$store.state.tempMarkers[pName][pIndex].elevation).toFixed(1);
-
-            let payload = {};
-            payload.pName = d.name;
-            payload.pIndex = this.position_selections_index[d.name];
-            payload.targeted = true;
-
-            EventBus.$emit('do-targetTempMarker', payload);
-        },
+        // selectedPosition: function(event, d) {
+        //     this.position_selections_index[d.name] = this.position_selections_items[d.name].indexOf(event);
+        //
+        //     let pIndex = this.position_selections_index[d.name];
+        //     let pName = d.name;
+        //     this.position_selections_elevation[pName] = parseFloat(this.$store.state.tempMarkers[pName][pIndex].elevation).toFixed(1);
+        //
+        //     let payload = {};
+        //     payload.pName = d.name;
+        //     payload.pIndex = this.position_selections_index[d.name];
+        //     payload.targeted = true;
+        //
+        //     EventBus.$emit('do-targetTempMarker', payload);
+        // },
 
         tab_click(title) {
             this.$store.state.currentCommandTab = title;
@@ -1939,209 +1938,13 @@ export default {
     },
 
     created() {
-        console.log('DroneCommand-created()');
-
         this.context_left = this.$store.state.command_tab_left_x;
-
-        for (let dName in this.$store.state.drone_infos) {
-            if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                if (this.$store.state.drone_infos[dName].selected) {
-                    this.targetSurveyMarkerIndex[dName] = -1;
-                    for (let pIndex in this.$store.state.surveyMarkers[dName]) {
-                        if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName], pIndex)) {
-                            if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
-                                this.targetSurveyMarkerIndex[dName] = pIndex;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-
-        EventBus.$on('gcs-map-ready', () => {
-            setTimeout(() => {
-                console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%DroneCommand', 'gcs-map-ready', this.$store.state.tempMarkers);
-                for (let dName in this.$store.state.tempMarkers) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
-                        this.position_selections_items[dName] = [];
-                        for (let pIndex in this.$store.state.tempMarkers[dName]) {
-                            if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
-                                let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].alt + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].speed + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].radius + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].turningSpeed + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].targetMavCmd + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].targetStayTime + ':' +
-                                    this.$store.state.tempMarkers[dName][pIndex].elevation;
-                                this.position_selections_items[dName].push(strPos);
-                            }
-                        }
-                    }
-                }
-
-                console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%DroneCommand', 'gcs-map-ready', this.position_selections_items);
-            }, 2000);
-        });
-
-        EventBus.$on('do-targetDrone', () => {
-            console.log('DroneCommand-do-targetDrone');
-
-            this.$store.state.drone_command_prepared = false;
-
-            this.targetModeSelection = {};
-            this.takeoffDelay = {};
-            this.targetTakeoffAlt = {};
-            this.targetAlt = {};
-            this.targetSpeed = {};
-            this.targetStayTime = {};
-            this.targetTurningSpeed = {};
-            this.targetRadius = {};
-            this.autoStartIndex = {};
-            this.autoEndIndex = {};
-            this.autoSpeed = {};
-            this.autoDelay = {};
-            this.gotoType = {};
-            this.yawBehavior = {};
-            this.flyShape = {};
-            this.startWay = {};
-            this.circleType = {};
-            for (let name in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        this.targetModeSelection[name] = this.$store.state.drone_infos[name].targetModeSelection;
-                        this.takeoffDelay[name] = this.$store.state.drone_infos[name].takeoffDelay;
-                        this.targetTakeoffAlt[name] = this.$store.state.drone_infos[name].targetTakeoffAlt;
-                        this.targetAlt[name] = this.$store.state.drone_infos[name].targetAlt;
-                        this.targetSpeed[name] = this.$store.state.drone_infos[name].targetSpeed;
-                        this.targetStayTime[name] = this.$store.state.drone_infos[name].targetStayTime;
-                        this.targetTurningSpeed[name] = this.$store.state.drone_infos[name].targetTurningSpeed;
-                        this.targetRadius[name] = this.$store.state.drone_infos[name].targetRadius;
-                        this.autoStartIndex[name] = this.$store.state.drone_infos[name].autoStartIndex;
-                        this.autoEndIndex[name] = this.$store.state.drone_infos[name].autoEndIndex;
-                        this.autoSpeed[name] = this.$store.state.drone_infos[name].autoSpeed;
-                        this.autoDelay[name] = this.$store.state.drone_infos[name].autoDelay;
-                        // if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[name], 'gotoType')) {
-                        //     this.$store.state.drone_infos[name].gotoType = '바로이동';
-                        // }
-                        this.gotoType[name] = this.$store.state.drone_infos[name].gotoType;
-                        this.yawBehavior[name] = 'YAW고정';
-                        this.flyShape[name] = '곡선비행';
-                        this.startWay[name] = '처음부터';
-                        this.circleType[name] = '시계방향';
-
-                        this.$store.state.drone_command_prepared = true;
-
-                        if (this.$cookies.isKey('target_mission_num')) {
-                            this.target_mission_num = this.$cookies.get('target_mission_num');
-                            this.mission_value = this.$cookies.get('mission_value');
-                        }
-                        else {
-                            for (let i = 0; i < this.channels.length; i++) {
-                                let num = this.channels[i];
-                                this.mission_value[`ch${num}`][name] = (this.mission_ch_max + this.mission_ch_min) / 2;
-                                this.target_mission_num[`targetCh${num}`][name] = num;
-                            }
-
-                            this.$cookies.set('target_mission_num', this.target_mission_num);
-                            this.$cookies.set('mission_value', this.mission_value);
-                        }
-                    }
-                }
-            }
-        });
-
-
-        EventBus.$on('do-selected-position', (payload) => {
-            console.log('do-selected-position', payload);
-
-            if(payload.value) {
-                let strPos = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].alt + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].speed + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].turningSpeed + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetStayTime + ':' +
-                    this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation;
-
-                this.position_selections_index[payload.pName] = payload.pIndex;
-                this.position_selections[payload.pName] = strPos;
-                this.position_selections_elevation[payload.pName] = parseFloat(this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation).toFixed(1);
-            }
-            else {
-                this.position_selections_index[payload.pName] = 0;
-                this.position_selections[payload.pName] = '';
-                this.position_selections_elevation[payload.pName]= 0;
-            }
-
-            this.$forceUpdate();
-        });
-
-        EventBus.$on('update-goto-positions', (payload) => {
-            console.log('update-goto-positions', payload);
-
-            this.position_selections[payload.pName] = this.$store.state.tempMarkers[payload.pName][payload.pIndex].lat + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].lng + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].alt + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].speed + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].radius + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].turningSpeed + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetMavCmd + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].targetStayTime + ':' +
-                this.$store.state.tempMarkers[payload.pName][payload.pIndex].elevation;
-
-            this.$forceUpdate();
-        });
-
-        EventBus.$on('do-target-survey-marker', (payload) => {
-            console.log('do-selected-position', payload);
-
-            if(payload.targeted) {
-                this.targetSurveyMarkerIndex[payload.dName] = payload.pIndex;
-            }
-            else {
-                this.targetSurveyMarkerIndex[payload.dName] = -1;
-            }
-
-            this.$forceUpdate();
-        });
-
-        // eslint-disable-next-line no-unused-vars
-        // EventBus.$on('selected-drone', (payload) => {
-        //
-        //     // console.log(this.$store.state.selectedDrone);
-        //     //
-        //     // this.selectedDrone = this.$store.state.selectedDrone;
-        //     //
-        //     for(let name in this.$store.state.selectedDrone) {
-        //         if (Object.prototype.hasOwnProperty.call(this.$store.state.selectedDrone, name)) {
-        //             if(this.$store.state.selectedDrone[name]) {
-        //                 this.$store.state.drone_command_prepared = true;
-        //                 this.$forceUpdate();
-        //                 return;
-        //             }
-        //         }
-        //     }
-        //
-        //     this.$store.state.drone_command_prepared = false;
-        //     this.$forceUpdate();
-        // });
     },
 
     mounted() {
     },
 
     beforeDestroy() {
-        EventBus.$off('gcs-map-ready');
-        EventBus.$off('do-targetDrone');
-        EventBus.$off('do-selected-position');
-        EventBus.$off('update-goto-positions');
-
-        EventBus.$off('do-target-survey-marker');
     }
 }
 </script>

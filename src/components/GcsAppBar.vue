@@ -1172,6 +1172,10 @@
                                 this.$store.state.drone_infos[dName].curArmStatus = 'DISARMED';
                             }
 
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffAbsoluteAlt')) {
+                                this.$store.state.drone_infos[dName].takeoffAbsoluteAlt = 0;
+                            }
+
                             if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
                                 this.$store.state.drone_infos[dName].targeted = false;
                             }
@@ -1707,6 +1711,27 @@
                                     if(!Object.prototype.hasOwnProperty.call(marker, 'area')) {
                                         marker.area = 0;
                                     }
+
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'paramAlt')) {
+                                        marker.paramAlt = 150;
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'paramOffsetAlt')) {
+                                        marker.paramOffsetAlt = 0;
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'flyAlt')) {
+                                        marker.flyAlt = Array(256).fill(150);
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'takeoffAlt')) {
+                                        marker.takeoffAlt = Array(256).fill(0);
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'offsetAlt')) {
+                                        marker.offsetAlt = Array(256).fill(0);
+                                    }
+
 
                                     marker.polygonDraggable = false;
                                     marker.polygonEditable = false;

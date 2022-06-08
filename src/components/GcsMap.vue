@@ -1671,11 +1671,7 @@
                 this.context_flag = false;
 
                 if(!Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, 'unknown')) {
-                    this.$store.state.tempMarkers.unknown = [];
-
-                    this.createEachTempMarkerInfoToMobius('unknown', () => {
-                        console.log('createEachTempMarkerInfoToMobius', 'unknown');
-                    });
+                    this.$store.state.tempMarkers['unknown'] = [];
                 }
 
                 const elevator = new this.google.maps.ElevationService();
@@ -1704,71 +1700,12 @@
 
                     this.$store.state.tempMarkers['unknown'].push(marker);
 
-                    this.doBroadcastAddMarker(JSON.parse(JSON.stringify(marker)));
+                    this.doBroadcastConfirmAddTempMarker(JSON.parse(JSON.stringify(marker)));
 
-                    axios({
-                        validateStatus: function (status) {
-                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                            return status < 500;
-                        },
-                        method: 'post',
-                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/unknown',
-                        headers: {
-                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                            'X-M2M-Origin': 'SVue',
-                            'Content-Type': 'application/json;ty=4'
-                        },
-                        data: {
-                            'm2m:cin': {
-                                con: this.$store.state.tempMarkers.unknown
-                            }
-                        }
-                    }).then(
-                        function (res) {
-                            console.log('++++++++ confirmAddTempMarker-axios', res.data);
-                        }
-                    ).catch(
-                        function (err) {
-                            console.log(err.message);
-                        }
-                    );
+                    this.postCinTempMarkerInfoToMobius('unknown');
 
                     this.$store.state.adding = false;
                 });
-
-                // let payload = {};
-                // payload.pName = 'unknown';
-                // payload.lat = this.click_lat;
-                // payload.lng = this.click_lng;
-                // payload.alt = 20;
-                // payload.speed = 5;
-                // payload.radius = 250;
-                // payload.turningSpeed = 10;
-                // payload.targetMavCmd = 16;
-                // payload.targetStayTime = 1;
-                // payload.color = 'grey';
-                // payload.elevation = 0;
-                // payload.type = 'Goto';
-                // this.$store.commit('setDroneColorMap', payload); //JSON.parse(JSON.stringify(payload)));
-                //
-                // this.$store.commit('addingTempMarker', payload);
-                //
-                // // const elevator = new this.google.maps.ElevationService();
-                //
-                // console.log('elevation-confirmAddTempMarker', this.$store.state.tempPayload);
-                // let lat = this.$store.state.tempPayload.lat;
-                // let lng = this.$store.state.tempPayload.lng;
-                //
-                // this.displayLocationElevation({lat:lat, lng:lng}, this.elevator, (val) => {
-                //     console.log('curElevation', val);
-                //
-                //     this.$store.state.tempPayload.elevation = val;
-                //     this.$store.state.tempPayload.type = 0;
-                //
-                //     this.$store.commit('confirmAddTempMarker', false);
-                //
-                //     this.doBroadcastAddMarker(this.$store.state.tempPayload);
-                // });
             },
 
             createEachSurveyMarkerInfoToMobius(dName, callback) {
@@ -1905,11 +1842,6 @@
                     });
                 }
 
-                //const elevator = new this.google.maps.ElevationService();
-
-                //this.displayLocationElevation({lat:lat, lng:lng}, elevator, (val) => {
-                    //console.log('__________________________________confirmAddSurveyMarker', 'curElevation', val);
-
                 let survey = JSON.parse(JSON.stringify(this.$store.state.defaultPosition));
                 survey.lat = this.click_lat;
                 survey.lng = this.click_lng;
@@ -1943,18 +1875,16 @@
                 survey.angle = 0;
 
                 this.$store.state.surveyMarkers['unknown'].push(survey);
-                console.log('elevation-confirmAddSurveyMarker', this.$store.state.surveyMarkers);
 
                 this.updateSurveyPath('unknown', this.$store.state.surveyMarkers.unknown.length-1, 20, 0, 1);
 
-                this.doBroadcastAddSurveyMarker(JSON.parse(JSON.stringify(survey)));
+                this.doBroadcastConfirmAddSurveyMarker(JSON.parse(JSON.stringify(survey)));
 
                 survey = null;
 
                 this.postCinSurveyMarkerInfoToMobius('unknown');
 
                 this.$store.state.adding = false;
-                //});
             },
 
             cancelMarker() {
@@ -1969,20 +1899,6 @@
             },
 
             addingMarker(e) {
-                //this.drawBoundaryCircles(100);
-
-                //this.curBoundaryRadius = 1;
-
-                // for(let dName in this.boundaryCircles) {
-                //     if (Object.prototype.hasOwnProperty.call(this.boundaryCircles, dName)) {
-                //         this.boundaryCircles[dName].radius = this.curBoundaryRadius;
-                //     }
-                // }
-                //
-                // let temp = JSON.parse(JSON.stringify(this.boundaryCircles));
-                // delete this.boundaryCircles;
-                // this.boundaryCircles = null;
-                // this.boundaryCircles = JSON.parse(JSON.stringify(temp));
 
                 console.log(e);
 
@@ -2004,8 +1920,6 @@
                 this.context.top = e.domEvent.clientY-50;
 
                 console.log('context', this.context);
-
-                this.context_flag = true;
 
                 this.curInfoTempMarkerFlag = false;
                 this.curInfoSurveyMarkerFlag = false;
@@ -2034,20 +1948,7 @@
                     }
                 }
 
-                //this.$store.commit('setAllTempMarker', false);
-
-                // console.log('addingMarker', e.domEvent);
-                //
-                // e.domEvent.preventDefault();
-                //
-                // e.domEvent.cancelBubble = true;
-                //
-                // console.log('addingMarker', e.domEvent);
-                //
-                // e.domEvent.stopPropagation();
-
-
-                // return false;
+                this.context_flag = true;
             },
 
             printPosClick(e) {
@@ -2104,7 +2005,9 @@
                     }
                 }
 
-                //EventBus.$emit('do-targetDrone');
+                setTimeout(() => {
+                    this.$store.state.drone_command_prepared = false;
+                }, 100);
 
                 this.cancelMarker();
             },
@@ -2152,16 +2055,22 @@
                         marker.targeted = false;
                     });
 
-                    this.$store.state.surveyMarkers[dName].forEach((marker, index) => {
-                        marker.selected = false;
+                    for (var d_name in this.$store.state.drone_infos) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, d_name)) {
+                            if (this.$store.state.drone_infos[d_name].selected) {
+                                this.$store.state.surveyMarkers[d_name].forEach((marker, index) => {
+                                    marker.selected = false;
 
-                        if (pIndex !== index) {
-                            marker.targeted = false;
+                                    if (pIndex !== index) {
+                                        marker.targeted = false;
+                                    }
+
+                                    marker.polygonDraggable = false;
+                                    marker.polygonEditable = false;
+                                });
+                            }
                         }
-
-                        marker.polygonDraggable = false;
-                        marker.polygonEditable = false;
-                    });
+                    }
 
                     this.$store.state.surveyMarkers[dName][pIndex].targeted = !this.$store.state.surveyMarkers[dName][pIndex].targeted;
 
@@ -2169,7 +2078,6 @@
                     if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
                         this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = pIndex;
                     }
-
 
                     if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         this.$store.state.drone_command_prepared = false;
@@ -2565,9 +2473,39 @@
                 }
             },
 
-            getCinTempMarkerInfoFromMobius(dName, callback) {
-                let self = this;
+            getCinSurveyMarkerInfoFromMobius(dName, callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'get',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName + '/la',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(
+                    (res) => {
 
+                        console.log('getCinSurveyMarkerInfoFromMobius', 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName + '/la', res.data['m2m:cin'].con);
+
+                        if (res.status === 200) {
+                            callback(res.status, res.data['m2m:cin'].con);
+                        }
+                        else {
+                            callback(res.status, '');
+                        }
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            getCinTempMarkerInfoFromMobius(dName, callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -2581,9 +2519,8 @@
                         'Content-Type': 'application/json'
                     }
                 }).then(
-                    function (res) {
-
-                        console.log('getCinDroneInfoFromMobius', 'http://' + self.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + self.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName + '/la', res.data['m2m:cin'].con);
+                    (res) => {
+                        console.log('getCinTempMarkerInfoFromMobius', 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName + '/la', res.data['m2m:cin'].con);
 
                         if (res.status === 200) {
                             callback(res.status, res.data['m2m:cin'].con);
@@ -2626,6 +2563,15 @@
                                 }
                             });
                         }
+                        else if (watchingPayload.broadcastMission === 'confirmAddSurveyMarker') {
+                            let dName = watchingPayload.payload.dName;
+                            this.getCinSurveyMarkerInfoFromMobius(dName, (status, con) => {
+                                if(status === 200) {
+                                    this.$store.state.surveyMarkers[dName] = null;
+                                    this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(con));
+                                }
+                            });
+                        }
                         else if (watchingPayload.broadcastMission === 'broadcastRegisterTempMarker') {
                             let dName = watchingPayload.dName;
                             this.getCinTempMarkerInfoFromMobius(dName, (status, con) => {
@@ -2654,7 +2600,7 @@
                 this.$store.state.didIPublish = false;
             },
 
-            doBroadcastAddMarker(payload) {
+            doBroadcastConfirmAddTempMarker(payload) {
                 let watchingPayload = {};
                 watchingPayload.broadcastMission = 'confirmAddTempMarker';
                 watchingPayload.payload = payload;
@@ -2666,7 +2612,7 @@
                 this.$store.state.didIPublish = true;
             },
 
-            doBroadcastAddSurveyMarker(payload) {
+            doBroadcastConfirmAddSurveyMarker(payload) {
                 let watchingPayload = {};
                 watchingPayload.broadcastMission = 'confirmAddSurveyMarker';
                 watchingPayload.payload = payload;

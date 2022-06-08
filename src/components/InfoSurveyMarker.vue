@@ -172,6 +172,19 @@
                                 </v-col>
                                 <v-col cols="1">
                                     <v-text-field
+                                        label="옵셋고도(m)"
+                                        v-model="paramOffsetAlt"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details
+                                        color="amber"
+                                        min="3"
+                                        max="500"
+                                        @input="changeParamShooting($event, 'paramOffsetAlt')"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
                                         label="촬영고도(m)"
                                         v-model="paramAlt"
                                         class="mt-0 pt-0"
@@ -399,6 +412,7 @@
                 paramGap: 10,
                 paramPeriod: 10,
                 paramAlt: 100,
+                paramOffsetAlt: 0,
                 paramSpeed: 5,
 
                 elevation: 0,
@@ -459,14 +473,18 @@
 
                 //console.log(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations);
 
-                let eiganVal = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist / 256);
-                console.log('eiganVal', eiganVal);
+                let unitVal = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist / 256);
+                console.log('unitVal', unitVal);
                 let labels = [0];
                 let dist = 0;
                 for(let i = 1; i < 256; i++) {
-                    dist += eiganVal;
+                    dist += unitVal;
                     labels.push(dist);
                 }
+
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt = Array(256).fill(parseInt(this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt));
+
+                console.log('takeoffAlt - ', this.$store.state.drone_infos[this.markerName].absolute_alt, this.$store.state.drone_infos[this.markerName].alt, this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt)
 
                 const ctx = document.getElementById('elevation-chart-'+this.markerName).getContext('2d');
                 let config = {
@@ -500,10 +518,24 @@
                             },
                             {
                                 type: 'line',
-                                label: 'Line Dataset',
+                                label: '비행고도',
                                 data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt,
                                 backgroundColor: Array(256).fill('rgba(255, 99, 132, 0.2)'),
                                 borderColor: Array(256).fill('rgba(255, 99, 132, 1)'),
+                            },
+                            {
+                                type: 'line',
+                                label: '옵셋고도',
+                                data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt,
+                                backgroundColor: Array(256).fill('rgba(255, 206, 86, 0.2)'),
+                                borderColor: Array(256).fill('rgba(255, 206, 86, 1)'),
+                            },
+                            {
+                                type: 'line',
+                                label: '이륙고도',
+                                data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt,
+                                backgroundColor: Array(256).fill('rgba(54, 162, 235, 1)'),
+                                borderColor: Array(256).fill('rgba(54, 162, 235, 0.2)'),
                             },
                         ],
                     },
@@ -511,7 +543,7 @@
                         scales: {
                             y: {beginAtZero: true}
                         },
-                        // responsive: false,
+                        responsive: true,
                         maintainAspectRatio: false,
                     }
                 };
@@ -565,13 +597,18 @@
                     } else if (factor === 'Overlap') {
                         this.paramOverlap = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap = val;
-                    } else if (factor === 'Alt') {
+                    }
+                    else if (factor === 'Alt') {
                         this.paramAlt = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt = val;
+
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
 
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = [];
                         if(this.flyAltType === '상대고도') {
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(256).fill(parseInt(this.paramOffsetAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
                         }
                         else {
                             for(let i = 0; i < 256; i++) {
@@ -580,7 +617,28 @@
                                 );
                             }
                         }
-                    } else if (factor === 'Speed') {
+                    }
+                    else if (factor === 'paramOffsetAlt') {
+                        this.paramOffsetAlt = val;
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramOffsetAlt = val;
+
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
+
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = [];
+                        if(this.flyAltType === '상대고도') {
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(256).fill(parseInt(this.paramOffsetAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
+                        }
+                        else {
+                            for(let i = 0; i < 256; i++) {
+                                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
+                                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i] + parseInt(this.paramAlt)
+                                );
+                            }
+                        }
+                    }
+                    else if (factor === 'Speed') {
                         this.paramSpeed = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = val;
                     }
@@ -707,12 +765,6 @@
                     this.postCinSurveyMarkerInfoToMobius(this.markerName);
 
                     this.postCinSurveyMarkerInfoToMobius('unknown');
-
-                    // let temp = JSON.parse(JSON.stringify(state.tempMarkers));
-                    // state.tempMarkers = null;
-                    // state.tempMarkers = {};
-                    // state.tempMarkers = JSON.parse(JSON.stringify(temp));
-                    // temp = null;
                 }
 
                 this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
@@ -872,7 +924,8 @@
             this.paramAngle = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].angle;
             this.paramDir = (this.$store.state.surveyMarkers[this.markerName][this.markerIndex].dir === 1) ? 'cw' : 'ccw';
             this.paramGap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap;
-            this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt;
+            this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt;
+            this.paramOffsetAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramOffsetAlt;
 
             if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'focal')) {
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal = 16;
