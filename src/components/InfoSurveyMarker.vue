@@ -575,7 +575,7 @@
 
             calcFactorSurvey(focal, sensor_h, overlap, alt, speed) {
                 let interval_t = (sensor_h * alt * (1-overlap)) / (focal * speed);
-                let interval_l = interval_t * 5;
+                let interval_l = interval_t * speed;
 
                 return({'interval_t': interval_t, 'interval_l': interval_l});
             },
