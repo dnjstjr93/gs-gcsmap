@@ -1450,17 +1450,20 @@
                 .then(({ results }) => {
                     if (results[0]) {
                         this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
+                        this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
 
-                        //console.log('getElevationAlongPath');
+                        //console.log('getElevationAlongPath', results);
 
-                        console.log(this.$store.state.drone_infos[dName].absolute_alt);
+                        //console.log(this.$store.state.drone_infos[dName].absolute_alt);
 
-                        let diff_alt = this.$store.state.drone_infos[dName].alt - this.$store.state.drone_infos[dName].absolute_alt;
+                        //let diff_alt = this.$store.state.drone_infos[dName].alt - this.$store.state.drone_infos[dName].absolute_alt;
 
                         for (let i = 0; i < results.length; i++) {
-                            //console.log(results[i]);
+                            //console.log(results[i].elevation, results[i].location.lat(), results[i].location.lng());
 
-                            this.$store.state.surveyMarkers[dName][pIndex].elevations.push((results[i].elevation - diff_alt));
+                            //this.$store.state.surveyMarkers[dName][pIndex].elevations.push((results[i].elevation - diff_alt));
+                            this.$store.state.surveyMarkers[dName][pIndex].elevations.push((results[i].elevation));
+                            this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: results[i].location.lat(), lng: results[i].location.lng()});
                         }
                     }
                     else {
@@ -2911,6 +2914,7 @@
             EventBus.$off('clearAllPlaneMarker');
             // EventBus.$off('draw-gotoLines');
 
+            EventBus.$off('do-update-survey-GcsMap');
             EventBus.$off('do-rotate-map');
         }
     }

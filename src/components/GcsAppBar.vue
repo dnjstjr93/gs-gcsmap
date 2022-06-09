@@ -1732,6 +1732,17 @@
                                         marker.offsetAlt = Array(256).fill(0);
                                     }
 
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'flyAltType')) {
+                                        marker.flyAltType = '상대고도';
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'elevations')) {
+                                        marker.elevations = [];
+                                    }
+
+                                    if(!Object.prototype.hasOwnProperty.call(marker, 'elevations_location')) {
+                                        marker.elevations_location = [];
+                                    }
 
                                     marker.polygonDraggable = false;
                                     marker.polygonEditable = false;

@@ -1865,46 +1865,91 @@ export default {
                             //this.$store.state.drone_infos[dName].startWay = this.startWay[dName];
 
                             this.position_selections_items[dName] = [];
-                            for (let idx in this.$store.state.surveyMarkers[dName][pIndex].pathLines) {
-                                if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName][pIndex].pathLines, idx)) {
-                                    let strPos = this.$store.state.surveyMarkers[dName][pIndex].pathLines[idx].lat + ':' +
-                                        this.$store.state.surveyMarkers[dName][pIndex].pathLines[idx].lng + ':' +
+                            if(this.$store.state.surveyMarkers[dName][pIndex].flyAltType === '상대고도') {
+                                for (let idx in this.$store.state.surveyMarkers[dName][pIndex].pathLines) {
+                                    if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName][pIndex].pathLines, idx)) {
+                                        let strPos = this.$store.state.surveyMarkers[dName][pIndex].pathLines[idx].lat + ':' +
+                                            this.$store.state.surveyMarkers[dName][pIndex].pathLines[idx].lng + ':' +
+                                            this.$store.state.surveyMarkers[dName][pIndex].alt + ':' +
+                                            this.$store.state.surveyMarkers[dName][pIndex].speed + ':' +
+                                            // this.targetAlt[dName] + ':' +
+                                            // this.targetSpeed[dName] + ':' +
+                                            '100:5:16:' +
+                                            this.$store.state.drone_infos[dName].targetStayTime + ':0';
+                                        this.position_selections_items[dName].push(strPos);
+                                    }
+                                }
+
+                                if(this.$store.state.surveyMarkers[dName].startWay === '중간부터') {
+                                    console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
+
+                                    let strPos = this.$store.state.drone_infos[dName].pausePosition.lat + ':' +
+                                        this.$store.state.drone_infos[dName].pausePosition.lng + ':' +
                                         this.$store.state.surveyMarkers[dName][pIndex].alt + ':' +
                                         this.$store.state.surveyMarkers[dName][pIndex].speed + ':' +
-                                        // this.targetAlt[dName] + ':' +
-                                        // this.targetSpeed[dName] + ':' +
-                                        '100:5:16:' +
-                                        this.$store.state.drone_infos[dName].targetStayTime + ':0';
-                                    this.position_selections_items[dName].push(strPos);
+                                        '100:5:16:0:0';
+
+                                    let payload = {};
+                                    payload.position = strPos;
+                                    payload.mission_current_number = this.$store.state.drone_infos[dName].curMissionItemReached
+
+                                    EventBus.$emit('command-set-mission_rewind-' + dName, payload);
+                                }
+                                else {
+                                    console.log('setSurvey', 0, parseInt(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length - 1), this.$store.state.drone_infos[dName].autoDelay);
+                                    let payload = {};
+                                    payload.start_index = 0;
+                                    payload.end_index = this.$store.state.surveyMarkers[dName][pIndex].pathLines.length - 1;
+                                    payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
+                                    EventBus.$emit('command-set-auto_goto-' + dName, payload);
+
+                                    payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
+                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' keti';
+                                    EventBus.$emit('do-publish-' + dName, payload);
                                 }
                             }
-
-                            if(this.$store.state.surveyMarkers[dName].startWay === '중간부터') {
-                                console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
-
-                                let strPos = this.$store.state.drone_infos[dName].pausePosition.lat + ':' +
-                                    this.$store.state.drone_infos[dName].pausePosition.lng + ':' +
-                                    this.$store.state.surveyMarkers[dName][pIndex].alt + ':' +
-                                    this.$store.state.surveyMarkers[dName][pIndex].speed + ':' +
-                                    '100:5:16:0:0';
-
-                                let payload = {};
-                                payload.position = strPos;
-                                payload.mission_current_number = this.$store.state.drone_infos[dName].curMissionItemReached
-
-                                EventBus.$emit('command-set-mission_rewind-' + dName, payload);
-                            }
                             else {
-                                console.log('setSurvey', 0, parseInt(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length - 1), this.$store.state.drone_infos[dName].autoDelay);
-                                let payload = {};
-                                payload.start_index = 0;
-                                payload.end_index = this.$store.state.surveyMarkers[dName][pIndex].pathLines.length - 1;
-                                payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
-                                EventBus.$emit('command-set-auto_goto-' + dName, payload);
+                                for (let idx in this.$store.state.surveyMarkers[dName][pIndex].elevations_location) {
+                                    if (Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName][pIndex].elevations_location, idx)) {
+                                        let strPos = this.$store.state.surveyMarkers[dName][pIndex].elevations_location[idx].lat + ':' +
+                                            this.$store.state.surveyMarkers[dName][pIndex].elevations_location[idx].lng + ':' +
+                                            this.$store.state.surveyMarkers[dName][pIndex].flyAlt[idx] + ':' +
+                                            this.$store.state.surveyMarkers[dName][pIndex].speed + ':' +
+                                            // this.targetAlt[dName] + ':' +
+                                            // this.targetSpeed[dName] + ':' +
+                                            '100:5:16:' +
+                                            this.$store.state.drone_infos[dName].targetStayTime + ':0';
+                                        this.position_selections_items[dName].push(strPos);
+                                    }
+                                }
 
-                                payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
-                                payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' keti';
-                                EventBus.$emit('do-publish-' + dName, payload);
+                                if(this.$store.state.surveyMarkers[dName].startWay === '중간부터') {
+                                    console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
+
+                                    let strPos = this.$store.state.drone_infos[dName].pausePosition.lat + ':' +
+                                        this.$store.state.drone_infos[dName].pausePosition.lng + ':' +
+                                        this.$store.state.surveyMarkers[dName][pIndex].alt + ':' +
+                                        this.$store.state.surveyMarkers[dName][pIndex].speed + ':' +
+                                        '100:5:16:0:0';
+
+                                    let payload = {};
+                                    payload.position = strPos;
+                                    payload.mission_current_number = this.$store.state.drone_infos[dName].curMissionItemReached
+
+                                    EventBus.$emit('command-set-mission_rewind-' + dName, payload);
+                                }
+                                else {
+                                    console.log('setSurvey', 0, parseInt(this.$store.state.surveyMarkers[dName][pIndex].elevations_location.length - 1), this.$store.state.drone_infos[dName].autoDelay);
+                                    let payload = {};
+                                    payload.start_index = 0;
+                                    payload.end_index = this.$store.state.surveyMarkers[dName][pIndex].elevations_location.length - 1;
+                                    payload.goto_positions = JSON.parse(JSON.stringify(this.position_selections_items[dName]));
+                                    EventBus.$emit('command-set-auto_goto-' + dName, payload);
+
+                                    payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
+                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' keti';
+                                    EventBus.$emit('do-publish-' + dName, payload);
+                                }
                             }
                         }
                         else {

@@ -193,7 +193,7 @@
                                         color="amber"
                                         min="3"
                                         max="500"
-                                        @input="changeParamShooting($event, 'Alt')"
+                                        @input="changeParamShooting($event, 'paramAlt')"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="1">
@@ -278,7 +278,7 @@
                                         color="amber"
                                         min="3"
                                         max="500"
-                                        @input="changeParamSearch($event, 'Alt')"
+                                        @input="changeParamSearch($event, 'paramAlt')"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="1">
@@ -467,10 +467,6 @@
                     this.myChart.destroy();
                 }
 
-                if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'elevations')) {
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations = [];
-                }
-
                 //console.log(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations);
 
                 let unitVal = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist / 256);
@@ -555,8 +551,9 @@
                 console.log(altType, this.markerName);
 
                 this.flyAltType = altType;
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAltType = altType;
 
-                this.changeParamShooting(this.paramAlt, 'Alt');
+                this.changeParamShooting(this.paramAlt, 'paramAlt');
             },
 
             changeWayOfSurvey(val) {
@@ -598,7 +595,7 @@
                         this.paramOverlap = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap = val;
                     }
-                    else if (factor === 'Alt') {
+                    else if (factor === 'paramAlt') {
                         this.paramAlt = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt = val;
 
@@ -613,7 +610,7 @@
                         else {
                             for(let i = 0; i < 256; i++) {
                                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
-                                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i] + parseInt(this.paramAlt)
+                                    parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
                                 );
                             }
                         }
@@ -633,7 +630,7 @@
                         else {
                             for(let i = 0; i < 256; i++) {
                                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
-                                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i] + parseInt(this.paramAlt)
+                                    parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
                                 );
                             }
                         }
@@ -660,7 +657,7 @@
 
             changeParamSearch(val, factor) {
                 if(val !== '') {
-                    if (factor === 'Alt') {
+                    if (factor === 'paramAlt') {
                         this.paramAlt = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = val;
 
