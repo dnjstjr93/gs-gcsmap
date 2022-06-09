@@ -906,6 +906,39 @@
                                                             </v-col>
                                                         </v-row>
                                                     </v-card>
+                                                    <v-card tile flat v-if="(command.title === '투하')">
+                                                        <div v-for="(d, dName) in $store.state.drone_infos"
+                                                             :key="'params'+dName">
+                                                            <div v-if="d.selected && d.targeted">
+                                                                <v-row no-gutters>
+                                                                    <v-col cols="12">
+                                                                        <v-subheader>{{ d.name }} 투하 장치 제어:
+                                                                        </v-subheader>
+                                                                    </v-col>
+                                                                    <table>
+                                                                        <tr v-for="item in items" :key="item.first">
+                                                                            <td @click="setPoint(item.first)"><span
+                                                                                v-html="item.first"></span></td>
+                                                                            <td @click="setPoint(item.second)"><span
+                                                                                v-html="item.second"></span></td>
+                                                                            <td @click="setPoint(item.third)"><span
+                                                                                v-html="item.third"></span></td>
+                                                                            <td @click="setPoint(item.fourth)"><span
+                                                                                v-html="item.fourth"></span></td>
+                                                                            <td @click="setPoint(item.fifth)"><span
+                                                                                v-html="item.fifth"></span></td>
+                                                                            <td @click="setPoint(item.sixth)"><span
+                                                                                v-html="item.sixth"></span></td>
+                                                                            <td @click="setPoint(item.seventh)"><span
+                                                                                v-html="item.seventh"></span></td>
+                                                                            <td @click="setPoint(item.eighth)"><span
+                                                                                v-html="item.eighth"></span></td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </v-row>
+                                                            </div>
+                                                        </div>
+                                                    </v-card>
                                                 </v-col>
                                             </v-row>
                                         </div>
@@ -1054,6 +1087,7 @@ export default {
         return {
             drawRadiusUpdateTimer: null,
 
+            items: [],
             point: '8,8',
             dropped_point: [],
 
@@ -1381,9 +1415,7 @@ export default {
                         td[tar_point].style.color = '#FFFFFF';
                         td[tar_point].style['font-weight'] = 'bold';
 
-                        this.dropped_point.push(tar_point)
-                        console.log('setDropCommand', this.dropped_point);
-
+                        this.dropped_point.push(tar_point);
                     }
                 }
             }
@@ -1987,6 +2019,19 @@ export default {
     },
 
     mounted() {
+        for (let i = 0; i < 8; i++) {
+            let row = {
+                "first": i+",0",
+                "second": i+",1",
+                "third": i+",2",
+                "fourth": i+",3",
+                "fifth": i+",4",
+                "sixth": i+",5",
+                "seventh": i+",6",
+                "eighth": i+",7"
+            };
+            this.items.push(row);
+        }
     },
 
     beforeDestroy() {
