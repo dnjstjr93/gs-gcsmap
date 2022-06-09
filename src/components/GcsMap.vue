@@ -102,7 +102,6 @@
                             :draggable="false"
                             :icon="p.icon"
                             :label="p.label"
-                            @click="targetPlaneMarker($event, p, pIndex)"
                             :title="p.name"
                         />
 
@@ -2745,10 +2744,10 @@
             //     this.targetDroneMarker('', dMarker, pName);
             // });
 
-            EventBus.$on('do-targetPlaneMarker', (pName) => {
-                let pMarker = this.planeMarkers[pName];
-                this.targetPlaneMarker('', pMarker, pName);
-            });
+            // EventBus.$on('do-targetPlaneMarker', (pName) => {
+            //     let pMarker = this.planeMarkers[pName];
+            //     this.targetPlaneMarker('', pMarker, pName);
+            // });
 
             EventBus.$on('gcs-map-ready', () => {
                 this.readyFlagGcsMap = true;

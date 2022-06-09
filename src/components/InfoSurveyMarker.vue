@@ -923,6 +923,7 @@
             this.paramGap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap;
             this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt;
             this.paramOffsetAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramOffsetAlt;
+            this.flyAltType = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAltType;
 
             if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'focal')) {
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal = 16;
