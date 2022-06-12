@@ -1098,7 +1098,9 @@
                                 localStorage.setItem(dName+'_selected', String(this.$store.state.drone_infos[dName].selected));
                             }
 
-                            this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
+                            if(dName !== 'unknown') {
+                                this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
+                            }
 
                             if(this.$store.state.drone_infos[dName].selected) {
                                 this.selected.push(this.$store.state.drone_infos[dName]);
