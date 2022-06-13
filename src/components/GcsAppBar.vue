@@ -2179,12 +2179,6 @@ export default {
 
             for(let el in this.form) {
                 if(Object.prototype.hasOwnProperty.call(this.form, el)) {
-                    // if (!this.form[el]) {
-                    //     this.formHasErrors = true;
-                    // }
-
-                    // console.log(el);
-
                     this.$refs[el].validate(true);
                 }
             }
@@ -2242,38 +2236,25 @@ export default {
             this.update_dialog = false;
         },
 
-        update_submit () {
+        update_submit() {
             this.formHasErrors = false;
 
             for(let el in this.form) {
                 if(Object.prototype.hasOwnProperty.call(this.form, el)) {
-                    // if (!this.form[el]) {
-                    //     this.formHasErrors = true;
-                    //
-                    //     console.log(el);
-                    // }
-                    //
-                    // console.log(el);
-
                     this.$refs[el].validate(true);
                 }
             }
 
             if(this.formHasErrors === false) {
-                console.log('update_submit', this.$store.state.drone_infos[this.drone_name]);
-
-                let payload = JSON.parse(JSON.stringify(this.$store.state.drone_infos[this.drone_name]));
-                payload.host = this.host;
-                payload.gcs = this.gcs;
-                payload.type = this.type_selected;
-                payload.color = this.$store.state.refColorValue[this.color_selected];
-                payload.name = this.drone_name;
-                payload.drone_host = this.drone_host;
-                payload.id = this.drone_id;
-                payload.bat_cell = this.bat_cell;
-                payload.system_id = this.system_id;
-
-                this.$store.commit('updateDroneInfos', payload);
+                this.$store.state.drone_infos[this.drone_name].host = this.host;
+                this.$store.state.drone_infos[this.drone_name].gcs = this.gcs;
+                this.$store.state.drone_infos[this.drone_name].type = this.type_selected;
+                this.$store.state.drone_infos[this.drone_name].color = this.$store.state.refColorValue[this.color_selected];
+                this.$store.state.drone_infos[this.drone_name].name = this.drone_name;
+                this.$store.state.drone_infos[this.drone_name].drone_host = this.drone_host;
+                this.$store.state.drone_infos[this.drone_name].id = this.drone_id;
+                this.$store.state.drone_infos[this.drone_name].bat_cell = this.bat_cell;
+                this.$store.state.drone_infos[this.drone_name].system_id = this.system_id;
 
                 this.selected = null;
                 this.selected = [];
@@ -2296,48 +2277,8 @@ export default {
                     this.update_dialog = false;
                     this.fab = false;
 
-                    payload = null;
-
                     this.resetForm();
                 });
-
-                //
-                // axios({
-                //     validateStatus: function (status) {
-                //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                //         return status < 500;
-                //     },
-                //     method: 'put',
-                //     url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':3000/info/'+this.drone_id,
-                //     headers: {
-                // 'X-M2M-RI': String(parseInt(Math.random()*10000)),
-                //         'X-M2M-Origin': 'SVue',
-                //         'Content-Type': 'application/json'
-                //     },
-                //     data: payload
-                // }).then(
-                //     function (res) {
-                //         console.log(res.data);
-                //
-                //         let update_profile = {};
-                //         update_profile.index = self.update_idx;
-                //         update_profile.profile = payload;
-                //
-                //         self.$store.commit('updateDroneInfos', update_profile);
-                //         self.update_dialog = false;
-                //         self.fab = false;
-                //
-                //         self.resetForm();
-                //     }
-                // ).catch(
-                //     function (err) {
-                //         console.log(err.message);
-                //         self.update_dialog = false;
-                //         self.fab = false;
-                //
-                //         self.resetForm();
-                //     }
-                // );
             }
 
         },
