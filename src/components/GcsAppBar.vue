@@ -239,7 +239,7 @@
                                 <v-avatar
                                     size="32"
                                     class="white--text"
-                                    v-text="item.color.toString().slice(0,1).toUpperCase()"
+                                    v-text="String(item.color).slice(0,1).toUpperCase()"
                                     :color="item.color"
                                 ></v-avatar>
                             </template>
@@ -496,6 +496,7 @@ export default {
 
     data: function () {
         return {
+            drone_infos: {},
             mapAngleDialog: false,
             mapAngle: 0,
             open: false,
@@ -595,20 +596,6 @@ export default {
             bottom: true,
             left: false,
             transition: 'slide-y-reverse-transition',
-            items: [
-                {
-                    src: 'backgrounds/bg.jpg',
-                },
-                {
-                    src: 'backgrounds/md.jpg',
-                },
-                {
-                    src: 'backgrounds/bg-2.jpg',
-                },
-                {
-                    src: 'backgrounds/md2.jpg',
-                },
-            ],
             headers: [
                 {text: 'color', value: 'color'},
                 {
@@ -624,88 +611,6 @@ export default {
                 {text: 'gcs', value: 'gcs'},
                 {text: '...', value: 'update'},
                 {text: '...', value: 'del'},
-            ],
-            desserts: [
-                {
-                    name: 'Frozen Yogurt',
-                    id: 159,
-                    fat: 6.0,
-                    carbs: 24,
-                    protein: 4.0,
-                    iron: '1%',
-                },
-                {
-                    name: 'Ice cream sandwich',
-                    id: 237,
-                    fat: 9.0,
-                    carbs: 37,
-                    protein: 4.3,
-                    iron: '1%',
-                },
-                {
-                    name: 'Eclair',
-                    id: 262,
-                    fat: 16.0,
-                    carbs: 23,
-                    protein: 6.0,
-                    iron: '7%',
-                },
-                {
-                    name: 'Cupcake',
-                    id: 305,
-                    fat: 3.7,
-                    carbs: 67,
-                    protein: 4.3,
-                    iron: '8%',
-                },
-                {
-                    name: 'Gingerbread',
-                    id: 356,
-                    fat: 16.0,
-                    carbs: 49,
-                    protein: 3.9,
-                    iron: '16%',
-                },
-                {
-                    name: 'Jelly bean',
-                    id: 375,
-                    fat: 0.0,
-                    carbs: 94,
-                    protein: 0.0,
-                    iron: '0%',
-                },
-                {
-                    name: 'Lollipop',
-                    id: 392,
-                    fat: 0.2,
-                    carbs: 98,
-                    protein: 0,
-                    iron: '2%',
-                },
-                {
-                    name: 'Honeycomb',
-                    id: 408,
-                    fat: 3.2,
-                    carbs: 87,
-                    protein: 6.5,
-                    iron: '45%',
-                },
-                {
-                    name: 'Donut',
-                    id: 452,
-                    fat: 25.0,
-                    carbs: 51,
-                    protein: 4.9,
-                    iron: '22%',
-                },
-                {
-                    name: 'KitKat',
-                    id: 518,
-                    fat: 26.0,
-                    carbs: 65,
-                    protein: 7,
-                    iron: '6%',
-                },
             ],
         }
     },
@@ -1047,116 +952,116 @@ export default {
                     if (status === 200) {
                         console.log(count, dName, con);
 
-                        this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(con));
+                        this.drone_infos[dName] = JSON.parse(JSON.stringify(con));
 
                         if (localStorage.getItem(dName + '_selected')) {
-                            this.$store.state.drone_infos[dName].selected = (localStorage.getItem(dName + '_selected') === 'true');
+                            this.drone_infos[dName].selected = (localStorage.getItem(dName + '_selected') === 'true');
                         }
                         else {
-                            localStorage.setItem(dName + '_selected', String(this.$store.state.drone_infos[dName].selected));
+                            localStorage.setItem(dName + '_selected', String(this.drone_infos[dName].selected));
                         }
 
                         if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
+                            this.drone_infos_list.push(this.drone_infos[dName]);
                         }
 
-                        if (this.$store.state.drone_infos[dName].selected) {
-                            this.selected.push(this.$store.state.drone_infos[dName]);
+                        if (this.drone_infos[dName].selected) {
+                            this.selected.push(this.drone_infos[dName]);
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
-                            this.$store.state.drone_infos[dName].targeted = false;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targeted')) {
+                            this.drone_infos[dName].targeted = false;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'home_position')) {
-                            this.$store.state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'home_position')) {
+                            this.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'gotoType')) {
-                            this.$store.state.drone_infos[dName].gotoType = '바로이동';
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'gotoType')) {
+                            this.drone_infos[dName].gotoType = '바로이동';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetModeSelection')) {
-                            this.$store.state.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetModeSelection')) {
+                            this.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetSpeed')) {
-                            this.$store.state.drone_infos[dName].targetSpeed = 5;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetSpeed')) {
+                            this.drone_infos[dName].targetSpeed = 5;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'alt')) {
-                            this.$store.state.drone_infos[dName].alt = 0;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'alt')) {
+                            this.drone_infos[dName].alt = 0;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTurningSpeed')) {
-                            this.$store.state.drone_infos[dName].targetTurningSpeed = 5;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetTurningSpeed')) {
+                            this.drone_infos[dName].targetTurningSpeed = 5;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetRadius')) {
-                            this.$store.state.drone_infos[dName].targetRadius = 50;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetRadius')) {
+                            this.drone_infos[dName].targetRadius = 50;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTakeoffAlt')) {
-                            this.$store.state.drone_infos[dName].targetTakeoffAlt = 20;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetTakeoffAlt')) {
+                            this.drone_infos[dName].targetTakeoffAlt = 20;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'circleType')) {
-                            this.$store.state.drone_infos[dName].circleType = '시계방향';
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'circleType')) {
+                            this.drone_infos[dName].circleType = '시계방향';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetAlt')) {
-                            this.$store.state.drone_infos[dName].targetAlt = 20;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetAlt')) {
+                            this.drone_infos[dName].targetAlt = 20;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'lastFlightTime')) {
-                            this.$store.state.drone_infos[dName].lastFlightTime = 0;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'lastFlightTime')) {
+                            this.drone_infos[dName].lastFlightTime = 0;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoStartIndex')) {
-                            this.$store.state.drone_infos[dName].autoStartIndex = '0';
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'autoStartIndex')) {
+                            this.drone_infos[dName].autoStartIndex = '0';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoEndIndex')) {
-                            this.$store.state.drone_infos[dName].autoEndIndex = '0';
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'autoEndIndex')) {
+                            this.drone_infos[dName].autoEndIndex = '0';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoDelay')) {
-                            this.$store.state.drone_infos[dName].autoDelay = 1;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'autoDelay')) {
+                            this.drone_infos[dName].autoDelay = 1;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoSpeed')) {
-                            this.$store.state.drone_infos[dName].autoSpeed = 5;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'autoSpeed')) {
+                            this.drone_infos[dName].autoSpeed = 5;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curArmStatus')) {
-                            this.$store.state.drone_infos[dName].curArmStatus = 'DISARMED';
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'curArmStatus')) {
+                            this.drone_infos[dName].curArmStatus = 'DISARMED';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffAbsoluteAlt')) {
-                            this.$store.state.drone_infos[dName].takeoffAbsoluteAlt = 0;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'takeoffAbsoluteAlt')) {
+                            this.drone_infos[dName].takeoffAbsoluteAlt = 0;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
-                            this.$store.state.drone_infos[dName].targeted = false;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targeted')) {
+                            this.drone_infos[dName].targeted = false;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'headingLine')) {
-                            this.$store.state.drone_infos[dName].headingLine = [];
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'headingLine')) {
+                            this.drone_infos[dName].headingLine = [];
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'directionLine')) {
-                            this.$store.state.drone_infos[dName].directionLine = [];
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'directionLine')) {
+                            this.drone_infos[dName].directionLine = [];
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'client')) {
-                            this.$store.state.drone_infos[dName].client = {
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'client')) {
+                            this.drone_infos[dName].client = {
                                 connected: false,
                                 loading: false
                             };
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'pausePosition')) {
-                            this.$store.state.drone_infos[dName].pausePosition = {
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'pausePosition')) {
+                            this.drone_infos[dName].pausePosition = {
                                 lat: 0,
                                 lng: 0,
                                 alt: 0,
@@ -1164,47 +1069,51 @@ export default {
                             };
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetStayTime')) {
-                            this.$store.state.drone_infos[dName].targetStayTime = 0;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetStayTime')) {
+                            this.drone_infos[dName].targetStayTime = 0;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'yawBehavior')) {
-                            this.$store.state.drone_infos[dName].yawBehavior = 'YAW고정';
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'yawBehavior')) {
+                            this.drone_infos[dName].yawBehavior = 'YAW고정';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'flyShape')) {
-                            this.$store.state.drone_infos[dName].flyShape = '직선비행';
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'flyShape')) {
+                            this.drone_infos[dName].flyShape = '직선비행';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'startWay')) {
-                            this.$store.state.drone_infos[dName].startWay = '처음부터';
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'startWay')) {
+                            this.drone_infos[dName].startWay = '처음부터';
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curMissionItemReached')) {
-                            this.$store.state.drone_infos[dName].curMissionItemReached = 0;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'curMissionItemReached')) {
+                            this.drone_infos[dName].curMissionItemReached = 0;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curTargetedTempMarkerIndex')) {
-                            this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'curTargetedTempMarkerIndex')) {
+                            this.drone_infos[dName].curTargetedTempMarkerIndex = -1;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curTargetedSurveyMarkerIndex')) {
-                            this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'curTargetedSurveyMarkerIndex')) {
+                            this.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'absolute_alt')) {
-                            this.$store.state.drone_infos[dName].absolute_alt = 0;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'absolute_alt')) {
+                            this.drone_infos[dName].absolute_alt = 0;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'rtlSpeed')) {
-                            this.$store.state.drone_infos[dName].rtlSpeed = 5;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'rtlSpeed')) {
+                            this.drone_infos[dName].rtlSpeed = 5;
                         }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffDelay')) {
-                            this.$store.state.drone_infos[dName].takeoffDelay = 6;
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'takeoffDelay')) {
+                            this.drone_infos[dName].takeoffDelay = 6;
                         }
 
-                        this.$store.state.drone_infos[dName].targeted = false;
+                        this.drone_infos[dName].targeted = false;
+
+                        if(dName === 'unknown' || this.drone_infos[dName].selected) {
+                            this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(this.drone_infos[dName]));
+                        }
 
                         this.initDroneInfos(drones, ++count, () => {
                             callback(0);
@@ -1452,7 +1361,7 @@ export default {
                             con = [];
                         }
 
-                        console.log('getEachMarkerInfoFromMobius', count, dName, con, this.$store.state.drone_infos[dName]);
+                        console.log('getEachMarkerInfoFromMobius', count, dName, con, this.$store.state.tempMarkers[dName]);
 
                         if (con.length === 0) {
                             this.$store.state.tempMarkers[dName] = [];
@@ -1645,6 +1554,12 @@ export default {
         },
 
         readyDroneInfos() {
+            // Object.keys(this.drone_infos).forEach((dName) => {
+            //     if (dName === 'unknown' || this.drone_infos[dName].selected) {
+            //         this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(this.drone_infos[dName]));
+            //     }
+            // });
+
             EventBus.$emit('gcs-map-ready', {});
 
             this.MOBIUS_CONNECTION_CONNECTED = true;
@@ -1659,17 +1574,17 @@ export default {
                     console.log('------1---------------------------------GcsAppBarCreated-getCntListDroneInfosFromMobius', status, drones.length, drones);
                     if (status === 200) {
                         if (drones.length > 0) {
-                            this.$store.state.drone_infos = {};
+                            this.drone_infos = {};
                             this.initDroneInfos(drones, 0, (result) => {
                                 if (result === 0) {
-                                    console.log('initDroneInfos-success', result, this.$store.state.drone_infos);
+                                    console.log('initDroneInfos-success', result, this.drone_infos);
 
                                     setTimeout(() => {
                                         this.readyDroneInfos();
                                     }, 250);
                                 }
                                 else {
-                                    console.log('initDroneInfos-error', result, this.$store.state.drone_infos);
+                                    console.log('initDroneInfos-error', result, this.drone_infos);
                                 }
                             });
                         }
@@ -1781,10 +1696,10 @@ export default {
             this.selected = null;
             this.selected = [];
 
-            for (let dName in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if (this.$store.state.drone_infos[dName].selected) {
-                        this.selected.push(this.$store.state.drone_infos[dName]);
+            for (let dName in this.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
+                    if (this.drone_infos[dName].selected) {
+                        this.selected.push(this.drone_infos[dName]);
                     }
                 }
             }
@@ -1899,31 +1814,47 @@ export default {
         confirmSelected(dialog) {
             console.log('confirmSelected', this.selected);
 
-            if (Object.keys(this.$store.state.drone_infos).length <= 1) {
+            if (Object.keys(this.drone_infos).length <= 1) {
                 this.dialog = false;
                 return;
             }
 
-            for (let dName in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    this.$store.state.drone_infos[dName].selected = false;
+            for (let dName in this.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
+                    this.drone_infos[dName].selected = false;
                 }
             }
 
             for (let idx in this.selected) {
                 if (Object.prototype.hasOwnProperty.call(this.selected, idx)) {
-                    this.$store.state.drone_infos[this.selected[idx].name].selected = true;
+                    this.drone_infos[this.selected[idx].name].selected = true;
                 }
             }
 
             Object.keys(this.$store.state.drone_infos).forEach((dName) => {
+                this.$store.state.drone_infos[dName].selected = false;
+
+                let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
+                this.postCinToMobius(url, this.$store.state.drone_infos[dName], () => {
+
+                });
+            });
+
+            this.$store.state.drone_infos = null;
+            this.$store.state.drone_infos = {};
+            Object.keys(this.drone_infos).forEach((dName) => {
                 if (dName !== 'unknown') {
-                    localStorage.setItem(dName + '_selected', String(this.$store.state.drone_infos[dName].selected));
+                    localStorage.setItem(dName + '_selected', String(this.drone_infos[dName].selected));
                 }
 
-                this.postCinDroneInfoToMobius(dName, this.$store.state.drone_infos[dName], () => {
-                    // this.postMarkerInfos(dName);
-                });
+                if(this.drone_infos[dName].selected) {
+                    this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(this.drone_infos[dName]));
+
+                    let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
+                    this.postCinToMobius(url, this.$store.state.drone_infos[dName], () => {
+
+                    });
+                }
             });
 
             //this.$store.commit('updateDroneInfosSelected');
@@ -1976,25 +1907,25 @@ export default {
         },
 
         removeProfile(item) {
-            delete this.$store.state.drone_infos[item.name];
+            delete this.drone_infos[item.name];
 
-            let temp = JSON.parse(JSON.stringify(this.$store.state.drone_infos));
-            this.$store.state.drone_infos = null;
-            this.$store.state.drone_infos = JSON.parse(JSON.stringify(temp));
+            let temp = JSON.parse(JSON.stringify(this.drone_infos));
+            this.drone_infos = null;
+            this.drone_infos = JSON.parse(JSON.stringify(temp));
             temp = null;
 
             this.deleteCntDroneInfoToMobius(item.name, () => {
                 this.selected = [];
                 this.drone_infos_list = [];
 
-                for (let dName in this.$store.state.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                for (let dName in this.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
                         if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
+                            this.drone_infos_list.push(this.drone_infos[dName]);
                         }
 
-                        if (this.$store.state.drone_infos[dName].selected) {
-                            this.selected.push(this.$store.state.drone_infos[dName]);
+                        if (this.drone_infos[dName].selected) {
+                            this.selected.push(this.drone_infos[dName]);
                         }
                     }
                 }
@@ -2038,27 +1969,27 @@ export default {
                 payload.home_position = {lat: 37.4032072, lng: 127.1595933};
                 payload.goto_positions = [];
 
-                this.$store.state.drone_infos[this.drone_name] = payload;
+                this.drone_infos[this.drone_name] = payload;
 
                 this.selected = null;
                 this.selected = [];
                 this.drone_infos_list = null;
                 this.drone_infos_list = [];
 
-                for (let dName in this.$store.state.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                for (let dName in this.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
                         if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
+                            this.drone_infos_list.push(this.drone_infos[dName]);
                         }
 
-                        if (this.$store.state.drone_infos[dName].selected) {
-                            this.selected.push(this.$store.state.drone_infos[dName]);
+                        if (this.drone_infos[dName].selected) {
+                            this.selected.push(this.drone_infos[dName]);
                         }
                     }
                 }
 
                 this.postCntDroneInfoToMobius(this.drone_name, () => {
-                    this.postCinDroneInfoToMobius(this.drone_name, this.$store.state.drone_infos[this.drone_name], () => {
+                    this.postCinDroneInfoToMobius(this.drone_name, this.drone_infos[this.drone_name], () => {
                         this.add_dialog = false;
                         this.fab = false;
 
@@ -2083,34 +2014,34 @@ export default {
             }
 
             if (this.formHasErrors === false) {
-                this.$store.state.drone_infos[this.drone_name].host = this.host;
-                this.$store.state.drone_infos[this.drone_name].gcs = this.gcs;
-                this.$store.state.drone_infos[this.drone_name].type = this.type_selected;
-                this.$store.state.drone_infos[this.drone_name].color = this.$store.state.refColorValue[this.color_selected];
-                this.$store.state.drone_infos[this.drone_name].name = this.drone_name;
-                this.$store.state.drone_infos[this.drone_name].drone_host = this.drone_host;
-                this.$store.state.drone_infos[this.drone_name].id = this.drone_id;
-                this.$store.state.drone_infos[this.drone_name].bat_cell = this.bat_cell;
-                this.$store.state.drone_infos[this.drone_name].system_id = this.system_id;
+                this.drone_infos[this.drone_name].host = this.host;
+                this.drone_infos[this.drone_name].gcs = this.gcs;
+                this.drone_infos[this.drone_name].type = this.type_selected;
+                this.drone_infos[this.drone_name].color = this.$store.state.refColorValue[this.color_selected];
+                this.drone_infos[this.drone_name].name = this.drone_name;
+                this.drone_infos[this.drone_name].drone_host = this.drone_host;
+                this.drone_infos[this.drone_name].id = this.drone_id;
+                this.drone_infos[this.drone_name].bat_cell = this.bat_cell;
+                this.drone_infos[this.drone_name].system_id = this.system_id;
 
                 this.selected = null;
                 this.selected = [];
                 this.drone_infos_list = null;
                 this.drone_infos_list = [];
 
-                for (let dName in this.$store.state.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                for (let dName in this.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
                         if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
+                            this.drone_infos_list.push(this.drone_infos[dName]);
                         }
 
-                        if (this.$store.state.drone_infos[dName].selected) {
-                            this.selected.push(this.$store.state.drone_infos[dName]);
+                        if (this.drone_infos[dName].selected) {
+                            this.selected.push(this.drone_infos[dName]);
                         }
                     }
                 }
 
-                this.postCinDroneInfoToMobius(this.drone_name, this.$store.state.drone_infos[this.drone_name], () => {
+                this.postCinDroneInfoToMobius(this.drone_name, this.drone_infos[this.drone_name], () => {
                     this.update_dialog = false;
                     this.fab = false;
 
@@ -2129,175 +2060,6 @@ export default {
         if (this.MOBIUS_CONNECTION_CONNECTED) {
             this.GcsAppBarCreated();
         }
-
-        EventBus.$on('drone_infos', (dName) => {
-            this.postCntDroneInfoToMobius(dName, () => {
-                this.getCinDroneInfoFromMobius(dName, (status, con) => {
-                    if (status === 200) {
-                        this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(con));
-
-                        if (localStorage.getItem(dName + '_selected')) {
-                            this.$store.state.drone_infos[dName].selected = (localStorage.getItem(dName + '_selected') === 'true');
-                        }
-                        else {
-                            localStorage.setItem(dName + '_selected', String(this.$store.state.drone_infos[dName].selected));
-                        }
-
-                        if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.$store.state.drone_infos[dName]);
-                        }
-
-                        if (this.$store.state.drone_infos[dName].selected) {
-                            this.selected.push(this.$store.state.drone_infos[dName]);
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
-                            this.$store.state.drone_infos[dName].targeted = false;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'home_position')) {
-                            this.$store.state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'gotoType')) {
-                            this.$store.state.drone_infos[dName].gotoType = '바로이동';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetModeSelection')) {
-                            this.$store.state.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetSpeed')) {
-                            this.$store.state.drone_infos[dName].targetSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'alt')) {
-                            this.$store.state.drone_infos[dName].alt = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTurningSpeed')) {
-                            this.$store.state.drone_infos[dName].targetTurningSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetRadius')) {
-                            this.$store.state.drone_infos[dName].targetRadius = 50;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTakeoffAlt')) {
-                            this.$store.state.drone_infos[dName].targetTakeoffAlt = 20;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'circleType')) {
-                            this.$store.state.drone_infos[dName].circleType = '시계방향';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetAlt')) {
-                            this.$store.state.drone_infos[dName].targetAlt = 20;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'lastFlightTime')) {
-                            this.$store.state.drone_infos[dName].lastFlightTime = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoStartIndex')) {
-                            this.$store.state.drone_infos[dName].autoStartIndex = '0';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoEndIndex')) {
-                            this.$store.state.drone_infos[dName].autoEndIndex = '0';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoDelay')) {
-                            this.$store.state.drone_infos[dName].autoDelay = 1;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoSpeed')) {
-                            this.$store.state.drone_infos[dName].autoSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curArmStatus')) {
-                            this.$store.state.drone_infos[dName].curArmStatus = 'DISARMED';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffAbsoluteAlt')) {
-                            this.$store.state.drone_infos[dName].takeoffAbsoluteAlt = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
-                            this.$store.state.drone_infos[dName].targeted = false;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'headingLine')) {
-                            this.$store.state.drone_infos[dName].headingLine = [];
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'directionLine')) {
-                            this.$store.state.drone_infos[dName].directionLine = [];
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'client')) {
-                            this.$store.state.drone_infos[dName].client = {
-                                connected: false,
-                                loading: false
-                            };
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'pausePosition')) {
-                            this.$store.state.drone_infos[dName].pausePosition = {
-                                lat: 0,
-                                lng: 0,
-                                alt: 0,
-                                heading: 0
-                            };
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetStayTime')) {
-                            this.$store.state.drone_infos[dName].targetStayTime = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'yawBehavior')) {
-                            this.$store.state.drone_infos[dName].yawBehavior = 'YAW고정';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'flyShape')) {
-                            this.$store.state.drone_infos[dName].flyShape = '직선비행';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'startWay')) {
-                            this.$store.state.drone_infos[dName].startWay = '처음부터';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curMissionItemReached')) {
-                            this.$store.state.drone_infos[dName].curMissionItemReached = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curTargetedTempMarkerIndex')) {
-                            this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curTargetedSurveyMarkerIndex')) {
-                            this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'absolute_alt')) {
-                            this.$store.state.drone_infos[dName].absolute_alt = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'rtlSpeed')) {
-                            this.$store.state.drone_infos[dName].rtlSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffDelay')) {
-                            this.$store.state.drone_infos[dName].takeoffDelay = 6;
-                        }
-
-                        this.$store.state.drone_infos[dName].targeted = false;
-
-                    }
-                });
-
-            });
-        });
     },
 
     beforeDestroy() {
