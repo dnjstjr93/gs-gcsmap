@@ -94,7 +94,7 @@
                 </v-card>
             </v-dialog>
 
-            <v-dialog v-model="dialog" persistent max-width="900px">
+            <v-dialog v-model="dialog" persistent max-width="960px">
                 <v-card id="create" class="mx-auto">
                     <v-toolbar color="teal" dark>
                         <v-icon left>mdi-quadcopter</v-icon>
