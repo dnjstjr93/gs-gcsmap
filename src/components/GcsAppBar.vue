@@ -14,7 +14,7 @@
                 <v-icon>mdi-format-rotate-90</v-icon>
             </v-btn>
 
-            <v-btn text :disabled="!MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text @click.stop="setGCSHomePosition" :disabled="!MOBIUS_CONNECTION_CONNECTED">
                 <v-icon>mdi-crosshairs-gps</v-icon>
             </v-btn>
 
@@ -239,7 +239,7 @@
                                 <v-avatar
                                     size="32"
                                     class="white--text"
-                                    v-text="String(item.color).slice(0,1).toUpperCase()"
+                                    v-text="item.color.toString().slice(0,1).toUpperCase()"
                                     :color="item.color"
                                 ></v-avatar>
                             </template>
@@ -727,6 +727,7 @@ export default {
     methods: {
         setGCSHomePosition() {
             // EventBus.$emit('do-setGCSHomePosition');
+            console.log('setGCSHomePosition');
         },
 
         postCinToMobius(url, con, callback) {
@@ -821,41 +822,6 @@ export default {
             );
         },
 
-        postCntGcsToMobius(callback) {
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius',
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                    'Content-Type': 'application/json;ty=2'
-                },
-                data: {
-                    'm2m:ae': {
-                        rn: this.$store.state.VUE_APP_MOBIUS_GCS,
-                        api: '0.2.481.1.1111',
-                        lbl: [this.$store.state.VUE_APP_MOBIUS_GCS],
-                        rr: true,
-                        poa: ["http://localhost:8080"]
-                    }
-                }
-            }).then(
-                (res) => {
-                    console.log('------------------GCS ae created');
-
-                    callback(res.status, '');
-                }
-            ).catch(
-                (err) => {
-                    console.log(err.message);
-                }
-            );
-        },
-
         postCntLossLTEInfosToMobius(callback) {
             axios({
                 validateStatus: function (status) {
@@ -918,35 +884,6 @@ export default {
             );
         },
 
-        postCinLossLTEInfoToMobius(callback) {
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/LossLteInfos',
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=4'
-                },
-                data: {
-                    'm2m:cin': {
-                        con: this.$store.state.loss_lte_infos,
-                    }
-                }
-            }).then(
-                (res) => {
-                    callback(res.status, '');
-                }
-            ).catch(
-                (err) => {
-                    console.log(err.message);
-                }
-            );
-        },
-
         postCntDroneInfoToMobius(dName, callback) {
             axios({
                 validateStatus: function (status) {
@@ -976,37 +913,6 @@ export default {
                 }
             );
         },
-
-        createEachMarkerInfoToMobius(dName, callback) {
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos',
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json;ty=3'
-                },
-                data: {
-                    'm2m:cnt': {
-                        rn: dName,
-                        lbl: ['dName'],
-                    }
-                }
-            }).then(
-                function (res) {
-                    callback(res.status, '');
-                }
-            ).catch(
-                function (err) {
-                    console.log(err.message);
-                }
-            );
-        },
-
 
         getCinDroneInfoFromMobius(dName, callback) {
             axios({
@@ -1042,35 +948,6 @@ export default {
                     console.log(err.message);
 
                     callback(200, {});
-                }
-            );
-        },
-
-        getCntGcsFromMobius(callback) {
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'get',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json'
-                }
-            }).then(
-                function (res) {
-                    if (res.status === 200) {
-                        callback(res.status, res.data);
-                    }
-                    else {
-                        callback(res.status, '');
-                    }
-                }
-            ).catch(
-                function (err) {
-                    console.log(err.message);
                 }
             );
         },
@@ -1402,65 +1279,6 @@ export default {
             );
         },
 
-        createSurveyMarkerInfosToMobius(callback) {
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'post',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius',
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                    'Content-Type': 'application/json;ty=2'
-                },
-                data: {
-                    'm2m:ae': {
-                        rn: this.$store.state.VUE_APP_MOBIUS_GCS,
-                        api: '0.2.481.1.1111',
-                        lbl: [this.$store.state.VUE_APP_MOBIUS_GCS],
-                        rr: true,
-                        poa: ["http://localhost:8080"]
-                    }
-                }
-            }).then(
-                () => {
-                    axios({
-                        validateStatus: function (status) {
-                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                            return status < 500;
-                        },
-                        method: 'post',
-                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                        headers: {
-                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                            'X-M2M-Origin': 'SVue',
-                            'Content-Type': 'application/json;ty=3'
-                        },
-                        data: {
-                            'm2m:cnt': {
-                                rn: 'SurveyMarkerInfos',
-                                lbl: ['SurveyMarkerInfos'],
-                            }
-                        }
-                    }).then(
-                        function (res) {
-                            callback(res.status, '');
-                        }
-                    ).catch(
-                        function (err) {
-                            console.log(err.message);
-                        }
-                    );
-                }
-            ).catch(
-                function (err) {
-                    console.log(err.message);
-                }
-            );
-        },
-
         getEachMarkerInfoFromMobius(dName, callback) {
             let self = this;
 
@@ -1685,14 +1503,14 @@ export default {
         initSurveyMarkerInfos(markers, count, callback) {
             if (markers.length > count) {
                 let dName = markers[count].split('/')[3];
-                console.log(count, 'initSurveyMarkerInfos', dName, markers[count]);
+                //console.log(count, 'initSurveyMarkerInfos', dName, markers[count]);
                 this.getEachSurveyMarkerInfoFromMobius(dName, (status, con) => {
                     if (status === 200 || status === 404 || con === '') {
                         if (con === undefined) {
                             con = [];
                         }
 
-                        console.log(count, 'initSurveyMarkerInfos', dName, con);
+                        //console.log(count, 'initSurveyMarkerInfos', dName, con);
 
                         if (con.length === 0) {
                             this.$store.state.surveyMarkers[dName] = [];
@@ -1831,7 +1649,7 @@ export default {
 
             this.MOBIUS_CONNECTION_CONNECTED = true;
             this.$store.state.MOBIUS_CONNECTION_CONNECTED = true;
-            localStorage.setItem('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED);
+            localStorage.setItem('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED.toString());
         },
 
         prepareDroneInfos() {
@@ -1954,7 +1772,7 @@ export default {
             this.$store.state.MOBIUS_CONNECTION_CONNECTED = false;
 
             //this.$cookies.set('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED);
-            localStorage.setItem('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED);
+            localStorage.setItem('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED.toString());
 
             this.confirmSelected(true);
         },
@@ -2489,11 +2307,11 @@ export default {
 </script>
 
 <style scoped>
-#create .v-speed-dial {
+#create {
     position: absolute;
 }
 
-#create .v-btn--floating {
+#create {
     position: relative;
 }
 </style>
