@@ -1674,6 +1674,10 @@
 
                 if(!Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, 'unknown')) {
                     this.$store.state.tempMarkers['unknown'] = [];
+
+                    this.postCntTempMarkerInfosToMobius('unknown', () => {
+                        console.log('postCntTempMarkerInfosToMobius', 'unknown');
+                    });
                 }
 
                 const elevator = new this.google.maps.ElevationService();
@@ -1702,15 +1706,19 @@
 
                     this.$store.state.tempMarkers['unknown'].push(marker);
 
-                    this.doBroadcastConfirmAddTempMarker(JSON.parse(JSON.stringify(marker)));
+                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers));
+                    this.$store.state.tempMarkers = null;
+                    this.$store.state.tempMarkers = JSON.parse(JSON.stringify(temp));
 
                     this.postCinTempMarkerInfoToMobius('unknown');
+
+                    this.doBroadcastConfirmAddTempMarker(JSON.parse(JSON.stringify(marker)));
 
                     this.$store.state.adding = false;
                 });
             },
 
-            createEachSurveyMarkerInfoToMobius(dName, callback) {
+            postCntSurveyMarkerInfosToMobius(dName, callback) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -1798,6 +1806,36 @@
                 );
             },
 
+            postCntTempMarkerInfosToMobius(dName) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            rn: dName,
+                            lbl: ['dName'],
+                        }
+                    }
+                }).then(
+                    function (res) {
+                        console.log('-------------------------------------------------------postCinTempMarkerInfoToMobius-axios', res.data);
+                    }
+                ).catch(
+                    function (err) {
+                        console.log(err.message);
+                    }
+                );
+            },
+
             getCenterPoly(paths) {
 
                 console.log('getCenterPoly', paths);
@@ -1839,8 +1877,8 @@
                 if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, 'unknown')) {
                     this.$store.state.surveyMarkers.unknown = [];
 
-                    this.createEachSurveyMarkerInfoToMobius('unknown', () => {
-                        console.log('createEachSurveyMarkerInfoToMobius', 'unknown');
+                    this.postCntSurveyMarkerInfosToMobius('unknown', () => {
+                        console.log('postCntSurveyMarkerInfosToMobius', 'unknown');
                     });
                 }
 
@@ -2230,7 +2268,12 @@
                 if(!this.$store.state.adding) {
                     this.curInfoTempMarkerFlag = false;
 
+                    if(!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        this.$store.state.drone_infos[dName] = {};
+                    }
+
                     this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
+
                     if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, dName)) {
                         this.$store.state.surveyMarkers[dName].forEach((marker) => {
                             marker.selected = false;
