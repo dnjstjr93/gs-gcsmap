@@ -849,7 +849,7 @@
                     }
                 }).then(
                     function (res) {
-                        console.log('++++++++ confirmAddSurveyMarker-axios', res.data);
+                        console.log('++++++++ postCinSurveyMarkerInfoToMobius-axios', res.data);
                     }
                 ).catch(
                     function (err) {
@@ -858,9 +858,71 @@
                 );
             },
 
+            postCntToMobius(url, name, callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: url,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            rn: name,
+                            lbl: [name],
+                        }
+                    }
+                }).then(
+                    (res) => {
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                    }
+                );
+            },
+
+            postCinToMobius(url, con, callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: url,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                    data: {
+                        'm2m:cin': {
+                            con: con
+                        }
+                    }
+                }).then(
+                    (res) => {
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                    }
+                );
+            },
+
             registerSurveyMarker(oldName, oldIndex, newName) {
 
                 this.$store.state.surveyMarkers[oldName][oldIndex].selected = false;
+                this.$store.state.surveyMarkers[oldName][oldIndex].targeted = false;
+                this.$store.state.surveyMarkers[oldName][oldIndex].polygonDraggable = false;
+                this.$store.state.surveyMarkers[oldName][oldIndex].polygonEditable = false;
 
                 this.$store.state.surveyMarkers[newName].push(
                     JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[oldName][oldIndex]))
@@ -879,19 +941,19 @@
             },
 
             submit() {
-                console.log("999999999999999999999999999999999999999999999999999", this.targetSelectName, this.$store.state.surveyMarkers[this.targetSelectName]);
-
                 if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, this.targetSelectName)) {
                     this.$store.state.surveyMarkers[this.targetSelectName] = [];
 
-                    this.createEachSurveyMarkerInfoToMobius(this.targetSelectName, (res) => {
-                        console.log('InfoSurveyMarker', 'createEachSurveyMarkerInfoToMobius', res);
-
-                        this.registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
+                    let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos';
+                    this.postCntToMobius(url, this.targetSelectName, () => {
+                        let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + this.targetSelectName;
+                        this.postCinToMobius(url, this.$store.state.surveyMarkers[this.targetSelectName], () => {
+                            this. registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
+                        });
                     });
                 }
                 else {
-                    this.registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
+                    this. registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
                 }
             },
         },
