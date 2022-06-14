@@ -1797,28 +1797,10 @@ export default {
         },
 
         readyDroneInfos() {
-            // let payload = JSON.parse(JSON.stringify(this.$store.state.drone_infos));
-            //
-            // this.$store.commit('resetDroneInfos', payload);
-
-            //EventBus.$emit('do-selected-drone-profiles');
-
-            //console.log('GcsAppBar-created-drone_infos', this.$store.state.drone_infos);
-
-            //this.$store.commit('updateDroneInfosSelected');
-
-            //let unknown = JSON.parse(JSON.stringify(this.$store.state.drone_infos.unknown));
-
-            //console.log('GcsAppBar-created-unknown', unknown);
-            //this.$store.commit('initUnknownInfo', unknown);
-
             EventBus.$emit('gcs-map-ready', {});
-
-            //unknown = null;
 
             this.MOBIUS_CONNECTION_CONNECTED = true;
             this.$store.state.MOBIUS_CONNECTION_CONNECTED = true;
-            //self.$cookies.set('mobius_connected', self.MOBIUS_CONNECTION_CONNECTED);
             localStorage.setItem('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED);
         },
 
