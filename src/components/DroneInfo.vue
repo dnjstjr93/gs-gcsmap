@@ -5555,6 +5555,10 @@ export default {
             delete this.$store.state.trackingLines[this.name];
             this.$store.state.trackingLines[this.name] = [];
 
+            let temp = JSON.parse(JSON.stringify(this.$store.state.trackingLines));
+            this.$store.state.trackingLines = null;
+            this.$store.state.trackingLines = JSON.parse(JSON.stringify(temp));
+
             localStorage.setItem('trackingLines-' + this.name, JSON.stringify(this.$store.state.trackingLines[this.name]));
         },
 

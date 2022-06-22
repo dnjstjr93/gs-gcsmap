@@ -218,12 +218,12 @@
             </v-card>
             <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn text @click="resetForm" outlined>
-                    Cancel
-                </v-btn>
-                <v-spacer></v-spacer>
                 <v-btn text color="primary" type="submit" outlined :disabled="conditions">
                     Register
+                </v-btn>
+                <v-spacer></v-spacer>
+                <v-btn text @click="resetForm" outlined>
+                    Cancel
                 </v-btn>
                 <v-spacer></v-spacer>
                 <v-btn text color="warning" fab dark @click="deleteTempMarker" outlined>
@@ -427,46 +427,105 @@
                 );
             },
 
-            submit() {
-                if(this.markerName !== this.targetSelectName) {
-                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
-                    let targetTempMarker = this.$store.state.tempMarkers[this.markerName].splice(this.markerIndex, 1);
-                    this.$store.state.tempMarkers[this.targetSelectName].push(targetTempMarker[0]);
+            postCntToMobius(url, name, callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: url,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            rn: name,
+                            lbl: [name],
+                        }
+                    }
+                }).then(
+                    (res) => {
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                    }
+                );
+            },
 
-                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName]));
-                    this.$store.state.tempMarkers[this.markerName] = null;
-                    this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
+            postCinToMobius(url, con, callback) {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: url,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                    data: {
+                        'm2m:cin': {
+                            con: con
+                        }
+                    }
+                }).then(
+                    (res) => {
+                        callback(res.status, '');
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                    }
+                );
+            },
 
-                    this.postCinTempMarkerInfoToMobius(this.markerName);
+            registerTempMarker(oldName, oldIndex, newName, newIndex) {
+                if(oldName !== newName) {
+                    this.$store.state.tempMarkers[oldName][oldIndex].selected = false;
+                    let targetTempMarker = this.$store.state.tempMarkers[oldName].splice(oldIndex, 1);
+                    this.$store.state.tempMarkers[newName].push(targetTempMarker[0]);
+
+                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[oldName]));
+                    this.$store.state.tempMarkers[oldName] = null;
+                    this.$store.state.tempMarkers[oldName] = JSON.parse(JSON.stringify(temp));
+
+                    this.postCinTempMarkerInfoToMobius(oldName);
 
                     this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
                     let watchingPayload = {};
                     watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
-                    watchingPayload.dName = this.markerName;
+                    watchingPayload.dName = oldName;
                     this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
                     this.$store.state.didIPublish = true;
 
-                    this.postCinTempMarkerInfoToMobius(this.targetSelectName);
+                    this.postCinTempMarkerInfoToMobius(newName);
 
-                    watchingPayload.dName = this.targetSelectName;
+                    watchingPayload.dName = newName;
                     this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
                     this.$store.state.didIPublish = true;
                 }
-                else if(this.markerIndex !== this.targetSelectIndex) {
-                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
-                    let targetTempMarker = this.$store.state.tempMarkers[this.markerName].splice(this.markerIndex, 1);
-                    this.$store.state.tempMarkers[this.markerName].splice(this.targetSelectIndex, 0, targetTempMarker[0]);
+                else if(oldIndex !== newIndex) {
+                    this.$store.state.tempMarkers[oldName][oldIndex].selected = false;
+                    let targetTempMarker = this.$store.state.tempMarkers[oldName].splice(oldIndex, 1);
+                    this.$store.state.tempMarkers[oldName].splice(newIndex, 0, targetTempMarker[0]);
 
-                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName]));
-                    this.$store.state.tempMarkers[this.markerName] = null;
-                    this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
+                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[oldName]));
+                    this.$store.state.tempMarkers[oldName] = null;
+                    this.$store.state.tempMarkers[oldName] = JSON.parse(JSON.stringify(temp));
 
-                    this.postCinTempMarkerInfoToMobius(this.markerName);
+                    this.postCinTempMarkerInfoToMobius(oldName);
 
                     this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
                     let watchingPayload = {};
                     watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
-                    watchingPayload.dName = this.markerName;
+                    watchingPayload.dName = oldName;
                     this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
                     this.$store.state.didIPublish = true;
                 }
@@ -476,6 +535,23 @@
                 setTimeout(() => {
                     this.resetForm();
                 }, 100);
+            },
+
+            submit() {
+                if(!Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, this.targetSelectName)) {
+                    this.$store.state.tempMarkers[this.targetSelectName] = [];
+
+                    let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos';
+                    this.postCntToMobius(url, this.targetSelectName, () => {
+                        let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + this.targetSelectName;
+                        this.postCinToMobius(url, this.$store.state.tempMarkers[this.targetSelectName], () => {
+                            this. registerTempMarker(this.markerName, this.markerIndex, this.targetSelectName, this.targetSelectIndex);
+                        });
+                    });
+                }
+                else {
+                    this. registerTempMarker(this.markerName, this.markerIndex, this.targetSelectName, this.targetSelectIndex);
+                }
             }
         },
 
