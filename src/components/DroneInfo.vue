@@ -4266,11 +4266,12 @@ export default {
                     this.$store.state.drone_infos[this.name].alt = (this.gpi.relative_alt / 1000);
                     this.$store.state.drone_infos[this.name].absolute_alt = (this.gpi.alt / 1000);
 
-
                     let h_pos = get_point_dist((this.gpi.lat / 10000000), (this.gpi.lon / 10000000), 1, this.heading);
                     this.$store.state.drone_infos[this.name].headingLine = [];
                     this.$store.state.drone_infos[this.name].headingLine.push({lat: (this.gpi.lat / 10000000), lng: (this.gpi.lon / 10000000)});
                     this.$store.state.drone_infos[this.name].headingLine.push({lat: h_pos.lat, lng: h_pos.lon});
+
+                    EventBus.$emit('do-current-drone-position', this.name);
 
                     if(Math.abs(this.gpi.vx) < 10) {
                         this.gpi.vx = 0;

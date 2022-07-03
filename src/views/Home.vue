@@ -2,10 +2,14 @@
     <div>
         <GcsAppBar/>
         <DroneInfoList/>
-        <GcsMap/>
-<!--        <v-card tile flat width="100%" height="calc(100vh - 48px)" class="px-0 ma-0">-->
-<!--            <OlGcsMap :geojson="geojson" v-on:select="selected = $event"></OlGcsMap>-->
-<!--        </v-card>-->
+        <div v-if="selected_map === 'googlemaps'">
+            <GcsMap/>
+        </div>
+        <div v-else>
+            <v-card tile flat width="100%" height="calc(100vh - 48px)" class="px-0 ma-0">
+                <OlGcsMap :geojson="geojson" v-on:select="selected = $event"></OlGcsMap>
+            </v-card>
+        </div>
     </div>
 </template>
 
@@ -14,7 +18,7 @@
 import GcsAppBar from "../components/GcsAppBar";
 import DroneInfoList from "../components/DroneInfoList";
 import GcsMap from "../components/GcsMap";
-// import OlGcsMap from "@/components/OlGcsMap";
+import OlGcsMap from "@/components/OlGcsMap";
 
 export default {
     name: 'Home',
@@ -22,11 +26,14 @@ export default {
     components: {
         GcsAppBar,
         GcsMap,
-        // OlGcsMap,
+        OlGcsMap,
         DroneInfoList
     },
 
     data: () => ({
+        selected_map: 'openlayers',
+        //selected_map: 'googlemaps',
+
         selected: undefined,
         geojson: {
             "type":"FeatureCollection",
@@ -98,11 +105,6 @@ export default {
     }),
 
     created() {
-        // console.log(document.cookie);
-        // document.cookie.split(";").forEach((c) => {
-        //     console.log(c);
-        //     document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-        // });
     }
 }
 </script>

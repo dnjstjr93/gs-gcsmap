@@ -2792,6 +2792,8 @@
 
             EventBus.$on('do-targetTempMarker', (payload) => {
                 this.targetTempMarker('', payload.pName, payload.pIndex, payload.targeted);
+
+                console.log(this.$store.state.iconSourceDrone);
             });
 
             // EventBus.$on('do-targetDroneMarker', (pName) => {
@@ -2946,8 +2948,6 @@
             });
 
             EventBus.$on('do-rotate-map', (angle)=>{
-
-
                 this.prepared = false;
                 this.prepared = true;
 

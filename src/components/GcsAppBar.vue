@@ -10,6 +10,10 @@
 
             <v-spacer></v-spacer>
 
+            <v-btn text @click.stop="mapDownload" :disabled="!MOBIUS_CONNECTION_CONNECTED">
+                <v-icon>mdi-monitor-arrow-down-variant</v-icon>
+            </v-btn>
+
             <v-btn text @click.stop="mapAngleDialog=true" :disabled="!MOBIUS_CONNECTION_CONNECTED">
                 <v-icon>mdi-format-rotate-90</v-icon>
             </v-btn>
@@ -630,6 +634,11 @@ export default {
     },
 
     methods: {
+        mapDownload() {
+            EventBus.$emit('do-download-map');
+            console.log('mapDownload');
+        },
+
         setGCSHomePosition() {
             // EventBus.$emit('do-setGCSHomePosition');
             console.log('setGCSHomePosition');
@@ -1862,6 +1871,8 @@ export default {
             this.dialog = dialog;
 
             EventBus.$emit('confirm_selected', JSON.parse(JSON.stringify(this.selected)));
+
+            EventBus.$emit('gcs-map-ready');
 
             this.$forceUpdate();
         },

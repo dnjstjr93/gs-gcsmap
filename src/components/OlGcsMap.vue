@@ -8,7 +8,8 @@
 import View from 'ol/View'
 import Map from 'ol/Map'
 import TileLayer from 'ol/layer/Tile'
-import OSM from 'ol/source/OSM'
+//import OSM from 'ol/source/OSM'
+import XYZ from 'ol/source/XYZ'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import GeoJSON from 'ol/format/GeoJSON'
@@ -21,64 +22,166 @@ import {Icon} from 'ol/style';
 // import {Geometry} from 'ol/geom';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
+import LineString from 'ol/geom/LineString';
 
+import convert from "xml-js";
+import { faLocationArrow } from "@fortawesome/free-solid-svg-icons";
+import EventBus from "@/EventBus";
+import axios from "axios";
 
-const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pin-fill" viewBox="0 0 16 16"> <path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/> </svg>';
+// import { openDB, deleteDB, wrap, unwrap } from 'idb';
+//import { openDB } from 'idb';
+//import {get} from '../js/idb_map'
 
-    export default {
+let svgObj = {};
+
+svgObj.svg = {};
+svgObj.svg._attributes = {};
+svgObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
+svgObj.svg._attributes.width = faLocationArrow.icon[0] / 2;
+svgObj.svg._attributes.height = faLocationArrow.icon[1] / 2;
+//svgObj.svg._attributes.fill = 'red';
+svgObj.svg._attributes.class = 'f124';
+svgObj.svg._attributes.viewBox = '0 0 ' + faLocationArrow.icon[0] + ' ' + faLocationArrow.icon[1];
+svgObj.svg.path = {};
+svgObj.svg.path._attributes = {};
+svgObj.svg.path._attributes.d = faLocationArrow.icon[4];
+
+const svgDrone = convert.js2xml(svgObj, {compact: true, ignoreComment: true, spaces: 4});
+const svgScale = 0.18;
+
+//console.log('svgDrone', svgDrone);
+
+//const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pin-fill" viewBox="0 0 16 16"> <path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/> </svg>';
+
+//const svgDrone = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="f124" viewBox="0 0 512 512"> <path d="M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19l191.9-415.78c15.99-38.39-25.59-79.97-63.97-63.97z"/> </svg>';
+
+// 1. indexedDB 객체 가져오기
+const idxedDB = window.indexedDB;
+
+// 2. 브라우저에서 지원하는지 체크하기
+if (!idxedDB) {
+    window.alert('해당 브라우저에서는 indexedDB를 지원하지 않습니다.')
+}
+else {
+    let db;
+    const request = idxedDB.open('SampleDB');   // 3. SampleDB(db) 열기
+
+    request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        db.createObjectStore('name', {keyPath: 'id'}); // 4. name저장소 만들고, key는 id로 지정
+
+        request.onerror = (e) => {
+            alert('failed', e);
+        }
+
+        request.onsuccess = () => {
+            let db = request.result;
+            console.log(db);
+        }
+    }
+
+}
+
+export default {
     name: 'MapContainer',
     components: {},
     props: {
         geojson: Object
     },
-    data: () => ({
-        olMap: null,
-        vectorLayer: null,
-        vectorSource: null,
-        selectedFeature: null,
-        selectedFeatureFlag: {},
-        selectedFeatureId: null,
+    data: () => {
+        let points = [[78.65, -32.65], [-98.65, 12.65]];
 
-        styles: [
-            /* We are using two different styles for the polygons:
+        return {
+            tileCoordObj: {},
+
+            mapHeading: 0,
+
+            olMap: null,
+            vectorLayer: null,
+            vectorSource: null,
+            osmSource: null,
+            selectedFeature: null,
+            selectedFeatureFlag: {},
+            selectedFeatureId: null,
+
+            styles: [
+                /* We are using two different styles for the polygons:
              *  - The first style is for the polygons themselves.
              *  - The second style is to draw the vertices of the polygons.
              *    In a custom `geometry` function the vertices of a polygon are
              *    returned as `MultiPoint` geometry, which will be used to render
              *    the style.
              */
-            new Style({
-                stroke: new Stroke({
-                    color: 'blue',
-                    width: 3,
-                }),
-                fill: new Fill({
-                    color: 'rgba(0, 0, 255, 0.1)',
-                }),
-            }),
-            new Style({
-                image: new CircleStyle({
-                    radius: 5,
+                new Style({
+                    stroke: new Stroke({
+                        color: 'blue',
+                        width: 3,
+                    }),
                     fill: new Fill({
-                        color: 'orange',
+                        color: 'rgba(0, 0, 255, 0.1)',
                     }),
                 }),
-                geometry: function (feature) {
-                    // return the coordinates of the first ring of the polygon
-                    const coordinates = feature.getGeometry().getCoordinates()[0];
-                    return new MultiPoint(coordinates);
-                },
-            }),
-        ],
-        selectedStyles: [
-            /* We are using two different styles for the polygons:
+                new Style({
+                    image: new CircleStyle({
+                        radius: 5,
+                        fill: new Fill({
+                            color: 'orange',
+                        }),
+                    }),
+                    geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinates = feature.getGeometry().getCoordinates()[0];
+                        return new MultiPoint(coordinates);
+                    },
+                }),
+            ],
+            selectedStyles: [
+                /* We are using two different styles for the polygons:
              *  - The first style is for the polygons themselves.
              *  - The second style is to draw the vertices of the polygons.
              *    In a custom `geometry` function the vertices of a polygon are
              *    returned as `MultiPoint` geometry, which will be used to render
              *    the style.
              */
-            new Style({
+                new Style({
+                    stroke: new Stroke({
+                        color: 'green',
+                        width: 3,
+                    }),
+                    fill: new Fill({
+                        color: 'rgba(0, 0, 255, 0.1)',
+                    }),
+                }),
+                new Style({
+                    image: new CircleStyle({
+                        radius: 5,
+                        fill: new Fill({
+                            color: 'orange',
+                        }),
+                    }),
+                    geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinates = feature.getGeometry().getCoordinates()[0];
+                        return new MultiPoint(coordinates);
+                    },
+                }),
+            ],
+
+            droneMarkers: {},
+
+            iconFeature: new Feature({
+                geometry: new Point([0, 0],),
+                name: 'Null Island',
+                population: 4000,
+                rainfall: 500,
+            }),
+
+            headingLineFeature: new Feature({
+                geometry: new LineString(points),
+            }),
+
+            headingLineStyle: new Style({
                 stroke: new Stroke({
                     color: 'green',
                     width: 3,
@@ -87,64 +190,242 @@ const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill
                     color: 'rgba(0, 0, 255, 0.1)',
                 }),
             }),
-            new Style({
-                image: new CircleStyle({
-                    radius: 5,
-                    fill: new Fill({
-                        color: 'orange',
-                    }),
-                }),
-                geometry: function (feature) {
-                    // return the coordinates of the first ring of the polygon
-                    const coordinates = feature.getGeometry().getCoordinates()[0];
-                    return new MultiPoint(coordinates);
-                },
-            }),
-        ],
-        iconFeature: new Feature({
-            geometry: new Point([0, 0], ),
-            name: 'Null Island',
-            population: 4000,
-            rainfall: 500,
-        }),
-        iconStyle: new Style({
-            image: new Icon({
-                opacity: 1,
-                src: 'data:image/svg+xml;utf8,' + svg,
-                scale: 1
-            })
-        // })
-        // // new Style({
-        // //     text: new Text({
-        // //         text: '\uf04b',
-        // //         font: 'normal 18px FontAwesome',
-        // //         textBaseline: 'Bottom',
-        // //         fill: new Fill({
-        // //             color: 'white'
-        // //         })
-        // //     })
-        //     new Style({
-        //     image: new Icon({
-        //         anchor: [0.5, 46],
-        //         anchorXUnits: 'fraction',
-        //         anchorYUnits: 'pixels',
-        //         src: 'data:image/svg+xml;utf8,' + this.svg,
-        //     }),
 
-            // image: new CircleStyle({
-            //     radius: 5,
-            //     fill: new Fill({
-            //         color: 'red',
-            //     }),
-            // }),
-            // geometry: function (feature) {
-            //     // return the coordinates of the first ring of the polygon
-            //     const coordinates = feature.getGeometry().getCoordinates();
-            //     return new Point(coordinates);
-            // },
-        }),
-    }),
+            iconStyle: new Style({
+                image: new Icon({
+                    opacity: 0.9,
+                    src: 'data:image/svg+xml;utf8,' + svgDrone,
+                    scale: svgScale
+                })
+                // })
+                // // new Style({
+                // //     text: new Text({
+                // //         text: '\uf04b',
+                // //         font: 'normal 18px FontAwesome',
+                // //         textBaseline: 'Bottom',
+                // //         fill: new Fill({
+                // //             color: 'white'
+                // //         })
+                // //     })
+                //     new Style({
+                //     image: new Icon({
+                //         anchor: [0.5, 46],
+                //         anchorXUnits: 'fraction',
+                //         anchorYUnits: 'pixels',
+                //         src: 'data:image/svg+xml;utf8,' + this.svg,
+                //     }),
+
+                // image: new CircleStyle({
+                //     radius: 5,
+                //     fill: new Fill({
+                //         color: 'red',
+                //     }),
+                // }),
+                // geometry: function (feature) {
+                //     // return the coordinates of the first ring of the polygon
+                //     const coordinates = feature.getGeometry().getCoordinates();
+                //     return new Point(coordinates);
+                // },
+            }),
+        }
+    },
+
+    watch: {
+        geojson(value) {
+            this.updateSource(value)
+        },
+        selectedFeature(value) {
+            this.$emit('select', value)
+        }
+    },
+
+    methods: {
+        writeIdxedDB(names) {
+            const request = window.indexedDB.open('SampleDB');
+            request.onerror = (e) => {
+                alert('DataBase error', e.target.errorCode);
+            }
+
+            request.onsuccess = () => {
+                console.log('success');
+
+                const db = request.result;
+                const transaction = db.transaction(['name'], 'readwrite');
+                //person 객체 저장소에 읽기&쓰기 권한으로 transaction 생성
+
+                // 완료, 실패 이벤트 처리
+                transaction.oncomplete = () => {
+                    console.log('[oncomplete] success');
+                }
+
+                transaction.onerror = () => {
+                    console.log('[onerror] fail');
+                }
+
+                // transaction으로
+                const objStore = transaction.objectStore('name');
+                for (const name of names) {
+                    const request = objStore.add(name);   // 저장
+                    request.onsuccess = (e) => console.log(e.target.result);
+                }
+            }
+        },
+
+        updateSource(geojson) {
+            console.log('geojson', geojson);
+
+            const view = this.olMap.getView();
+            const source = this.vectorLayer.getSource();
+
+            let features = new GeoJSON({
+                featureProjection: 'EPSG:3857',
+            }).readFeatures(geojson);
+
+            console.log('features', features);
+
+            features.push(this.iconFeature);
+            console.log('features', features);
+
+            for(let dName in this.droneMarkers) {
+                if(Object.prototype.hasOwnProperty.call(this.droneMarkers, dName)) {
+                    features.push(this.droneMarkers[dName].iconFeature);
+                    features.push(this.droneMarkers[dName].headingLineFeature);
+                    console.log('droneMarkers', features);
+                }
+            }
+
+            source.clear();
+            source.addFeatures(features);
+
+            view.fit(source.getExtent())
+        },
+
+        getIdxedDBValueSync(key) {
+            return new Promise((resolve) => {
+                const request = window.indexedDB.open('SampleDB');  // 1. DB 열기
+                request.onerror =(e)=> console.log(e.target.errorCode);
+
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const transaction = db.transaction('name');
+                    transaction.onerror = () => console.log('fail');
+                    transaction.oncomplete = () => console.log('success');
+
+                    const objStore = transaction.objectStore('name');
+                    const objStoreRequest = objStore.get(key);        // 2. get으로 데이터 접근
+                    objStoreRequest.onsuccess = () => {
+                        resolve(objStoreRequest.result);
+                    }
+                }
+            });
+        },
+
+        async getIdxedDBValue(tileCoord) {
+            let key = 'OSM_' + tileCoord[0] + '_' + tileCoord[1] + '_' + (-tileCoord[2] - 1);
+
+            return localStorage.getItem(key);
+            //
+            // let promise = new Promise((resolve, reject) => {
+            //     const request = idxedDB.open('SampleDB');  // 1. DB 열기
+            //     request.onerror = (e)=> console.log(e.target.errorCode);
+            //
+            //     request.onsuccess = () => {
+            //         const db = request.result;
+            //         const transaction = db.transaction('name');
+            //         transaction.onerror = () => {
+            //             console.log('fail');
+            //             return reject();
+            //         }
+            //         transaction.oncomplete = () => console.log('success');
+            //
+            //         const objStore = transaction.objectStore('name');
+            //         const objStoreRequest = objStore.get(key);        // 2. get으로 데이터 접근
+            //         objStoreRequest.onsuccess = () => {
+            //             return resolve(objStoreRequest.result.name);
+            //         }
+            //     }
+            // });
+            //
+            // let result = await promise;
+            // console.log(result);
+            // console.log(localStorage.getItem(key));
+            //
+            // return result;
+        },
+
+        getOfflineMapImage(id) {
+            return new Promise((resolve, reject) => {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'get',
+                    url: 'http://localhost:3000/employees/' + id,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: ''
+                }).then(
+                    (res) => {
+                        resolve(res.data);
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                        reject(err.message);
+                    }
+                );
+            });
+        },
+
+        postOfflineMapImage(obj) {
+            return new Promise((resolve, reject) => {
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://localhost:3000/employees',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    data: obj
+                }).then(
+                    (res) => {
+                        resolve(res.status);
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                        reject(err.message);
+                    }
+                );
+            });
+        },
+
+        async saveMapImage(obj) {
+            let status = await this.postOfflineMapImage(obj);
+            console.log('saveMapImage', status);
+        },
+
+        async getMapImage(id) {
+            let obj = await this.getIdxedDBValueSync(id);
+
+            return obj.name;
+        }
+    },
+
     mounted() {
+        //const names = [{id: 1, name: 'a'}, {id: 2, name: 'b'}, {id: 3, name: 'c'}];
+
+        //this.writeIdxedDB(names);
+
+        // this.writeIdxedDBEach(names[0]);
+        // this.writeIdxedDBEach(names[1]);
+        // this.writeIdxedDBEach(names[2]);
+
         //console.log(faMapPin);
         // this.iconStyle = new Style({
         //     image: new Icon({
@@ -174,16 +455,40 @@ const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill
             style: this.styles,
         });
 
+        this.osmSource = new XYZ({url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'}); // Google Satellite
+        //this.osmSource = new XYZ({url: 'http://localhost:4500/todos/todoid/OSM_{z}_{x}_{y}'}); // My Map of Satellite
+
+
+
+        // this.osmSource = new OSM(), this.osmSource = new XYZ({url: 'http://xdworld.vworld.kr:8080/2d/Base/202111/{z}/{x}/{y}.png'});
+        // this.osmSource = new XYZ({url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}); // Esri Imagery/Satellite
+        // this.osmSource = new XYZ({url: 'http://tile.thunderforest.com/cycle/{z}/{x}/{y}.png'}); // OSM Cycle Map
+        // this.osmSource = new XYZ({url: 'http://tile.openstreetmap.org/{z}/{x}/{y}.png'}); // OpenStreetMap Mapnick
+        // this.osmSource = new XYZ({url: 'http://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png'}); // OSM Black and White
+        // this.osmSource = new XYZ({url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}'}); // Esri Streets
+        // this.osmSource = new XYZ({url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'}); // Esri Topo
+        // this.osmSource = new XYZ({url: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}'}); // Google Streets
+        // this.osmSource = new XYZ({url: 'https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png'}); // Carto Positron
+        // this.osmSource = new XYZ({url: 'http://a.tile.stamen.com/terrain/{z}/{x}/{y}.png'}); // Stamen Terrain
+        // this.osmSource = new XYZ({
+        //     maxZoom: 19,
+        //     minZoom:19,
+        //     tileUrlFunction: (tileCoord) => {
+        //         console.log(localStorage.getItem('OSM_' + tileCoord[0] + '_' + tileCoord[1] + '_' + (-tileCoord[2] - 1)));
+        //         return localStorage.getItem('OSM_' + tileCoord[0] + '_' + tileCoord[1] + '_' + (-tileCoord[2] - 1));
+        //     }
+        // }); // offline
+
         this.olMap = new Map({
             target: this.$refs["map-root"],
             layers: [
                 new TileLayer({
-                    source: new OSM(),
+                    source: this.osmSource
                 }),
                 this.vectorLayer
             ],
             view: new View({
-                zoom: 0,
+                zoom: 19,
                 center: [0, 0],
                 constrainResolution: true
             }),
@@ -286,58 +591,288 @@ const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill
 
         this.updateSource(this.geojson);
 
-        setInterval(()=>{
-            let coordinate = this.iconFeature.getGeometry().getCoordinates();
+        // setInterval(()=>{
+        //
+        //
+        //     // let pnt = new Point([127.16050533784832, 37.40423134053018]).transform('EPSG:4326', 'EPSG:3857')
+        //     // let coordinate = pnt.getCoordinates();
+        //     // console.log('coordinate', coordinate[0], coordinate[1]);
+        //     //
+        //     // if(coordinate[0] === 0) {
+        //     //     coordinate[0] = 12716050;
+        //     //     coordinate[1] = 3740423;
+        //     // }
+        //     //
+        //     // coordinate[0] += parseInt(Math.random() * 10000);
+        //     // //coordinate[1] += parseInt(Math.random() * 10000);
+        //     //
+        //     // // this.iconFeature = null;
+        //     // // this.iconFeature = new Feature({
+        //     // //     geometry: new Point(coordinate ),
+        //     // //     name: 'Null Island',
+        //     // //     population: 4000,
+        //     // //     rainfall: 500,
+        //     // // });
+        //     //
+        //     // this.iconFeature.getGeometry().setCoordinates(coordinate);
+        //
+        //
+        //     for(let dName in this.droneMarkers) {
+        //         if(Object.prototype.hasOwnProperty.call(this.droneMarkers, dName)) {
+        //             let dLat = this.$store.state.drone_infos[dName].lat;
+        //             let dLng = this.$store.state.drone_infos[dName].lng;
+        //
+        //             console.log(dLat, dLng);
+        //
+        //             let pnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
+        //             let coordinate = pnt.getCoordinates();
+        //
+        //             console.log('coordinate', coordinate, coordinate[0], coordinate[1]);
+        //
+        //             this.droneMarkers[dName].iconFeature.getGeometry().setCoordinates(coordinate);
+        //         }
+        //     }
+        //
+        //     //this.iconFeature.setStyle(this.iconStyle);
+        //
+        //     //this.updateSource(this.geojson);
+        // }, 500);
 
-            console.log('coordinate', coordinate, coordinate[0], coordinate[1]);
+        EventBus.$on('gcs-map-ready', () => {
 
-            coordinate[0] += parseInt(Math.random() * 10000);
-            coordinate[1] += parseInt(Math.random() * 10000);
+            this.droneMarkers = {};
 
-            // this.iconFeature = null;
-            // this.iconFeature = new Feature({
-            //     geometry: new Point(coordinate ),
-            //     name: 'Null Island',
-            //     population: 4000,
-            //     rainfall: 500,
-            // });
+            Object.keys(this.$store.state.drone_infos).forEach((dName) => {
+                if(dName !== 'unknown' && this.$store.state.drone_infos[dName].selected) {
+                    let dLat = this.$store.state.drone_infos[dName].lat;
+                    let dLng = this.$store.state.drone_infos[dName].lng;
 
-            this.iconFeature.getGeometry().setCoordinates(coordinate);
+                    let pnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let coordinate = pnt.getCoordinates();
 
-            //this.iconFeature.setStyle(this.iconStyle);
+                    this.droneMarkers[dName] = {};
+                    this.droneMarkers[dName].iconFeature = new Feature({
+                        geometry: new Point([coordinate[0], coordinate[1]]),
+                        name: 'dName',
+                        population: 4000,
+                        rainfall: 500,
+                    });
 
-            //this.updateSource(this.geojson);
-        }, 2000);
+                    svgObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                    svgObj.svg.path._attributes.stroke = 'white';
+                    svgObj.svg.path._attributes['stroke-width'] = '35';
+                    this.droneMarkers[dName].droneMarker = convert.js2xml(svgObj, {compact: true, ignoreComment: true, spaces: 4});
+
+                    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx droneMarker', this.droneMarkers[dName].droneMarker);
+
+                    let iconStyle = new Style({
+                        image: new Icon({
+                            opacity: 1,
+                            src: 'data:image/svg+xml;utf8,' + this.droneMarkers[dName].droneMarker,
+                            scale: svgScale,
+                            rotation: (360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360,
+                        }),
+                    });
+
+                    this.droneMarkers[dName].iconFeature.setStyle(iconStyle);
+
+
+                    let sLat = this.$store.state.drone_infos[dName].headingLine[0].lat;
+                    let sLng = this.$store.state.drone_infos[dName].headingLine[0].lng;
+                    let eLat = this.$store.state.drone_infos[dName].headingLine[1].lat;
+                    let eLng = this.$store.state.drone_infos[dName].headingLine[1].lng;
+
+                    let sPnt = new Point([sLng, sLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let sCoordinate = sPnt.getCoordinates();
+                    let ePnt = new Point([eLng, eLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let eCoordinate = ePnt.getCoordinates();
+
+                    console.log('**************************************** gcs-map-ready', sCoordinate, eCoordinate);
+
+                    this.droneMarkers[dName].headingLineFeature = new Feature({
+                        geometry: new LineString([[sCoordinate[0], sCoordinate[1]], [eCoordinate[0], eCoordinate[1]]]),
+                    });
+
+                    let headingLineStyle = new Style({
+                        stroke: new Stroke({
+                            color: this.$store.state.drone_infos[dName].color,
+                            width: 1,
+                        }),
+                        fill: new Fill({
+                            color: 'rgba(0, 0, 255, 0.1)',
+                        }),
+                    });
+
+                    this.droneMarkers[dName].headingLineFeature.setStyle(headingLineStyle);
+                }
+            });
+
+            this.updateSource(this.geojson);
+
+            let pnt = new Point([127.16050533784832, 37.40423134053018]).transform('EPSG:4326', 'EPSG:3857')
+            let center_coordinate = pnt.getCoordinates();
+
+            this.olMap.getView().setCenter(center_coordinate);
+            this.olMap.getView().setZoom(18);
+        });
+
+        EventBus.$on('do-current-drone-position', (dName) => {
+            let dLat = this.$store.state.drone_infos[dName].lat;
+            let dLng = this.$store.state.drone_infos[dName].lng;
+
+            let pnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
+            let coordinate = pnt.getCoordinates();
+
+            let sLat = this.$store.state.drone_infos[dName].headingLine[0].lat;
+            let sLng = this.$store.state.drone_infos[dName].headingLine[0].lng;
+            let eLat = this.$store.state.drone_infos[dName].headingLine[1].lat;
+            let eLng = this.$store.state.drone_infos[dName].headingLine[1].lng;
+
+            let sPnt = new Point([sLng, sLat]).transform('EPSG:4326', 'EPSG:3857')
+            let sCoordinate = sPnt.getCoordinates();
+            let ePnt = new Point([eLng, eLat]).transform('EPSG:4326', 'EPSG:3857')
+            let eCoordinate = ePnt.getCoordinates();
+
+            console.log('coordinate', coordinate[0], coordinate[1]);
+
+            if(Object.prototype.hasOwnProperty.call(this.droneMarkers, dName)) {
+                let iconStyle = new Style({
+                    image: new Icon({
+                        opacity: 1,
+                        src: 'data:image/svg+xml;utf8,' + this.droneMarkers[dName].droneMarker,
+                        scale: svgScale,
+                        rotation: ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
+                    }),
+                });
+
+                this.droneMarkers[dName].iconFeature.setStyle(iconStyle);
+
+                this.droneMarkers[dName].iconFeature.getGeometry().setCoordinates(coordinate);
+
+                this.droneMarkers[dName].headingLineFeature.getGeometry().setCoordinates([[sCoordinate[0], sCoordinate[1]], [eCoordinate[0], eCoordinate[1]]]);
+
+            }
+        });
+
+        EventBus.$on('do-centerCurrentPosition', (positionCenter) => {
+            let dLat = positionCenter.lat;
+            let dLng = positionCenter.lng;
+
+            let pnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
+            let coordinate = pnt.getCoordinates();
+
+            //this.olMap.getView().fit([12962380.601052666, 4004207.209473483, 15290958.230732275, 4982601.171523739], {duration: 500});
+
+            this.olMap.getView().setCenter(coordinate);
+            this.olMap.getView().setZoom(18);
+        });
+
+        let pnt = new Point([127.16050533784832, 37.40423134053018]).transform('EPSG:4326', 'EPSG:3857')
+        let center_coordinate = pnt.getCoordinates();
+
+        this.olMap.getView().setCenter(center_coordinate);
+        this.olMap.getView().setZoom(18);
+
+        EventBus.$on('do-download-map', () => {
+            let osmextent = this.olMap.getView().calculateExtent();
+            //let totalLocalStroageSize = 0;
+            let totalCount = 0;
+            let totalCount2 = 0;
+            let currentZoomLevel = this.olMap.getView().getZoom();
+            //var mapImageObjs = [];
+            console.log('**************************************** getTileGrid', this.osmSource.getTileGrid());
+
+            this.osmSource.getTileGrid().forEachTileCoord(osmextent, currentZoomLevel, (tileCoord) => {
+                let img = document.createElement("img");
+                img.onload = () => {
+                    let canvas = document.createElement("canvas");
+                    canvas.width = this.osmSource.getTileGrid().getTileSize(currentZoomLevel);
+                    canvas.height = this.osmSource.getTileGrid().getTileSize(currentZoomLevel);
+                    let ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    //totalLocalStroageSize += canvas.toDataURL().length;
+                    //console.log(++totalCount, canvas.toDataURL().length, totalLocalStroageSize, 'OSM_' + tileCoord[0] + '_' + tileCoord[1] + '_' + (-tileCoord[2] - 1), canvas.toDataURL());
+
+                    //localStorage.setItem('OSM_' + tileCoord[0] + '_' + tileCoord[1] + '_' + (-tileCoord[2] - 1), canvas.toDataURL());
+
+                    let mapImageObj = {};
+                    mapImageObj.todoid = 'OSM_' + tileCoord[0] + '_' + tileCoord[1] + '_' + (tileCoord[2]);
+                    mapImageObj.content = canvas.toDataURL();
+
+                    axios({
+                        validateStatus: function (status) {
+                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            return status <= 500;
+                        },
+                        method: 'post',
+                        url: 'http://localhost:4500/todos',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        data: mapImageObj
+                    }).then(
+                        (res) => {
+                            console.log(res.status);
+                        }
+                    ).catch(
+                        (err) => {
+                            console.log(err.message);
+                        }
+                    );
+
+
+                    //setTimeout(this.saveMapImage, 100, mapImageObj);
+                    //mapImageObjs.push(mapImageObj);
+
+                    img.remove();
+                    canvas.remove();
+
+                    if(totalCount >= totalCount2) {
+                        //this.writeIdxedDB(mapImageObjs);
+
+                        // mapImageObjs.forEach((obj, idx) => {
+                        //     if(idx < 20) {
+                        //         localStorage.setItem(obj.id, obj.name);
+                        //     }
+                        // });
+
+                        // mapImageObjs.forEach((obj) => {
+                        //     axios({
+                        //         validateStatus: function (status) {
+                        //             // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        //             return status <= 500;
+                        //         },
+                        //         method: 'post',
+                        //         url: 'http://localhost:4500/todos',
+                        //         headers: {
+                        //             'Content-Type': 'application/json'
+                        //         },
+                        //         data: obj
+                        //     }).then(
+                        //         (res) => {
+                        //             console.log(res.status);
+                        //         }
+                        //     ).catch(
+                        //         (err) => {
+                        //             console.log(err.message);
+                        //         }
+                        //     );
+                        // });
+                    }
+                };
+                img.crossOrigin = "Anonymous";
+                img.src = this.osmSource.getTileUrlFunction()(tileCoord);
+
+                console.log('totalCount2', totalCount2++);
+            });
+        });
+
     },
-    watch: {
-        geojson(value) {
-            this.updateSource(value)
-        },
-        selectedFeature(value) {
-            this.$emit('select', value)
-        }
-    },
-    methods: {
-        updateSource(geojson) {
-            console.log('geojson', geojson);
 
-            const view = this.olMap.getView();
-            const source = this.vectorLayer.getSource();
-
-            const features = new GeoJSON({
-                featureProjection: 'EPSG:3857',
-            }).readFeatures(geojson);
-
-            console.log('features', features);
-
-            features.push(this.iconFeature);
-            console.log('features', features);
-
-            source.clear();
-            source.addFeatures(features);
-
-            view.fit(source.getExtent())
-        }
+    beforeDestroy() {
+        EventBus.$off('do-centerCurrentPosition');
+        EventBus.$off('gcs-map-ready');
+        EventBus.$off('do-centerCurrentPosition');
     }
 }
 </script>
