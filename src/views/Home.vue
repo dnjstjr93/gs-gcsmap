@@ -31,8 +31,8 @@ export default {
     },
 
     data: () => ({
-        //selected_map: 'openlayers',
-        selected_map: 'googlemaps',
+        selected_map: 'openlayers',
+        //selected_map: 'googlemaps',
 
         selected: undefined,
         geojson: {
@@ -105,6 +105,7 @@ export default {
     }),
 
     created() {
+        this.$store.state.viewAlt = this.selected_map === 'google_maps';
     }
 }
 </script>

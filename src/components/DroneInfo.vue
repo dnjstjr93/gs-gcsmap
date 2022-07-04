@@ -4128,6 +4128,18 @@ export default {
                         EventBus.$emit('onResize-DroneInfoList');
                     }
                 }
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_INJECT_DATA) {
+                    console.log('MAVLINK_MSG_ID_GPS_INJECT_DATA MAVLINK_MSG_ID_GPS_INJECT_DATA MAVLINK_MSG_ID_GPS_INJECT_DATA MAVLINK_MSG_ID_GPS_INJECT_DATA MAVLINK_MSG_ID_GPS_INJECT_DATA');
+                }
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RTCM_DATA) {
+                    console.log('MAVLINK_MSG_ID_GPS_RTCM_DATAMAVLINK_MSG_ID_GPS_RTCM_DATAMAVLINK_MSG_ID_GPS_RTCM_DATAMAVLINK_MSG_ID_GPS_RTCM_DATAMAVLINK_MSG_ID_GPS_RTCM_DATAMAVLINK_MSG_ID_GPS_RTCM_DATAMAVLINK_MSG_ID_GPS_RTCM_DATA');
+                }
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RTK) {
+                    console.log('MAVLINK_MSG_ID_GPS_RTKMAVLINK_MSG_ID_GPS_RTKMAVLINK_MSG_ID_GPS_RTKMAVLINK_MSG_ID_GPS_RTKMAVLINK_MSG_ID_GPS_RTKMAVLINK_MSG_ID_GPS_RTK');
+                }
+                else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_INPUT) {
+                    console.log('MAVLINK_MSG_ID_GPS_INPU');
+                }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_STATUSTEXT) {
                     /*
                     0 비상: 시스템을 사용할 수 없음

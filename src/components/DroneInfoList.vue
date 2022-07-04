@@ -75,7 +75,7 @@
                     <DroneCommand></DroneCommand>
                 </v-card>
             </v-col>
-            <v-col cols="12" sm="6" md="9">
+            <v-col v-if="$store.state.viewAlt" cols="12" sm="6" md="9">
                 <v-card flat tile>
                     <DroneAlt></DroneAlt>
                 </v-card>
