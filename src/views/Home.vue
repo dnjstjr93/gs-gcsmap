@@ -31,8 +31,8 @@ export default {
     },
 
     data: () => ({
-        selected_map: 'openlayers',
-        //selected_map: 'googlemaps',
+        //selected_map: 'openlayers',
+        selected_map: 'googlemaps',
 
         selected: undefined,
         geojson: {

@@ -18,7 +18,7 @@ import MultiPoint from 'ol/geom/MultiPoint';
 
 import 'ol/ol.css'
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
-import {Icon} from 'ol/style';
+import {Icon, Text} from 'ol/style';
 // import {Geometry} from 'ol/geom';
 import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
@@ -288,7 +288,7 @@ export default {
 
             for(let dName in this.droneMarkers) {
                 if(Object.prototype.hasOwnProperty.call(this.droneMarkers, dName)) {
-                    features.push(this.droneMarkers[dName].iconFeature);
+                    features.push(this.droneMarkers[dName].droneMarkerFeature);
                     features.push(this.droneMarkers[dName].headingLineFeature);
                     console.log('droneMarkers', features);
                 }
@@ -629,7 +629,7 @@ export default {
         //
         //             console.log('coordinate', coordinate, coordinate[0], coordinate[1]);
         //
-        //             this.droneMarkers[dName].iconFeature.getGeometry().setCoordinates(coordinate);
+        //             this.droneMarkers[dName].droneMarkerFeature.getGeometry().setCoordinates(coordinate);
         //         }
         //     }
         //
@@ -651,7 +651,7 @@ export default {
                     let coordinate = pnt.getCoordinates();
 
                     this.droneMarkers[dName] = {};
-                    this.droneMarkers[dName].iconFeature = new Feature({
+                    this.droneMarkers[dName].droneMarkerFeature = new Feature({
                         geometry: new Point([coordinate[0], coordinate[1]]),
                         name: 'dName',
                         population: 4000,
@@ -660,7 +660,7 @@ export default {
 
                     svgObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
                     svgObj.svg.path._attributes.stroke = 'white';
-                    svgObj.svg.path._attributes['stroke-width'] = '35';
+                    svgObj.svg.path._attributes['stroke-width'] = '25';
                     this.droneMarkers[dName].droneMarker = convert.js2xml(svgObj, {compact: true, ignoreComment: true, spaces: 4});
 
                     console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx droneMarker', this.droneMarkers[dName].droneMarker);
@@ -670,12 +670,19 @@ export default {
                             opacity: 1,
                             src: 'data:image/svg+xml;utf8,' + this.droneMarkers[dName].droneMarker,
                             scale: svgScale,
-                            rotation: (360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360,
+                            rotation: ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
+                            anchor: [0.5, 0.5],
+                        }),
+                        text: new Text({
+                            fill: new Fill({
+                                color: '#fff'
+                            }),
                         }),
                     });
 
-                    this.droneMarkers[dName].iconFeature.setStyle(iconStyle);
 
+                    this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyle);
+                    this.droneMarkers[dName].droneMarkerFeature.getStyle().getText().setText(this.$store.state.drone_infos[dName].alt.toFixed(1));
 
                     let sLat = this.$store.state.drone_infos[dName].headingLine[0].lat;
                     let sLng = this.$store.state.drone_infos[dName].headingLine[0].lng;
@@ -697,9 +704,6 @@ export default {
                         stroke: new Stroke({
                             color: this.$store.state.drone_infos[dName].color,
                             width: 1,
-                        }),
-                        fill: new Fill({
-                            color: 'rgba(0, 0, 255, 0.1)',
                         }),
                     });
 
@@ -742,12 +746,20 @@ export default {
                         src: 'data:image/svg+xml;utf8,' + this.droneMarkers[dName].droneMarker,
                         scale: svgScale,
                         rotation: ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
+                        anchor: [0.5, 0.5],
+                    }),
+                    text: new Text({
+                        scale: 1.4,
+                        fill: new Fill({
+                            color: '#fff'
+                        }),
                     }),
                 });
 
-                this.droneMarkers[dName].iconFeature.setStyle(iconStyle);
+                this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyle);
+                this.droneMarkers[dName].droneMarkerFeature.getStyle().getText().setText(this.$store.state.drone_infos[dName].alt.toFixed(1));
 
-                this.droneMarkers[dName].iconFeature.getGeometry().setCoordinates(coordinate);
+                this.droneMarkers[dName].droneMarkerFeature.getGeometry().setCoordinates(coordinate);
 
                 this.droneMarkers[dName].headingLineFeature.getGeometry().setCoordinates([[sCoordinate[0], sCoordinate[1]], [eCoordinate[0], eCoordinate[1]]]);
 
