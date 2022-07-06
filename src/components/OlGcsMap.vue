@@ -9,6 +9,7 @@ import View from 'ol/View'
 import Map from 'ol/Map'
 import TileLayer from 'ol/layer/Tile'
 //import OSM from 'ol/source/OSM'
+import DoubleClickZoom from 'ol/interaction/DoubleClickZoom'
 import XYZ from 'ol/source/XYZ'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
@@ -103,7 +104,7 @@ export default {
             vectorLayer: null,
             vectorSource: null,
             osmSource: null,
-            selectedFeature: null,
+            selectedFeature: undefined,
             selectedFeatureFlag: {},
             selectedFeatureId: null,
 
@@ -290,9 +291,9 @@ export default {
 
             for(let dName in this.droneMarkers) {
                 if(Object.prototype.hasOwnProperty.call(this.droneMarkers, dName)) {
-                    features.push(this.droneMarkers[dName].droneMarkerFeature);
                     features.push(this.droneMarkers[dName].headingLineFeature);
                     features.push(this.droneMarkers[dName].directionLineFeature);
+                    features.push(this.droneMarkers[dName].droneMarkerFeature);
                     console.log('droneMarkers', features);
                 }
             }
@@ -495,102 +496,16 @@ export default {
                 center: [0, 0],
                 constrainResolution: true
             }),
-        })
-
-        this.olMap.on('pointermove', (event) => {
-            const hovered = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
-            if (hovered !== this.selectedFeature) {
-                this.$set(this, 'selectedFeature', hovered);
-            }
         });
 
-        this.olMap.on('singleclick', (event) => {
-
-            this.vectorLayer.getSource().forEachFeature((feature) => {
-                //console.log(feature);
-
-                if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, feature.id_)) {
-                    this.selectedFeatureFlag[feature.id_] = false;
-                }
-
-                this.selectedFeatureFlag[feature.id_] = false;
-            });
-
-            const clicked = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
-
-            this.selectedFeature = clicked;
-
-            if(this.selectedFeature !== undefined) {
-//                this.selectedFeatureId = this.selectedFeature.getId();
-
-                if (this.selectedFeatureId) {
-                    this.vectorLayer.getSource().getFeatureById(this.selectedFeatureId).setStyle();
-                    this.selectedFeatureId = null;
-                }
-
-                if (this.selectedFeature.getId() !== this.selectedFeatureId) {
-                    this.selectedFeature.setStyle(this.selectedStyles);
-                    this.selectedFeatureId = this.selectedFeature.getId();
-                }
-
-                if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, clicked.id_)) {
-                    this.selectedFeatureFlag[clicked.id_] = false;
-                }
-
-                this.selectedFeatureFlag[clicked.id_] = !this.selectedFeatureFlag[clicked.id_];
-
-                console.log(clicked.id_, this.selectedFeatureFlag[clicked.id_]);
-
+        var interactions = this.olMap.getInteractions();
+        for (var i = 0; i < interactions.getLength(); i++) {
+            var interaction = interactions.item(i);
+            if (interaction instanceof DoubleClickZoom) {
+                this.olMap.removeInteraction(interaction);
+                break;
             }
-            else {
-                if (this.selectedFeatureId) {
-                    this.vectorLayer.getSource().getFeatureById(this.selectedFeatureId).setStyle();
-                    this.selectedFeatureId = null;
-                }
-            }
-
-            // this.olMap.forEachFeatureAtPixel(event.pixel, (clicked) => {
-            //     this.selectedFeature = clicked;
-            //
-            //     if(clicked !== undefined) {
-            //         if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, clicked.id_)) {
-            //             this.selectedFeatureFlag[clicked.id_] = false;
-            //         }
-            //
-            //         this.selectedFeatureFlag[clicked.id_] = !this.selectedFeatureFlag[clicked.id_];
-            //
-            //         console.log(clicked.id_, this.selectedFeatureFlag[clicked.id_]);
-            //
-            //         if (this.selectedFeatureId) {
-            //             selectedFeature.setStyle();
-            //             selectedFeatureId = null;
-            //         }
-            //         if (!selectedFeature || (selectedFeature.getId() != feature.getId())) {
-            //             feature.setStyle(selectedStyle);
-            //             selectedFeatureId = feature.getId();
-            //         }
-            //     }
-            //     else {
-            //         this.selectedFeatureId = null;
-            //     }
-            // });
-
-
-        });
-
-        // this.olMap.on('click', (event) => {
-        //     if(this.selectedFeature !== undefined) {
-        //         console.log('click', event, this.selectedFeature);
-        //
-        //         if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, this.selectedFeature.id_)) {
-        //             this.selectedFeatureFlag[this.selectedFeature.id_] = false;
-        //         }
-        //
-        //         this.selectedFeatureFlag[this.selectedFeature.id_] = !this.selectedFeatureFlag[this.selectedFeature.id_];
-        //
-        //         console.log(this.selectedFeature.id_, this.selectedFeatureFlag[this.selectedFeature.id_]);
-        //     }
-        // })
+        }
 
         this.updateSource(this.geojson);
 
@@ -657,10 +572,9 @@ export default {
                     this.droneMarkers[dName] = {};
                     this.droneMarkers[dName].droneMarkerFeature = new Feature({
                         geometry: new Point([coordinate[0], coordinate[1]]),
-                        name: 'dName',
-                        population: 4000,
-                        rainfall: 500,
+                        type: 'droneMarker',
                     });
+                    this.droneMarkers[dName].droneMarkerFeature.setId(dName);
 
                     svgObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
                     svgObj.svg.path._attributes.stroke = 'white';
@@ -679,16 +593,18 @@ export default {
                                 anchor: [0.5, 0.5],
                             }),
                             text: new Text({
-                                text: [dAlt.toFixed(1), 'bold 10px sans-serif'],
+                                text: [dAlt.toFixed(1), 'bold 11px sans-serif'],
+                                offsetY: -5,
                                 scale: 1.5,
                                 stroke: new Stroke({
                                     color: 'black',
-                                    width: 0.8,
+                                    width: 0.9,
                                 }),
                                 fill: new Fill({
                                     color: 'white'
                                 }),
                             }),
+                            zIndex: 2,
                         }),
                         new Style({
                             text: new Text({
@@ -704,7 +620,8 @@ export default {
                                     color: 'white'
                                 }),
                             }),
-                        })
+                            zIndex: 2,
+                        }),
                     ];
 
                     this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyle);
@@ -721,6 +638,7 @@ export default {
 
                     this.droneMarkers[dName].headingLineFeature = new Feature({
                         geometry: new LineString([[sCoordinate[0], sCoordinate[1]], [eCoordinate[0], eCoordinate[1]]]),
+                        type: 'headingLine',
                     });
 
                     let headingLineStyle = new Style({
@@ -748,6 +666,7 @@ export default {
 
                     this.droneMarkers[dName].directionLineFeature = new Feature({
                         geometry: new LineString([[sDirCoordinate[0], sDirCoordinate[1]], [eDirCoordinate[0], eDirCoordinate[1]]]),
+                        type: 'directionLine',
                     });
 
                     let directionLineStyle = [
@@ -819,7 +738,7 @@ export default {
             if(Object.prototype.hasOwnProperty.call(this.droneMarkers, dName)) {
                 this.droneMarkers[dName].droneMarkerFeature.getStyle()[0].getImage().setScale(svgScale + (dAlt / 3000));
                 this.droneMarkers[dName].droneMarkerFeature.getStyle()[0].getImage().setRotation(((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180));
-                this.droneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setText(dAlt.toFixed(1));
+                this.droneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setText([dAlt.toFixed(1), 'bold 11px sans-serif']);
                 this.droneMarkers[dName].droneMarkerFeature.getGeometry().setCoordinates(coordinate);
 
                 this.droneMarkers[dName].headingLineFeature.getGeometry().setCoordinates([[sCoordinate[0], sCoordinate[1]], [eCoordinate[0], eCoordinate[1]]]);
@@ -842,6 +761,291 @@ export default {
             this.olMap.getView().setCenter(coordinate);
             this.olMap.getView().setZoom(18);
         });
+
+        this.olMap.on('pointermove', (event) => {
+            const hovered = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+            if (hovered !== undefined) {
+                if(hovered.getId() !== undefined) {
+                    console.log('hovered', hovered.getId());
+                    //this.$set(this, 'selectedFeature', hovered);
+                }
+            }
+        });
+
+        this.olMap.on('singleclick', (event) => {
+
+            // this.vectorLayer.getSource().forEachFeature((feature) => {
+            //     if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, feature.id_)) {
+            //         this.selectedFeatureFlag[feature.getId()] = false;
+            //     }
+            //
+            //     this.selectedFeatureFlag[feature.getId()] = false;
+            // });
+
+            this.selectedFeature = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+
+            if(this.selectedFeature !== undefined && this.selectedFeature.getId() !== undefined) {
+                if(this.selectedFeature.getProperties().type === 'droneMarker') {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, this.selectedFeature.getId())) {
+                        let dName = this.selectedFeature.getId();
+                        if (this.$store.state.drone_infos[dName].selected) {
+                            if (this.$store.state.drone_infos[dName].targeted) {
+                                svgObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                                svgObj.svg.path._attributes.stroke = 'white';
+                                svgObj.svg.path._attributes['stroke-width'] = '25';
+                                this.$store.state.drone_infos[dName].targeted = false;
+                            }
+                            else {
+                                svgObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                                svgObj.svg.path._attributes.stroke = 'yellow';
+                                svgObj.svg.path._attributes['stroke-width'] = '35';
+                                this.$store.state.drone_infos[dName].targeted = true;
+                            }
+
+                            this.$store.state.drone_command_prepared = false;
+                            for (let dName in this.$store.state.drone_infos) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                                        this.$store.state.drone_command_prepared = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            this.droneMarkers[dName].droneMarker = convert.js2xml(svgObj, {compact: true, ignoreComment: true, spaces: 4});
+
+                            let iconStyle = [
+                                new Style({
+                                    image: new Icon({
+                                        opacity: 1,
+                                        src: 'data:image/svg+xml;utf8,' + this.droneMarkers[dName].droneMarker,
+                                        scale: svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+                                        rotation: ((360 + this.$store.state.drone_infos[dName].heading - 45 - this.mapHeading) % 360) * (Math.PI / 180),
+                                        anchor: [0.5, 0.5],
+                                    }),
+                                    text: new Text({
+                                        text: [this.$store.state.drone_infos[dName].alt.toFixed(1), 'bold 11px sans-serif'],
+                                        offsetY: -5,
+                                        scale: 1.5,
+                                        stroke: new Stroke({
+                                            color: 'black',
+                                            width: 0.9,
+                                        }),
+                                        fill: new Fill({
+                                            color: 'white'
+                                        }),
+                                    }),
+                                    zIndex: 2,
+                                }),
+                                new Style({
+                                    text: new Text({
+                                        textAlign: 'center',
+                                        offsetY: 35,
+                                        text: [this.$store.state.drone_infos[dName].name, 'bold 10px sans-serif', '\n', 'bold 10px sans-serif', '(' + this.$store.state.drone_infos[dName].system_id + ')', 'bold 10px sans-serif',],
+                                        scale: 1.5,
+                                        stroke: new Stroke({
+                                            color: 'black',
+                                            width: 0.8,
+                                        }),
+                                        fill: new Fill({
+                                            color: 'white'
+                                        }),
+                                    }),
+                                    zIndex: 2,
+                                }),
+                            ];
+
+                            this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyle);
+                        }
+                    }
+                }
+            }
+
+            this.vectorLayer.getSource().forEachFeature((feature) => {
+                if(feature.getProperties().type === 'tempMarker') {
+                    if(this.selectedFeature.getId() !== feature.getId()) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, feature.getId())) {
+                            let dName = feature.getId();
+                            if (this.$store.state.drone_infos[dName].selected) {
+                                if (this.$store.state.drone_infos[dName].targeted) {
+                                    svgObj.svg.path._attributes.stroke = 'white';
+                                    svgObj.svg.path._attributes['stroke-width'] = '25';
+
+                                    this.$store.state.drone_infos[dName].targeted = false;
+
+                                    this.droneMarkers[dName].droneMarker = convert.js2xml(svgObj, {
+                                        compact: true,
+                                        ignoreComment: true,
+                                        spaces: 4
+                                    });
+
+                                    let iconStyle = [
+                                        new Style({
+                                            image: new Icon({
+                                                opacity: 1,
+                                                src: 'data:image/svg+xml;utf8,' + this.droneMarkers[dName].droneMarker,
+                                                scale: svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+                                                rotation: ((360 + this.$store.state.drone_infos[dName].heading - 45 - this.mapHeading) % 360) * (Math.PI / 180),
+                                                anchor: [0.5, 0.5],
+                                            }),
+                                            text: new Text({
+                                                text: [this.$store.state.drone_infos[dName].alt.toFixed(1), 'bold 11px sans-serif'],
+                                                offsetY: -5,
+                                                scale: 1.5,
+                                                stroke: new Stroke({
+                                                    color: 'black',
+                                                    width: 0.9,
+                                                }),
+                                                fill: new Fill({
+                                                    color: 'white'
+                                                }),
+                                            }),
+                                            zIndex: 2,
+                                        }),
+                                        new Style({
+                                            text: new Text({
+                                                textAlign: 'center',
+                                                offsetY: 35,
+                                                text: [this.$store.state.drone_infos[dName].name, 'bold 10px sans-serif', '\n', 'bold 10px sans-serif', '(' + this.$store.state.drone_infos[dName].system_id + ')', 'bold 10px sans-serif',],
+                                                scale: 1.5,
+                                                stroke: new Stroke({
+                                                    color: 'black',
+                                                    width: 0.8,
+                                                }),
+                                                fill: new Fill({
+                                                    color: 'white'
+                                                }),
+                                            }),
+                                            zIndex: 2,
+                                        }),
+                                    ];
+
+                                    this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyle);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // this.olMap.forEachFeatureAtPixel(event.pixel, (clicked) => {
+            //     this.selectedFeature = clicked;
+            //
+            //     if(clicked !== undefined) {
+            //         if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, clicked.id_)) {
+            //             this.selectedFeatureFlag[clicked.id_] = false;
+            //         }
+            //
+            //         this.selectedFeatureFlag[clicked.id_] = !this.selectedFeatureFlag[clicked.id_];
+            //
+            //         console.log(clicked.id_, this.selectedFeatureFlag[clicked.id_]);
+            //
+            //         if (this.selectedFeatureId) {
+            //             selectedFeature.setStyle();
+            //             selectedFeatureId = null;
+            //         }
+            //         if (!selectedFeature || (selectedFeature.getId() != feature.getId())) {
+            //             feature.setStyle(selectedStyle);
+            //             selectedFeatureId = feature.getId();
+            //         }
+            //     }
+            //     else {
+            //         this.selectedFeatureId = null;
+            //     }
+            // });
+
+
+        });
+
+        this.olMap.on('dblclick', (event) => {
+
+            console.log('dblclick', event);
+
+//             this.vectorLayer.getSource().forEachFeature((feature) => {
+//                 //console.log(feature);
+//
+//                 if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, feature.id_)) {
+//                     this.selectedFeatureFlag[feature.id_] = false;
+//                 }
+//
+//                 this.selectedFeatureFlag[feature.id_] = false;
+//             });
+//
+//             const clicked = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+//
+//             this.selectedFeature = clicked;
+//
+//             if(this.selectedFeature !== undefined) {
+// //                this.selectedFeatureId = this.selectedFeature.getId();
+//
+//                 if (this.selectedFeatureId) {
+//                     this.vectorLayer.getSource().getFeatureById(this.selectedFeatureId).setStyle();
+//                     this.selectedFeatureId = null;
+//                 }
+//
+//                 if (this.selectedFeature.getId() !== this.selectedFeatureId) {
+//                     this.selectedFeature.setStyle(this.selectedStyles);
+//                     this.selectedFeatureId = this.selectedFeature.getId();
+//                 }
+//
+//                 if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, clicked.id_)) {
+//                     this.selectedFeatureFlag[clicked.id_] = false;
+//                 }
+//
+//                 this.selectedFeatureFlag[clicked.id_] = !this.selectedFeatureFlag[clicked.id_];
+//
+//                 console.log(clicked.id_, this.selectedFeatureFlag[clicked.id_]);
+//
+//             }
+//             else {
+//                 if (this.selectedFeatureId) {
+//                     this.vectorLayer.getSource().getFeatureById(this.selectedFeatureId).setStyle();
+//                     this.selectedFeatureId = null;
+//                 }
+//             }
+
+            // this.olMap.forEachFeatureAtPixel(event.pixel, (clicked) => {
+            //     this.selectedFeature = clicked;
+            //
+            //     if(clicked !== undefined) {
+            //         if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, clicked.id_)) {
+            //             this.selectedFeatureFlag[clicked.id_] = false;
+            //         }
+            //
+            //         this.selectedFeatureFlag[clicked.id_] = !this.selectedFeatureFlag[clicked.id_];
+            //
+            //         console.log(clicked.id_, this.selectedFeatureFlag[clicked.id_]);
+            //
+            //         if (this.selectedFeatureId) {
+            //             selectedFeature.setStyle();
+            //             selectedFeatureId = null;
+            //         }
+            //         if (!selectedFeature || (selectedFeature.getId() != feature.getId())) {
+            //             feature.setStyle(selectedStyle);
+            //             selectedFeatureId = feature.getId();
+            //         }
+            //     }
+            //     else {
+            //         this.selectedFeatureId = null;
+            //     }
+            // });
+
+
+        });
+
+        // this.olMap.on('click', (event) => {
+        //     if(this.selectedFeature !== undefined) {
+        //         console.log('click', event, this.selectedFeature);
+        //
+        //         if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, this.selectedFeature.id_)) {
+        //             this.selectedFeatureFlag[this.selectedFeature.id_] = false;
+        //         }
+        //
+        //         this.selectedFeatureFlag[this.selectedFeature.id_] = !this.selectedFeatureFlag[this.selectedFeature.id_];
+        //
+        //         console.log(this.selectedFeature.id_, this.selectedFeatureFlag[this.selectedFeature.id_]);
+        //     }
+        // })
 
         let pnt = new Point([127.16050533784832, 37.40423134053018]).transform('EPSG:4326', 'EPSG:3857')
         let center_coordinate = pnt.getCoordinates();
