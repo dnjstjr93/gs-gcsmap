@@ -934,7 +934,7 @@ export default {
             iconFlightElapsed: 'mdi-timer-off-outline',
             flightElapsedTime: '00:00',
             iconBattery: 'mdi-battery-off-outline',
-            colorBattery: 'gray',
+            colorBattery: '#9E9E9E',
             infos1: [
                 {
                     name: 'Bat',
@@ -1035,7 +1035,7 @@ export default {
             missionLteUrl: '',
 
             curLteVal: -80,
-            colorLteVal: 'gray',
+            colorLteVal: '#9E9E9E',
             iconLte: 'mdi-network-strength-off-outline',
 
             roll: 0,
@@ -1209,17 +1209,17 @@ export default {
                 isVideo: false,
                 num_satellites: 0,
                 rssi: 0,
-                colorLteVal: 'gray',
+                colorLteVal: '#9E9E9E',
                 curLteVal: 0,
                 iconLte: 'mdi-network-strength-off-outline',
-                colorBattery: 'gray',
+                colorBattery: '#9E9E9E',
                 iconBattery: 'mdi-battery-off-outline',
                 voltageBattery: 0,
                 iconFlightElapsed: 'mdi-timer-off-outline',
                 flightElapsedTime: '00:00',
                 valueDistance: '0 m',
                 wpYawBehavior: 'YAW-0',
-                colorMode: 'gray',
+                colorMode: '#9E9E9E',
                 curMode: 'UNKNOWN',
                 curArmStatus: 'DISARMED',
                 severity: 6,
@@ -1232,7 +1232,7 @@ export default {
 
     computed: {
         bpm_color() {
-            if (this.bpm < 100) return 'grey'
+            if (this.bpm < 100) return '#9E9E9E'
             if (this.bpm < 200) return 'indigo'
             if (this.bpm < 300) return 'teal'
             if (this.bpm < 400) return 'green'
@@ -1344,7 +1344,7 @@ export default {
                 }
                 else {
                     this.colorMode = 'td-text-gray';
-                    this.info.colorMode = 'gray';
+                    this.info.colorMode = '#9E9E9E';
                 }
             }, 2000);
 
@@ -1970,7 +1970,7 @@ export default {
             // this.$store.state.dronesChecked = JSON.parse(JSON.stringify(temp));
             // temp = null;
 
-            //EventBus.$emit('do-targetDroneMarker', this.name);
+            EventBus.$emit('do-updateTargetDroneMarker', this.name);
 
             //EventBus.$emit('do-targetDrone');
 
@@ -2132,7 +2132,7 @@ export default {
                                         // console.log(payload.sur);
 
                                         if (Object.prototype.hasOwnProperty.call(payload.con, 'rsrp')) {
-                                            this.colorLteVal = 'gray';
+                                            this.colorLteVal = '#9E9E9E';
 
                                             this.curLteVal = payload.con.rsrp;
                                             //console.log(this.curLteVal);
@@ -2166,7 +2166,7 @@ export default {
 
                                             this.lteTimeoutObj = setTimeout(() => {
                                                 this.lteTimeoutObj = null;
-                                                this.colorLteVal = 'gray';
+                                                this.colorLteVal = '#9E9E9E';
                                                 this.iconLte = 'mdi-network-strength-off-outline';
                                             }, 5500);
                                         }
@@ -2476,7 +2476,7 @@ export default {
                     this.iconDistance = 'mdi-map-marker-distance';
 
                     this.iconBattery = 'mdi-battery-off-outline';
-                    this.colorBattery = 'gray';
+                    this.colorBattery = '#9E9E9E';
 
                     this.info.iconBattery = this.iconBattery;
                     this.info.colorBattery = this.colorBattery;
@@ -3924,7 +3924,7 @@ export default {
         },
 
         checkLteValRsrp(_curLteVal) {
-            this.colorLteVal = 'gray';
+            this.colorLteVal = '#9E9E9E';
             this.iconLte = 'mdi-network-strength-off-outline';
 
             if (0 > _curLteVal && _curLteVal >= -80) {
@@ -3951,7 +3951,7 @@ export default {
 
             this.lteTimeoutObj = setTimeout(() => {
                 this.lteTimeoutObj = null;
-                this.colorLteVal = 'gray';
+                this.colorLteVal = '#9E9E9E';
                 this.iconLte = 'mdi-network-strength-off-outline';
             }, 2500);
         },

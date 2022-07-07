@@ -150,7 +150,7 @@
                                 :title="'unknown'  + ':' + pos.alt"
                                 :icon="{
                                     path: $store.state.iconSourceMarker.icon[4],
-                                    fillColor: 'grey',
+                                    fillColor: '#9E9E9E',
                                     fillOpacity: 1,
                                     strokeWeight: pos.selected ? 3 : (pos.targeted ? 3 : 1),
                                     strokeColor: pos.selected ? 'springgreen' : (pos.targeted ? 'yellow' : 'white'),
@@ -1684,7 +1684,7 @@
                     marker.type = 'Goto';
                     marker.selected = false;
                     marker.targeted = false;
-                    marker.color = 'grey';
+                    marker.color = '#9E9E9E';
 
                     this.$store.state.tempMarkers['unknown'].push(marker);
 
@@ -1877,7 +1877,7 @@
                 survey.targetMavCmd = 16;
                 survey.targetStayTime = 1;
                 survey.type = 'Survey';
-                survey.color = 'grey';
+                survey.color = '#9E9E9E';
                 survey.selected = false;
                 survey.targeted = false;
 
@@ -2415,7 +2415,7 @@
             //         dMarker.icon = JSON.parse(JSON.stringify(temp));
             //         dMarker.icon.strokeWeight = 1;
             //         dMarker.icon.strokeOpacity = 1
-            //         dMarker.icon.strokeColor = 'grey';
+            //         dMarker.icon.strokeColor = '#9E9E9E';
             //
             //     }
             //

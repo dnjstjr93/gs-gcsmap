@@ -10,12 +10,14 @@ import Map from 'ol/Map'
 import TileLayer from 'ol/layer/Tile'
 //import OSM from 'ol/source/OSM'
 import DoubleClickZoom from 'ol/interaction/DoubleClickZoom'
+import Translate from 'ol/interaction/Translate'
 import XYZ from 'ol/source/XYZ'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import GeoJSON from 'ol/format/GeoJSON'
 import MultiPoint from 'ol/geom/MultiPoint';
-//import Projection from 'ol/proj'
+import { toLonLat } from 'ol/proj';
+import { Collection } from "ol";
 
 import 'ol/ol.css'
 import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
@@ -25,8 +27,11 @@ import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import LineString from 'ol/geom/LineString';
 
+import { faLocationArrow, faMapPin } from "@fortawesome/free-solid-svg-icons";
+//import { faMapMarkerAlt, faMapPin, faFlag, faPlaneSlash, faHourglassHalf } from "@fortawesome/free-solid-svg-icons";
+
 import convert from "xml-js";
-import { faLocationArrow } from "@fortawesome/free-solid-svg-icons";
+
 import EventBus from "@/EventBus";
 import axios from "axios";
 
@@ -36,55 +41,69 @@ import arrawImagePath from '../assets/arrow.png'
 //import { openDB } from 'idb';
 //import {get} from '../js/idb_map'
 
-let svgObj = {};
+let svgDroneObj = {};
+svgDroneObj.svg = {};
+svgDroneObj.svg._attributes = {};
+svgDroneObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
+svgDroneObj.svg._attributes.width = faLocationArrow.icon[0] / 2;
+svgDroneObj.svg._attributes.height = faLocationArrow.icon[1] / 2;
+//svgDroneObj.svg._attributes.fill = 'red';
+svgDroneObj.svg._attributes.class = 'f124';
+svgDroneObj.svg._attributes.viewBox = '-25 -25 ' + (faLocationArrow.icon[0]+50) + ' ' + (faLocationArrow.icon[1]+50);
+svgDroneObj.svg.path = {};
+svgDroneObj.svg.path._attributes = {};
+svgDroneObj.svg.path._attributes.d = faLocationArrow.icon[4];
 
-svgObj.svg = {};
-svgObj.svg._attributes = {};
-svgObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
-svgObj.svg._attributes.width = faLocationArrow.icon[0] / 2;
-svgObj.svg._attributes.height = faLocationArrow.icon[1] / 2;
-//svgObj.svg._attributes.fill = 'red';
-svgObj.svg._attributes.class = 'f124';
-svgObj.svg._attributes.viewBox = '-25 -25 ' + (faLocationArrow.icon[0]+50) + ' ' + (faLocationArrow.icon[1]+50);
-svgObj.svg.path = {};
-svgObj.svg.path._attributes = {};
-svgObj.svg.path._attributes.d = faLocationArrow.icon[4];
+let svgTempObj = {};
+svgTempObj.svg = {};
+svgTempObj.svg._attributes = {};
+svgTempObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
+svgTempObj.svg._attributes.width = faMapPin.icon[0] / 2;
+svgTempObj.svg._attributes.height = faMapPin.icon[1] / 2;
+//svgDroneObj.svg._attributes.fill = 'red';
+svgTempObj.svg._attributes.class = 'f276';
+svgTempObj.svg._attributes.viewBox = '-25 -25 ' + (faMapPin.icon[0]+50) + ' ' + (faMapPin.icon[1]+50);
+svgTempObj.svg.path = {};
+svgTempObj.svg.path._attributes = {};
+svgTempObj.svg.path._attributes.d = faMapPin.icon[4];
 
-const svgDrone = convert.js2xml(svgObj, {compact: true, ignoreComment: true, spaces: 4});
+console.log('faMapPin', faMapPin);
+
 const svgScale = 0.18;
 
-//console.log('svgDrone', svgDrone);
-
-//const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pin-fill" viewBox="0 0 16 16"> <path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/> </svg>';
-
-//const svgDrone = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="f124" viewBox="0 0 512 512"> <path d="M444.52 3.52L28.74 195.42c-47.97 22.39-31.98 92.75 19.19 92.75h175.91v175.91c0 51.17 70.36 67.17 92.75 19.19l191.9-415.78c15.99-38.39-25.59-79.97-63.97-63.97z"/> </svg>';
-
-// 1. indexedDB 객체 가져오기
-const idxedDB = window.indexedDB;
-
-// 2. 브라우저에서 지원하는지 체크하기
-if (!idxedDB) {
-    window.alert('해당 브라우저에서는 indexedDB를 지원하지 않습니다.')
-}
-else {
-    let db;
-    const request = idxedDB.open('SampleDB');   // 3. SampleDB(db) 열기
-
-    request.onupgradeneeded = (e) => {
-        db = e.target.result;
-        db.createObjectStore('name', {keyPath: 'id'}); // 4. name저장소 만들고, key는 id로 지정
-
-        request.onerror = (e) => {
-            alert('failed', e);
-        }
-
-        request.onsuccess = () => {
-            let db = request.result;
-            console.log(db);
-        }
-    }
-
-}
+const colorMapAlt = {
+    0:  '#FFFFFF',
+    10:  '#FF9E80',
+    20:  '#FFD180',
+    30:  '#FFE57F',
+    40:  '#FFFF8D',
+    50:  '#F4FF81',
+    60:  '#CCFF90',
+    70:  '#B9F6CA',
+    80:  '#A7FFEB',
+    90:  '#84FFFF',
+    100:  '#80D8FF',
+    110:  '#82B1FF',
+    120:  '#8C9EFF',
+    130:  '#B388FF',
+    140:  '#EA80FC',
+    150:  '#FF80AB',
+    160:  '#BF360C',
+    170:  '#E65100',
+    180:  '#FF6F00',
+    190:  '#F57F17',
+    200:  '#827717',
+    210:  '#33691E',
+    220:  '#1B5E20',
+    230:  '#004D40',
+    240:  '#006064',
+    250:  '#01579B',
+    260:  '#0D47A1',
+    270:  '#1A237E',
+    280:  '#311B92',
+    290:  '#4A148C',
+    300:  '#880E4F',
+};
 
 export default {
     name: 'MapContainer',
@@ -93,9 +112,10 @@ export default {
         geojson: Object
     },
     data: () => {
-        let points = [[78.65, -32.65], [-98.65, 12.65]];
 
         return {
+            datum: {targeted: false, lat:0.0, lng:0.0},
+
             tileCoordObj: {},
 
             mapHeading: 0,
@@ -104,9 +124,14 @@ export default {
             vectorLayer: null,
             vectorSource: null,
             osmSource: null,
+
+            droneMarkers: {},
+            tempMarkers: {},
+
             selectedFeature: undefined,
             selectedFeatureFlag: {},
             selectedFeatureId: null,
+            selectedTempFeatureId: {},
 
             styles: [
                 /* We are using two different styles for the polygons:
@@ -170,66 +195,6 @@ export default {
                     },
                 }),
             ],
-
-            droneMarkers: {},
-
-            iconFeature: new Feature({
-                geometry: new Point([0, 0],),
-                name: 'Null Island',
-                population: 4000,
-                rainfall: 500,
-            }),
-
-            headingLineFeature: new Feature({
-                geometry: new LineString(points),
-            }),
-
-            headingLineStyle: new Style({
-                stroke: new Stroke({
-                    color: 'green',
-                    width: 3,
-                }),
-                fill: new Fill({
-                    color: 'rgba(0, 0, 255, 0.1)',
-                }),
-            }),
-
-            iconStyle: new Style({
-                image: new Icon({
-                    opacity: 0.9,
-                    src: 'data:image/svg+xml;utf8,' + svgDrone,
-                    scale: svgScale
-                })
-                // })
-                // // new Style({
-                // //     text: new Text({
-                // //         text: '\uf04b',
-                // //         font: 'normal 18px FontAwesome',
-                // //         textBaseline: 'Bottom',
-                // //         fill: new Fill({
-                // //             color: 'white'
-                // //         })
-                // //     })
-                //     new Style({
-                //     image: new Icon({
-                //         anchor: [0.5, 46],
-                //         anchorXUnits: 'fraction',
-                //         anchorYUnits: 'pixels',
-                //         src: 'data:image/svg+xml;utf8,' + this.svg,
-                //     }),
-
-                // image: new CircleStyle({
-                //     radius: 5,
-                //     fill: new Fill({
-                //         color: 'red',
-                //     }),
-                // }),
-                // geometry: function (feature) {
-                //     // return the coordinates of the first ring of the polygon
-                //     const coordinates = feature.getGeometry().getCoordinates();
-                //     return new Point(coordinates);
-                // },
-            }),
         }
     },
 
@@ -286,15 +251,23 @@ export default {
 
             console.log('features', features);
 
-            features.push(this.iconFeature);
-            console.log('features', features);
-
             for(let dName in this.droneMarkers) {
                 if(Object.prototype.hasOwnProperty.call(this.droneMarkers, dName)) {
                     features.push(this.droneMarkers[dName].headingLineFeature);
                     features.push(this.droneMarkers[dName].directionLineFeature);
                     features.push(this.droneMarkers[dName].droneMarkerFeature);
                     console.log('droneMarkers', features);
+                }
+            }
+
+            for(let dName in this.tempMarkers) {
+                if(Object.prototype.hasOwnProperty.call(this.tempMarkers, dName)) {
+                    features.push(this.tempMarkers[dName].guideLineFeature);
+                    features = features.concat(this.tempMarkers[dName].tempMarkerFeatures);
+
+                    this.tempMarkers[dName].tempMarkerTranslates.forEach((translate) => {
+                        this.olMap.addInteraction(translate);
+                    });
                 }
             }
 
@@ -409,46 +382,410 @@ export default {
             });
         },
 
-        async saveMapImage(obj) {
-            let status = await this.postOfflineMapImage(obj);
-            console.log('saveMapImage', status);
+        postCinTempMarkerInfoToMobius(dName) {
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName,
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: this.$store.state.tempMarkers[dName]
+                    }
+                }
+            }).then(
+                function (res) {
+                    console.log('-------------------------------------------------------postCinTempMarkerInfoToMobius-axios', res.data);
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
         },
 
-        async getMapImage(id) {
-            let obj = await this.getIdxedDBValueSync(id);
+        getStyleTempMarker(pIndex, fillColor, strokeColor, strokeWidth, tAlt, scale) {
+            svgTempObj.svg.path._attributes.fill = fillColor.replace('#', '%23');
+            svgTempObj.svg.path._attributes.stroke = strokeColor.replace('#', '%23');
+            svgTempObj.svg.path._attributes['stroke-width'] = strokeWidth;
 
-            return obj.name;
-        }
+            let xmlSvgTempMarker = convert.js2xml(svgTempObj, {compact: true, ignoreComment: true, spaces: 4});
+
+            return (
+                new Style({
+                    image: new Icon({
+                        opacity: 1,
+                        src: 'data:image/svg+xml;utf8,' + xmlSvgTempMarker,
+                        scale: scale,
+                        anchor: [0.5, 1],
+                    }),
+                    text: new Text({
+                        text: [pIndex + ':' + tAlt.toFixed(0), 'bold 11px sans-serif'],
+                        offsetY: -45,
+                        scale: 1.4,
+                        stroke: new Stroke({
+                            color: 'black',
+                            width: 0.8,
+                        }),
+                        fill: new Fill({
+                            color: colorMapAlt[Math.round(tAlt / 10) * 10]
+                        }),
+                    }),
+                    zIndex: 3,
+                })
+            );
+        },
+
+        updateTempMarker(dName, pIndex) {
+            let iconStyleTemp = null;
+
+            if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                iconStyleTemp = this.getStyleTempMarker(
+                    pIndex,
+                    this.$store.state.drone_infos[dName].color,
+                    '#FFFF00',
+                    '35',
+                    this.$store.state.tempMarkers[dName][pIndex].alt,
+                    svgScale
+                );
+            }
+            else {
+                iconStyleTemp = this.getStyleTempMarker(
+                    pIndex,
+                    this.$store.state.drone_infos[dName].color,
+                    '#FFFDE7',
+                    '15',
+                    this.$store.state.tempMarkers[dName][pIndex].alt,
+                    svgScale
+                );
+            }
+
+            this.tempMarkers[dName].tempMarkerFeatures[pIndex].setStyle(iconStyleTemp);
+        },
+
+        getStyleDroneMarker(dName, system_id, fillColor, strokeColor, strokeWidth, dAlt, scale, rotation) {
+            svgDroneObj.svg.path._attributes.fill = fillColor.replace('#', '%23');
+            svgDroneObj.svg.path._attributes.stroke = strokeColor.replace('#', '%23');
+            svgDroneObj.svg.path._attributes['stroke-width'] = strokeWidth;
+
+            let xmlSvgDroneMarker = convert.js2xml(svgDroneObj, {compact: true, ignoreComment: true, spaces: 4});
+
+            return [
+                new Style({
+                    image: new Icon({
+                        opacity: 1,
+                        src: 'data:image/svg+xml;utf8,' + xmlSvgDroneMarker,
+                        scale: scale,
+                        rotation: rotation,
+                        anchor: [0.5, 0.5],
+                    }),
+                    text: new Text({
+                        text: [dAlt.toFixed(1), 'bold 11px sans-serif'],
+                        offsetY: -15,
+                        scale: 1.5,
+                        stroke: new Stroke({
+                            color: 'black',
+                            width: 0.8,
+                        }),
+                        fill: new Fill({
+                            color: colorMapAlt[Math.round(dAlt / 10) * 10]
+                        }),
+                    }),
+                    zIndex: 2,
+                }),
+                new Style({
+                    text: new Text({
+                        textAlign: 'center',
+                        offsetY: 40,
+                        text: [dName, 'bold 9px sans-serif', '\n', 'bold 10px sans-serif', '(' + system_id + ')', 'bold 10px sans-serif',],
+                        scale: 1.6,
+                        stroke: new Stroke({
+                            color: 'black',
+                            width: 0.8,
+                        }),
+                        fill: new Fill({
+                            color: colorMapAlt[Math.round(dAlt / 10) * 10]
+                        }),
+                    }),
+                    zIndex: 2,
+                }),
+            ];
+        },
+
+        updateTargetDroneMarker(dName) {
+            let iconStyleDrone = null;
+
+            if (this.$store.state.drone_infos[dName].targeted) {
+                iconStyleDrone = this.getStyleDroneMarker(
+                    dName,
+                    this.$store.state.drone_infos[dName].system_id,
+                    this.$store.state.drone_infos[dName].color,
+                    '#FFFF00',
+                    '35',
+                    this.$store.state.drone_infos[dName].alt,
+                    svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+                    ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180)
+                );
+            }
+            else {
+                iconStyleDrone = this.getStyleDroneMarker(
+                    dName,
+                    this.$store.state.drone_infos[dName].system_id,
+                    this.$store.state.drone_infos[dName].color,
+                    '#FFFDE7',
+                    '25',
+                    this.$store.state.drone_infos[dName].alt,
+                    svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+                    ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180)
+                );
+            }
+
+            this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyleDrone);
+
+            this.$store.state.drone_command_prepared = false;
+            for (let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.state.drone_command_prepared = true;
+                        break;
+                    }
+                }
+            }
+        },
+
+        initDroneMarkers() {
+            this.droneMarkers = {};
+
+            Object.keys(this.$store.state.drone_infos).forEach((dName) => {
+                if(dName !== 'unknown' && this.$store.state.drone_infos[dName].selected) {
+                    let dLat = this.$store.state.drone_infos[dName].lat;
+                    let dLng = this.$store.state.drone_infos[dName].lng;
+                    let dAlt = this.$store.state.drone_infos[dName].alt;
+
+                    let pnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let coordinate = pnt.getCoordinates();
+
+                    this.droneMarkers[dName] = {};
+                    this.droneMarkers[dName].droneMarkerFeature = new Feature({
+                        geometry: new Point([coordinate[0], coordinate[1]]),
+                        type: 'droneMarker',
+                    });
+                    this.droneMarkers[dName].droneMarkerFeature.setId(dName);
+
+                    svgDroneObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                    svgDroneObj.svg.path._attributes.stroke = 'white';
+                    svgDroneObj.svg.path._attributes['stroke-width'] = '25';
+                    this.droneMarkers[dName].droneMarker = convert.js2xml(svgDroneObj, {compact: true, ignoreComment: true, spaces: 4});
+
+                    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx droneMarker', this.droneMarkers[dName].droneMarker);
+
+                    let iconStyleDrone = this.getStyleDroneMarker(
+                        dName,
+                        this.$store.state.drone_infos[dName].system_id,
+                        this.$store.state.drone_infos[dName].color,
+                        '#FFFDE7',
+                        '25',
+                        dAlt,
+                        svgScale + (dAlt / 3000),
+                        ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180)
+                    );
+
+                    this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyleDrone);
+
+                    let sLat = this.$store.state.drone_infos[dName].headingLine[0].lat;
+                    let sLng = this.$store.state.drone_infos[dName].headingLine[0].lng;
+                    let eLat = this.$store.state.drone_infos[dName].headingLine[1].lat;
+                    let eLng = this.$store.state.drone_infos[dName].headingLine[1].lng;
+
+                    let sPnt = new Point([sLng, sLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let sCoordinate = sPnt.getCoordinates();
+                    let ePnt = new Point([eLng, eLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let eCoordinate = ePnt.getCoordinates();
+
+                    this.droneMarkers[dName].headingLineFeature = new Feature({
+                        geometry: new LineString([[sCoordinate[0], sCoordinate[1]], [eCoordinate[0], eCoordinate[1]]]),
+                        type: 'headingLine-'+dName,
+                    });
+
+                    let headingLineStyle = new Style({
+                        stroke: new Stroke({
+                            color: this.$store.state.drone_infos[dName].color,
+                            width: 1,
+                        })
+                    });
+
+                    this.droneMarkers[dName].headingLineFeature.setStyle(headingLineStyle);
+
+                    let sDirLat = this.$store.state.drone_infos[dName].directionLine[0].lat;
+                    let sDirLng = this.$store.state.drone_infos[dName].directionLine[0].lng;
+                    let eDirLat = this.$store.state.drone_infos[dName].directionLine[1].lat;
+                    let eDirLng = this.$store.state.drone_infos[dName].directionLine[1].lng;
+
+                    let sDirPnt = new Point([sDirLng, sDirLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let sDirCoordinate = sDirPnt.getCoordinates();
+                    let eDirPnt = new Point([eDirLng, eDirLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let eDirCoordinate = eDirPnt.getCoordinates();
+
+                    var dx = eDirCoordinate[0] - sDirCoordinate[0];
+                    var dy = eDirCoordinate[1] - sDirCoordinate[1];
+                    var rotation = Math.atan2(dy, dx);
+
+                    this.droneMarkers[dName].directionLineFeature = new Feature({
+                        geometry: new LineString([[sDirCoordinate[0], sDirCoordinate[1]], [eDirCoordinate[0], eDirCoordinate[1]]]),
+                        type: 'directionLine-'+dName,
+                    });
+
+                    let directionLineStyle = [
+                        new Style({
+                            stroke: new Stroke({
+                                color: this.$store.state.drone_infos[dName].color + '80',
+                                width: 5,
+                            }),
+                        }),
+                        new Style({
+                            geometry: new Point(eDirCoordinate),
+                            image: new Icon({
+                                src: arrawImagePath,
+                                anchor: [0.75, 0.5],
+                                rotateWithView: true,
+                                rotation: -rotation,
+                                color: this.$store.state.drone_infos[dName].color,
+                                opacity: 0.5,
+                                scale: 1.5
+                            })
+                        }),
+                    ];
+
+                    this.droneMarkers[dName].directionLineFeature.setStyle(directionLineStyle);
+                }
+            });
+        },
+
+        initTempMarkers() {
+            this.tempMarkers = {};
+
+            Object.keys(this.$store.state.tempMarkers).forEach((dName) => {
+                if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    this.tempMarkers[dName] = {};
+                    this.tempMarkers[dName].Coordinates = [];
+                    this.tempMarkers[dName].tempMarkerFeatures = [];
+                    this.tempMarkers[dName].tempMarkerTranslates = [];
+
+                    this.$store.state.tempMarkers[dName].forEach((marker, pIndex) => {
+                        let tLat = marker.lat;
+                        let tLng = marker.lng;
+                        let tAlt = marker.alt;
+
+                        let tPnt = new Point([tLng, tLat]).transform('EPSG:4326', 'EPSG:3857')
+                        let tCoordinate = tPnt.getCoordinates();
+
+                        console.log('OOOOOOOOOOOOOOOOOOOOOOOOOO tempMarkers', dName, pIndex, tCoordinate);
+
+                        this.tempMarkers[dName].Coordinates.push(tCoordinate);
+
+                        let tFeature = new Feature({
+                            geometry: new Point([tCoordinate[0], tCoordinate[1]]),
+                            type: 'tempMarker',
+                        });
+                        tFeature.setId(dName + '-' + pIndex);
+
+                        let iconStyleTemp = this.getStyleTempMarker(
+                            pIndex,
+                            this.$store.state.drone_infos[dName].color,
+                            '#FFFDE7',
+                            '15',
+                            tAlt,
+                            svgScale
+                        );
+
+                        tFeature.setStyle(iconStyleTemp);
+
+                        this.tempMarkers[dName].tempMarkerFeatures.push(tFeature);
+
+                        let tTranslate = new Translate({
+                            features: new Collection([tFeature]),
+                            pIndex: pIndex,
+                        });
+
+                        tTranslate.on('translatestart', function (evt) {
+                            //coordMarker2 = marker2.getCoordinates();
+
+                            //this.droneMarkers[dName].droneMarkerFeature.getGeometry().setCoordinates(coordinate);
+
+                            console.log('translatestart', evt.coordinate);
+                        });
+
+
+                        tTranslate.on('translating', function (evt) {
+                            //line.setCoordinates([coordMarker2, evt.coordinate]);
+                            console.log('translating', evt.coordinate);
+                        });
+
+                        tTranslate.on('translateend', (evt) => {
+                            //line.setCoordinates([coordMarker2, evt.coordinate]);
+
+                            evt.features.forEach(feature => {
+                                let pIndex = feature.getId().split('-')[1];
+                                let latLng = toLonLat(feature.getGeometry().getCoordinates());
+
+                                console.log('translateend', evt.coordinate, feature.getGeometry().getCoordinates(), feature);
+                                //feature.getGeometry().setCoordinates(evt.coordinate);
+
+                                this.tempMarkers[dName].Coordinates[pIndex] = feature.getGeometry().getCoordinates();
+
+                                this.tempMarkers[dName].guideLineFeature.getGeometry().setCoordinates(this.tempMarkers[dName].Coordinates);
+
+                                this.$store.state.tempMarkers[dName][pIndex].lat = latLng[1];
+                                this.$store.state.tempMarkers[dName][pIndex].lng = latLng[0];
+                                this.$store.state.tempMarkers[dName][pIndex].elevation = 0;
+
+                                this.postCinTempMarkerInfoToMobius(dName);
+
+                                let watchingPayload = {};
+                                watchingPayload.broadcastMission = 'broadcastUpdateTempMarkerPosition';
+                                watchingPayload.payload = {};
+                                watchingPayload.payload.pName = dName;
+                                watchingPayload.payload.pIndex = pIndex;
+                                watchingPayload.payload.lat = latLng[1];
+                                watchingPayload.payload.lng = latLng[0];
+                                watchingPayload.payload.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
+                                watchingPayload.payload.selected = this.$store.state.tempMarkers[dName][pIndex].selected;
+                                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                                //this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+                                this.$store.state.didIPublish = true;
+                            });
+                        });
+
+                        this.tempMarkers[dName].tempMarkerTranslates.push(tTranslate);
+
+                    });
+
+                    this.tempMarkers[dName].guideLineFeature = new Feature({
+                        geometry: new LineString(this.tempMarkers[dName].Coordinates),
+                        type: 'guideLine',
+                    });
+
+                    let guideLineStyle = new Style({
+                        stroke: new Stroke({
+                            color: this.$store.state.drone_infos[dName].color + '30',
+                            width: 10,
+                        })
+                    });
+
+                    this.tempMarkers[dName].guideLineFeature.setStyle(guideLineStyle);
+                }
+            });
+        },
     },
 
     mounted() {
-        //const names = [{id: 1, name: 'a'}, {id: 2, name: 'b'}, {id: 3, name: 'c'}];
-
-        //this.writeIdxedDB(names);
-
-        // this.writeIdxedDBEach(names[0]);
-        // this.writeIdxedDBEach(names[1]);
-        // this.writeIdxedDBEach(names[2]);
-
-        //console.log(faMapPin);
-        // this.iconStyle = new Style({
-        //     image: new Icon({
-        //         anchor: [0.5, 46],
-        //         anchorXUnits: 'fraction',
-        //         anchorYUnits: 'pixels',
-        //         src: 'data:image/svg+xml;utf8,' + svg,
-        //     }),
-        // });
-
-        // this.iconStyle = new Style({
-        //     image: new Icon({
-        //         opacity: 1,
-        //         src: 'data:image/svg+xml;utf8,' + svg,
-        //         scale: 0.3
-        //     })
-        // });
-
-        this.iconFeature.setStyle(this.iconStyle);
 
         this.vectorSource = new VectorSource({
             features: [],
@@ -558,141 +895,9 @@ export default {
 
         EventBus.$on('gcs-map-ready', () => {
 
-            this.droneMarkers = {};
+            this.initDroneMarkers();
 
-            Object.keys(this.$store.state.drone_infos).forEach((dName) => {
-                if(dName !== 'unknown' && this.$store.state.drone_infos[dName].selected) {
-                    let dLat = this.$store.state.drone_infos[dName].lat;
-                    let dLng = this.$store.state.drone_infos[dName].lng;
-                    let dAlt = this.$store.state.drone_infos[dName].alt;
-
-                    let pnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
-                    let coordinate = pnt.getCoordinates();
-
-                    this.droneMarkers[dName] = {};
-                    this.droneMarkers[dName].droneMarkerFeature = new Feature({
-                        geometry: new Point([coordinate[0], coordinate[1]]),
-                        type: 'droneMarker',
-                    });
-                    this.droneMarkers[dName].droneMarkerFeature.setId(dName);
-
-                    svgObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
-                    svgObj.svg.path._attributes.stroke = 'white';
-                    svgObj.svg.path._attributes['stroke-width'] = '25';
-                    this.droneMarkers[dName].droneMarker = convert.js2xml(svgObj, {compact: true, ignoreComment: true, spaces: 4});
-
-                    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx droneMarker', this.droneMarkers[dName].droneMarker);
-
-                    let iconStyle = [
-                        new Style({
-                            image: new Icon({
-                                opacity: 1,
-                                src: 'data:image/svg+xml;utf8,' + this.droneMarkers[dName].droneMarker,
-                                scale: svgScale + (dAlt / 3000),
-                                rotation: ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
-                                anchor: [0.5, 0.5],
-                            }),
-                            text: new Text({
-                                text: [dAlt.toFixed(1), 'bold 11px sans-serif'],
-                                offsetY: -5,
-                                scale: 1.5,
-                                stroke: new Stroke({
-                                    color: 'black',
-                                    width: 0.9,
-                                }),
-                                fill: new Fill({
-                                    color: 'white'
-                                }),
-                            }),
-                            zIndex: 2,
-                        }),
-                        new Style({
-                            text: new Text({
-                                textAlign: 'center',
-                                offsetY: 35,
-                                text: [this.$store.state.drone_infos[dName].name, 'bold 10px sans-serif', '\n', 'bold 10px sans-serif', '(' + this.$store.state.drone_infos[dName].system_id + ')', 'bold 10px sans-serif',],
-                                scale: 1.5,
-                                stroke: new Stroke({
-                                    color: 'black',
-                                    width: 0.8,
-                                }),
-                                fill: new Fill({
-                                    color: 'white'
-                                }),
-                            }),
-                            zIndex: 2,
-                        }),
-                    ];
-
-                    this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyle);
-
-                    let sLat = this.$store.state.drone_infos[dName].headingLine[0].lat;
-                    let sLng = this.$store.state.drone_infos[dName].headingLine[0].lng;
-                    let eLat = this.$store.state.drone_infos[dName].headingLine[1].lat;
-                    let eLng = this.$store.state.drone_infos[dName].headingLine[1].lng;
-
-                    let sPnt = new Point([sLng, sLat]).transform('EPSG:4326', 'EPSG:3857')
-                    let sCoordinate = sPnt.getCoordinates();
-                    let ePnt = new Point([eLng, eLat]).transform('EPSG:4326', 'EPSG:3857')
-                    let eCoordinate = ePnt.getCoordinates();
-
-                    this.droneMarkers[dName].headingLineFeature = new Feature({
-                        geometry: new LineString([[sCoordinate[0], sCoordinate[1]], [eCoordinate[0], eCoordinate[1]]]),
-                        type: 'headingLine',
-                    });
-
-                    let headingLineStyle = new Style({
-                        stroke: new Stroke({
-                            color: this.$store.state.drone_infos[dName].color,
-                            width: 1,
-                        })
-                    });
-
-                    this.droneMarkers[dName].headingLineFeature.setStyle(headingLineStyle);
-
-                    let sDirLat = this.$store.state.drone_infos[dName].directionLine[0].lat;
-                    let sDirLng = this.$store.state.drone_infos[dName].directionLine[0].lng;
-                    let eDirLat = this.$store.state.drone_infos[dName].directionLine[1].lat;
-                    let eDirLng = this.$store.state.drone_infos[dName].directionLine[1].lng;
-
-                    let sDirPnt = new Point([sDirLng, sDirLat]).transform('EPSG:4326', 'EPSG:3857')
-                    let sDirCoordinate = sDirPnt.getCoordinates();
-                    let eDirPnt = new Point([eDirLng, eDirLat]).transform('EPSG:4326', 'EPSG:3857')
-                    let eDirCoordinate = eDirPnt.getCoordinates();
-
-                    var dx = eDirCoordinate[0] - sDirCoordinate[0];
-                    var dy = eDirCoordinate[1] - sDirCoordinate[1];
-                    var rotation = Math.atan2(dy, dx);
-
-                    this.droneMarkers[dName].directionLineFeature = new Feature({
-                        geometry: new LineString([[sDirCoordinate[0], sDirCoordinate[1]], [eDirCoordinate[0], eDirCoordinate[1]]]),
-                        type: 'directionLine',
-                    });
-
-                    let directionLineStyle = [
-                        new Style({
-                            stroke: new Stroke({
-                                color: this.$store.state.drone_infos[dName].color + '80',
-                                width: 5,
-                            }),
-                        }),
-                        new Style({
-                            geometry: new Point(eDirCoordinate),
-                            image: new Icon({
-                                src: arrawImagePath,
-                                anchor: [0.75, 0.5],
-                                rotateWithView: true,
-                                rotation: -rotation,
-                                color: this.$store.state.drone_infos[dName].color,
-                                opacity: 0.5,
-                                scale: 1.5
-                            })
-                        }),
-                    ];
-
-                    this.droneMarkers[dName].directionLineFeature.setStyle(directionLineStyle);
-                }
-            });
+            this.initTempMarkers();
 
             this.updateSource(this.geojson);
 
@@ -739,6 +944,8 @@ export default {
                 this.droneMarkers[dName].droneMarkerFeature.getStyle()[0].getImage().setScale(svgScale + (dAlt / 3000));
                 this.droneMarkers[dName].droneMarkerFeature.getStyle()[0].getImage().setRotation(((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180));
                 this.droneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setText([dAlt.toFixed(1), 'bold 11px sans-serif']);
+                this.droneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setFill(new Fill({ color: colorMapAlt[Math.round(dAlt / 10) * 10] }));
+                this.droneMarkers[dName].droneMarkerFeature.getStyle()[1].getText().setFill(new Fill({ color: colorMapAlt[Math.round(dAlt / 10) * 10] }));
                 this.droneMarkers[dName].droneMarkerFeature.getGeometry().setCoordinates(coordinate);
 
                 this.droneMarkers[dName].headingLineFeature.getGeometry().setCoordinates([[sCoordinate[0], sCoordinate[1]], [eCoordinate[0], eCoordinate[1]]]);
@@ -762,8 +969,33 @@ export default {
             this.olMap.getView().setZoom(18);
         });
 
+        EventBus.$on('do-updateTargetDroneMarker', (dName) => {
+            this.updateTargetDroneMarker(dName);
+        });
+
         this.olMap.on('pointermove', (event) => {
+            if (event.dragging) {
+                return;
+            }
+
+            var hit = this.olMap.hasFeatureAtPixel(this.olMap.getEventPixel(event.originalEvent));
+            this.olMap.getTargetElement().style.cursor = hit ? 'pointer' : '';
+
+
+            console.log('event.dragging', event.dragging);
+
+            let latLng = toLonLat(event.coordinate);
+
+            if(this.datum.targeted) {
+                this.datum.curLat = latLng[1];
+                this.datum.curLng = latLng[0];
+
+                EventBus.$emit('do-calcDistance', this.datum);
+            }
+
+            //console.log(Proj.toLonLat(event.getCoordinates()));
             const hovered = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+            console.log(event.pixel);
             if (hovered !== undefined) {
                 if(hovered.getId() !== undefined) {
                     console.log('hovered', hovered.getId());
@@ -786,147 +1018,59 @@ export default {
 
             if(this.selectedFeature !== undefined && this.selectedFeature.getId() !== undefined) {
                 if(this.selectedFeature.getProperties().type === 'droneMarker') {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, this.selectedFeature.getId())) {
-                        let dName = this.selectedFeature.getId();
-                        if (this.$store.state.drone_infos[dName].selected) {
-                            if (this.$store.state.drone_infos[dName].targeted) {
-                                svgObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
-                                svgObj.svg.path._attributes.stroke = 'white';
-                                svgObj.svg.path._attributes['stroke-width'] = '25';
-                                this.$store.state.drone_infos[dName].targeted = false;
-                            }
-                            else {
-                                svgObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
-                                svgObj.svg.path._attributes.stroke = 'yellow';
-                                svgObj.svg.path._attributes['stroke-width'] = '35';
-                                this.$store.state.drone_infos[dName].targeted = true;
-                            }
+                    let dName = this.selectedFeature.getId();
+                    if (this.$store.state.drone_infos[dName].selected) {
 
-                            this.$store.state.drone_command_prepared = false;
-                            for (let dName in this.$store.state.drone_infos) {
-                                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                                        this.$store.state.drone_command_prepared = true;
-                                        break;
-                                    }
-                                }
-                            }
+                        this.$store.state.drone_infos[dName].targeted = !this.$store.state.drone_infos[dName].targeted;
 
-                            this.droneMarkers[dName].droneMarker = convert.js2xml(svgObj, {compact: true, ignoreComment: true, spaces: 4});
+                        this.updateTargetDroneMarker(dName);
+                    }
+                }
+                else if(this.selectedFeature.getProperties().type === 'tempMarker') {
+                    let arrId = this.selectedFeature.getId().split('-');
+                    let dName = arrId[0];
+                    let pIndex = arrId[1];
 
-                            let iconStyle = [
-                                new Style({
-                                    image: new Icon({
-                                        opacity: 1,
-                                        src: 'data:image/svg+xml;utf8,' + this.droneMarkers[dName].droneMarker,
-                                        scale: svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
-                                        rotation: ((360 + this.$store.state.drone_infos[dName].heading - 45 - this.mapHeading) % 360) * (Math.PI / 180),
-                                        anchor: [0.5, 0.5],
-                                    }),
-                                    text: new Text({
-                                        text: [this.$store.state.drone_infos[dName].alt.toFixed(1), 'bold 11px sans-serif'],
-                                        offsetY: -5,
-                                        scale: 1.5,
-                                        stroke: new Stroke({
-                                            color: 'black',
-                                            width: 0.9,
-                                        }),
-                                        fill: new Fill({
-                                            color: 'white'
-                                        }),
-                                    }),
-                                    zIndex: 2,
-                                }),
-                                new Style({
-                                    text: new Text({
-                                        textAlign: 'center',
-                                        offsetY: 35,
-                                        text: [this.$store.state.drone_infos[dName].name, 'bold 10px sans-serif', '\n', 'bold 10px sans-serif', '(' + this.$store.state.drone_infos[dName].system_id + ')', 'bold 10px sans-serif',],
-                                        scale: 1.5,
-                                        stroke: new Stroke({
-                                            color: 'black',
-                                            width: 0.8,
-                                        }),
-                                        fill: new Fill({
-                                            color: 'white'
-                                        }),
-                                    }),
-                                    zIndex: 2,
-                                }),
-                            ];
+                    if(!Object.prototype.hasOwnProperty.call(this.selectedTempFeatureId, dName)) {
+                        this.selectedTempFeatureId[dName] = '';
+                    }
 
-                            this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyle);
-                        }
+                    if(this.selectedTempFeatureId[dName] !== '' && this.selectedTempFeatureId[dName] !== this.selectedFeature.getId()) {
+                        let pIndexOld = this.selectedTempFeatureId[dName].split('-')[1];
+
+                        this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
+                        this.selectedTempFeatureId[dName] = '';
+
+                        this.updateTempMarker(dName, pIndexOld);
+                    }
+
+                    if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                        this.$store.state.tempMarkers[dName][pIndex].targeted = false;
+                        this.selectedTempFeatureId[dName] = '';
+                        this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
+                    }
+                    else {
+                        this.$store.state.tempMarkers[dName][pIndex].targeted = true;
+                        this.selectedTempFeatureId[dName] = this.selectedFeature.getId();
+                        this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;
+                    }
+
+                    this.updateTempMarker(dName, pIndex);
+
+                    if(dName === 'unknown') {
+                        this.datum.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
+                        this.datum.lat = this.$store.state.tempMarkers[dName][pIndex].lat;
+                        this.datum.lng = this.$store.state.tempMarkers[dName][pIndex].lng;
+                    }
+
+                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.state.drone_command_prepared = false;
+                        setTimeout(() => {
+                            this.$store.state.drone_command_prepared = true;
+                        }, 10);
                     }
                 }
             }
-
-            this.vectorLayer.getSource().forEachFeature((feature) => {
-                if(feature.getProperties().type === 'tempMarker') {
-                    if(this.selectedFeature.getId() !== feature.getId()) {
-                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, feature.getId())) {
-                            let dName = feature.getId();
-                            if (this.$store.state.drone_infos[dName].selected) {
-                                if (this.$store.state.drone_infos[dName].targeted) {
-                                    svgObj.svg.path._attributes.stroke = 'white';
-                                    svgObj.svg.path._attributes['stroke-width'] = '25';
-
-                                    this.$store.state.drone_infos[dName].targeted = false;
-
-                                    this.droneMarkers[dName].droneMarker = convert.js2xml(svgObj, {
-                                        compact: true,
-                                        ignoreComment: true,
-                                        spaces: 4
-                                    });
-
-                                    let iconStyle = [
-                                        new Style({
-                                            image: new Icon({
-                                                opacity: 1,
-                                                src: 'data:image/svg+xml;utf8,' + this.droneMarkers[dName].droneMarker,
-                                                scale: svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
-                                                rotation: ((360 + this.$store.state.drone_infos[dName].heading - 45 - this.mapHeading) % 360) * (Math.PI / 180),
-                                                anchor: [0.5, 0.5],
-                                            }),
-                                            text: new Text({
-                                                text: [this.$store.state.drone_infos[dName].alt.toFixed(1), 'bold 11px sans-serif'],
-                                                offsetY: -5,
-                                                scale: 1.5,
-                                                stroke: new Stroke({
-                                                    color: 'black',
-                                                    width: 0.9,
-                                                }),
-                                                fill: new Fill({
-                                                    color: 'white'
-                                                }),
-                                            }),
-                                            zIndex: 2,
-                                        }),
-                                        new Style({
-                                            text: new Text({
-                                                textAlign: 'center',
-                                                offsetY: 35,
-                                                text: [this.$store.state.drone_infos[dName].name, 'bold 10px sans-serif', '\n', 'bold 10px sans-serif', '(' + this.$store.state.drone_infos[dName].system_id + ')', 'bold 10px sans-serif',],
-                                                scale: 1.5,
-                                                stroke: new Stroke({
-                                                    color: 'black',
-                                                    width: 0.8,
-                                                }),
-                                                fill: new Fill({
-                                                    color: 'white'
-                                                }),
-                                            }),
-                                            zIndex: 2,
-                                        }),
-                                    ];
-
-                                    this.droneMarkers[dName].droneMarkerFeature.setStyle(iconStyle);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
 
             // this.olMap.forEachFeatureAtPixel(event.pixel, (clicked) => {
             //     this.selectedFeature = clicked;
@@ -1100,10 +1244,6 @@ export default {
                         }
                     );
 
-
-                    //setTimeout(this.saveMapImage, 100, mapImageObj);
-                    //mapImageObjs.push(mapImageObj);
-
                     img.remove();
                     canvas.remove();
 
@@ -1153,6 +1293,7 @@ export default {
         EventBus.$off('do-centerCurrentPosition');
         EventBus.$off('gcs-map-ready');
         EventBus.$off('do-centerCurrentPosition');
+        EventBus.$off('do-updateTargetDroneMarker');
     }
 }
 </script>

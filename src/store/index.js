@@ -49,7 +49,7 @@ const _defaultMarkerIcon = Object(
         fillColor: "grey",
         fillOpacity: 1,
         strokeWeight: 1,
-        strokeColor: 'grey',
+        strokeColor: '#9E9E9E',
         rotation: 0,
         scale: 2,
         anchor: {x: 12, y: 24},

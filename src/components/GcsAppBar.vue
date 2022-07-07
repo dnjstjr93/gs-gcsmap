@@ -986,6 +986,14 @@ export default {
                             this.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
                         }
 
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'color')) {
+                            this.drone_infos[dName].color = '#9E9E9E';
+                        }
+
+                        if(this.drone_infos[dName].color === 'grey') {
+                            this.drone_infos[dName].color = '#9E9E9E';
+                        }
+
                         if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'gotoType')) {
                             this.drone_infos[dName].gotoType = '바로이동';
                         }
@@ -1379,19 +1387,35 @@ export default {
                             this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(con));
 
                             this.$store.state.tempMarkers[dName].forEach((marker) => {
-                                if (!Object.hasOwnProperty.call(marker, 'elevation')) {
+                                if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
                                     marker.elevation = 0;
                                 }
 
-                                if (!Object.hasOwnProperty.call(marker, 'type')) {
+                                //console.log('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY', dName, marker, this.drone_infos[dName].color)
+
+                                // if (!Object.prototype.hasOwnProperty.call(marker, 'color')) {
+                                //     marker.color = '#9E9E9E';
+                                // }
+                                // else {
+                                //     if (dName === 'unknown') {
+                                //         if (marker.color === 'grey') {
+                                //             marker.color = '#9E9E9E';
+                                //         }
+                                //     }
+                                //     else {
+                                //         marker.color = this.drone_infos[dName].color;
+                                //     }
+                                // }
+
+                                if (!Object.prototype.hasOwnProperty.call(marker, 'type')) {
                                     marker.type = 'Goto';
                                 }
 
-                                if (!Object.hasOwnProperty.call(marker, 'mavCmd')) {
+                                if (!Object.prototype.hasOwnProperty.call(marker, 'mavCmd')) {
                                     marker.targetMavCmd = 16;
                                 }
 
-                                if (!Object.hasOwnProperty.call(marker, 'targetStayTime')) {
+                                if (!Object.prototype.hasOwnProperty.call(marker, 'targetStayTime')) {
                                     marker.targetStayTime = 1;
                                 }
 
