@@ -1,13 +1,27 @@
 <template>
     <div ref="map-root"
          style="width: 100%; height: 100%">
+        <v-card flat tile class="info_markers" v-if="curInfoTempMarkerFlag">
+            <InfoTempMarker v-model="curInfoTempMarkerFlag"
+                            :marker-name="curNameMarker"
+                            :marker-index="curIndexMarker"
+                            :marker="curSelectedMarker"
+            ></InfoTempMarker>
+        </v-card>
     </div>
 </template>
 
 <script>
+import InfoTempMarker from "./InfoTempMarker";
+
 import View from 'ol/View'
 import Map from 'ol/Map'
 import TileLayer from 'ol/layer/Tile'
+import Stamen from 'ol/source/Stamen'
+//
+// import ImageLayer from 'ol/layer/Image'
+// import Raster from 'ol/source/Raster'
+
 //import OSM from 'ol/source/OSM'
 import DoubleClickZoom from 'ol/interaction/DoubleClickZoom'
 import Translate from 'ol/interaction/Translate'
@@ -27,8 +41,8 @@ import Feature from 'ol/Feature';
 import Point from 'ol/geom/Point';
 import LineString from 'ol/geom/LineString';
 
-import { faLocationArrow, faMapPin } from "@fortawesome/free-solid-svg-icons";
-//import { faMapMarkerAlt, faMapPin, faFlag, faPlaneSlash, faHourglassHalf } from "@fortawesome/free-solid-svg-icons";
+import { faLocationArrow, faMapPin, faCrosshairs } from "@fortawesome/free-solid-svg-icons";
+//import { faMapMarkerAlt, faCrosshairs, faFlag, faPlaneSlash, faHourglassHalf } from "@fortawesome/free-solid-svg-icons";
 
 import convert from "xml-js";
 
@@ -36,10 +50,7 @@ import EventBus from "@/EventBus";
 import axios from "axios";
 
 import arrawImagePath from '../assets/arrow.png'
-
-// import { openDB, deleteDB, wrap, unwrap } from 'idb';
-//import { openDB } from 'idb';
-//import {get} from '../js/idb_map'
+import {gmapApi} from "vue2-google-maps";
 
 let svgDroneObj = {};
 svgDroneObj.svg = {};
@@ -48,7 +59,7 @@ svgDroneObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
 svgDroneObj.svg._attributes.width = faLocationArrow.icon[0] / 2;
 svgDroneObj.svg._attributes.height = faLocationArrow.icon[1] / 2;
 //svgDroneObj.svg._attributes.fill = 'red';
-svgDroneObj.svg._attributes.class = 'f124';
+svgDroneObj.svg._attributes.class = faLocationArrow.icon[3];
 svgDroneObj.svg._attributes.viewBox = '-25 -25 ' + (faLocationArrow.icon[0]+50) + ' ' + (faLocationArrow.icon[1]+50);
 svgDroneObj.svg.path = {};
 svgDroneObj.svg.path._attributes = {};
@@ -58,16 +69,16 @@ let svgTempObj = {};
 svgTempObj.svg = {};
 svgTempObj.svg._attributes = {};
 svgTempObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
-svgTempObj.svg._attributes.width = faMapPin.icon[0] / 2;
-svgTempObj.svg._attributes.height = faMapPin.icon[1] / 2;
+svgTempObj.svg._attributes.width = faCrosshairs.icon[0] / 2;
+svgTempObj.svg._attributes.height = faCrosshairs.icon[1] / 2;
 //svgDroneObj.svg._attributes.fill = 'red';
-svgTempObj.svg._attributes.class = 'f276';
-svgTempObj.svg._attributes.viewBox = '-25 -25 ' + (faMapPin.icon[0]+50) + ' ' + (faMapPin.icon[1]+50);
+svgTempObj.svg._attributes.class = faCrosshairs.icon[3];
+svgTempObj.svg._attributes.viewBox = '-25 -25 ' + (faCrosshairs.icon[0]+50) + ' ' + (faCrosshairs.icon[1]+50);
 svgTempObj.svg.path = {};
 svgTempObj.svg.path._attributes = {};
-svgTempObj.svg.path._attributes.d = faMapPin.icon[4];
+svgTempObj.svg.path._attributes.d = faCrosshairs.icon[4];
 
-console.log('faMapPin', faMapPin);
+console.log('faMapPin', faLocationArrow, faCrosshairs, faMapPin);
 
 const svgScale = 0.18;
 
@@ -107,13 +118,17 @@ const colorMapAlt = {
 
 export default {
     name: 'MapContainer',
-    components: {},
+    components: {
+        InfoTempMarker,
+    },
     props: {
         geojson: Object
     },
     data: () => {
 
         return {
+            curInfoTempMarkerFlag: false,
+
             datum: {targeted: false, lat:0.0, lng:0.0},
 
             tileCoordObj: {},
@@ -124,6 +139,7 @@ export default {
             vectorLayer: null,
             vectorSource: null,
             osmSource: null,
+            demSource: null,
 
             droneMarkers: {},
             tempMarkers: {},
@@ -131,7 +147,8 @@ export default {
             selectedFeature: undefined,
             selectedFeatureFlag: {},
             selectedFeatureId: null,
-            selectedTempFeatureId: {},
+            targetedTempFeatureId: {},
+            selectedTempFeatureId: '',
 
             styles: [
                 /* We are using two different styles for the polygons:
@@ -204,7 +221,11 @@ export default {
         },
         selectedFeature(value) {
             this.$emit('select', value)
-        }
+        },
+    },
+
+    computed: {
+        google: gmapApi
     },
 
     methods: {
@@ -411,24 +432,25 @@ export default {
             );
         },
 
-        getStyleTempMarker(pIndex, fillColor, strokeColor, strokeWidth, tAlt, scale) {
+        getStyleTempMarker(pIndex, fillColor, strokeColor, strokeWidth, tAlt, scale, selectedColor) {
             svgTempObj.svg.path._attributes.fill = fillColor.replace('#', '%23');
             svgTempObj.svg.path._attributes.stroke = strokeColor.replace('#', '%23');
             svgTempObj.svg.path._attributes['stroke-width'] = strokeWidth;
 
             let xmlSvgTempMarker = convert.js2xml(svgTempObj, {compact: true, ignoreComment: true, spaces: 4});
 
-            return (
+            return ([
                 new Style({
                     image: new Icon({
                         opacity: 1,
                         src: 'data:image/svg+xml;utf8,' + xmlSvgTempMarker,
                         scale: scale,
-                        anchor: [0.5, 1],
+                        anchor: [0.49, 0.49],
                     }),
                     text: new Text({
                         text: [pIndex + ':' + tAlt.toFixed(0), 'bold 11px sans-serif'],
-                        offsetY: -45,
+                        textAlign: 'center',
+                        offsetY: -25,
                         scale: 1.4,
                         stroke: new Stroke({
                             color: 'black',
@@ -439,12 +461,30 @@ export default {
                         }),
                     }),
                     zIndex: 3,
-                })
-            );
+                }),
+                new Style({
+                    image: new CircleStyle({
+                        radius: 9,
+                        fill: new Fill({
+                            color: selectedColor,
+                        }),
+                    }),
+                    geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinate = feature.getGeometry().getCoordinates();
+                        return new Point(coordinate);
+                    },
+                }),
+            ]);
         },
 
         updateTempMarker(dName, pIndex) {
             let iconStyleTemp = null;
+            let selectedColor = '#FAFAFA80';
+
+            if (this.$store.state.tempMarkers[dName][pIndex].selected) {
+                selectedColor = '#76FF03F0';
+            }
 
             if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
                 iconStyleTemp = this.getStyleTempMarker(
@@ -453,7 +493,8 @@ export default {
                     '#FFFF00',
                     '35',
                     this.$store.state.tempMarkers[dName][pIndex].alt,
-                    svgScale
+                    svgScale-0.06,
+                    selectedColor
                 );
             }
             else {
@@ -463,7 +504,8 @@ export default {
                     '#FFFDE7',
                     '15',
                     this.$store.state.tempMarkers[dName][pIndex].alt,
-                    svgScale
+                    svgScale-0.06,
+                    selectedColor
                 );
             }
 
@@ -484,11 +526,11 @@ export default {
                         src: 'data:image/svg+xml;utf8,' + xmlSvgDroneMarker,
                         scale: scale,
                         rotation: rotation,
-                        anchor: [0.5, 0.5],
+                        anchor: [0.5, 0.56],
                     }),
                     text: new Text({
                         text: [dAlt.toFixed(1), 'bold 11px sans-serif'],
-                        offsetY: -15,
+                        offsetY: -40,
                         scale: 1.5,
                         stroke: new Stroke({
                             color: 'black',
@@ -517,6 +559,34 @@ export default {
                     zIndex: 2,
                 }),
             ];
+        },
+
+        updateSelectedTempMarker(dName, pIndex) {
+            if(this.selectedTempFeatureId !== '' && this.selectedTempFeatureId !== (dName + '-' + pIndex)) {
+                let dNameOld = this.selectedTempFeatureId.split('-')[0];
+                let pIndexOld = this.selectedTempFeatureId.split('-')[1];
+
+                this.$store.state.tempMarkers[dNameOld][pIndexOld].selected = false;
+                this.selectedTempFeatureId = '';
+
+                this.updateTempMarker(dNameOld, pIndexOld);
+            }
+
+            this.$store.state.tempMarkers[dName][pIndex].selected = true;
+            this.selectedTempFeatureId = (dName + '-' + pIndex);
+
+            this.updateTempMarker(dName, pIndex);
+
+            this.curInfoTempMarkerFlag = false;
+
+            this.$forceUpdate();
+
+            setTimeout(() => {
+                this.curSelectedMarker = this.$store.state.tempMarkers[dName][pIndex];
+                this.curIndexMarker = pIndex;
+                this.curNameMarker = dName;
+                this.curInfoTempMarkerFlag = true;
+            }, 10);
         },
 
         updateTargetDroneMarker(dName) {
@@ -668,6 +738,43 @@ export default {
             });
         },
 
+        getElevationProfile(eLngLats, callback) {
+
+            eLngLats.forEach((eLngLat, idx) => {
+                [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                eLngLats[idx] = eLngLat;
+            });
+
+            let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+            param = param.replace(/\]/g, '');
+
+            let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+
+            console.log(url);
+
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status <= 500;
+                },
+                method: 'get',
+                url: url,
+                headers: {
+                },
+                data: ''
+            }).then(
+                (res) => {
+                    console.log(res.data);
+                    callback(res.status, res.data);
+                }
+            ).catch(
+                (err) => {
+                    console.log(err.message);
+                    callback(500, err.message);
+                }
+            );
+        },
+
         initTempMarkers() {
             this.tempMarkers = {};
 
@@ -693,16 +800,23 @@ export default {
                         let tFeature = new Feature({
                             geometry: new Point([tCoordinate[0], tCoordinate[1]]),
                             type: 'tempMarker',
+                            dragging: false,
                         });
                         tFeature.setId(dName + '-' + pIndex);
 
+                        let selectedColor = '#FAFAFA80';
+
+                        if (this.$store.state.tempMarkers[dName][pIndex].selected) {
+                            selectedColor = '#76FF03F0';
+                        }
                         let iconStyleTemp = this.getStyleTempMarker(
                             pIndex,
                             this.$store.state.drone_infos[dName].color,
                             '#FFFDE7',
                             '15',
                             tAlt,
-                            svgScale
+                            svgScale-0.06,
+                            selectedColor
                         );
 
                         tFeature.setStyle(iconStyleTemp);
@@ -711,7 +825,6 @@ export default {
 
                         let tTranslate = new Translate({
                             features: new Collection([tFeature]),
-                            pIndex: pIndex,
                         });
 
                         tTranslate.on('translatestart', function (evt) {
@@ -723,48 +836,77 @@ export default {
                         });
 
 
-                        tTranslate.on('translating', function (evt) {
-                            //line.setCoordinates([coordMarker2, evt.coordinate]);
-                            console.log('translating', evt.coordinate);
+                        tTranslate.on('translating', (evt) => {
+                            //console.log(evt.coordinate, evt.startCoordinate);
+                            //console.log('translating', evt.coordinate.every((u, i) => { return parseInt(u/2)*2 === parseInt(evt.startCoordinate[i]/2)*2; }));
+
+                            evt.features.forEach((feature) => {
+                                if (evt.coordinate.length === evt.startCoordinate.length && evt.coordinate.every((u, i) => { return parseInt(u) === parseInt(evt.startCoordinate[i]); }))
+                                {
+                                    feature.setProperties({dragging: false});
+                                    console.log('feature.getProperties().dragging', feature.getProperties().dragging);
+                                }
+                                else {
+                                    feature.setProperties({dragging: true});
+                                }
+                            });
                         });
 
                         tTranslate.on('translateend', (evt) => {
                             //line.setCoordinates([coordMarker2, evt.coordinate]);
-
-                            evt.features.forEach(feature => {
-                                let pIndex = feature.getId().split('-')[1];
-                                let latLng = toLonLat(feature.getGeometry().getCoordinates());
-
+                            evt.features.forEach((feature) => {
                                 console.log('translateend', evt.coordinate, feature.getGeometry().getCoordinates(), feature);
-                                //feature.getGeometry().setCoordinates(evt.coordinate);
 
-                                this.tempMarkers[dName].Coordinates[pIndex] = feature.getGeometry().getCoordinates();
+                                if(feature.getProperties().dragging) {
 
-                                this.tempMarkers[dName].guideLineFeature.getGeometry().setCoordinates(this.tempMarkers[dName].Coordinates);
+                                    feature.setProperties({dragging: false});
 
-                                this.$store.state.tempMarkers[dName][pIndex].lat = latLng[1];
-                                this.$store.state.tempMarkers[dName][pIndex].lng = latLng[0];
-                                this.$store.state.tempMarkers[dName][pIndex].elevation = 0;
+                                    let pIndex = feature.getId().split('-')[1];
+                                    let latLng = toLonLat(feature.getGeometry().getCoordinates());
 
-                                this.postCinTempMarkerInfoToMobius(dName);
+                                    //feature.getGeometry().setCoordinates(evt.coordinate);
 
-                                let watchingPayload = {};
-                                watchingPayload.broadcastMission = 'broadcastUpdateTempMarkerPosition';
-                                watchingPayload.payload = {};
-                                watchingPayload.payload.pName = dName;
-                                watchingPayload.payload.pIndex = pIndex;
-                                watchingPayload.payload.lat = latLng[1];
-                                watchingPayload.payload.lng = latLng[0];
-                                watchingPayload.payload.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
-                                watchingPayload.payload.selected = this.$store.state.tempMarkers[dName][pIndex].selected;
-                                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
-                                //this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
-                                this.$store.state.didIPublish = true;
+                                    let eLngLats = [];
+                                    eLngLats.push(JSON.parse(JSON.stringify(latLng)));
+
+                                    this.getElevationProfile(eLngLats, (status, result) => {
+                                        if (status === 200) {
+                                            let elevation_val = result.elevationProfile[0].height;
+
+                                            console.log('elevation_val', result.elevationProfile[0].distance, result.elevationProfile[0].height);
+                                            this.tempMarkers[dName].Coordinates[pIndex] = feature.getGeometry().getCoordinates();
+
+                                            this.tempMarkers[dName].guideLineFeature.getGeometry().setCoordinates(this.tempMarkers[dName].Coordinates);
+
+                                            this.$store.state.tempMarkers[dName][pIndex].lat = latLng[1];
+                                            this.$store.state.tempMarkers[dName][pIndex].lng = latLng[0];
+                                            this.$store.state.tempMarkers[dName][pIndex].elevation = elevation_val;
+
+                                            if(this.curInfoTempMarkerFlag) {
+                                                this.updateSelectedTempMarker(dName, pIndex);
+                                            }
+
+                                            this.postCinTempMarkerInfoToMobius(dName);
+
+                                            let watchingPayload = {};
+                                            watchingPayload.broadcastMission = 'broadcastUpdateTempMarkerPosition';
+                                            watchingPayload.payload = {};
+                                            watchingPayload.payload.pName = dName;
+                                            watchingPayload.payload.pIndex = pIndex;
+                                            watchingPayload.payload.lat = latLng[1];
+                                            watchingPayload.payload.lng = latLng[0];
+                                            watchingPayload.payload.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
+                                            watchingPayload.payload.selected = this.$store.state.tempMarkers[dName][pIndex].selected;
+                                            this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                                            //this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+                                            this.$store.state.didIPublish = true;
+                                        }
+                                    });
+                                }
                             });
                         });
 
                         this.tempMarkers[dName].tempMarkerTranslates.push(tTranslate);
-
                     });
 
                     this.tempMarkers[dName].guideLineFeature = new Feature({
@@ -779,9 +921,88 @@ export default {
                         })
                     });
 
+                    this.tempMarkers[dName].guideLineFeature.setId(dName + '-' + 'guideLine');
+
                     this.tempMarkers[dName].guideLineFeature.setStyle(guideLineStyle);
                 }
             });
+        },
+
+        shade(inputs, data) {
+            var elevationImage = inputs[0]; // 첫번째(0) 데이터소스로 elevation 객체
+            var width = elevationImage.width;
+            var height = elevationImage.height;
+            var elevationData = elevationImage.data;
+            var shadeData = new Uint8ClampedArray(elevationData.length);
+            var dp = data.resolution * 2;
+            var maxX = width - 1;
+            var maxY = height - 1;
+            var pixel = [0, 0, 0, 0];
+            var twoPi = 2 * Math.PI;
+            var halfPi = Math.PI / 2;
+            //var sunEl = Math.PI * data.sunEl / 180;
+            var sunAz = Math.PI * data.sunAz / 180;
+            var cosSunEl = Math.cos(data.sunEl);
+            var sinSunEl = Math.sin(data.sunEl);
+            var pixelX, pixelY, x0, x1, y0, y1, offset,
+                z0, z1, dzdx, dzdy, slope, aspect, cosIncidence, scaled;
+            for (pixelY = 0; pixelY <= maxY; ++pixelY) {
+                y0 = pixelY === 0 ? 0 : pixelY - 1;
+                y1 = pixelY === maxY ? maxY : pixelY + 1;
+                for (pixelX = 0; pixelX <= maxX; ++pixelX) {
+                    x0 = pixelX === 0 ? 0 : pixelX - 1;
+                    x1 = pixelX === maxX ? maxX : pixelX + 1;
+                    // determine elevation for (x0, pixelY)
+                    offset = (pixelY * width + x0) * 4;
+                    pixel[0] = elevationData[offset];
+                    pixel[1] = elevationData[offset + 1];
+                    pixel[2] = elevationData[offset + 2];
+                    pixel[3] = elevationData[offset + 3];
+                    z0 = data.vert * (pixel[0] + pixel[1] * 2 + pixel[2] * 3);
+
+                    // determine elevation for (x1, pixelY)
+                    offset = (pixelY * width + x1) * 4;
+                    pixel[0] = elevationData[offset];
+                    pixel[1] = elevationData[offset + 1];
+                    pixel[2] = elevationData[offset + 2];
+                    pixel[3] = elevationData[offset + 3];
+                    z1 = data.vert * (pixel[0] + pixel[1] * 2 + pixel[2] * 3);
+                    dzdx = (z1 - z0) / dp;
+                    // determine elevation for (pixelX, y0)
+                    offset = (y0 * width + pixelX) * 4;
+                    pixel[0] = elevationData[offset];
+                    pixel[1] = elevationData[offset + 1];
+                    pixel[2] = elevationData[offset + 2];
+                    pixel[3] = elevationData[offset + 3];
+                    z0 = data.vert * (pixel[0] + pixel[1] * 2 + pixel[2] * 3);
+                    // determine elevation for (pixelX, y1)
+                    offset = (y1 * width + pixelX) * 4;
+                    pixel[0] = elevationData[offset];
+                    pixel[1] = elevationData[offset + 1];
+                    pixel[2] = elevationData[offset + 2];
+                    pixel[3] = elevationData[offset + 3];
+                    z1 = data.vert * (pixel[0] + pixel[1] * 2 + pixel[2] * 3);
+                    dzdy = (z1 - z0) / dp;
+                    slope = Math.atan(Math.sqrt(dzdx * dzdx + dzdy * dzdy));
+                    aspect = Math.atan2(dzdy, -dzdx);
+                    if (aspect < 0) {
+                        aspect = halfPi - aspect;
+                    } else if (aspect > halfPi) {
+                        aspect = twoPi - aspect + halfPi;
+                    } else {
+                        aspect = halfPi - aspect;
+                    }
+                    cosIncidence = sinSunEl * Math.cos(slope) +
+                        cosSunEl * Math.sin(slope) * Math.cos(sunAz - aspect);
+                    offset = (pixelY * width + pixelX) * 4;
+                    scaled = 255 * cosIncidence;
+                    shadeData[offset] = scaled;
+                    shadeData[offset + 1] = scaled;
+                    shadeData[offset + 2] = scaled;
+                    shadeData[offset + 3] = elevationData[offset + 3];
+                }
+            }
+            return {data: shadeData, width: width, height: height};
         },
     },
 
@@ -820,12 +1041,56 @@ export default {
         //     }
         // }); // offline
 
+        // this.osmSource = new XYZ({
+        //     url: 'http://a.tile.stamen.com/terrain/{z}/{x}/{y}.png',
+        //     crossOrigin: 'anonymous',
+        //     transition: 0
+        // });
+
+        this.demSource = new Stamen({ layer: 'terrain' });
+
+        // var raster = new Raster({
+        //     sources: [elevation],
+        //     operationType: 'image',
+        //     operation: this.shade
+        // });
+        //
+        // raster.on('beforeoperations', (event) => {
+        //     var data = event.data;
+        //     data.resolution = event.resolution;
+        //     data.vert = 1; // 음영기복도의 과고감 정도
+        //     data.sunEl = 45; // 태양의 Elevation(단위: Degree)
+        //     data.sunAz = 45; // 태양의 Azimuth(단위: Degree)
+        // });
+        //
+        // var imageLayer = new ImageLayer({ source: raster });
+
+        // var map = new Map({
+        //     target: this.$refs["map-root"],
+        //     layers: [
+        //         //imageLayer,
+        //         this.vectorLayer
+        //     ],
+        //     view: new View({
+        //         extent: [-13675026, 4439648, -13580856, 4580292],
+        //         center: [-13615645, 4497969],
+        //         minZoom: 10,
+        //         maxZoom: 16,
+        //         zoom: 13
+        //     })
+        // });
+        //
+        // console.log(map);
+
         this.olMap = new Map({
             target: this.$refs["map-root"],
             layers: [
                 new TileLayer({
                     source: this.osmSource
                 }),
+                // new TileLayer({
+                //     source: this.demSource
+                // }),
                 this.vectorLayer
             ],
             view: new View({
@@ -844,7 +1109,7 @@ export default {
             }
         }
 
-        this.updateSource(this.geojson);
+        //this.updateSource(this.geojson);
 
         // setInterval(()=>{
         //
@@ -973,6 +1238,18 @@ export default {
             this.updateTargetDroneMarker(dName);
         });
 
+        EventBus.$on('do-unsetSelectedTempMarker', () => {
+            if(this.selectedTempFeatureId !== '') {
+                let dNameOld = this.selectedTempFeatureId.split('-')[0];
+                let pIndexOld = this.selectedTempFeatureId.split('-')[1];
+
+                this.$store.state.tempMarkers[dNameOld][pIndexOld].selected = false;
+                this.selectedTempFeatureId = '';
+
+                this.updateTempMarker(dNameOld, pIndexOld);
+            }
+        });
+
         this.olMap.on('pointermove', (event) => {
             if (event.dragging) {
                 return;
@@ -982,7 +1259,7 @@ export default {
             this.olMap.getTargetElement().style.cursor = hit ? 'pointer' : '';
 
 
-            console.log('event.dragging', event.dragging);
+            //console.log('event.dragging', event.dragging);
 
             let latLng = toLonLat(event.coordinate);
 
@@ -995,10 +1272,10 @@ export default {
 
             //console.log(Proj.toLonLat(event.getCoordinates()));
             const hovered = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
-            console.log(event.pixel);
+            //console.log(event.pixel, event.coordinate);
             if (hovered !== undefined) {
                 if(hovered.getId() !== undefined) {
-                    console.log('hovered', hovered.getId());
+                    //console.log('hovered', hovered.getId());
                     //this.$set(this, 'selectedFeature', hovered);
                 }
             }
@@ -1015,6 +1292,7 @@ export default {
             // });
 
             this.selectedFeature = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+            console.log('singleclick', this.selectedFeature);
 
             if(this.selectedFeature !== undefined && this.selectedFeature.getId() !== undefined) {
                 if(this.selectedFeature.getProperties().type === 'droneMarker') {
@@ -1031,27 +1309,27 @@ export default {
                     let dName = arrId[0];
                     let pIndex = arrId[1];
 
-                    if(!Object.prototype.hasOwnProperty.call(this.selectedTempFeatureId, dName)) {
-                        this.selectedTempFeatureId[dName] = '';
+                    if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeatureId, dName)) {
+                        this.targetedTempFeatureId[dName] = '';
                     }
 
-                    if(this.selectedTempFeatureId[dName] !== '' && this.selectedTempFeatureId[dName] !== this.selectedFeature.getId()) {
-                        let pIndexOld = this.selectedTempFeatureId[dName].split('-')[1];
+                    if(this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeatureId[dName] !== this.selectedFeature.getId()) {
+                        let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
 
                         this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
-                        this.selectedTempFeatureId[dName] = '';
+                        this.targetedTempFeatureId[dName] = '';
 
                         this.updateTempMarker(dName, pIndexOld);
                     }
 
                     if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
                         this.$store.state.tempMarkers[dName][pIndex].targeted = false;
-                        this.selectedTempFeatureId[dName] = '';
+                        this.targetedTempFeatureId[dName] = '';
                         this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
                     }
                     else {
                         this.$store.state.tempMarkers[dName][pIndex].targeted = true;
-                        this.selectedTempFeatureId[dName] = this.selectedFeature.getId();
+                        this.targetedTempFeatureId[dName] = this.selectedFeature.getId();
                         this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;
                     }
 
@@ -1069,6 +1347,52 @@ export default {
                             this.$store.state.drone_command_prepared = true;
                         }, 10);
                     }
+                }
+                else if(this.selectedFeature.getProperties().type === 'guideLine') {
+
+                    // let eLngLats = [];
+                    // let eLngLat = toLonLat(this.selectedFeature.getGeometry().getCoordinateAt(0));
+                    // [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                    // eLngLats.push(eLngLat);
+                    //
+                    // eLngLat = toLonLat(this.selectedFeature.getGeometry().getCoordinateAt(0.5));
+                    // [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                    // eLngLats.push(eLngLat);
+                    //
+                    // eLngLat = toLonLat(this.selectedFeature.getGeometry().getCoordinateAt(1));
+                    // [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                    // eLngLats.push(eLngLat);
+                    //
+                    // console.log('this.selectedFeature.getGeometry().getCoordinateAt', this.selectedFeature.getGeometry().getCoordinateAt(0));
+                    // console.log('this.selectedFeature.getGeometry().getCoordinateAt', this.selectedFeature.getGeometry().getCoordinateAt(0.5));
+                    // console.log('this.selectedFeature.getGeometry().getCoordinateAt', this.selectedFeature.getGeometry().getCoordinateAt(1));
+                    //
+                    // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+                    // param = param.replace(/\]/g, '');
+                    //
+                    // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+                    //
+                    // console.log(url);
+                    //
+                    // axios({
+                    //     validateStatus: function (status) {
+                    //         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    //         return status <= 500;
+                    //     },
+                    //     method: 'get',
+                    //     url: url,
+                    //     headers: {
+                    //     },
+                    //     data: ''
+                    // }).then(
+                    //     (res) => {
+                    //         console.log(res.data);
+                    //     }
+                    // ).catch(
+                    //     (err) => {
+                    //         console.log(err.message);
+                    //     }
+                    // );
                 }
             }
 
@@ -1103,78 +1427,18 @@ export default {
 
         this.olMap.on('dblclick', (event) => {
 
-            console.log('dblclick', event);
+            this.selectedFeature = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
+            console.log('dblclick', this.selectedFeature);
 
-//             this.vectorLayer.getSource().forEachFeature((feature) => {
-//                 //console.log(feature);
-//
-//                 if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, feature.id_)) {
-//                     this.selectedFeatureFlag[feature.id_] = false;
-//                 }
-//
-//                 this.selectedFeatureFlag[feature.id_] = false;
-//             });
-//
-//             const clicked = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
-//
-//             this.selectedFeature = clicked;
-//
-//             if(this.selectedFeature !== undefined) {
-// //                this.selectedFeatureId = this.selectedFeature.getId();
-//
-//                 if (this.selectedFeatureId) {
-//                     this.vectorLayer.getSource().getFeatureById(this.selectedFeatureId).setStyle();
-//                     this.selectedFeatureId = null;
-//                 }
-//
-//                 if (this.selectedFeature.getId() !== this.selectedFeatureId) {
-//                     this.selectedFeature.setStyle(this.selectedStyles);
-//                     this.selectedFeatureId = this.selectedFeature.getId();
-//                 }
-//
-//                 if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, clicked.id_)) {
-//                     this.selectedFeatureFlag[clicked.id_] = false;
-//                 }
-//
-//                 this.selectedFeatureFlag[clicked.id_] = !this.selectedFeatureFlag[clicked.id_];
-//
-//                 console.log(clicked.id_, this.selectedFeatureFlag[clicked.id_]);
-//
-//             }
-//             else {
-//                 if (this.selectedFeatureId) {
-//                     this.vectorLayer.getSource().getFeatureById(this.selectedFeatureId).setStyle();
-//                     this.selectedFeatureId = null;
-//                 }
-//             }
+            if(this.selectedFeature !== undefined && this.selectedFeature.getId() !== undefined) {
+                if(this.selectedFeature.getProperties().type === 'tempMarker') {
+                    let arrId = this.selectedFeature.getId().split('-');
+                    let dName = arrId[0];
+                    let pIndex = arrId[1];
 
-            // this.olMap.forEachFeatureAtPixel(event.pixel, (clicked) => {
-            //     this.selectedFeature = clicked;
-            //
-            //     if(clicked !== undefined) {
-            //         if (!Object.prototype.hasOwnProperty.call(this.selectedFeatureFlag, clicked.id_)) {
-            //             this.selectedFeatureFlag[clicked.id_] = false;
-            //         }
-            //
-            //         this.selectedFeatureFlag[clicked.id_] = !this.selectedFeatureFlag[clicked.id_];
-            //
-            //         console.log(clicked.id_, this.selectedFeatureFlag[clicked.id_]);
-            //
-            //         if (this.selectedFeatureId) {
-            //             selectedFeature.setStyle();
-            //             selectedFeatureId = null;
-            //         }
-            //         if (!selectedFeature || (selectedFeature.getId() != feature.getId())) {
-            //             feature.setStyle(selectedStyle);
-            //             selectedFeatureId = feature.getId();
-            //         }
-            //     }
-            //     else {
-            //         this.selectedFeatureId = null;
-            //     }
-            // });
-
-
+                    this.updateSelectedTempMarker(dName, pIndex);
+                }
+            }
         });
 
         // this.olMap.on('click', (event) => {
@@ -1294,6 +1558,24 @@ export default {
         EventBus.$off('gcs-map-ready');
         EventBus.$off('do-centerCurrentPosition');
         EventBus.$off('do-updateTargetDroneMarker');
+        EventBus.$off('do-unsetSelectedTempMarker');
     }
 }
 </script>
+
+<style scoped>
+.info_markers {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 1;
+    z-index: 2;
+    width: 100%;
+}
+
+.context-menu {
+    position: absolute;
+    opacity: 1;
+    z-index: 5;
+}
+</style>

@@ -237,6 +237,7 @@
 
 <script>
     import axios from "axios";
+    import EventBus from "@/EventBus";
 
     export default {
         name: "InfoTempMarker",
@@ -294,6 +295,8 @@
                     this.targetMavCmd = newVal.targetMavCmd;
                     this.targetStayTime = newVal.targetStayTime;
                     this.elevation = newVal.elevation.toFixed(1);
+
+                    this.$forceUpdate();
                 }
             },
 
@@ -396,6 +399,8 @@
 
             resetForm() {
                 this.$emit('input', false);
+
+                EventBus.$emit('do-unsetSelectedTempMarker');
             },
 
             postCinTempMarkerInfoToMobius(dName) {

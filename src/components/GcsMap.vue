@@ -2209,6 +2209,20 @@
                         this.$store.state.tempMarkers = null;
                         this.$store.state.tempMarkers = JSON.parse(JSON.stringify(temp));
 
+                        if(this.curInfoTempMarkerFlag) {
+                            this.curInfoTempMarkerFlag = false;
+
+                            this.$forceUpdate();
+
+                            setTimeout(() => {
+                                this.$store.state.tempMarkers[dName][pIndex].selected = true;
+                                this.curSelectedMarker = this.$store.state.tempMarkers[dName][pIndex];
+                                this.curIndexMarker = pIndex;
+                                this.curNameMarker = dName;
+                                this.curInfoTempMarkerFlag = true;
+                            }, 10);
+                        }
+
                         this.postCinTempMarkerInfoToMobius(dName);
 
                         let watchingPayload = {};
