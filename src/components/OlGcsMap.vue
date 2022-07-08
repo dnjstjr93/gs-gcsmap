@@ -56,24 +56,28 @@ let svgDroneObj = {};
 svgDroneObj.svg = {};
 svgDroneObj.svg._attributes = {};
 svgDroneObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
-svgDroneObj.svg._attributes.width = faLocationArrow.icon[0] / 2;
-svgDroneObj.svg._attributes.height = faLocationArrow.icon[1] / 2;
-//svgDroneObj.svg._attributes.fill = 'red';
+svgDroneObj.svg._attributes.x = '0';
+svgDroneObj.svg._attributes.y = '0';
+svgDroneObj.svg._attributes.width = faLocationArrow.icon[0]/2;
+svgDroneObj.svg._attributes.height = faLocationArrow.icon[1]/2;
 svgDroneObj.svg._attributes.class = faLocationArrow.icon[3];
-svgDroneObj.svg._attributes.viewBox = '-25 -25 ' + (faLocationArrow.icon[0]+50) + ' ' + (faLocationArrow.icon[1]+50);
+svgDroneObj.svg._attributes.viewBox = '-11 -11 ' + (faLocationArrow.icon[0]+22) + ' ' + (faLocationArrow.icon[1]+22);
+
 svgDroneObj.svg.path = {};
 svgDroneObj.svg.path._attributes = {};
 svgDroneObj.svg.path._attributes.d = faLocationArrow.icon[4];
+// svgDroneObj.svg.path._attributes['stroke-alignment'] = 'inner';
 
 let svgTempObj = {};
 svgTempObj.svg = {};
 svgTempObj.svg._attributes = {};
 svgTempObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
-svgTempObj.svg._attributes.width = faCrosshairs.icon[0] / 2;
-svgTempObj.svg._attributes.height = faCrosshairs.icon[1] / 2;
-//svgDroneObj.svg._attributes.fill = 'red';
+svgTempObj.svg._attributes.x = '0';
+svgTempObj.svg._attributes.y = '0';
+svgTempObj.svg._attributes.width = faCrosshairs.icon[0]/2;
+svgTempObj.svg._attributes.height = faCrosshairs.icon[1]/2;
 svgTempObj.svg._attributes.class = faCrosshairs.icon[3];
-svgTempObj.svg._attributes.viewBox = '-25 -25 ' + (faCrosshairs.icon[0]+50) + ' ' + (faCrosshairs.icon[1]+50);
+svgTempObj.svg._attributes.viewBox = '-11 -11 ' + (faCrosshairs.icon[0]+22) + ' ' + (faCrosshairs.icon[1]+22);
 svgTempObj.svg.path = {};
 svgTempObj.svg.path._attributes = {};
 svgTempObj.svg.path._attributes.d = faCrosshairs.icon[4];
@@ -493,7 +497,7 @@ export default {
                     '#FFFF00',
                     '35',
                     this.$store.state.tempMarkers[dName][pIndex].alt,
-                    svgScale-0.06,
+                    svgScale-0.05,
                     selectedColor
                 );
             }
@@ -504,7 +508,7 @@ export default {
                     '#FFFDE7',
                     '15',
                     this.$store.state.tempMarkers[dName][pIndex].alt,
-                    svgScale-0.06,
+                    svgScale-0.05,
                     selectedColor
                 );
             }
@@ -526,7 +530,8 @@ export default {
                         src: 'data:image/svg+xml;utf8,' + xmlSvgDroneMarker,
                         scale: scale,
                         rotation: rotation,
-                        anchor: [0.5, 0.56],
+                        anchor: [0.51, 0.51],
+
                     }),
                     text: new Text({
                         text: [dAlt.toFixed(1), 'bold 11px sans-serif'],
@@ -815,7 +820,7 @@ export default {
                             '#FFFDE7',
                             '15',
                             tAlt,
-                            svgScale-0.06,
+                            svgScale-0.05,
                             selectedColor
                         );
 
