@@ -222,7 +222,7 @@
                     Register
                 </v-btn>
                 <v-spacer></v-spacer>
-                <v-btn text @click="resetForm" outlined>
+                <v-btn text @click="resetForm('cancel')" outlined>
                     Cancel
                 </v-btn>
                 <v-spacer></v-spacer>
@@ -383,7 +383,7 @@
                 this.snackbar = true;
 
                 setTimeout(() => {
-                    this.resetForm();
+                    this.resetForm('delete');
                 }, 100);
             },
 
@@ -397,10 +397,10 @@
                 }
             },
 
-            resetForm() {
+            resetForm(status) {
                 this.$emit('input', false);
 
-                EventBus.$emit('do-unsetSelectedTempMarker');
+                EventBus.$emit('do-unsetSelectedTempMarker', status);
             },
 
             postCinTempMarkerInfoToMobius(dName) {
@@ -538,7 +538,8 @@
                 this.snackbar = true;
 
                 setTimeout(() => {
-                    this.resetForm();
+
+                    this.resetForm('register');
                 }, 100);
             },
 

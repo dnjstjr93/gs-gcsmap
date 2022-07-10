@@ -1706,6 +1706,7 @@ export default {
                             this.prepareSurveyMarkerInfos();
                             this.postCntToMobius(url, 'LossLteInfos', () => {
                                 this.prepareLossLteInfos();
+                                EventBus.$emit('ready-gcs_app_bar');
                             });
                         });
                     });

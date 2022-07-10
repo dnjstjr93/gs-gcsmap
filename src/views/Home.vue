@@ -1,14 +1,16 @@
 <template>
     <div>
         <GcsAppBar/>
-        <DroneInfoList/>
-        <div v-if="selected_map === 'googlemaps'">
-            <GcsMap/>
-        </div>
-        <div v-else>
-            <v-card tile flat width="100%" height="calc(100vh - 48px)" class="px-0 ma-0">
-                <OlGcsMap :geojson="geojson" v-on:select="selected = $event"></OlGcsMap>
-            </v-card>
+        <div v-if="ready_dorne_list">
+            <DroneInfoList/>
+            <div v-if="selected_map === 'googlemaps'">
+                <GcsMap/>
+            </div>
+            <div v-else>
+                <v-card tile flat width="100%" height="calc(100vh - 48px)" class="px-0 ma-0">
+                    <OlGcsMap :geojson="geojson" v-on:select="selected = $event"></OlGcsMap>
+                </v-card>
+            </div>
         </div>
     </div>
 </template>
@@ -19,6 +21,7 @@ import GcsAppBar from "../components/GcsAppBar";
 import DroneInfoList from "../components/DroneInfoList";
 import GcsMap from "../components/GcsMap";
 import OlGcsMap from "@/components/OlGcsMap";
+import EventBus from "@/EventBus";
 
 export default {
     name: 'Home',
@@ -31,6 +34,8 @@ export default {
     },
 
     data: () => ({
+        ready_dorne_list: false,
+
         selected_map: 'openlayers',
         //selected_map: 'googlemaps',
 
@@ -106,6 +111,14 @@ export default {
 
     created() {
         this.$store.state.viewAlt = this.selected_map === 'google_maps';
+
+        EventBus.$on('ready-gcs_app_bar', () => {
+            this.ready_dorne_list = true;
+        });
+    },
+
+    beforeDestroy() {
+        EventBus.$off('');
     }
 }
 </script>

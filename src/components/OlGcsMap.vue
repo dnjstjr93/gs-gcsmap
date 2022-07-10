@@ -28,7 +28,7 @@ import Translate from 'ol/interaction/Translate'
 import XYZ from 'ol/source/XYZ'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
-import GeoJSON from 'ol/format/GeoJSON'
+//import GeoJSON from 'ol/format/GeoJSON'
 import MultiPoint from 'ol/geom/MultiPoint';
 import { toLonLat } from 'ol/proj';
 import { Collection } from "ol";
@@ -50,7 +50,6 @@ import EventBus from "@/EventBus";
 import axios from "axios";
 
 import arrawImagePath from '../assets/arrow.png'
-import {gmapApi} from "vue2-google-maps";
 
 let svgDroneObj = {};
 svgDroneObj.svg = {};
@@ -145,6 +144,8 @@ export default {
             osmSource: null,
             demSource: null,
 
+            features: [],
+
             droneMarkers: {},
             tempMarkers: {},
 
@@ -229,7 +230,6 @@ export default {
     },
 
     computed: {
-        google: gmapApi
     },
 
     methods: {
@@ -264,31 +264,32 @@ export default {
             }
         },
 
-        updateSource(geojson) {
-            console.log('geojson', geojson);
+        updateSource() {
+            //console.log('geojson', geojson);
 
-            const view = this.olMap.getView();
             const source = this.vectorLayer.getSource();
 
-            let features = new GeoJSON({
-                featureProjection: 'EPSG:3857',
-            }).readFeatures(geojson);
+            // let features = new GeoJSON({
+            //     featureProjection: 'EPSG:3857',
+            // }).readFeatures(geojson);
+            //
+            // console.log('features', features);
 
-            console.log('features', features);
+            this.features = [];
 
             for(let dName in this.droneMarkers) {
                 if(Object.prototype.hasOwnProperty.call(this.droneMarkers, dName)) {
-                    features.push(this.droneMarkers[dName].headingLineFeature);
-                    features.push(this.droneMarkers[dName].directionLineFeature);
-                    features.push(this.droneMarkers[dName].droneMarkerFeature);
-                    console.log('droneMarkers', features);
+                    this.features.push(this.droneMarkers[dName].headingLineFeature);
+                    this.features.push(this.droneMarkers[dName].directionLineFeature);
+                    this.features.push(this.droneMarkers[dName].droneMarkerFeature);
+                    console.log('droneMarkers', this.features);
                 }
             }
 
             for(let dName in this.tempMarkers) {
                 if(Object.prototype.hasOwnProperty.call(this.tempMarkers, dName)) {
-                    features.push(this.tempMarkers[dName].guideLineFeature);
-                    features = features.concat(this.tempMarkers[dName].tempMarkerFeatures);
+                    this.features.push(this.tempMarkers[dName].guideLineFeature);
+                    this.features = this.features.concat(this.tempMarkers[dName].tempMarkerFeatures);
 
                     this.tempMarkers[dName].tempMarkerTranslates.forEach((translate) => {
                         this.olMap.addInteraction(translate);
@@ -297,9 +298,7 @@ export default {
             }
 
             source.clear();
-            source.addFeatures(features);
-
-            view.fit(source.getExtent())
+            source.addFeatures(this.features);
         },
 
         getIdxedDBValueSync(key) {
@@ -814,6 +813,7 @@ export default {
                         if (this.$store.state.tempMarkers[dName][pIndex].selected) {
                             selectedColor = '#76FF03F0';
                         }
+
                         let iconStyleTemp = this.getStyleTempMarker(
                             pIndex,
                             this.$store.state.drone_infos[dName].color,
@@ -1169,7 +1169,10 @@ export default {
 
             this.initTempMarkers();
 
-            this.updateSource(this.geojson);
+            this.updateSource();
+
+            // const view = this.olMap.getView();
+            // view.fit(source.getExtent())
 
             let pnt = new Point([127.16050533784832, 37.40423134053018]).transform('EPSG:4326', 'EPSG:3857')
             let center_coordinate = pnt.getCoordinates();
@@ -1243,16 +1246,33 @@ export default {
             this.updateTargetDroneMarker(dName);
         });
 
-        EventBus.$on('do-unsetSelectedTempMarker', () => {
-            if(this.selectedTempFeatureId !== '') {
-                let dNameOld = this.selectedTempFeatureId.split('-')[0];
-                let pIndexOld = this.selectedTempFeatureId.split('-')[1];
+        EventBus.$on('do-unsetSelectedTempMarker', (payload) => {
+            let status = payload.status;
 
-                this.$store.state.tempMarkers[dNameOld][pIndexOld].selected = false;
-                this.selectedTempFeatureId = '';
+            console.log(status, payload);
 
-                this.updateTempMarker(dNameOld, pIndexOld);
+            if(status === 'cancel') {
+                if (this.selectedTempFeatureId !== '') {
+                    let dNameOld = this.selectedTempFeatureId.split('-')[0];
+                    let pIndexOld = this.selectedTempFeatureId.split('-')[1];
+
+                    this.$store.state.tempMarkers[dNameOld][pIndexOld].selected = false;
+                    this.selectedTempFeatureId = '';
+
+                    this.updateTempMarker(dNameOld, pIndexOld);
+                }
             }
+            else {
+                if (this.selectedTempFeatureId !== '') {
+
+                    this.initTempMarkers();
+
+                    this.updateSource();
+
+                    this.selectedTempFeatureId = '';
+                }
+            }
+
         });
 
         this.olMap.on('pointermove', (event) => {

@@ -37,6 +37,24 @@
                         </v-col>
                         <v-spacer></v-spacer>
                         <v-col cols="1">
+                            <v-tooltip top>
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-btn
+                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
+                                        @click.stop="checkMissionLteUrl"
+                                        v-bind="attrs"
+                                        v-on="on"
+                                        :disabled="missionLteUrlFlag"
+                                    >
+                                        <v-icon small>
+                                            mdi-briefcase-outline
+                                        </v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>LTE 미션 확인</span>
+                            </v-tooltip>
+                        </v-col>
+                        <v-col cols="1">
 <!--                                    <v-switch-->
 <!--                                        dense hide-details flat inset-->
 <!--                                        prepend-icon="mdi-video-outline"-->
@@ -868,7 +886,7 @@ export default {
         'id',
         'gcs',
         'bat_cell',
-        'sortie',
+        'sortie_name',
         'airspeed_size',
         'heading_size',
         'attitude_size',
@@ -881,6 +899,8 @@ export default {
 
     data() {
         return {
+            missionTopic: '/oneM2M/req/Mobius2/' + this.name + '/json',
+
             myChart: null,
 
             yawAngle: 0,
@@ -916,7 +936,7 @@ export default {
             ],
             absolute: true,
             opacity: 0.8,
-            sortie_name: this.sortie,
+            curSortieName: this.sortie_name,
 
             curMode: 'UNKNOWN',
             colorMode: 'td-text-gray',
@@ -1033,6 +1053,7 @@ export default {
             targeted: -1,
 
             missionLteUrl: '',
+            missionLteUrlFlag: false,
 
             curLteVal: -80,
             colorLteVal: '#9E9E9E',
@@ -1351,9 +1372,8 @@ export default {
             this.$store.state.drone_infos[this.name].preMode = this.$store.state.drone_infos[this.name].curMode;
         },
 
-        sortie_name: function (newData) {
-            console.log(`sortie change ${newData}`);
-            console.log(this.missionLteUrl);
+        sortie_name: function (newData, oldData) {
+            console.log(`sortie_name change ${oldData} -> ${newData}`, 'missionLteUrl', this.missionLteUrl);
 
             if (newData !== 'disarm') {
                 var now = moment.utc();
@@ -1375,48 +1395,61 @@ export default {
                 return;
             }
 
-            let sortie = newData;
-            let mission_topic = '/oneM2M/req/Mobius2/' + this.name + '/json';
+            // let sortie_name = newData;
+            // let mission_topic = '/oneM2M/req/Mobius2/' + this.name + '/json';
+            //
+            // this.createSubscription(sortie_name, (res) => {
+            //     console.log('createSubscription', res);
+            //
+            //     if (res.status === 201 || res.status === 409) {
+            //         //EventBus.$emit('do-subscribe', mission_topic);
+            //
+            //         this.doSubscribe(mission_topic);
+            //
+            //         this.droneSubscribeSuccess[mission_topic] = true;
+            //         console.log('Subscribe mission topic to ', mission_topic);
+            //     }
+            // });
 
-            this.getParentSubscription(sortie, (res) => {
-                console.log('getParentSubscription', res);
-
-                if (res.status === 200) {
-                    this.getSubscription(sortie, (res) => {
-                        console.log('getSubscription', res);
-
-                        if (res.status === 200) {
-                            //EventBus.$emit('do-subscribe', mission_topic);
-
-                            this.doSubscribe(mission_topic);
-
-                            this.droneSubscribeSuccess[mission_topic] = true;
-                            console.log('Subscribe mission topic to ', mission_topic);
-                        }
-                        else {
-                            this.createSubscription(sortie, function (res) {
-                                console.log('createSubscription', res);
-
-                                if (res.status === 201 || res.status === 409) {
-                                    //EventBus.$emit('do-subscribe', mission_topic);
-
-                                    this.doSubscribe(mission_topic);
-
-                                    this.droneSubscribeSuccess[mission_topic] = true;
-                                    console.log('Subscribe mission topic to ', mission_topic);
-                                }
-                            });
-                        }
-                    });
-                }
+            // this.getParentSubscription(sortie_name, (res) => {
+            //     console.log('getParentSubscription', res);
+            //
+            //     if (res.status === 200) {
+            //         this.getSubscription(sortie_name, (res) => {
+            //             console.log('getSubscription', res);
+            //
+            //             if (res.status === 200) {
+            //                 //EventBus.$emit('do-subscribe', mission_topic);
+            //
+            //                 this.doSubscribe(mission_topic);
+            //
+            //                 this.droneSubscribeSuccess[mission_topic] = true;
+            //                 console.log('Subscribe mission topic to ', mission_topic);
+            //             }
+            //             else {
+            //                 this.createSubscription(sortie_name, function (res) {
+            //                     console.log('createSubscription', res);
+            //
+            //                     if (res.status === 201 || res.status === 409) {
+            //                         //EventBus.$emit('do-subscribe', mission_topic);
+            //
+            //                         this.doSubscribe(mission_topic);
+            //
+            //                         this.droneSubscribeSuccess[mission_topic] = true;
+            //                         console.log('Subscribe mission topic to ', mission_topic);
+            //                     }
+            //                 });
+            //             }
+            //         });
+            //     }
                 // else {
-                //     let tid = setInterval(this.getParentSubscription, 2000, sortie, (res) => {
+                //     let tid = setInterval(this.getParentSubscription, 2000, sortie_name, (res) => {
                 //         console.log('getParentSubscription', res);
                 //
                 //         if (res.status === 200) {
                 //             clearInterval(tid);
                 //
-                //             this.getSubscription(sortie, (res) => {
+                //             this.getSubscription(sortie_name, (res) => {
                 //
                 //                 console.log('getSubscription', res);
                 //
@@ -1428,7 +1461,7 @@ export default {
                 //                     this.droneSubscribeSuccess[mission_topic] = true;
                 //                     console.log('Subscribe mission topic to ', mission_topic);
                 //                 } else {
-                //                     this.createSubscription(sortie, function (res) {
+                //                     this.createSubscription(sortie_name, function (res) {
                 //                         console.log('createSubscription', res);
                 //
                 //                         if (res.status === 201 || res.status === 409) {
@@ -1445,7 +1478,7 @@ export default {
                 //         }
                 //     });
                 // }
-            });
+            // });
         },
     },
 
@@ -2261,29 +2294,28 @@ export default {
         doSubscribe(topic) {
             if (this.client.connected) {
                 const qos = 0;
-                let self = this;
                 this.client.subscribe(topic, {qos}, (error) => {
                     if (error) {
                         console.log('Subscribe to topics error', error)
                         return
                     }
-                    self.droneSubscribeSuccess[topic] = true;
+                    this.droneSubscribeSuccess[topic] = true;
                 });
             }
         },
 
         doUnSubscribe(topic) {
             if (this.client.connected) {
-                let self = this;
-                this.client.unsubscribe(topic, error => {
+
+                this.client.unsubscribe(topic, (error) => {
                     if (error) {
                         console.log('Unsubscribe error', error)
                     }
 
-                    self.droneSubscribeSuccess[topic] = false;
+                    this.droneSubscribeSuccess[topic] = false;
                     console.log('Unsubscribe to topics (', topic, ')');
 
-                    self.receiveNews = '';
+                    this.receiveNews = '';
                 });
             }
         },
@@ -2383,9 +2415,10 @@ export default {
             // SpeechSynthesisUtterance에 저장된 내용을 바탕으로 음성합성 실행
             window.speechSynthesis.speak(speechMsg)
         },
+
         receiveFromDrone(topic, hex_content_each) {
             var arr_topic = topic.split('/');
-            let sortie_name = arr_topic.pop();
+            let curSortieName = arr_topic.pop();
             topic = arr_topic.join('/');
 
             // // eslint-disable-next-line no-prototype-builtins
@@ -2425,16 +2458,21 @@ export default {
                 //this.mavStrFromDrone[topic] = this.mavStrFromDrone[topic].substr(mavLength);
 
                 // let payload = {};
-                // payload.sortie = sortie_name;
+                // payload.sortie_name = sortie_name;
                 // payload.data = mavPacket;
 
                 //EventBus.$emit('push-status-' + arr_topic[4], payload);
 
                 this.recv_counter++;
 
-                if(this.sortie_name !== sortie_name) {
-                    this.sortie_name = sortie_name;
-                    localStorage.setItem(this.name+'_sortie_name', this.sortie_name);
+                if(this.curSortieName !== curSortieName) {
+                    this.curSortieName = curSortieName;
+                    this.$store.state.drone_infos[this.name].sortie_name = curSortieName;
+                    localStorage.setItem(this.name+'_sortie_name', this.curSortieName);
+
+                    this.postDroneInfos((res) => {
+                        console.log('postDroneInfos -> disarm', res);
+                    });
                 }
 
                 this.mavStr = mavPacket;
@@ -2617,7 +2655,7 @@ export default {
         //
         //         // let payload = {};
         //         // let arr_topic = topic.split('/');
-        //         // payload.sortie = arr_topic[5];
+        //         // payload.sortie_name = arr_topic[5];
         //         // payload.data = message.toString();
         //         //
         //         // EventBus.$emit('push-status-' + arr_topic[4], payload);
@@ -5338,7 +5376,7 @@ export default {
             }
         },
 
-        getParentSubscription(sortie, callback) {
+        getParentSubscription(sortie_name, callback) {
 
             axios({
                 validateStatus: function (status) {
@@ -5346,7 +5384,7 @@ export default {
                     return status < 500;
                 },
                 method: 'get',
-                //url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie,
+                //url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie_name,
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl,
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
@@ -5363,7 +5401,7 @@ export default {
                 });
         },
 
-        getSubscription(sortie, callback) {
+        getSubscription(sortie_name, callback) {
             const subscription_name = 'sub_' + this.name + '_of_gcs';
             axios({
                 validateStatus: function (status) {
@@ -5371,7 +5409,7 @@ export default {
                     return status < 500;
                 },
                 method: 'get',
-                //url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie + '/' + subscription_name,
+                //url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie_name + '/' + subscription_name,
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + subscription_name,
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
@@ -5389,7 +5427,7 @@ export default {
             );
         },
 
-        deleteSubscription(sortie, callback) {
+        deleteSubscription(sortie_name, callback) {
             const subscription_name = 'sub_' + this.name + '_of_gcs';
             axios({
                 validateStatus: function (status) {
@@ -5397,7 +5435,7 @@ export default {
                     return status < 500;
                 },
                 method: 'delete',
-                //url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie + '/' + subscription_name,
+                //url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie_name + '/' + subscription_name,
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + subscription_name,
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
@@ -5414,17 +5452,17 @@ export default {
                 });
         },
 
-        createSubscription(sortie, callback) {
+        createSubscription(sortie_name, callback) {
             const subscription_name = 'sub_' + this.name + '_of_gcs';
             let nu = 'mqtt://' + this.$store.state.VUE_APP_MOBIUS_HOST + '/' + this.name + '?ct=json';
 
             axios({
-                validateStatus: function (status) {
+                validateStatus: (status) => {
                     // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
                     return status < 500;
                 },
                 method: 'post',
-                //url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie,
+                //url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl + '/' + sortie_name,
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579' + this.missionLteUrl,
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
@@ -5443,18 +5481,18 @@ export default {
                     }
                 }
             }).then(
-                function (res) {
+                (res) => {
                     callback(res);
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     callback(err);
                 }
             );
         },
 
         getDroneMissionInfo() {
-            let self = this;
+
             axios({
                 method: 'get',
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/MUV/approval/' + this.id + '/la',
@@ -5463,8 +5501,8 @@ export default {
                     'X-M2M-Origin': 'SVue'
                 }
             }).then(
-                function (res) {
-                    //console.log(res.data[Object.keys(res.data)[0]].con);
+                (res) => {
+                    console.log(res.data[Object.keys(res.data)[0]].con);
                     // console.log(res);
                     // console.log('headers', res.headers)
 
@@ -5479,8 +5517,8 @@ export default {
                                         for (let idx in con['mission'][msw_name][container]) {
                                             if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name][container], idx)) {
                                                 if (con['mission'][msw_name][container][idx] === 'LTE') {
-                                                    self.missionLteUrl = '/Mobius/' + con.gcs + '/Mission_Data/' + self.name + '/' + msw_name + '/' + con['mission'][msw_name][container][idx];
-                                                    console.log(self.missionLteUrl);
+                                                    this.missionLteUrl = '/Mobius/' + con.gcs + '/Mission_Data/' + this.name + '/' + msw_name + '/' + con['mission'][msw_name][container][idx];
+                                                    console.log(this.missionLteUrl);
                                                     break;
                                                 }
                                             }
@@ -5561,6 +5599,26 @@ export default {
             }
 
             this.$store.state.didIPublish = true;
+        },
+
+        checkMissionLteUrl() {
+            this.getDroneMissionInfo();
+
+            if(this.missionLteUrl !== '') {
+                this.createSubscription(this.curSortieName, (res) => {
+                    console.log('createSubscription', res);
+
+                    if (res.status === 201 || res.status === 409) {
+
+                        this.doSubscribe(this.missionTopic);
+
+                        this.droneSubscribeSuccess[this.missionTopic] = true;
+                        console.log('Subscribe mission topic to ', this.missionTopic);
+
+                        this.missionLteUrlFlag = true;
+                    }
+                });
+            }
         },
 
         clearTrackingLines() {
@@ -6801,7 +6859,7 @@ export default {
         //
         //     this.recv_counter++;
         //
-        //     this.sortie_name = payload.sortie;
+        //     this.sortie_name = payload.sortie_name;
         //     this.mavStr = payload.data;
         //
         //     this.statusColor = 'indicator-green';
@@ -6948,7 +7006,25 @@ export default {
             }
         }
 
+        console.log('Interval getDroneMissionInfo');
+
         this.getDroneMissionInfo();
+
+        if(this.missionLteUrl !== '') {
+            this.createSubscription(this.curSortieName, (res) => {
+                console.log('createSubscription', res);
+
+                if (res.status === 201 || res.status === 409) {
+
+                    this.doSubscribe(this.missionTopic);
+
+                    this.droneSubscribeSuccess[this.missionTopic] = true;
+                    console.log('Subscribe mission topic to ', this.missionTopic);
+
+                    this.missionLteUrlFlag = true;
+                }
+            });
+        }
 
         console.log('DroneInfo-mounted', this.lat, this.lng);
 
@@ -6976,6 +7052,23 @@ export default {
         else {
             this.$store.state.trackingLines[this.name] = [];
         }
+
+        if (this.curSortieName !== 'disarm') {
+            var now = moment.utc();
+            this.startFlightTime = moment(this.curSortieName.replace(/_/g, ''));
+            console.log('curSortieName', this.startFlightTime);
+
+            //let diff = (now.seconds() - this.startFlightTime.seconds());
+            let diff = now.subtract(this.startFlightTime);
+            console.log(diff.unix());
+
+            this.flightTimeCount = diff.unix();
+            this.startFlightTimer();
+        }
+        else {
+            this.stopFlightTimer();
+        }
+
     },
 
     beforeDestroy() {
