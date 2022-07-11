@@ -1068,10 +1068,14 @@ export default {
 
                         if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'headingLine')) {
                             this.drone_infos[dName].headingLine = [];
+                            this.drone_infos[dName].headingLine.push({lat: 0, lng: 0});
+                            this.drone_infos[dName].headingLine.push({lat: 0, lng: 0});
                         }
 
                         if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'directionLine')) {
                             this.drone_infos[dName].directionLine = [];
+                            this.$store.state.drone_infos[dName].directionLine.push({lat: 0, lng: 0});
+                            this.$store.state.drone_infos[dName].directionLine.push({lat: 0, lng: 0});
                         }
 
                         if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'client')) {

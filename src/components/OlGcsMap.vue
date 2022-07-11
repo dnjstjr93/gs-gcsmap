@@ -1,6 +1,5 @@
 <template>
-    <div ref="map-root"
-         style="width: 100%; height: 100%">
+    <div ref="map-root" style="width: 100%; height: 100%">
         <v-card flat tile class="info_markers" v-if="curInfoTempMarkerFlag">
             <InfoTempMarker v-model="curInfoTempMarkerFlag"
                             :marker-name="curNameMarker"
@@ -18,6 +17,9 @@ import View from 'ol/View'
 import Map from 'ol/Map'
 import TileLayer from 'ol/layer/Tile'
 import Stamen from 'ol/source/Stamen'
+import ScaleLine from 'ol/control/ScaleLine'
+import Zoom from 'ol/control/Zoom'
+
 //
 // import ImageLayer from 'ol/layer/Image'
 // import Raster from 'ol/source/Raster'
@@ -673,6 +675,11 @@ export default {
 
                     this.olDroneMarkers[dName].droneMarkerFeature.setStyle(iconStyleDrone);
 
+                    if(this.$store.state.drone_infos[dName].headingLine.length === 0) {
+                        this.$store.state.drone_infos[dName].headingLine.push({lat: 0, lng: 0});
+                        this.$store.state.drone_infos[dName].headingLine.push({lat: 0, lng: 0});
+                    }
+
                     let sLat = this.$store.state.drone_infos[dName].headingLine[0].lat;
                     let sLng = this.$store.state.drone_infos[dName].headingLine[0].lng;
                     let eLat = this.$store.state.drone_infos[dName].headingLine[1].lat;
@@ -696,6 +703,11 @@ export default {
                     });
 
                     this.olDroneMarkers[dName].headingLineFeature.setStyle(headingLineStyle);
+
+                    if(this.$store.state.drone_infos[dName].directionLine.length === 0) {
+                        this.$store.state.drone_infos[dName].directionLine.push({lat: 0, lng: 0});
+                        this.$store.state.drone_infos[dName].directionLine.push({lat: 0, lng: 0});
+                    }
 
                     let sDirLat = this.$store.state.drone_infos[dName].directionLine[0].lat;
                     let sDirLng = this.$store.state.drone_infos[dName].directionLine[0].lng;
@@ -1117,6 +1129,11 @@ export default {
                 break;
             }
         }
+
+        // Control
+        var ctrl = new Zoom({ });
+        this.olMap.addControl(ctrl);
+        this.olMap.addControl(new ScaleLine());
 
         //this.updateSource(this.geojson);
 
@@ -1662,7 +1679,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss">
 .info_markers {
     position: absolute;
     left: 0;
@@ -1676,5 +1693,55 @@ export default {
     position: absolute;
     opacity: 1;
     z-index: 5;
+}
+
+
+
+//.ol-zoom.my-new-class-name {
+//    background: red;
+//}
+
+.ol-zoom {
+    top: 0.5em;
+    right: 0.5em;
+    left: unset;
+
+    //move the tooltips to the left of the now right aligned buttons
+    .ol-has-tooltip:hover [role=tooltip] {
+        left: -5.5em;
+        border-radius: 4px 0 0 4px;
+    }
+
+    .ol-zoom-out.ol-has-tooltip:hover [role=tooltip] {
+        left: -6.2em;
+    }
+
+    //make sure the rotate controls included by default with an opacity of 0 don't
+    //block clicks intended for the '+' button
+    .ol-rotate {
+        visibility: hidden;
+    }
+}
+
+.ol-scale-line {
+    bottom: 0.5em;
+    right: 0.5em;
+    left: unset;
+
+    //move the tooltips to the left of the now right aligned buttons
+    .ol-has-tooltip:hover [role=tooltip] {
+        left: -5.5em;
+        border-radius: 4px 0 0 4px;
+    }
+
+    .ol-zoom-out.ol-has-tooltip:hover [role=tooltip] {
+        left: -6.2em;
+    }
+
+    //make sure the rotate controls included by default with an opacity of 0 don't
+    //block clicks intended for the '+' button
+    .ol-rotate {
+        visibility: hidden;
+    }
 }
 </style>

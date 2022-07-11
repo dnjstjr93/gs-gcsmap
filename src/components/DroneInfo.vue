@@ -2111,7 +2111,12 @@ export default {
                     }
                 }
             }
-            else if (chkTopic === '/oneM2M') {
+        },
+
+        onMessageHandler(topic, message) {
+            let chkTopic = topic.substr(0, 7);
+
+            if (chkTopic === '/oneM2M') {
                 var jsonObj = JSON.parse(message.toString());
 
                 if (jsonObj['m2m:rqp'] == null) {
@@ -2208,18 +2213,6 @@ export default {
                             }
                         }
                     }
-                }
-            }
-        },
-
-        onMessageHandler(topic, message) {
-            let chkTopic = topic.substr(0, 7);
-
-            if (chkTopic === "/Mobius") {
-                let watchingMissionTopic = topic.substr(7+(this.gcs.length)+1, 16);
-
-                if(watchingMissionTopic === '/watchingMission') {
-                    this.onMessageBroadcast(message);
                 }
             }
         },
