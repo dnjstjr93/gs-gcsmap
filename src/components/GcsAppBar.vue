@@ -1030,6 +1030,10 @@ export default {
                             this.drone_infos[dName].targetAlt = 20;
                         }
 
+                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'sortie_name')) {
+                            this.drone_infos[dName].sortie_name = 'disarm';
+                        }
+
                         if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'lastFlightTime')) {
                             this.drone_infos[dName].lastFlightTime = 0;
                         }

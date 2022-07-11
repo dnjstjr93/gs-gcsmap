@@ -337,45 +337,57 @@
 
         methods: {
             deleteTempMarker() {
-                if(this.markerName === 'unknown') {
-                    this.$store.state.tempMarkers[this.markerName].splice(this.markerIndex, 1);
+                let status = 'cancel';
+                let oldName = this.markerName;
+                let oldIndex = this.markerIndex;
+                let newName = 'unknown';
 
-                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName]));
-                    this.$store.state.tempMarkers[this.markerName] = null;
-                    this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
+                if(oldName === 'unknown') {
+                    this.$store.state.tempMarkers[oldName].splice(oldIndex, 1);
 
-                    this.postCinTempMarkerInfoToMobius(this.markerName);
+                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[oldName]));
+                    this.$store.state.tempMarkers[oldName] = null;
+                    this.$store.state.tempMarkers[oldName] = JSON.parse(JSON.stringify(temp));
+
+                    status = 'remove';
+
+                    this.postCinTempMarkerInfoToMobius(oldName);
 
                     this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
                     let watchingPayload = {};
                     watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
-                    watchingPayload.dName = this.markerName;
+                    watchingPayload.dName = oldName;
 
                     this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
 
                     this.$store.state.didIPublish = true;
                 }
                 else {
-                    this.$store.state.tempMarkers[this.markerName][this.markerIndex].selected = false;
-                    let targetTempMarker = this.$store.state.tempMarkers[this.markerName].splice(this.markerIndex, 1);
-                    this.$store.state.tempMarkers['unknown'].push(targetTempMarker[0]);
+                    this.$store.state.tempMarkers[oldName][oldIndex].selected = false;
+                    let targetTempMarker = this.$store.state.tempMarkers[oldName].splice(oldIndex, 1);
+                    this.$store.state.tempMarkers[newName].push(targetTempMarker[0]);
 
-                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[this.markerName]));
-                    this.$store.state.tempMarkers[this.markerName] = null;
-                    this.$store.state.tempMarkers[this.markerName] = JSON.parse(JSON.stringify(temp));
+                    let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[oldName]));
+                    this.$store.state.tempMarkers[oldName] = null;
+                    this.$store.state.tempMarkers[oldName] = JSON.parse(JSON.stringify(temp));
 
-                    this.postCinTempMarkerInfoToMobius(this.markerName);
+                    temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[newName]));
+                    this.$store.state.tempMarkers[newName] = null;
+                    this.$store.state.tempMarkers[newName] = JSON.parse(JSON.stringify(temp));
+
+                    status = 'delete';
 
                     this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
                     let watchingPayload = {};
                     watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
-                    watchingPayload.dName = this.markerName;
+
+                    this.postCinTempMarkerInfoToMobius(oldName);
+                    watchingPayload.dName = oldName;
                     this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
                     this.$store.state.didIPublish = true;
 
-                    this.postCinTempMarkerInfoToMobius('unknown');
-
-                    watchingPayload.dName = 'unknown';
+                    this.postCinTempMarkerInfoToMobius(newName);
+                    watchingPayload.dName = newName;
                     this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
                     this.$store.state.didIPublish = true;
                 }
@@ -383,7 +395,7 @@
                 this.snackbar = true;
 
                 setTimeout(() => {
-                    this.resetForm('delete');
+                    this.resetForm(status, oldName, newName);
                 }, 100);
             },
 
@@ -397,10 +409,15 @@
                 }
             },
 
-            resetForm(status) {
+            resetForm(status, oldName, newName) {
                 this.$emit('input', false);
 
-                EventBus.$emit('do-unsetSelectedTempMarker', status);
+                let payload = {};
+                payload.status = status;
+                payload.dNameOld = oldName;
+                payload.dNameNew = newName;
+
+                EventBus.$emit('do-unsetSelectedTempMarker', payload);
             },
 
             postCinTempMarkerInfoToMobius(dName) {
@@ -492,6 +509,8 @@
             },
 
             registerTempMarker(oldName, oldIndex, newName, newIndex) {
+                let status = 'cancel';
+
                 if(oldName !== newName) {
                     this.$store.state.tempMarkers[oldName][oldIndex].selected = false;
                     let targetTempMarker = this.$store.state.tempMarkers[oldName].splice(oldIndex, 1);
@@ -500,6 +519,12 @@
                     let temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[oldName]));
                     this.$store.state.tempMarkers[oldName] = null;
                     this.$store.state.tempMarkers[oldName] = JSON.parse(JSON.stringify(temp));
+
+                    temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[newName]));
+                    this.$store.state.tempMarkers[newName] = null;
+                    this.$store.state.tempMarkers[newName] = JSON.parse(JSON.stringify(temp));
+
+                    status = 'register-name';
 
                     this.postCinTempMarkerInfoToMobius(oldName);
 
@@ -525,6 +550,12 @@
                     this.$store.state.tempMarkers[oldName] = null;
                     this.$store.state.tempMarkers[oldName] = JSON.parse(JSON.stringify(temp));
 
+                    temp = JSON.parse(JSON.stringify(this.$store.state.tempMarkers[newName]));
+                    this.$store.state.tempMarkers[newName] = null;
+                    this.$store.state.tempMarkers[newName] = JSON.parse(JSON.stringify(temp));
+
+                    status = 'register-index';
+
                     this.postCinTempMarkerInfoToMobius(oldName);
 
                     this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
@@ -539,7 +570,7 @@
 
                 setTimeout(() => {
 
-                    this.resetForm('register');
+                    this.resetForm(status, oldName, newName);
                 }, 100);
             },
 
