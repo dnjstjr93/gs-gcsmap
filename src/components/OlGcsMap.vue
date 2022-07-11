@@ -137,45 +137,6 @@ export default {
     data: () => {
 
         return {
-            contextmenuItems: [
-                {
-                    text: 'Center map here',
-                    classname: 'bold',
-                    icon: centerIcon,
-                    callback: (obj) => {
-                        console.log('Center map here', obj);
-                    },
-                },
-                {
-                    text: 'Some Actions',
-                    icon: listIcon,
-                    items: [
-                        {
-                            text: 'Center map here',
-                            icon: centerIcon,
-                            callback: (obj) => {
-                                console.log('Center map here', obj);
-                            },
-                        },
-                        {
-                            text: 'Add a Marker',
-                            icon: pinIcon,
-                            callback: (obj) => {
-                                console.log('Add a Marker', obj);
-                            },
-                        }
-                    ]
-                },
-                {
-                    text: 'Add a Marker',
-                    icon: pinIcon,
-                    callback: (obj) => {
-                        console.log('Add a Marker', obj);
-                    },
-                },
-                '-' // this is a separator
-            ],
-
             curInfoTempMarkerFlag: false,
 
             datum: {targeted: false, lat:0.0, lng:0.0},
@@ -280,6 +241,49 @@ export default {
 
     methods: {
 
+        deleteOlTempMarker(obj) {
+            console.log(obj.data.marker.getId());
+        },
+
+        addOlTempMarker(obj) {
+            let latLng = toLonLat(obj.coordinate);
+
+            let eLngLats = [];
+            eLngLats.push(JSON.parse(JSON.stringify(latLng)));
+
+            this.getElevationProfile(eLngLats, (status, result) => {
+                if (status === 200) {
+                    let elevation_val = result.elevationProfile[0].height;
+
+                    console.log(elevation_val);
+
+                    let marker = {};
+                    marker.lat = latLng[1];
+                    marker.lng = latLng[0];
+                    marker.alt = 20;
+                    marker.speed = 5;
+                    marker.radius = 50;
+                    marker.turningSpeed = 10;
+                    marker.targetMavCmd = 16;
+                    marker.targetStayTime = 1;
+                    marker.elevation = elevation_val;
+                    marker.type = 'Goto';
+                    marker.selected = false;
+                    marker.targeted = false;
+                    marker.color = '#9E9E9E';
+
+                    this.$store.state.tempMarkers['unknown'].push(marker);
+
+                    this.initOlTempMarker('unknown');
+
+                    this.updateSource();
+
+                    this.postCinTempMarkerInfoToMobius('unknown');
+
+                    this.doBroadcastConfirmAddTempMarker(JSON.parse(JSON.stringify(marker)));
+                }
+            });
+        },
 
         writeIdxedDB(names) {
             const request = window.indexedDB.open('SampleDB');
@@ -995,9 +999,6 @@ export default {
             });
         },
 
-
-
-
         shade(inputs, data) {
             var elevationImage = inputs[0]; // 첫번째(0) 데이터소스로 elevation 객체
             var width = elevationImage.width;
@@ -1184,45 +1185,64 @@ export default {
         this.olMap.addControl(ctrl);
         this.olMap.addControl(new ScaleLine());
 
-        function center(obj) {
-            console.log(obj)
-        }
 
-        function removeMarker(obj) {
-            console.log(obj)
-        }
+        const contextmenuItems = [
+            {
+                text: 'Center map here',
+                classname: 'bold',
+                icon: centerIcon,
+                callback: (obj) => {
+                    console.log('Center map here', obj);
+                },
+            },
+            {
+                text: 'Some Actions',
+                icon: listIcon,
+                items: [
+                    {
+                        text: 'Center map here',
+                        icon: centerIcon,
+                        callback: (obj) => {
+                            console.log('Center map here', obj);
+                        },
+                    },
+                    {
+                        text: 'Add a Marker',
+                        icon: pinIcon,
+                        callback: (obj) => {
+                            console.log('Add a Marker', obj);
 
-        function marker(obj) {
-            console.log(obj)
-        }
+                            this.addOlTempMarker(obj);
+                        },
+                    }
+                ]
+            },
+            {
+                text: 'Add a Marker',
+                icon: pinIcon,
+                callback: (obj) => {
+                    console.log('Add a Marker', obj);
+
+                    this.addOlTempMarker(obj);
+                },
+            },
+            '-' // this is a separator
+        ];
 
         var contextmenu = new ContextMenu({
-            width: 170,
-            defaultItems: true, // defaultItems are (for now) Zoom In/Zoom Out
-            items: [
-                {
-                    text: 'Center map here',
-                    classname: 'some-style-class', // add some CSS rules
-                    callback: center // `center` is your callback function
-                },
-                {
-                    text: 'Add a Marker',
-                    classname: 'some-style-class', // you can add this icon with a CSS class
-                                                   // instead of `icon` property (see next line)
-                    icon: 'img/marker.png',  // this can be relative or absolute
-                    callback: marker
-                },
-                '-' // this is a separator
-            ]
+            width: 180,
+            items: contextmenuItems
         });
         this.olMap.addControl(contextmenu);
-
-        contextmenu.clear();
 
         var removeMarkerItem = {
             text: 'Remove this Marker',
             classname: 'marker',
-            callback: removeMarker
+            callback: (obj) => {
+                console.log('Remove this Marker', obj);
+
+                this.deleteOlTempMarker(obj);
+            },
         };
 
         contextmenu.on('open', (evt) => {
@@ -1230,14 +1250,14 @@ export default {
 
             var feature = this.olMap.forEachFeatureAtPixel(evt.pixel, ft => ft);
 
-            if (feature && feature.get('type') === 'removable') {
+            if (feature && feature.get('type') === 'tempMarker') {
                 contextmenu.clear();
                 removeMarkerItem.data = { marker: feature };
                 contextmenu.push(removeMarkerItem);
             }
             else {
                 contextmenu.clear();
-                contextmenu.extend(this.contextmenuItems);
+                contextmenu.extend(contextmenuItems);
                 contextmenu.extend(contextmenu.getDefaultItems());
             }
         });
