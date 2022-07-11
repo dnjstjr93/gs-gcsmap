@@ -20,7 +20,8 @@ import Stamen from 'ol/source/Stamen'
 import ScaleLine from 'ol/control/ScaleLine'
 import Zoom from 'ol/control/Zoom'
 
-//
+import ContextMenu from 'ol-contextmenu'
+
 // import ImageLayer from 'ol/layer/Image'
 // import Raster from 'ol/source/Raster'
 
@@ -121,6 +122,10 @@ const colorMapAlt = {
     300:  '#880E4F',
 };
 
+var pinIcon = 'https://cdn.jsdelivr.net/gh/jonataswalker/ol-contextmenu@604befc46d737d814505b5d90fc171932f747043/examples/img/pin_drop.png';
+var centerIcon = 'https://cdn.jsdelivr.net/gh/jonataswalker/ol-contextmenu@604befc46d737d814505b5d90fc171932f747043/examples/img/center.png';
+var listIcon = 'https://cdn.jsdelivr.net/gh/jonataswalker/ol-contextmenu@604befc46d737d814505b5d90fc171932f747043/examples/img/view_list.png';
+
 export default {
     name: 'MapContainer',
     components: {
@@ -132,7 +137,44 @@ export default {
     data: () => {
 
         return {
-            
+            contextmenuItems: [
+                {
+                    text: 'Center map here',
+                    classname: 'bold',
+                    icon: centerIcon,
+                    callback: (obj) => {
+                        console.log('Center map here', obj);
+                    },
+                },
+                {
+                    text: 'Some Actions',
+                    icon: listIcon,
+                    items: [
+                        {
+                            text: 'Center map here',
+                            icon: centerIcon,
+                            callback: (obj) => {
+                                console.log('Center map here', obj);
+                            },
+                        },
+                        {
+                            text: 'Add a Marker',
+                            icon: pinIcon,
+                            callback: (obj) => {
+                                console.log('Add a Marker', obj);
+                            },
+                        }
+                    ]
+                },
+                {
+                    text: 'Add a Marker',
+                    icon: pinIcon,
+                    callback: (obj) => {
+                        console.log('Add a Marker', obj);
+                    },
+                },
+                '-' // this is a separator
+            ],
 
             curInfoTempMarkerFlag: false,
 
@@ -237,6 +279,8 @@ export default {
     },
 
     methods: {
+
+
         writeIdxedDB(names) {
             const request = window.indexedDB.open('SampleDB');
             request.onerror = (e) => {
@@ -1140,11 +1184,62 @@ export default {
         this.olMap.addControl(ctrl);
         this.olMap.addControl(new ScaleLine());
 
-        this.olMap.getViewport().addEventListener('contextmenu', (e) => {
+        function center(obj) {
+            console.log(obj)
+        }
 
-            e.preventDefault();
+        function removeMarker(obj) {
+            console.log(obj)
+        }
 
-            console.log('contextmenu', e);
+        function marker(obj) {
+            console.log(obj)
+        }
+
+        var contextmenu = new ContextMenu({
+            width: 170,
+            defaultItems: true, // defaultItems are (for now) Zoom In/Zoom Out
+            items: [
+                {
+                    text: 'Center map here',
+                    classname: 'some-style-class', // add some CSS rules
+                    callback: center // `center` is your callback function
+                },
+                {
+                    text: 'Add a Marker',
+                    classname: 'some-style-class', // you can add this icon with a CSS class
+                                                   // instead of `icon` property (see next line)
+                    icon: 'img/marker.png',  // this can be relative or absolute
+                    callback: marker
+                },
+                '-' // this is a separator
+            ]
+        });
+        this.olMap.addControl(contextmenu);
+
+        contextmenu.clear();
+
+        var removeMarkerItem = {
+            text: 'Remove this Marker',
+            classname: 'marker',
+            callback: removeMarker
+        };
+
+        contextmenu.on('open', (evt) => {
+            console.log('open', evt);
+
+            var feature = this.olMap.forEachFeatureAtPixel(evt.pixel, ft => ft);
+
+            if (feature && feature.get('type') === 'removable') {
+                contextmenu.clear();
+                removeMarkerItem.data = { marker: feature };
+                contextmenu.push(removeMarkerItem);
+            }
+            else {
+                contextmenu.clear();
+                contextmenu.extend(this.contextmenuItems);
+                contextmenu.extend(contextmenu.getDefaultItems());
+            }
         });
 
         //this.updateSource(this.geojson);
@@ -1692,6 +1787,9 @@ export default {
 </script>
 
 <style lang="scss">
+
+@import "../../node_modules/ol-contextmenu/dist/ol-contextmenu.min.css";
+
 .info_markers {
     position: absolute;
     left: 0;
@@ -1757,21 +1855,5 @@ export default {
     }
 }
 
-.contextMenu {
-    cursor: pointer;
-    background-color: #eee;
-    position: absolute;
-    border: solid 1px black;
-    width: 150px;
-}
-.contextMenu .menuItem {
-    padding: 5px;
-}
-.contextMenu .menuItem:hover {
-    background-color: #ccc;
-}
 
-.menuSeparator {
-    border-bottom: solid 1px black;
-}
 </style>
