@@ -652,6 +652,10 @@
                 setTimeout(this.onResize, 500);
             });
 
+            EventBus.$on('do-subscribe', (topic) => {
+                this.doSubscribe(topic)
+            });
+
             EventBus.$on('ws-connect', () => {
                 this.ws = new WebSocket(this.wsUrl);
 
@@ -735,6 +739,7 @@
             EventBus.$off('confirm_selected');
             EventBus.$off('ws-send-message');
             EventBus.$off('do-calcDistance');
+            EventBus.$off('do-subscribe');
         }
     }
 </script>

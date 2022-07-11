@@ -132,6 +132,8 @@ export default {
     data: () => {
 
         return {
+            
+
             curInfoTempMarkerFlag: false,
 
             datum: {targeted: false, lat:0.0, lng:0.0},
@@ -949,6 +951,9 @@ export default {
             });
         },
 
+
+
+
         shade(inputs, data) {
             var elevationImage = inputs[0]; // 첫번째(0) 데이터소스로 elevation 객체
             var width = elevationImage.width;
@@ -1134,6 +1139,13 @@ export default {
         var ctrl = new Zoom({ });
         this.olMap.addControl(ctrl);
         this.olMap.addControl(new ScaleLine());
+
+        this.olMap.getViewport().addEventListener('contextmenu', (e) => {
+
+            e.preventDefault();
+
+            console.log('contextmenu', e);
+        });
 
         //this.updateSource(this.geojson);
 
@@ -1743,5 +1755,23 @@ export default {
     .ol-rotate {
         visibility: hidden;
     }
+}
+
+.contextMenu {
+    cursor: pointer;
+    background-color: #eee;
+    position: absolute;
+    border: solid 1px black;
+    width: 150px;
+}
+.contextMenu .menuItem {
+    padding: 5px;
+}
+.contextMenu .menuItem:hover {
+    background-color: #ccc;
+}
+
+.menuSeparator {
+    border-bottom: solid 1px black;
 }
 </style>

@@ -5484,7 +5484,7 @@ export default {
             );
         },
 
-        getDroneMissionInfo() {
+        getDroneMissionInfo(callback) {
 
             axios({
                 method: 'get',
@@ -5512,6 +5512,8 @@ export default {
                                                 if (con['mission'][msw_name][container][idx] === 'LTE') {
                                                     this.missionLteUrl = '/Mobius/' + con.gcs + '/Mission_Data/' + this.name + '/' + msw_name + '/' + con['mission'][msw_name][container][idx];
                                                     console.log(this.missionLteUrl);
+
+                                                    callback(res.status);
                                                     break;
                                                 }
                                             }
@@ -5523,9 +5525,11 @@ export default {
                     }
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message)
-                });
+                    callback(err.message)
+                }
+            )
         },
 
         clone(obj) {
@@ -5595,23 +5599,25 @@ export default {
         },
 
         checkMissionLteUrl() {
-            this.getDroneMissionInfo();
+            this.getDroneMissionInfo(() => {
+                if(this.missionLteUrl !== '') {
+                    this.createSubscription(this.curSortieName, (res) => {
+                        console.log('createSubscription', res);
 
-            if(this.missionLteUrl !== '') {
-                this.createSubscription(this.curSortieName, (res) => {
-                    console.log('createSubscription', res);
+                        if (res.status === 201 || res.status === 409) {
 
-                    if (res.status === 201 || res.status === 409) {
+                            // this.doSubscribe(this.missionTopic);
+                            //
+                            // this.droneSubscribeSuccess[this.missionTopic] = true;
+                            // console.log('Subscribe mission topic to ', this.missionTopic);
 
-                        this.doSubscribe(this.missionTopic);
+                            EventBus.$emit('do-subscribe', this.missionTopic);
 
-                        this.droneSubscribeSuccess[this.missionTopic] = true;
-                        console.log('Subscribe mission topic to ', this.missionTopic);
-
-                        this.missionLteUrlFlag = true;
-                    }
-                });
-            }
+                            this.missionLteUrlFlag = true;
+                        }
+                    });
+                }
+            });
         },
 
         clearTrackingLines() {
@@ -7001,23 +7007,7 @@ export default {
 
         console.log('Interval getDroneMissionInfo');
 
-        this.getDroneMissionInfo();
-
-        if(this.missionLteUrl !== '') {
-            this.createSubscription(this.curSortieName, (res) => {
-                console.log('createSubscription', res);
-
-                if (res.status === 201 || res.status === 409) {
-
-                    this.doSubscribe(this.missionTopic);
-
-                    this.droneSubscribeSuccess[this.missionTopic] = true;
-                    console.log('Subscribe mission topic to ', this.missionTopic);
-
-                    this.missionLteUrlFlag = true;
-                }
-            });
-        }
+        this.checkMissionLteUrl();
 
         console.log('DroneInfo-mounted', this.lat, this.lng);
 
