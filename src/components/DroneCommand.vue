@@ -554,7 +554,7 @@
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
-                                                            <v-col cols="2">
+                                                            <v-col cols="2" v-if="Object.prototype.hasOwnProperty.call($store.state.tempMarkers, d.name)">
                                                                 <v-select
                                                                     dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
                                                                     label="Start Index" v-model="d.autoStartIndex"
@@ -562,7 +562,7 @@
                                                                     hide-details
                                                                 ></v-select>
                                                             </v-col>
-                                                            <v-col cols="2">
+                                                            <v-col cols="2" v-if="Object.prototype.hasOwnProperty.call($store.state.tempMarkers, d.name)">
                                                                 <v-select
                                                                     dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
                                                                     label="End Index" v-model="d.autoEndIndex"

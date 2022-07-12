@@ -431,12 +431,14 @@
                 if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected) {
                         if (localStorage.getItem(this.$store.state.drone_infos[dName].name + '_sortie_name')) {
-                            this.$store.state.drone_infos[dName].sortie_name = localStorage.getItem(this.name + '_sortie_name');
+                            this.$store.state.drone_infos[dName].sortie_name = localStorage.getItem(this.$store.state.drone_infos[dName].name + '_sortie_name');
                         }
                         else {
-                            //this.$store.state.drone_infos[dName].sortie_name = 'disarm';
+                            this.$store.state.drone_infos[dName].sortie_name = 'disarm';
                             localStorage.setItem(this.$store.state.drone_infos[dName].name + '_sortie_name', this.$store.state.drone_infos[dName].sortie_name);
                         }
+
+                        console.log(this.$store.state.drone_infos[dName].name + '_sortie_name', this.$store.state.drone_infos[dName].sortie_name)
                     }
                 }
             }
@@ -566,6 +568,8 @@
 
             EventBus.$on('gcs-map-ready', () => {
 
+                console.log('uuuuuuuuuuuuuuuuuuu     DroneInfoList gcs-map-ready')
+
                 this.$store.state.commands = [];
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
@@ -585,15 +589,15 @@
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
 
-                this.drones_selected = null;
-                this.drones_selected = [];
-                for(let name in this.$store.state.drone_infos) {
-                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                        if(this.$store.state.drone_infos[name].selected) {
-                            this.drones_selected.push(this.$store.state.drone_infos[name]);
-                        }
-                    }
-                }
+                // this.drones_selected = null;
+                // this.drones_selected = [];
+                // for(let name in this.$store.state.drone_infos) {
+                //     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                //         if(this.$store.state.drone_infos[name].selected) {
+                //             this.drones_selected.push(this.$store.state.drone_infos[name]);
+                //         }
+                //     }
+                // }
 
                 if (localStorage.getItem('mqttConnection-DroneInfoList')) {
                     if (JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList')).connected) {

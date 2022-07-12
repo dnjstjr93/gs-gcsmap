@@ -479,7 +479,7 @@
                             <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0"
                                     :class="colorArming"
                                     @click="currentPosition">
-                                <DroneInfoBox v-show="false"
+                                <DroneInfoBox v-if="false"
                                     :name="name"
                                     :heading="heading"
                                     :heading_size="heading_size"
@@ -1876,7 +1876,7 @@ export default {
                     console.log('DroneInfo.vue', 'postMarkerInfos');
                 });
 
-                EventBus.$emit('gcs-map-ready');
+                //EventBus.$emit('gcs-map-ready');
             }
             catch (e) {
                 console.log('updateMyDroneInfo-JSON parsing error', e.message);
@@ -2461,7 +2461,7 @@ export default {
                 if(this.curSortieName !== curSortieName) {
                     this.curSortieName = curSortieName;
                     this.$store.state.drone_infos[this.name].sortie_name = curSortieName;
-                    localStorage.setItem(this.name+'_sortie_name', this.curSortieName);
+                    localStorage.setItem(this.name+'_sortie_name', curSortieName);
 
                     this.postDroneInfos((res) => {
                         console.log('postDroneInfos -> disarm', res);
@@ -7036,10 +7036,14 @@ export default {
             this.$store.state.trackingLines[this.name] = [];
         }
 
+        this.curSortieName = this.sortie_name;
+
+        console.log('curSortieName', this.curSortieName, 'sortie_name', this.sortie_name);
+
         if (this.curSortieName !== 'disarm') {
             var now = moment.utc();
             this.startFlightTime = moment(this.curSortieName.replace(/_/g, ''));
-            console.log('curSortieName', this.startFlightTime);
+            console.log('startFlightTime', this.startFlightTime);
 
             //let diff = (now.seconds() - this.startFlightTime.seconds());
             let diff = now.subtract(this.startFlightTime);

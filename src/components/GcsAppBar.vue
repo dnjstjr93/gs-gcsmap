@@ -10,15 +10,15 @@
 
             <v-spacer></v-spacer>
 
-            <v-btn text @click.stop="mapDownload" :disabled="!MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text @click.stop="mapDownload" :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
                 <v-icon>mdi-monitor-arrow-down-variant</v-icon>
             </v-btn>
 
-            <v-btn text @click.stop="mapAngleDialog=true" :disabled="!MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text @click.stop="mapAngleDialog=true" :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
                 <v-icon>mdi-format-rotate-90</v-icon>
             </v-btn>
 
-            <v-btn text @click.stop="setGCSHomePosition" :disabled="!MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text @click.stop="setGCSHomePosition" :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
                 <v-icon>mdi-crosshairs-gps</v-icon>
             </v-btn>
 
@@ -32,7 +32,7 @@
             <!--            <v-icon>mdi-video</v-icon>-->
             <!--        </v-btn>-->
 
-            <v-btn text @click.stop="openCam2" :disabled="!MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text @click.stop="openCam2" :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
                 <v-icon>mdi-video</v-icon>
             </v-btn>
 
@@ -45,7 +45,7 @@
             <!--            </v-btn>-->
             <!--        </router-link>-->
 
-            <v-btn text :disabled="!MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
                 <v-icon>mdi-account</v-icon>
             </v-btn>
 
@@ -139,7 +139,7 @@
                                         placeholder="203.253.128.177"
                                         label="HOST*"
                                         required
-                                        :disabled="MOBIUS_CONNECTION_CONNECTED"
+                                        :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="3">
@@ -151,7 +151,7 @@
                                         placeholder="KETI_GCS"
                                         label="GCS*"
                                         required
-                                        :disabled="MOBIUS_CONNECTION_CONNECTED"
+                                        :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="4">
@@ -160,7 +160,7 @@
                                         tile @click="GcsAppBarCreated"
                                         elevation="5"
                                         color="primary"
-                                        :disabled="MOBIUS_CONNECTION_CONNECTED"
+                                        :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"
                                     > {{ MOBIUS_CONNECTION_TEXT }}
                                     </v-btn>
                                     <!--            </v-col>-->
@@ -170,7 +170,7 @@
                                         tile text outlined @click="GcsAppBarReseted"
                                         elevation="1"
                                         dark
-                                        :disabled="!MOBIUS_CONNECTION_CONNECTED"
+                                        :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED"
                                     > {{ MOBIUS_DISCONNECTION_TEXT }}
                                     </v-btn>
                                 </v-col>
@@ -193,7 +193,7 @@
                             <!--                                    placeholder="203.253.128.177"-->
                             <!--                                    label="HOST*"-->
                             <!--                                    required-->
-                            <!--                                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
+                            <!--                                    :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"-->
                             <!--                            ></v-text-field>-->
                             <!--                        </v-col>-->
                             <!--                        <v-col cols="3">-->
@@ -205,7 +205,7 @@
                             <!--                                    placeholder="KETI_GCS"-->
                             <!--                                    label="GCS*"-->
                             <!--                                    required-->
-                            <!--                                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
+                            <!--                                    :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"-->
                             <!--                            ></v-text-field>-->
                             <!--                        </v-col>-->
                             <!--                        <v-col cols="2">-->
@@ -214,7 +214,7 @@
                             <!--                                    tile @click="GcsAppBarCreated"-->
                             <!--                                    elevation="5"-->
                             <!--                                    color="primary"-->
-                            <!--                                    :disabled="MOBIUS_CONNECTION_CONNECTED"-->
+                            <!--                                    :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"-->
                             <!--                            > {{ MOBIUS_CONNECTION_TEXT }}-->
                             <!--                            </v-btn>-->
                             <!--                        </v-col>-->
@@ -224,7 +224,7 @@
                             <!--                                    tile @click="GcsAppBarReseted"-->
                             <!--                                    elevation="2"-->
                             <!--                                    color="primary"-->
-                            <!--                                    :disabled="!MOBIUS_CONNECTION_CONNECTED"-->
+                            <!--                                    :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED"-->
                             <!--                            > {{ MOBIUS_DISCONNECTION_TEXT }}-->
                             <!--                            </v-btn>-->
                             <!--                        </v-col>-->
@@ -500,14 +500,12 @@ export default {
 
     data: function () {
         return {
-            drone_infos: {},
             mapAngleDialog: false,
             mapAngle: 0,
             open: false,
             MOBIUS_DISCONNECTION_TEXT: 'Disconnect',
             MOBIUS_CONNECTION_TEXT: 'Connect',
-            //MOBIUS_CONNECTION_CONNECTED: this.$cookies.isKey('mobius_connected')?(this.$cookies.get('mobius_connected') === 'true'):false,
-            MOBIUS_CONNECTION_CONNECTED: localStorage.getItem('mobius_connected') ? (localStorage.getItem('mobius_connected') === 'true') : false,
+            //MOBIUS_CONNECTION_CONNECTED: this.$cookies.isKey('MOBIUS_CONNECTION_CONNECTED')?(this.$cookies.get('mobius_connected') === 'true'):false,
             MOBIUS_CONNECTION_DISABLED: false,
             update_idx: 0,
             formHasErrors: false,
@@ -818,11 +816,11 @@ export default {
                     }
                 }
             }).then(
-                function (res) {
+                (res) => {
                     callback(res.status, '');
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
                 }
             );
@@ -880,7 +878,7 @@ export default {
                     'Content-Type': 'application/json'
                 }
             }).then(
-                function (res) {
+                (res) => {
                     console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', res)
                     if (res.status === 200) {
                         callback(res.status, res.data['m2m:cin'].con);
@@ -890,7 +888,7 @@ export default {
                     }
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
                 }
             );
@@ -910,7 +908,7 @@ export default {
                     'Content-Type': 'application/json'
                 }
             }).then(
-                function (res) {
+                (res) => {
                     if (res.status === 200) {
                         callback(res.status, res.data['m2m:uril']);
                     }
@@ -919,7 +917,7 @@ export default {
                     }
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
                 }
             );
@@ -944,11 +942,11 @@ export default {
                     }
                 }
             }).then(
-                function (res) {
+                (res) => {
                     callback(res.status, '');
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
                 }
             );
@@ -961,185 +959,163 @@ export default {
                     if (status === 200) {
                         console.log(count, dName, con);
 
-                        this.drone_infos[dName] = JSON.parse(JSON.stringify(con));
-
-                        if (localStorage.getItem(dName + '_selected')) {
-                            this.drone_infos[dName].selected = (localStorage.getItem(dName + '_selected') === 'true');
-                        }
-                        else {
-                            localStorage.setItem(dName + '_selected', String(this.drone_infos[dName].selected));
-                        }
-
                         if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.drone_infos[dName]);
+                            this.drone_infos_list.push(JSON.parse(JSON.stringify(con)));
                         }
 
-                        if (this.drone_infos[dName].selected) {
-                            this.selected.push(this.drone_infos[dName]);
-                        }
+                        if(con.selected) {
+                            this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(con));
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targeted')) {
-                            this.drone_infos[dName].targeted = false;
-                        }
+                            this.selected.push(this.$store.state.drone_infos[dName]);
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'home_position')) {
-                            this.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
+                                this.$store.state.drone_infos[dName].targeted = false;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'color')) {
-                            this.drone_infos[dName].color = '#9E9E9E';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'home_position')) {
+                                this.$store.state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
+                            }
 
-                        if(this.drone_infos[dName].color === 'grey') {
-                            this.drone_infos[dName].color = '#9E9E9E';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'color')) {
+                                this.$store.state.drone_infos[dName].color = '#9E9E9E';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'gotoType')) {
-                            this.drone_infos[dName].gotoType = '바로이동';
-                        }
+                            if(this.$store.state.drone_infos[dName].color === 'grey') {
+                                this.$store.state.drone_infos[dName].color = '#9E9E9E';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetModeSelection')) {
-                            this.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'gotoType')) {
+                                this.$store.state.drone_infos[dName].gotoType = '바로이동';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetSpeed')) {
-                            this.drone_infos[dName].targetSpeed = 5;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetModeSelection')) {
+                                this.$store.state.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'alt')) {
-                            this.drone_infos[dName].alt = 0;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetSpeed')) {
+                                this.$store.state.drone_infos[dName].targetSpeed = 5;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetTurningSpeed')) {
-                            this.drone_infos[dName].targetTurningSpeed = 5;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'alt')) {
+                                this.$store.state.drone_infos[dName].alt = 0;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetRadius')) {
-                            this.drone_infos[dName].targetRadius = 50;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTurningSpeed')) {
+                                this.$store.state.drone_infos[dName].targetTurningSpeed = 5;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetTakeoffAlt')) {
-                            this.drone_infos[dName].targetTakeoffAlt = 20;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetRadius')) {
+                                this.$store.state.drone_infos[dName].targetRadius = 50;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'circleType')) {
-                            this.drone_infos[dName].circleType = '시계방향';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTakeoffAlt')) {
+                                this.$store.state.drone_infos[dName].targetTakeoffAlt = 20;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetAlt')) {
-                            this.drone_infos[dName].targetAlt = 20;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'circleType')) {
+                                this.$store.state.drone_infos[dName].circleType = '시계방향';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'sortie_name')) {
-                            this.drone_infos[dName].sortie_name = 'disarm';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetAlt')) {
+                                this.$store.state.drone_infos[dName].targetAlt = 20;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'lastFlightTime')) {
-                            this.drone_infos[dName].lastFlightTime = 0;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'sortie_name')) {
+                                this.$store.state.drone_infos[dName].sortie_name = 'disarm';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'autoStartIndex')) {
-                            this.drone_infos[dName].autoStartIndex = '0';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'lastFlightTime')) {
+                                this.$store.state.drone_infos[dName].lastFlightTime = 0;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'autoEndIndex')) {
-                            this.drone_infos[dName].autoEndIndex = '0';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoStartIndex')) {
+                                this.$store.state.drone_infos[dName].autoStartIndex = '0';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'autoDelay')) {
-                            this.drone_infos[dName].autoDelay = 1;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoEndIndex')) {
+                                this.$store.state.drone_infos[dName].autoEndIndex = '0';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'autoSpeed')) {
-                            this.drone_infos[dName].autoSpeed = 5;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoDelay')) {
+                                this.$store.state.drone_infos[dName].autoDelay = 1;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'curArmStatus')) {
-                            this.drone_infos[dName].curArmStatus = 'DISARMED';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoSpeed')) {
+                                this.$store.state.drone_infos[dName].autoSpeed = 5;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'takeoffAbsoluteAlt')) {
-                            this.drone_infos[dName].takeoffAbsoluteAlt = 0;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curArmStatus')) {
+                                this.$store.state.drone_infos[dName].curArmStatus = 'DISARMED';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targeted')) {
-                            this.drone_infos[dName].targeted = false;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffAbsoluteAlt')) {
+                                this.$store.state.drone_infos[dName].takeoffAbsoluteAlt = 0;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'headingLine')) {
-                            this.drone_infos[dName].headingLine = [];
-                            this.drone_infos[dName].headingLine.push({lat: 0, lng: 0});
-                            this.drone_infos[dName].headingLine.push({lat: 0, lng: 0});
-                        }
+                            this.$store.state.drone_infos[dName].targeted = false;
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'directionLine')) {
-                            this.drone_infos[dName].directionLine = [];
-                            this.drone_infos[dName].directionLine.push({lat: 0, lng: 0});
-                            this.drone_infos[dName].directionLine.push({lat: 0, lng: 0});
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'headingLine')) {
+                                this.$store.state.drone_infos[dName].headingLine = [];
+                                this.$store.state.drone_infos[dName].headingLine.push({lat: 37.4032072, lng: 127.1595933});
+                                this.$store.state.drone_infos[dName].headingLine.push({lat: 37.4032072, lng: 127.1595933});
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'client')) {
-                            this.drone_infos[dName].client = {
-                                connected: false,
-                                loading: false
-                            };
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'directionLine')) {
+                                this.$store.state.drone_infos[dName].directionLine = [];
+                                this.$store.state.drone_infos[dName].directionLine.push({lat: 37.4032072, lng: 127.1595933});
+                                this.$store.state.drone_infos[dName].directionLine.push({lat: 37.4032072, lng: 127.1595933});
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'pausePosition')) {
-                            this.drone_infos[dName].pausePosition = {
-                                lat: 0,
-                                lng: 0,
-                                alt: 0,
-                                heading: 0
-                            };
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'client')) {
+                                this.$store.state.drone_infos[dName].client = {
+                                    connected: false,
+                                    loading: false
+                                };
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'targetStayTime')) {
-                            this.drone_infos[dName].targetStayTime = 0;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'pausePosition')) {
+                                this.$store.state.drone_infos[dName].pausePosition = {
+                                    lat: 0,
+                                    lng: 0,
+                                    alt: 0,
+                                    heading: 0
+                                };
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'yawBehavior')) {
-                            this.drone_infos[dName].yawBehavior = 'YAW고정';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetStayTime')) {
+                                this.$store.state.drone_infos[dName].targetStayTime = 0;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'flyShape')) {
-                            this.drone_infos[dName].flyShape = '직선비행';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'yawBehavior')) {
+                                this.$store.state.drone_infos[dName].yawBehavior = 'YAW고정';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'startWay')) {
-                            this.drone_infos[dName].startWay = '처음부터';
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'flyShape')) {
+                                this.$store.state.drone_infos[dName].flyShape = '직선비행';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'curMissionItemReached')) {
-                            this.drone_infos[dName].curMissionItemReached = 0;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'startWay')) {
+                                this.$store.state.drone_infos[dName].startWay = '처음부터';
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'curTargetedTempMarkerIndex')) {
-                            this.drone_infos[dName].curTargetedTempMarkerIndex = -1;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curMissionItemReached')) {
+                                this.$store.state.drone_infos[dName].curMissionItemReached = 0;
+                            }
 
-                        this.drone_infos[dName].curTargetedTempMarkerIndex = -1;
+                            this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
+                            this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'curTargetedSurveyMarkerIndex')) {
-                            this.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'absolute_alt')) {
+                                this.$store.state.drone_infos[dName].absolute_alt = 0;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'absolute_alt')) {
-                            this.drone_infos[dName].absolute_alt = 0;
-                        }
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'rtlSpeed')) {
+                                this.$store.state.drone_infos[dName].rtlSpeed = 5;
+                            }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'rtlSpeed')) {
-                            this.drone_infos[dName].rtlSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.drone_infos[dName], 'takeoffDelay')) {
-                            this.drone_infos[dName].takeoffDelay = 6;
-                        }
-
-                        this.drone_infos[dName].targeted = false;
-
-                        if(dName === 'unknown' || this.drone_infos[dName].selected) {
-                            this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(this.drone_infos[dName]));
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffDelay')) {
+                                this.$store.state.drone_infos[dName].takeoffDelay = 6;
+                            }
                         }
 
                         this.initDroneInfos(drones, ++count, () => {
@@ -1199,17 +1175,17 @@ export default {
                             }
                         }
                     }).then(
-                        function (res) {
+                        (res) => {
                             callback(res.status, '');
                         }
                     ).catch(
-                        function (err) {
+                        (err) => {
                             console.log(err.message);
                         }
                     );
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
                 }
             );
@@ -1303,7 +1279,7 @@ export default {
                     'Content-Type': 'application/json'
                 }
             }).then(
-                function (res) {
+                (res) => {
                     if (res.status === 200) {
                         callback(res.status, res.data['m2m:uril']);
                     }
@@ -1312,7 +1288,7 @@ export default {
                     }
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
                 }
             );
@@ -1332,7 +1308,7 @@ export default {
                     'Content-Type': 'application/json'
                 }
             }).then(
-                function (res) {
+                (res) => {
                     if (res.status === 200) {
                         callback(res.status, res.data['m2m:uril']);
                     }
@@ -1341,7 +1317,7 @@ export default {
                     }
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
                 }
             );
@@ -1366,14 +1342,14 @@ export default {
                     }
                 }
             }).then(
-                function (res) {
+                (res) => {
 
                     console.log('postMarkerInfos-axios', dName, res.data);
 
                     callback(res.status, '');
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
                 }
             );
@@ -1382,69 +1358,84 @@ export default {
         initTempMarkerInfos(markers, count, callback) {
             if (markers.length > count) {
                 let dName = markers[count].split('/')[3];
-                this.getEachMarkerInfoFromMobius(dName, (status, con) => {
-                    if (status === 200) {
-                        if (con === undefined) {
-                            con = [];
-                        }
 
-                        if (con.length === 0) {
-                            this.$store.state.tempMarkers[dName] = [];
-                        }
-                        else {
-                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(con));
-
-                            this.$store.state.tempMarkers[dName].forEach((marker) => {
-                                if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
-                                    marker.elevation = 0;
+                if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(this.$store.state.drone_infos[dName].selected) {
+                        this.getEachMarkerInfoFromMobius(dName, (status, con) => {
+                            if (status === 200) {
+                                if (con === undefined) {
+                                    con = [];
                                 }
 
-                                //console.log('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY', dName, marker, this.drone_infos[dName].color)
+                                if (con.length === 0) {
+                                    this.$store.state.tempMarkers[dName] = [];
+                                }
+                                else {
+                                    this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(con));
 
-                                // if (!Object.prototype.hasOwnProperty.call(marker, 'color')) {
-                                //     marker.color = '#9E9E9E';
-                                // }
-                                // else {
-                                //     if (dName === 'unknown') {
-                                //         if (marker.color === 'grey') {
-                                //             marker.color = '#9E9E9E';
-                                //         }
-                                //     }
-                                //     else {
-                                //         marker.color = this.drone_infos[dName].color;
-                                //     }
-                                // }
+                                    this.$store.state.tempMarkers[dName].forEach((marker) => {
+                                        if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
+                                            marker.elevation = 0;
+                                        }
 
-                                if (!Object.prototype.hasOwnProperty.call(marker, 'type')) {
-                                    marker.type = 'Goto';
+                                        //console.log('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY', dName, marker, this.$store.state.drone_infos[dName].color)
+
+                                        // if (!Object.prototype.hasOwnProperty.call(marker, 'color')) {
+                                        //     marker.color = '#9E9E9E';
+                                        // }
+                                        // else {
+                                        //     if (dName === 'unknown') {
+                                        //         if (marker.color === 'grey') {
+                                        //             marker.color = '#9E9E9E';
+                                        //         }
+                                        //     }
+                                        //     else {
+                                        //         marker.color = this.$store.state.drone_infos[dName].color;
+                                        //     }
+                                        // }
+
+                                        if (!Object.prototype.hasOwnProperty.call(marker, 'type')) {
+                                            marker.type = 'Goto';
+                                        }
+
+                                        if (!Object.prototype.hasOwnProperty.call(marker, 'mavCmd')) {
+                                            marker.targetMavCmd = 16;
+                                        }
+
+                                        if (!Object.prototype.hasOwnProperty.call(marker, 'targetStayTime')) {
+                                            marker.targetStayTime = 1;
+                                        }
+
+                                        marker.targeted = false;
+                                        marker.selected = false;
+                                    });
+
+                                    // let payload = {};
+                                    // payload.dName = dName;
+                                    // EventBus.$emit('draw-gotoLines', payload);
+
+                                    //EventBus.$emit('do-positions-elevation-' + dName);
                                 }
 
-                                if (!Object.prototype.hasOwnProperty.call(marker, 'mavCmd')) {
-                                    marker.targetMavCmd = 16;
-                                }
+                                console.log('getEachMarkerInfoFromMobius', count, '/', markers.length, dName, con, this.$store.state.tempMarkers[dName]);
+                            }
 
-                                if (!Object.prototype.hasOwnProperty.call(marker, 'targetStayTime')) {
-                                    marker.targetStayTime = 1;
-                                }
-
-                                marker.targeted = false;
-                                marker.selected = false;
+                            this.initTempMarkerInfos(markers, ++count, () => {
+                                callback();
                             });
-
-                            // let payload = {};
-                            // payload.dName = dName;
-                            // EventBus.$emit('draw-gotoLines', payload);
-
-                            //EventBus.$emit('do-positions-elevation-' + dName);
-                        }
-
-                        console.log('getEachMarkerInfoFromMobius', count, '/', markers.length, dName, con, this.$store.state.tempMarkers[dName]);
-
+                        });
+                    }
+                    else {
                         this.initTempMarkerInfos(markers, ++count, () => {
                             callback();
                         });
                     }
-                });
+                }
+                else {
+                    this.initTempMarkerInfos(markers, ++count, () => {
+                        callback();
+                    });
+                }
             }
             else {
                 callback();
@@ -1596,37 +1587,34 @@ export default {
         },
 
         readyDroneInfos() {
-            // Object.keys(this.drone_infos).forEach((dName) => {
-            //     if (dName === 'unknown' || this.drone_infos[dName].selected) {
-            //         this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(this.drone_infos[dName]));
-            //     }
-            // });
+            EventBus.$emit('gcs-map-ready');
 
-            EventBus.$emit('gcs-map-ready', {});
-
-            this.MOBIUS_CONNECTION_CONNECTED = true;
             this.$store.state.MOBIUS_CONNECTION_CONNECTED = true;
-            localStorage.setItem('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED.toString());
+            localStorage.setItem('MOBIUS_CONNECTION_CONNECTED', this.$store.state.MOBIUS_CONNECTION_CONNECTED.toString());
         },
 
-        prepareDroneInfos() {
+        prepareDroneInfos(callback) {
             let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos';
             this.postCntToMobius(url, 'unknown', () => {
                 this.getCntListDroneInfosFromMobius((status, drones) => {
                     console.log('------1---------------------------------GcsAppBarCreated-getCntListDroneInfosFromMobius', status, drones.length, drones);
                     if (status === 200) {
                         if (drones.length > 0) {
-                            this.drone_infos = {};
+                            this.$store.state.drone_infos = {};
                             this.initDroneInfos(drones, 0, (result) => {
                                 if (result === 0) {
-                                    console.log('initDroneInfos-success', result, this.drone_infos);
+                                    console.log('initDroneInfos-success', result, this.$store.state.drone_infos);
 
-                                    setTimeout(() => {
-                                        this.readyDroneInfos();
-                                    }, 250);
+                                    // setTimeout(() => {
+                                    //     this.readyDroneInfos();
+                                    // }, 250);
+
+                                    callback();
                                 }
                                 else {
-                                    console.log('initDroneInfos-error', result, this.drone_infos);
+                                    console.log('initDroneInfos-error', result, this.$store.state.drone_infos);
+
+                                    callback();
                                 }
                             });
                         }
@@ -1635,7 +1623,7 @@ export default {
             });
         },
 
-        prepareMarkerInfos() {
+        prepareMarkerInfos(callback) {
             let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos';
             this.postCntToMobius(url, 'unknown', () => {
                 this.getMarkerInfosFromMobius((status, markers) => {
@@ -1643,11 +1631,15 @@ export default {
                     if (status === 200) {
                         if (markers.length === 0) {
                             this.$store.state.tempMarkers = {};
+
+                            callback();
                         }
                         else {
                             this.$store.state.tempMarkers = {};
                             this.initTempMarkerInfos(markers, 0, () => {
                                 console.log('GcsAppBarCreated()-2', this.$store.state.tempMarkers);
+
+                                callback();
                             });
                         }
                     }
@@ -1655,7 +1647,7 @@ export default {
             });
         },
 
-        prepareSurveyMarkerInfos() {
+        prepareSurveyMarkerInfos(callback) {
             let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos';
             this.postCntToMobius(url, 'unknown', () => {
                 this.getSurveyMarkerInfosFromMobius((status, markers) => {
@@ -1663,12 +1655,16 @@ export default {
                     if (status === 200) {
                         if (markers.length === 0) {
                             this.$store.state.surveyMarkers = {};
+
+                            callback();
                         }
                         else {
                             this.$store.state.surveyMarkers = {};
                             setTimeout((markers, count) => {
                                 this.initSurveyMarkerInfos(markers, count, () => {
                                     console.log('GcsAppBarCreated()-2', 'initSurveyMarkerInfos', this.$store.state.surveyMarkers);
+
+                                    callback();
                                 });
                             }, 1, markers, 0);
                         }
@@ -1677,7 +1673,7 @@ export default {
             });
         },
 
-        prepareLossLteInfos() {
+        prepareLossLteInfos(callback) {
             this.getCinLossLTEInfosFromMobius((status, lossLTEs) => {
                 if (status === 200) {
                     if (lossLTEs === undefined) {
@@ -1688,6 +1684,7 @@ export default {
                     }
                     console.log('------1---------------------------------GcsAppBarCreated-getCinLossLTEInfosFromMobius', status, this.$store.state.loss_lte_infos);
                 }
+                callback();
             });
         },
 
@@ -1707,14 +1704,21 @@ export default {
             this.postAeToMobius(url, this.$store.state.VUE_APP_MOBIUS_GCS, () => {
                 let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
                 this.postCntToMobius(url, 'DroneInfos', () => {
-                    this.prepareDroneInfos();
-                    this.postCntToMobius(url, 'MarkerInfos', () => {
-                        this.prepareMarkerInfos();
-                        this.postCntToMobius(url, 'SurveyMarkerInfos', () => {
-                            this.prepareSurveyMarkerInfos();
-                            this.postCntToMobius(url, 'LossLteInfos', () => {
-                                this.prepareLossLteInfos();
-                                EventBus.$emit('ready-gcs_app_bar');
+                    this.prepareDroneInfos(() => {
+                        this.postCntToMobius(url, 'MarkerInfos', () => {
+                            this.prepareMarkerInfos(() => {
+                                this.postCntToMobius(url, 'SurveyMarkerInfos', () => {
+                                    this.prepareSurveyMarkerInfos(() => {
+                                        this.postCntToMobius(url, 'LossLteInfos', () => {
+                                            this.prepareLossLteInfos(() => {
+                                                EventBus.$emit('ready-gcs_app_bar');
+                                                setTimeout(() => {
+                                                    this.readyDroneInfos();
+                                                }, 500);
+                                            });
+                                        });
+                                    });
+                                });
                             });
                         });
                     });
@@ -1726,26 +1730,25 @@ export default {
             this.selected = [];
             this.drone_infos_list = [];
 
-            this.MOBIUS_CONNECTION_CONNECTED = false;
             this.$store.state.MOBIUS_CONNECTION_CONNECTED = false;
 
-            //this.$cookies.set('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED);
-            localStorage.setItem('mobius_connected', this.MOBIUS_CONNECTION_CONNECTED.toString());
+            //this.$cookies.set('MOBIUS_CONNECTION_CONNECTED', this.$store.state.MOBIUS_CONNECTION_CONNECTED);
+            localStorage.setItem('MOBIUS_CONNECTION_CONNECTED', this.$store.state.MOBIUS_CONNECTION_CONNECTED.toString());
 
             this.confirmSelected(true);
         },
 
         dialogProfile() {
-            this.selected = null;
-            this.selected = [];
-
-            for (let dName in this.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
-                    if (this.drone_infos[dName].selected) {
-                        this.selected.push(this.drone_infos[dName]);
-                    }
-                }
-            }
+            // this.selected = null;
+            // this.selected = [];
+            //
+            // for (let dName in this.drone_infos) {
+            //     if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
+            //         if (this.drone_infos[dName].selected) {
+            //             this.selected.push(this.drone_infos[dName]);
+            //         }
+            //     }
+            // }
 
             this.dialog = true;
         },
@@ -1784,13 +1787,13 @@ export default {
                     'Content-Type': 'application/json'
                 }
             }).then(
-                function (res) {
+                (res) => {
                     console.log('deleteCntDroneInfoToMobius-axios', dName, res.data);
 
                     callback(res);
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
 
                     callback(err)
@@ -1812,13 +1815,13 @@ export default {
                     'Content-Type': 'application/json'
                 }
             }).then(
-                function (res) {
+                (res) => {
                     console.log('deleteCntMarkerInfoToMobius-axios', dName, res.data);
 
                     callback(res);
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
 
                     callback(err)
@@ -1840,13 +1843,13 @@ export default {
                     'Content-Type': 'application/json'
                 }
             }).then(
-                function (res) {
+                (res) => {
                     console.log('deleteCntMarkerInfoToMobius-axios', dName, res.data);
 
                     callback(res);
                 }
             ).catch(
-                function (err) {
+                (err) => {
                     console.log(err.message);
 
                     callback(err)
@@ -1855,50 +1858,54 @@ export default {
         },
 
         confirmSelected(dialog) {
-            console.log('confirmSelected', this.selected);
+            console.log('vvvvvvvvvvvvvvvvvvvvvvvvvvv confirmSelected', this.selected);
 
-            if (Object.keys(this.drone_infos).length <= 1) {
-                this.dialog = false;
-                return;
-            }
+            // if (Object.keys(this.$store.state.drone_infos).length <= 1) {
+            //     this.dialog = false;
+            //     return;
+            // }
+            //
 
-            for (let dName in this.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
-                    this.drone_infos[dName].selected = false;
-                }
-            }
+            this.drone_infos_list.forEach((drone_info) => {
+                drone_info.selected = false;
+            });
 
+            this.$store.state.drone_infos = {};
             for (let idx in this.selected) {
                 if (Object.prototype.hasOwnProperty.call(this.selected, idx)) {
-                    this.drone_infos[this.selected[idx].name].selected = true;
+                    this.$store.state.drone_infos[this.selected[idx].name] = JSON.parse(JSON.stringify(this.selected[idx]));
+                    this.$store.state.drone_infos[this.selected[idx].name].selected = true;
+
+                    for(let sel_idx = 0; sel_idx < this.drone_infos_list.length; sel_idx++) {
+                        if(this.drone_infos_list[sel_idx].name === this.selected[idx].name) {
+                            this.drone_infos_list[sel_idx].selected = true;
+                        }
+                    }
                 }
             }
 
-            Object.keys(this.$store.state.drone_infos).forEach((dName) => {
-                this.$store.state.drone_infos[dName].selected = false;
-
-                let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
-                this.postCinToMobius(url, this.$store.state.drone_infos[dName], () => {
-
+            for(let sel_idx = 0; sel_idx < this.drone_infos_list.length; sel_idx++) {
+                let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + this.drone_infos_list[sel_idx].name;
+                this.postCinToMobius(url, this.drone_infos_list[sel_idx], () => {
                 });
-            });
+            }
 
-            this.$store.state.drone_infos = null;
-            this.$store.state.drone_infos = {};
-            Object.keys(this.drone_infos).forEach((dName) => {
-                if (dName !== 'unknown') {
-                    localStorage.setItem(dName + '_selected', String(this.drone_infos[dName].selected));
-                }
-
-                if(this.drone_infos[dName].selected) {
-                    this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(this.drone_infos[dName]));
-
-                    let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
-                    this.postCinToMobius(url, this.$store.state.drone_infos[dName], () => {
-
-                    });
-                }
-            });
+            // this.$store.state.drone_infos = null;
+            // this.$store.state.drone_infos = {};
+            // Object.keys(this.drone_infos).forEach((dName) => {
+            //     if (dName !== 'unknown') {
+            //         localStorage.setItem(dName + '_selected', String(this.drone_infos[dName].selected));
+            //     }
+            //
+            //     if(this.drone_infos[dName].selected) {
+            //         this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(this.drone_infos[dName]));
+            //
+            //         let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
+            //         this.postCinToMobius(url, this.$store.state.drone_infos[dName], () => {
+            //
+            //         });
+            //     }
+            // });
 
             //this.$store.commit('updateDroneInfosSelected');
             this.dialog = dialog;
@@ -1952,28 +1959,35 @@ export default {
         },
 
         removeProfile(item) {
-            delete this.drone_infos[item.name];
+            for(let del_index = 0; del_index < this.drone_infos_list.length; del_index++) {
+                if(this.drone_infos_list[del_index].name === item.name) {
+                    this.drone_infos_list.splice(del_index, 1);
+                    break;
+                }
+            }
 
-            let temp = JSON.parse(JSON.stringify(this.drone_infos));
-            this.drone_infos = null;
-            this.drone_infos = JSON.parse(JSON.stringify(temp));
-            temp = null;
+            // delete this.drone_infos[item.name];
+            //
+            // let temp = JSON.parse(JSON.stringify(this.drone_infos));
+            // this.drone_infos = null;
+            // this.drone_infos = JSON.parse(JSON.stringify(temp));
+            // temp = null;
 
             this.deleteCntDroneInfoToMobius(item.name, () => {
-                this.selected = [];
-                this.drone_infos_list = [];
-
-                for (let dName in this.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
-                        if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.drone_infos[dName]);
-                        }
-
-                        if (this.drone_infos[dName].selected) {
-                            this.selected.push(this.drone_infos[dName]);
-                        }
-                    }
-                }
+                // this.selected = [];
+                // this.drone_infos_list = [];
+                //
+                // for (let dName in this.drone_infos) {
+                //     if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
+                //         if (dName !== 'unknown') {
+                //             this.drone_infos_list.push(this.drone_infos[dName]);
+                //         }
+                //
+                //         if (this.drone_infos[dName].selected) {
+                //             this.selected.push(this.drone_infos[dName]);
+                //         }
+                //     }
+                // }
 
                 this.deleteCntMarkerInfoToMobius(item.name);
                 this.deleteCntSurveyMarkerInfoToMobius(item.name);
@@ -2014,27 +2028,27 @@ export default {
                 payload.home_position = {lat: 37.4032072, lng: 127.1595933};
                 payload.goto_positions = [];
 
-                this.drone_infos[this.drone_name] = payload;
+                this.drone_infos_list.push(payload);
 
-                this.selected = null;
-                this.selected = [];
-                this.drone_infos_list = null;
-                this.drone_infos_list = [];
-
-                for (let dName in this.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
-                        if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.drone_infos[dName]);
-                        }
-
-                        if (this.drone_infos[dName].selected) {
-                            this.selected.push(this.drone_infos[dName]);
-                        }
-                    }
-                }
+                // this.selected = null;
+                // this.selected = [];
+                // this.drone_infos_list = null;
+                // this.drone_infos_list = [];
+                //
+                // for (let dName in this.drone_infos) {
+                //     if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
+                //         if (dName !== 'unknown') {
+                //             this.drone_infos_list.push(this.drone_infos[dName]);
+                //         }
+                //
+                //         if (this.drone_infos[dName].selected) {
+                //             this.selected.push(this.drone_infos[dName]);
+                //         }
+                //     }
+                // }
 
                 this.postCntDroneInfoToMobius(this.drone_name, () => {
-                    this.postCinDroneInfoToMobius(this.drone_name, this.drone_infos[this.drone_name], () => {
+                    this.postCinDroneInfoToMobius(this.drone_name, payload, () => {
                         this.add_dialog = false;
                         this.fab = false;
 
@@ -2059,50 +2073,56 @@ export default {
             }
 
             if (this.formHasErrors === false) {
-                this.drone_infos[this.drone_name].host = this.host;
-                this.drone_infos[this.drone_name].gcs = this.gcs;
-                this.drone_infos[this.drone_name].type = this.type_selected;
-                this.drone_infos[this.drone_name].color = this.$store.state.refColorValue[this.color_selected];
-                this.drone_infos[this.drone_name].name = this.drone_name;
-                this.drone_infos[this.drone_name].drone_host = this.drone_host;
-                this.drone_infos[this.drone_name].id = this.drone_id;
-                this.drone_infos[this.drone_name].bat_cell = this.bat_cell;
-                this.drone_infos[this.drone_name].system_id = this.system_id;
+                for(let update_index = 0; update_index < this.drone_infos_list.length; update_index++) {
+                    if(this.drone_infos_list[update_index].name === this.drone_name) {
+                        this.drone_infos_list[update_index].host = this.host;
+                        this.drone_infos_list[update_index].gcs = this.gcs;
+                        this.drone_infos_list[update_index].type = this.type_selected;
+                        this.drone_infos_list[update_index].color = this.$store.state.refColorValue[this.color_selected];
+                        this.drone_infos_list[update_index].name = this.drone_name;
+                        this.drone_infos_list[update_index].drone_host = this.drone_host;
+                        this.drone_infos_list[update_index].id = this.drone_id;
+                        this.drone_infos_list[update_index].bat_cell = this.bat_cell;
+                        this.drone_infos_list[update_index].system_id = this.system_id;
 
-                this.selected = null;
-                this.selected = [];
-                this.drone_infos_list = null;
-                this.drone_infos_list = [];
+                        // this.selected = null;
+                        // this.selected = [];
+                        // this.drone_infos_list = null;
+                        // this.drone_infos_list = [];
+                        //
+                        // for (let dName in this.drone_infos) {
+                        //     if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
+                        //         if (dName !== 'unknown') {
+                        //             this.drone_infos_list.push(this.drone_infos[dName]);
+                        //         }
+                        //
+                        //         if (this.drone_infos[dName].selected) {
+                        //             this.selected.push(this.drone_infos[dName]);
+                        //         }
+                        //     }
+                        // }
 
-                for (let dName in this.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
-                        if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.drone_infos[dName]);
-                        }
+                        this.postCinDroneInfoToMobius(this.drone_name, this.drone_infos_list[update_index], () => {
+                            this.update_dialog = false;
+                            this.fab = false;
 
-                        if (this.drone_infos[dName].selected) {
-                            this.selected.push(this.drone_infos[dName]);
-                        }
+                            this.resetForm();
+                        });
+
+                        break;
                     }
                 }
-
-                this.postCinDroneInfoToMobius(this.drone_name, this.drone_infos[this.drone_name], () => {
-                    this.update_dialog = false;
-                    this.fab = false;
-
-                    this.resetForm();
-                });
             }
 
         },
     },
 
     created() {
-
+        this.$store.state.MOBIUS_CONNECTION_CONNECTED = localStorage.getItem('MOBIUS_CONNECTION_CONNECTED') ? (localStorage.getItem('MOBIUS_CONNECTION_CONNECTED') === 'true') : false;
     },
 
     mounted() {
-        if (this.MOBIUS_CONNECTION_CONNECTED) {
+        if (this.$store.state.MOBIUS_CONNECTION_CONNECTED) {
             this.GcsAppBarCreated();
         }
     },

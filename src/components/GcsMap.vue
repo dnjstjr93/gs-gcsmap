@@ -2861,6 +2861,10 @@
                 //
                 //     console.log('gotoLines', this.gotoLines);
                 // }
+
+                if(localStorage.getItem('rotateMapVal')) {
+                    this.mapHeading = parseInt(localStorage.getItem('rotateMapVal'));
+                }
             });
 
             EventBus.$on('updatePlaneMarker', (payload) => {
@@ -2966,6 +2970,8 @@
                 this.prepared = true;
 
                 this.mapHeading = parseInt(angle);
+
+                localStorage.setItem('rotateMapVal', this.mapHeading);
             });
         },
 
