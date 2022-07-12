@@ -36,8 +36,8 @@ export default {
     data: () => ({
         ready_dorne_list: false,
 
-        selected_map: 'openlayers',
-        //selected_map: 'googlemaps',
+        //selected_map: 'openlayers',
+        selected_map: 'googlemaps',
 
         selected: undefined,
         geojson: {
