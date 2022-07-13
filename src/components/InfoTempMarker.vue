@@ -565,6 +565,20 @@
                     this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
                     this.$store.state.didIPublish = true;
                 }
+                else {
+                    this.$store.state.tempMarkers[oldName][oldIndex].selected = false;
+
+                    status = 'register-extra';
+
+                    this.postCinTempMarkerInfoToMobius(oldName);
+
+                    this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+                    let watchingPayload = {};
+                    watchingPayload.broadcastMission = 'broadcastRegisterTempMarker';
+                    watchingPayload.dName = oldName;
+                    this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+                    this.$store.state.didIPublish = true;
+                }
 
                 this.snackbar = true;
 
@@ -575,6 +589,12 @@
             },
 
             submit() {
+                this.$store.state.tempMarkers[this.markerName][this.markerIndex].alt = parseInt(this.targetAlt);
+                this.$store.state.tempMarkers[this.markerName][this.markerIndex].targetAlt = parseInt(this.targetAlt);
+                this.$store.state.tempMarkers[this.markerName][this.markerIndex].targetSpeed = parseInt(this.targetSpeed);
+
+                console.log('submit', this.$store.state.tempMarkers);
+
                 if(!Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, this.targetSelectName)) {
                     this.$store.state.tempMarkers[this.targetSelectName] = [];
 

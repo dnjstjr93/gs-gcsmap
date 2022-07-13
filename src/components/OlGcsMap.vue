@@ -162,6 +162,7 @@ export default {
             selectedTempFeatureId: '',
 
             targetedFeature: undefined,
+            targetedTempFeature: {},
             targetedTempFeatureId: {},
 
             targetedTempTranslate: {},
@@ -543,7 +544,7 @@ export default {
                         anchor: [0.49, 0.49],
                     }),
                     text: new Text({
-                        text: [pIndex + ':' + tAlt.toFixed(0), 'bold 11px sans-serif'],
+                        text: [pIndex + ':' + String(tAlt), 'bold 11px sans-serif'],
                         textAlign: 'center',
                         offsetY: -25,
                         scale: 1.4,
@@ -741,6 +742,17 @@ export default {
 
                                 if(this.curInfoTempMarkerFlag) {
                                     this.updateSelectedTempMarker(dName, pIndex);
+
+                                    this.curInfoTempMarkerFlag = false;
+
+                                    this.$forceUpdate();
+
+                                    setTimeout(() => {
+                                        this.curSelectedMarker = this.$store.state.tempMarkers[dName][pIndex];
+                                        this.curIndexMarker = pIndex;
+                                        this.curNameMarker = dName;
+                                        this.curInfoTempMarkerFlag = true;
+                                    }, 10);
                                 }
 
                                 this.postCinTempMarkerInfoToMobius(dName);
@@ -767,70 +779,52 @@ export default {
         },
 
         updateSelectedTempMarker(dName, pIndex) {
-            if(this.selectedTempFeatureId !== '' && this.selectedTempFeatureId !== (dName + '-' + pIndex)) {
-                let dNameOld = this.selectedTempFeatureId.split('-')[0];
-                let pIndexOld = this.selectedTempFeatureId.split('-')[1];
-
-                this.$store.state.tempMarkers[dNameOld][pIndexOld].selected = false;
-                this.selectedTempFeatureId = '';
-
-                this.updateOlTempMarker(dNameOld, pIndexOld);
-            }
-
-            this.$store.state.tempMarkers[dName][pIndex].selected = true;
-            this.selectedTempFeatureId = (dName + '-' + pIndex);
-
-            this.updateOlTempMarker(dName, pIndex);
-
-            this.curInfoTempMarkerFlag = false;
-
-            this.$forceUpdate();
-
-            setTimeout(() => {
-                this.curSelectedMarker = this.$store.state.tempMarkers[dName][pIndex];
-                this.curIndexMarker = pIndex;
-                this.curNameMarker = dName;
-                this.curInfoTempMarkerFlag = true;
-            }, 10);
-        },
-
-        updateTargetedTempMarker(dName, pIndex, feature) {
-            if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeatureId, dName)) {
-                this.targetedTempFeatureId[dName] = '';
-            }
-
-            if(this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeatureId[dName] !== (dName + '-' + pIndex)) {
-                let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
-
-                this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
-                this.targetedTempFeatureId[dName] = '';
-
-                this.updateOlTempMarker(dName, pIndexOld);
-            }
-
-            if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
-                this.$store.state.tempMarkers[dName][pIndex].targeted = false;
-                this.targetedTempFeatureId[dName] = '';
-                this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
-
-                this.deleteTranslate(feature);
+            if(this.$store.state.tempMarkers[dName][pIndex].selected) {
+                let tempCircle = new CircleStyle({
+                    radius: 9,
+                    fill: new Fill({
+                        color: '#76FF03F0',
+                    }),
+                });
+                this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[1].setImage(tempCircle);
             }
             else {
-                this.$store.state.tempMarkers[dName][pIndex].targeted = true;
-                this.targetedTempFeatureId[dName] = (dName + '-' + pIndex);
-                this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;
+                let tempCircle = new CircleStyle({
+                    radius: 9,
+                    fill: new Fill({
+                        color: '#FAFAFA80',
+                    }),
+                });
+                this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[1].setImage(tempCircle);
+            }
+        },
 
-                this.addTranslate(feature);
+        updateTargetedTempMarker(dName, pIndex) {
+            if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                svgTempObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                svgTempObj.svg.path._attributes.stroke = '#FFFF00'.replace('#', '%23');
+                svgTempObj.svg.path._attributes['stroke-width'] = '35';
+            }
+            else {
+                svgTempObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                svgTempObj.svg.path._attributes.stroke = '#FFFDE7'.replace('#', '%23');
+                svgTempObj.svg.path._attributes['stroke-width'] = '15';
             }
 
-            this.updateOlTempMarker(dName, pIndex);
+            let xmlSvgDroneMarker = convert.js2xml(svgTempObj, {
+                compact: true,
+                ignoreComment: true,
+                spaces: 4
+            });
 
-            if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                this.$store.state.drone_command_prepared = false;
-                setTimeout(() => {
-                    this.$store.state.drone_command_prepared = true;
-                }, 10);
-            }
+            let tempIcon = new Icon({
+                opacity: 1,
+                src: 'data:image/svg+xml;utf8,' + xmlSvgDroneMarker,
+                scale: svgScale-0.05,
+                anchor: [0.49, 0.49],
+            });
+
+            this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[0].setImage(tempIcon);
         },
 
         updateTargetDroneMarker(dName) {
@@ -1110,9 +1104,25 @@ export default {
                     selectedColor
                 );
 
+                if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                    iconStyleTemp = this.getStyleTempMarker(
+                        pIndex,
+                        this.$store.state.drone_infos[dName].color,
+                        '#FFFF00',
+                        '35',
+                        this.$store.state.tempMarkers[dName][pIndex].alt,
+                        svgScale-0.05,
+                        selectedColor
+                    );
+                }
+
                 tFeature.setStyle(iconStyleTemp);
 
                 this.olTempMarkers[dName].tempMarkerFeatures.push(tFeature);
+
+                if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                    this.addTranslate(tFeature);
+                }
             });
 
             // let tTranslate = new Translate({
@@ -1636,7 +1646,7 @@ export default {
                     this.$store.state.tempMarkers[dNameOld][pIndexOld].selected = false;
                     this.selectedTempFeatureId = '';
 
-                    this.updateOlTempMarker(dNameOld, pIndexOld);
+                    this.updateSelectedTempMarker(dNameOld, pIndexOld);
                 }
             }
             else if(status === 'register-name') {
@@ -1652,6 +1662,16 @@ export default {
                 }
             }
             else if(status === 'register-index') {
+                if (this.selectedTempFeatureId !== '') {
+
+                    this.initOlTempMarker(dNameOld);
+
+                    this.updateSource();
+
+                    this.selectedTempFeatureId = '';
+                }
+            }
+            else if(status === 'register-extra') {
                 if (this.selectedTempFeatureId !== '') {
 
                     this.initOlTempMarker(dNameOld);
@@ -1741,7 +1761,50 @@ export default {
                     let dName = arrId[0];
                     let pIndex = arrId[1];
 
-                    this.updateTargetedTempMarker(dName, pIndex, this.targetedFeature);
+                    if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeatureId, dName)) {
+                        this.targetedTempFeatureId[dName] = '';
+                    }
+
+                    if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeature, dName)) {
+                        this.targetedTempFeature[dName] = undefined;
+                    }
+
+                    if(this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeatureId[dName] !== (dName + '-' + pIndex)) {
+                        let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
+                        this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
+
+                        this.deleteTranslate(this.targetedTempFeature[dName]);
+                        this.targetedTempFeatureId[dName] = '';
+                        this.targetedTempFeature[dName] = undefined;
+
+                        this.updateTargetedTempMarker(dName, pIndexOld);
+                    }
+
+                    if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                        this.$store.state.tempMarkers[dName][pIndex].targeted = false;
+                        this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
+
+                        this.deleteTranslate(this.targetedFeature);
+                        this.targetedTempFeatureId[dName] = '';
+                        this.targetedTempFeature[dName] = undefined;
+                    }
+                    else {
+                        this.$store.state.tempMarkers[dName][pIndex].targeted = true;
+                        this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;
+
+                        this.addTranslate(this.targetedFeature);
+                        this.targetedTempFeatureId[dName] = (dName + '-' + pIndex);
+                        this.targetedTempFeature[dName] = this.targetedFeature;
+                    }
+
+                    this.updateTargetedTempMarker(dName, pIndex);
+
+                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.state.drone_command_prepared = false;
+                        setTimeout(() => {
+                            this.$store.state.drone_command_prepared = true;
+                        }, 10);
+                    }
 
                     if(dName === 'unknown') {
                         this.datum.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
@@ -1811,10 +1874,11 @@ export default {
                     if(this.targetedTempFeatureId[dName] !== '') {
                         let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
 
+                        this.deleteTranslate(this.targetedTempFeature[dName]);
                         this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
                         this.targetedTempFeatureId[dName] = '';
 
-                        this.updateOlTempMarker(dName, pIndexOld);
+                        this.updateTargetedTempMarker(dName, pIndexOld);
                     }
                 });
 
@@ -1825,7 +1889,7 @@ export default {
                     this.$store.state.tempMarkers[dNameOld][pIndexOld].selected = false;
                     this.selectedTempFeatureId = '';
 
-                    this.updateOlTempMarker(dNameOld, pIndexOld);
+                    this.updateSelectedTempMarker(dNameOld, pIndexOld);
 
                     this.curInfoTempMarkerFlag = false;
 
@@ -1873,7 +1937,31 @@ export default {
                     let dName = arrId[0];
                     let pIndex = arrId[1];
 
+                    if(this.selectedTempFeatureId !== '' && this.selectedTempFeatureId !== (dName + '-' + pIndex)) {
+                        let dNameOld = this.selectedTempFeatureId.split('-')[0];
+                        let pIndexOld = this.selectedTempFeatureId.split('-')[1];
+
+                        this.$store.state.tempMarkers[dNameOld][pIndexOld].selected = false;
+                        this.selectedTempFeatureId = '';
+
+                        this.updateSelectedTempMarker(dNameOld, pIndexOld);
+                    }
+
+                    this.$store.state.tempMarkers[dName][pIndex].selected = true;
+                    this.selectedTempFeatureId = (dName + '-' + pIndex);
+
                     this.updateSelectedTempMarker(dName, pIndex);
+
+                    this.curInfoTempMarkerFlag = false;
+
+                    this.$forceUpdate();
+
+                    setTimeout(() => {
+                        this.curSelectedMarker = this.$store.state.tempMarkers[dName][pIndex];
+                        this.curIndexMarker = pIndex;
+                        this.curNameMarker = dName;
+                        this.curInfoTempMarkerFlag = true;
+                    }, 10);
                 }
             }
         });
