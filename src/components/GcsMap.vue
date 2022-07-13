@@ -479,7 +479,7 @@
                                                 :paths="survey.paths"
                                                 :options="{
                                                     strokeColor: (survey.selected)?'#76FF03':((survey.targeted)?'#FFFF00':drone.color),
-                                                    strokeOpacity: (survey.selected)?0.8:((survey.targeted)?0.8:0.2),
+                                                    strokeOpacity: (survey.selected)?0.8:((survey.targeted)?0.9:0.5),
                                                     strokeWeight: (survey.selected)?4:((survey.targeted)?4:1),
                                                     fillColor: drone.color,
                                                     fillOpacity: 0.1,
@@ -498,46 +498,65 @@
                                                     zIndex: 0
                                                 }"
                                             />
-<!--                                            <GmapMarker-->
-<!--                                                :position="{lat:survey.pathLines[0].lat, lng:survey.pathLines[0].lng}"-->
-<!--                                                :icon="{-->
-<!--                                                    path: $store.state.iconSourceSurveyMarker.icon[4],-->
-<!--                                                    fillColor: '#FF5722',-->
-<!--                                                    fillOpacity: 0.6,-->
-<!--                                                    strokeWeight: 0.8,-->
-<!--                                                    strokeColor: 'black',-->
-<!--                                                    rotation: 0,-->
-<!--                                                    scale: 0.05,-->
-<!--                                                    anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},-->
-<!--                                                    labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},-->
-<!--                                                }"-->
-<!--                                                :label="{-->
-<!--                                                    text: '0',-->
-<!--                                                    color: 'white',-->
-<!--                                                    fontSize: '14px',-->
-<!--                                                    fontWeight: 'bold',-->
-<!--                                                }"-->
-<!--                                            />-->
-<!--                                            <GmapMarker-->
-<!--                                                :position="{lat:survey.pathLines[survey.pathLines.length-1].lat, lng:survey.pathLines[survey.pathLines.length-1].lng}"-->
-<!--                                                :icon="{-->
-<!--                                                    path: $store.state.iconSourceSurveyMarker.icon[4],-->
-<!--                                                    fillColor: '#607D8B',-->
-<!--                                                    fillOpacity: 0.6,-->
-<!--                                                    strokeWeight: 0.8,-->
-<!--                                                    strokeColor: 'black',-->
-<!--                                                    rotation: 0,-->
-<!--                                                    scale: 0.05,-->
-<!--                                                    anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},-->
-<!--                                                    labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},-->
-<!--                                                }"-->
-<!--                                                :label="{-->
-<!--                                                    text: String(survey.pathLines.length-1),-->
-<!--                                                    color: 'white',-->
-<!--                                                    fontSize: '14px',-->
-<!--                                                    fontWeight: 'bold',-->
-<!--                                                }"-->
-<!--                                            />-->
+                                            <GmapMarker
+                                                :position="{lat:survey.pathLines[0].lat, lng:survey.pathLines[0].lng}"
+                                                :icon="{
+                                                    path: $store.state.iconSourceSurveyMarker.icon[4],
+                                                    fillColor: '#FF5722',
+                                                    fillOpacity: 0.6,
+                                                    strokeWeight: 0.8,
+                                                    strokeColor: 'black',
+                                                    rotation: 0,
+                                                    scale: 0.05,
+                                                    anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},
+                                                    labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},
+                                                }"
+                                                :label="{
+                                                    text: '0',
+                                                    color: 'white',
+                                                    fontSize: '14px',
+                                                    fontWeight: 'bold',
+                                                }"
+                                            />
+                                            <GmapMarker
+                                                :position="{lat:survey.pathLines[survey.pathLines.length-1].lat, lng:survey.pathLines[survey.pathLines.length-1].lng}"
+                                                :icon="{
+                                                    path: $store.state.iconSourceSurveyMarker.icon[4],
+                                                    fillColor: '#607D8B',
+                                                    fillOpacity: 0.6,
+                                                    strokeWeight: 0.8,
+                                                    strokeColor: 'black',
+                                                    rotation: 0,
+                                                    scale: 0.05,
+                                                    anchor: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]},
+                                                    labelOrigin: {x: $store.state.iconSourceSurveyMarker.icon[0]/2, y: $store.state.iconSourceSurveyMarker.icon[1]/2},
+                                                }"
+                                                :label="{
+                                                    text: String(survey.pathLines.length-1),
+                                                    color: 'white',
+                                                    fontSize: '14px',
+                                                    fontWeight: 'bold',
+                                                }"
+                                            />
+                                            <div v-if="drone.targeted && survey.targeted">-->
+                                                <GmapPolyline
+                                                    :path="[
+                                                        {
+                                                            lat: drone.lat,
+                                                            lng: drone.lng,
+                                                        },
+                                                        {
+                                                            lat: survey.pathLines[0].lat,
+                                                            lng: survey.pathLines[0].lng
+                                                        }
+                                                    ]"
+                                                    :options="{
+                                                        strokeColor: drone.color,
+                                                        strokeOpacity: 0.7,
+                                                        strokeWeight: 4
+                                                    }"
+                                                ></GmapPolyline>
+                                            </div>
 <!--                                            <div v-if="false">-->
 <!--                                                <div v-for="(pos, pIndex) in survey.pathLines" :key="'survey'+pIndex">-->
 <!--                                                    <GmapMarker-->

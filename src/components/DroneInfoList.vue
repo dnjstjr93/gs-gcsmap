@@ -731,6 +731,8 @@
             });
 
             EventBus.$emit('ws-connect');
+
+            this.resetSubscription();
         },
 
         beforeDestroy() {

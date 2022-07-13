@@ -6577,7 +6577,7 @@ export default {
                 setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
 
                 console.log('send_arm_command ', this.name);
-                setTimeout(this.send_arm_command, parseInt(50 + Math.random() * 50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
+                setTimeout(this.send_arm_command, parseInt(100 + Math.random() * 50), this.name, this.target_pub_topic, this.sys_id, 1, 0);
 
                 let takeoffDelay = payload.takeoffDelay;
                 let relativeAlt = payload.targetTakeoffAlt;
@@ -6591,7 +6591,6 @@ export default {
                 //this.send_set_do_set_home(this.name, this.target_pub_topic, this.sys_id);
                 setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
                     if (this.curArmStatus === 'ARMED') {
-
                         target_mode = 'GUIDED';
                         if(this.fcType === 'px4') {
                             target_mode = 'AUTO_LOITER';
@@ -6615,7 +6614,7 @@ export default {
 
                             this.doPublishBroadcast();
 
-                        }, parseInt(Math.random() * 10), name, target_pub_topic, sys_id, takeoff_alt);
+                        }, parseInt(1000 + (Math.random() * 10)), name, target_pub_topic, sys_id, takeoff_alt);
 
 
                         // var auto_goto_positions = [];
@@ -6633,7 +6632,7 @@ export default {
                     else {
                         console.log("시동이 걸리지 않았습니다.");
                     }
-                }, parseInt(((takeoffDelay) * 1000) + Math.random() * 10), this.name, this.target_pub_topic, this.sys_id, _alt);
+                }, parseInt((takeoffDelay*1000) + Math.random()*10), this.name, this.target_pub_topic, this.sys_id, _alt);
             }
         });
 

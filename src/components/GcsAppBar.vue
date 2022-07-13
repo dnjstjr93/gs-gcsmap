@@ -963,7 +963,7 @@ export default {
                             this.drone_infos_list.push(JSON.parse(JSON.stringify(con)));
                         }
 
-                        if(con.selected) {
+                        if(dName === 'unknown' || con.selected) {
                             this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(con));
 
                             this.selected.push(this.$store.state.drone_infos[dName]);
