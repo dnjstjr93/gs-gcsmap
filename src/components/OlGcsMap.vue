@@ -834,36 +834,32 @@ export default {
         },
 
         updateTargetDroneMarker(dName) {
-            let iconStyleDrone = null;
-
             if (this.$store.state.drone_infos[dName].targeted) {
-                iconStyleDrone = this.getStyleDroneMarker(
-                    dName,
-                    this.$store.state.drone_infos[dName].system_id,
-                    this.$store.state.drone_infos[dName].color,
-                    '#FFFF00',
-                    '35',
-                    this.$store.state.drone_infos[dName].alt,
-                    svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
-                    ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
-                    this.$store.state.drone_infos[dName].curArmStatus,
-                );
+                svgDroneObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                svgDroneObj.svg.path._attributes.stroke = '#FFFF00'.replace('#', '%23');
+                svgDroneObj.svg.path._attributes['stroke-width'] = '35';
             }
             else {
-                iconStyleDrone = this.getStyleDroneMarker(
-                    dName,
-                    this.$store.state.drone_infos[dName].system_id,
-                    this.$store.state.drone_infos[dName].color,
-                    '#FFFDE7',
-                    '25',
-                    this.$store.state.drone_infos[dName].alt,
-                    svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
-                    ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
-                    this.$store.state.drone_infos[dName].curArmStatus,
-                );
+                svgDroneObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                svgDroneObj.svg.path._attributes.stroke = '#FFFDE7'.replace('#', '%23');
+                svgDroneObj.svg.path._attributes['stroke-width'] = '25';
             }
 
-            this.olDroneMarkers[dName].droneMarkerFeature.setStyle(iconStyleDrone);
+            let xmlSvgDroneMarker = convert.js2xml(svgDroneObj, {
+                compact: true,
+                ignoreComment: true,
+                spaces: 4
+            });
+
+            let droneIcon = new Icon({
+                opacity: 1,
+                src: 'data:image/svg+xml;utf8,' + xmlSvgDroneMarker,
+                scale: svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+                rotation: ((360 + this.$store.state.drone_infos[dName].heading - 45 - this.mapHeading) % 360) * (Math.PI / 180),
+                anchor: [0.51, 0.51],
+            });
+
+            this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].setImage(droneIcon);
 
             this.$store.state.drone_command_prepared = false;
             for (let dName in this.$store.state.drone_infos) {
@@ -874,6 +870,47 @@ export default {
                     }
                 }
             }
+
+            // let iconStyleDrone = null;
+            //
+            // if (this.$store.state.drone_infos[dName].targeted) {
+            //     iconStyleDrone = this.getStyleDroneMarker(
+            //         dName,
+            //         this.$store.state.drone_infos[dName].system_id,
+            //         this.$store.state.drone_infos[dName].color,
+            //         '#FFFF00',
+            //         '35',
+            //         this.$store.state.drone_infos[dName].alt,
+            //         svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+            //         ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
+            //         this.$store.state.drone_infos[dName].curArmStatus,
+            //     );
+            // }
+            // else {
+            //     iconStyleDrone = this.getStyleDroneMarker(
+            //         dName,
+            //         this.$store.state.drone_infos[dName].system_id,
+            //         this.$store.state.drone_infos[dName].color,
+            //         '#FFFDE7',
+            //         '25',
+            //         this.$store.state.drone_infos[dName].alt,
+            //         svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+            //         ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
+            //         this.$store.state.drone_infos[dName].curArmStatus,
+            //     );
+            // }
+            //
+            // this.olDroneMarkers[dName].droneMarkerFeature.setStyle(iconStyleDrone);
+            //
+            // this.$store.state.drone_command_prepared = false;
+            // for (let dName in this.$store.state.drone_infos) {
+            //     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+            //         if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+            //             this.$store.state.drone_command_prepared = true;
+            //             break;
+            //         }
+            //     }
+            // }
         },
 
         initDroneMarkers() {
