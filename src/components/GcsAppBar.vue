@@ -966,7 +966,13 @@ export default {
                         if(dName === 'unknown' || con.selected) {
                             this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(con));
 
-                            this.selected.push(this.$store.state.drone_infos[dName]);
+                            if (dName !== 'unknown') {
+                                this.selected.push(this.$store.state.drone_infos[dName]);
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'name')) {
+                                this.$store.state.drone_infos[dName].name = dName;
+                            }
 
                             if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
                                 this.$store.state.drone_infos[dName].targeted = false;
@@ -1601,6 +1607,8 @@ export default {
                     if (status === 200) {
                         if (drones.length > 0) {
                             this.$store.state.drone_infos = {};
+                            this.drone_infos_list = [];
+                            this.selected = [];
                             this.initDroneInfos(drones, 0, (result) => {
                                 if (result === 0) {
                                     console.log('initDroneInfos-success', result, this.$store.state.drone_infos);
