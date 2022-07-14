@@ -1399,7 +1399,7 @@ export default {
                 let dName = markers[count].split('/')[3];
 
                 if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if(this.$store.state.drone_infos[dName].selected) {
+                    if(dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
                         this.getEachMarkerInfoFromMobius(dName, (status, con) => {
                             if (status === 200) {
                                 if (con === undefined) {
@@ -1629,7 +1629,7 @@ export default {
         },
 
         readyDroneInfos() {
-            //EventBus.$emit('gcs-map-ready');
+            EventBus.$emit('gcs-map-ready');
 
             this.$store.state.MOBIUS_CONNECTION_CONNECTED = true;
             localStorage.setItem('MOBIUS_CONNECTION_CONNECTED', this.$store.state.MOBIUS_CONNECTION_CONNECTED.toString());
@@ -1975,7 +1975,7 @@ export default {
 
             EventBus.$emit('confirm_selected', JSON.parse(JSON.stringify(this.selected)));
 
-            //EventBus.$emit('gcs-map-ready');
+            EventBus.$emit('gcs-map-ready');
 
             this.$forceUpdate();
         },
@@ -2079,6 +2079,8 @@ export default {
                 payload.selected = false;
                 payload.lat = 37.404324133883605 + Math.random() * 0.001;
                 payload.lng = 127.16124484502097 + Math.random() * 0.001;
+                payload.alt = 0;
+                payload.absolute_alt = 0;
                 payload.heading = 0;
                 payload.host = this.host;
                 payload.gcs = this.gcs;

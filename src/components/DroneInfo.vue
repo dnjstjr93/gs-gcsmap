@@ -1795,18 +1795,23 @@ export default {
 
         showMyDroneInfoDialog() {
             this.$store.state.drone_infos[this.name].goto_positions = [];
-            this.$store.state.tempMarkers[this.name].forEach((pos) => {
-                let strPos = pos.lat + ':' +
-                    pos.lng + ':' +
-                    pos.alt + ':' +
-                    pos.speed + ':' +
-                    pos.radius + ':' +
-                    pos.turningSpeed + ':' +
-                    pos.targetMavCmd + ':' +
-                    pos.targetStayTime + ':' +
-                    pos.elevation;
-                this.$store.state.drone_infos[this.name].goto_positions.push(strPos);
-            });
+
+            if(Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, this.name)) {
+                if (this.$store.state.tempMarkers[this.name].length > 0) {
+                    this.$store.state.tempMarkers[this.name].forEach((pos) => {
+                        let strPos = pos.lat + ':' +
+                            pos.lng + ':' +
+                            pos.alt + ':' +
+                            pos.speed + ':' +
+                            pos.radius + ':' +
+                            pos.turningSpeed + ':' +
+                            pos.targetMavCmd + ':' +
+                            pos.targetStayTime + ':' +
+                            pos.elevation;
+                        this.$store.state.drone_infos[this.name].goto_positions.push(strPos);
+                    });
+                }
+            }
 
             this.strMyDroneInfo = JSON.stringify(this.$store.state.drone_infos[this.name], null, 4);
 
