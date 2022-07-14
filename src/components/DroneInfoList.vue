@@ -424,6 +424,61 @@
                 EventBus.$emit('ClickADSBMonitor', this.ADSBMonitor);
             },
 
+            readyDroneInfoList() {
+                console.log('uuuuuuuuuuuuuuuuuuu     readyDroneInfoList')
+
+                this.$store.state.commands = [];
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['선회']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['패턴']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['자동']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['고도']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['속도']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['관심']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['착륙']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
+
+                // this.drones_selected = null;
+                // this.drones_selected = [];
+                // for(let name in this.$store.state.drone_infos) {
+                //     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                //         if(this.$store.state.drone_infos[name].selected) {
+                //             this.drones_selected.push(this.$store.state.drone_infos[name]);
+                //         }
+                //     }
+                // }
+
+                if (localStorage.getItem('mqttConnection-DroneInfoList')) {
+                    if (JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList')).connected) {
+                        this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList'));
+                        console.log('DroneInfoList', 'client', this.$store.state.client);
+
+                        this.$store.state.client = {
+                            connected: false,
+                            loading: false
+                        }
+
+                        localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
+                    }
+                }
+                else {
+                    this.$store.state.client = {
+                        connected: false,
+                        loading: false
+                    }
+                }
+
+                this.createConnection();
+            }
+
         },
 
         created() {
@@ -566,61 +621,61 @@
                 }
             }, 1000);
 
-            EventBus.$on('gcs-map-ready', () => {
-
-                console.log('uuuuuuuuuuuuuuuuuuu     DroneInfoList gcs-map-ready')
-
-                this.$store.state.commands = [];
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['선회']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['패턴']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['자동']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['고도']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['속도']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['관심']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['착륙']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
-
-                // this.drones_selected = null;
-                // this.drones_selected = [];
-                // for(let name in this.$store.state.drone_infos) {
-                //     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                //         if(this.$store.state.drone_infos[name].selected) {
-                //             this.drones_selected.push(this.$store.state.drone_infos[name]);
-                //         }
-                //     }
-                // }
-
-                if (localStorage.getItem('mqttConnection-DroneInfoList')) {
-                    if (JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList')).connected) {
-                        this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList'));
-                        console.log('DroneInfoList', 'client', this.$store.state.client);
-
-                        this.$store.state.client = {
-                            connected: false,
-                            loading: false
-                        }
-
-                        localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
-                    }
-                }
-                else {
-                    this.$store.state.client = {
-                        connected: false,
-                        loading: false
-                    }
-                }
-
-                this.createConnection();
-            });
+            // EventBus.$on('gcs-map-ready', () => {
+            //
+            //     console.log('uuuuuuuuuuuuuuuuuuu     DroneInfoList gcs-map-ready')
+            //
+            //     this.$store.state.commands = [];
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['선회']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['패턴']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['자동']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['고도']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['속도']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['관심']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['착륙']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
+            //     this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
+            //
+            //     // this.drones_selected = null;
+            //     // this.drones_selected = [];
+            //     // for(let name in this.$store.state.drone_infos) {
+            //     //     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+            //     //         if(this.$store.state.drone_infos[name].selected) {
+            //     //             this.drones_selected.push(this.$store.state.drone_infos[name]);
+            //     //         }
+            //     //     }
+            //     // }
+            //
+            //     if (localStorage.getItem('mqttConnection-DroneInfoList')) {
+            //         if (JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList')).connected) {
+            //             this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList'));
+            //             console.log('DroneInfoList', 'client', this.$store.state.client);
+            //
+            //             this.$store.state.client = {
+            //                 connected: false,
+            //                 loading: false
+            //             }
+            //
+            //             localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
+            //         }
+            //     }
+            //     else {
+            //         this.$store.state.client = {
+            //             connected: false,
+            //             loading: false
+            //         }
+            //     }
+            //
+            //     this.createConnection();
+            // });
 
             EventBus.$on('confirm_selected', (selected) => {
                 this.drones_selected = null;
@@ -651,7 +706,9 @@
                 }
                 selected = null;
 
-                this.resetSubscription();
+                //this.resetSubscription();
+
+                this.readyDroneInfoList();
 
                 setTimeout(this.onResize, 500);
             });
@@ -732,7 +789,7 @@
 
             EventBus.$emit('ws-connect');
 
-            this.resetSubscription();
+            this.readyDroneInfoList();
         },
 
         beforeDestroy() {

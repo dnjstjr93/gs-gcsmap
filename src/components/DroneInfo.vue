@@ -936,7 +936,7 @@ export default {
             ],
             absolute: true,
             opacity: 0.8,
-            curSortieName: this.sortie_name,
+            curSortieName: 'disarm',
 
             curMode: 'UNKNOWN',
             colorMode: 'td-text-gray',
@@ -7033,11 +7033,16 @@ export default {
             this.$store.state.trackingLines[this.name] = [];
         }
 
-        this.curSortieName = this.sortie_name;
+        if (this.sortie_name !== 'disarm' && this.sortie_name !== undefined) {
+            this.curSortieName = this.sortie_name;
+        }
+        else {
+            this.curSortieName = 'disarm';
+        }
 
         console.log('curSortieName', this.curSortieName, 'sortie_name', this.sortie_name);
 
-        if (this.curSortieName !== 'disarm') {
+        if (this.curSortieName !== 'disarm' && this.curSortieName !== undefined) {
             var now = moment.utc();
             this.startFlightTime = moment(this.curSortieName.replace(/_/g, ''));
             console.log('startFlightTime', this.startFlightTime);
