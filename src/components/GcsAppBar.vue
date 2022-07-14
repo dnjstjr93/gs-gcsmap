@@ -1678,6 +1678,9 @@ export default {
                             });
                         }
                     }
+                    else {
+                        callback();
+                    }
                 });
             });
         },
