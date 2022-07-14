@@ -1585,6 +1585,9 @@ export default {
                             callback();
                         });
                     }
+                    else {
+                        callback();
+                    }
                 });
             }
             else {
@@ -1668,13 +1671,11 @@ export default {
                         }
                         else {
                             this.$store.state.surveyMarkers = {};
-                            setTimeout((markers, count) => {
-                                this.initSurveyMarkerInfos(markers, count, () => {
-                                    console.log('GcsAppBarCreated()-2', 'initSurveyMarkerInfos', this.$store.state.surveyMarkers);
+                            this.initSurveyMarkerInfos(markers, 0, () => {
+                                console.log('GcsAppBarCreated()-2', 'initSurveyMarkerInfos', this.$store.state.surveyMarkers);
 
-                                    callback();
-                                });
-                            }, 1, markers, 0);
+                                callback();
+                            });
                         }
                     }
                 });
