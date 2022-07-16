@@ -308,7 +308,7 @@ export default {
 
                     this.postCinTempMarkerInfoToMobius('unknown');
 
-                    this.doBroadcastConfirmAddTempMarker(JSON.parse(JSON.stringify(marker)));
+                    //this.doBroadcastConfirmAddTempMarker(JSON.parse(JSON.stringify(marker)));
                 }
             });
         },
@@ -360,10 +360,10 @@ export default {
             for(let dName in this.olDroneMarkers) {
                 if(Object.prototype.hasOwnProperty.call(this.olDroneMarkers, dName)) {
                     this.features.push(this.olDroneMarkers[dName].headingLineFeature);
-                    this.features.push(this.olDroneMarkers[dName].directionLineFeature);
                     this.features.push(this.olDroneMarkers[dName].targetLineFeature);
                     this.features.push(this.olDroneMarkers[dName].droneMarkerFeature);
                     //this.features.push(this.olDroneMarkers[dName].droneGotoMarkerFeature);
+                    this.features.push(this.olDroneMarkers[dName].directionLineFeature);
                     console.log('droneMarkers', this.features);
                 }
             }
@@ -606,7 +606,7 @@ export default {
                     pIndex,
                     this.$store.state.drone_infos[dName].color,
                     '#FFFF00',
-                    '35',
+                    '25',
                     this.$store.state.tempMarkers[dName][pIndex].alt,
                     svgTempScale,
                     selectedColor
@@ -662,9 +662,11 @@ export default {
                         //anchor: [0.505, 0.505],
                     }),
                     text: new Text({
-                        text: [dAlt.toFixed(1), 'bold 11px sans-serif', '\n', 'bold 10px sans-serif', (armStatus === 'DISARMED') ? 'DISARMED' : '', 'bold 10px sans-serif',],
-                        offsetY: -45,
-                        // offsetX: -1,
+                        text: [dAlt.toFixed(1)+' m', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
+                            '', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
+                            (armStatus === 'DISARMED') ? 'DISARMED' : '', 'bold 10px sans-serif',],
+                        textAlign: 'center',
+                        offsetY: -25,
                         scale: 1.5,
                         stroke: new Stroke({
                             color: 'black',
@@ -680,7 +682,7 @@ export default {
                     text: new Text({
                         textAlign: 'center',
                         offsetY: 40,
-                        text: [dName, 'bold 9px sans-serif', '\n', 'bold 10px sans-serif', '(' + system_id + ')', 'bold 10px sans-serif',],
+                        text: [dName, 'bold 9px sans-serif', '\n', 'bold 9px sans-serif', '(' + system_id + ')', 'bold 9px sans-serif',],
                         scale: 1.6,
                         stroke: new Stroke({
                             color: 'black',
@@ -836,10 +838,12 @@ export default {
         },
 
         updateTargetedTempMarker(dName, pIndex) {
+            console.log(dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted);
+
             if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
                 svgTempObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
                 svgTempObj.svg.path._attributes.stroke = '#FFFF00'.replace('#', '%23');
-                svgTempObj.svg.path._attributes['stroke-width'] = '35';
+                svgTempObj.svg.path._attributes['stroke-width'] = '25';
             }
             else {
                 svgTempObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
@@ -864,73 +868,32 @@ export default {
         },
 
         updateTargetDroneMarker(dName) {
-            if (this.$store.state.drone_infos[dName].targeted) {
-                svgDroneObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
-                svgDroneObj.svg.path._attributes.stroke = '#FFFF00'.replace('#', '%23');
-                svgDroneObj.svg.path._attributes['stroke-width'] = '35';
-            }
-            else {
-                svgDroneObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
-                svgDroneObj.svg.path._attributes.stroke = '#FFFDE7'.replace('#', '%23');
-                svgDroneObj.svg.path._attributes['stroke-width'] = '25';
-            }
-
-            let xmlSvgDroneMarker = convert.js2xml(svgDroneObj, {
-                compact: true,
-                ignoreComment: true,
-                spaces: 4
-            });
-
-            let droneIcon = new Icon({
-                opacity: 1,
-                src: 'data:image/svg+xml;utf8,' + xmlSvgDroneMarker,
-                scale: svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
-                rotation: ((360 + this.$store.state.drone_infos[dName].heading - 45 - this.mapHeading) % 360) * (Math.PI / 180),
-                //anchor: [0.51, 0.51],
-            });
-
-            this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].setImage(droneIcon);
-
-            this.$store.state.drone_command_prepared = false;
-            for (let dName in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                        this.$store.state.drone_command_prepared = true;
-                        break;
-                    }
-                }
-            }
-
-            // let iconStyleDrone = null;
-            //
             // if (this.$store.state.drone_infos[dName].targeted) {
-            //     iconStyleDrone = this.getStyleDroneMarker(
-            //         dName,
-            //         this.$store.state.drone_infos[dName].system_id,
-            //         this.$store.state.drone_infos[dName].color,
-            //         '#FFFF00',
-            //         '35',
-            //         this.$store.state.drone_infos[dName].alt,
-            //         svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
-            //         ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
-            //         this.$store.state.drone_infos[dName].curArmStatus,
-            //     );
+            //     svgDroneObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+            //     svgDroneObj.svg.path._attributes.stroke = '#FFFF00'.replace('#', '%23');
+            //     svgDroneObj.svg.path._attributes['stroke-width'] = '35';
             // }
             // else {
-            //     iconStyleDrone = this.getStyleDroneMarker(
-            //         dName,
-            //         this.$store.state.drone_infos[dName].system_id,
-            //         this.$store.state.drone_infos[dName].color,
-            //         '#FFFDE7',
-            //         '25',
-            //         this.$store.state.drone_infos[dName].alt,
-            //         svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
-            //         ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
-            //         this.$store.state.drone_infos[dName].curArmStatus,
-            //     );
+            //     svgDroneObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+            //     svgDroneObj.svg.path._attributes.stroke = '#FFFDE7'.replace('#', '%23');
+            //     svgDroneObj.svg.path._attributes['stroke-width'] = '25';
             // }
             //
-            // this.olDroneMarkers[dName].droneMarkerFeature.setStyle(iconStyleDrone);
+            // let xmlSvgDroneMarker = convert.js2xml(svgDroneObj, {
+            //     compact: true,
+            //     ignoreComment: true,
+            //     spaces: 4
+            // });
+            //
+            // let droneIcon = new Icon({
+            //     opacity: 1,
+            //     src: 'data:image/svg+xml;utf8,' + xmlSvgDroneMarker,
+            //     scale: svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+            //     rotation: ((360 + this.$store.state.drone_infos[dName].heading - 45 + this.mapHeading) % 360) * (Math.PI / 180),
+            //     //anchor: [0.51, 0.51],
+            // });
+            //
+            // this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].setImage(droneIcon);
             //
             // this.$store.state.drone_command_prepared = false;
             // for (let dName in this.$store.state.drone_infos) {
@@ -941,6 +904,47 @@ export default {
             //         }
             //     }
             // }
+
+            let iconStyleDrone = null;
+
+            if (this.$store.state.drone_infos[dName].targeted) {
+                iconStyleDrone = this.getStyleDroneMarker(
+                    dName,
+                    this.$store.state.drone_infos[dName].system_id,
+                    this.$store.state.drone_infos[dName].color,
+                    '#FFFF00',
+                    '25',
+                    this.$store.state.drone_infos[dName].alt,
+                    svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+                    ((360+this.$store.state.drone_infos[dName].heading-45+this.mapHeading)%360) * (Math.PI / 180),
+                    this.$store.state.drone_infos[dName].curArmStatus,
+                );
+            }
+            else {
+                iconStyleDrone = this.getStyleDroneMarker(
+                    dName,
+                    this.$store.state.drone_infos[dName].system_id,
+                    this.$store.state.drone_infos[dName].color,
+                    '#FFFDE7',
+                    '25',
+                    this.$store.state.drone_infos[dName].alt,
+                    svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
+                    ((360+this.$store.state.drone_infos[dName].heading-45+this.mapHeading)%360) * (Math.PI / 180),
+                    this.$store.state.drone_infos[dName].curArmStatus,
+                );
+            }
+
+            this.olDroneMarkers[dName].droneMarkerFeature.setStyle(iconStyleDrone);
+
+            this.$store.state.drone_command_prepared = false;
+            for (let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.state.drone_command_prepared = true;
+                        break;
+                    }
+                }
+            }
         },
 
         initDroneMarkers() {
@@ -977,7 +981,7 @@ export default {
                         '25',
                         dAlt,
                         svgScale + (dAlt / 3000),
-                        ((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180),
+                        ((360+this.$store.state.drone_infos[dName].heading-45+this.mapHeading)%360) * (Math.PI / 180),
                         this.$store.state.drone_infos[dName].curArmStatus,
                     );
 
@@ -1042,6 +1046,17 @@ export default {
                                 color: this.$store.state.drone_infos[dName].color + '80',
                                 width: 5,
                             }),
+                            text: new Text({
+                                text: [''],
+                                scale: 1.5,
+                                stroke: new Stroke({
+                                    color: 'black',
+                                    width: 0.8,
+                                }),
+                                fill: new Fill({
+                                    color: '#FAFAFA'
+                                }),
+                            }),
                         }),
                         new Style({
                             geometry: new Point(eDirCoordinate),
@@ -1102,6 +1117,7 @@ export default {
                                     color: '#FAFAFA'
                                 }),
                             }),
+                            zIndex: 2,
                         }),
                         new Style({
                             geometry: new Point(eTarCoordinate),
@@ -1146,15 +1162,21 @@ export default {
 
         updateTargetLineFeature(dName) {
             //console.log('this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName]', this.$store.state.drone_infos[dName].targeted, this.targetedTempFeatureId[dName])
-            if(this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName] !== '') {
+
+            if(this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeature[dName] !== undefined) {
                 let sTarLat = this.$store.state.drone_infos[dName].lat;
                 let sTarLng = this.$store.state.drone_infos[dName].lng;
+                let eTarLat = this.$store.state.drone_infos[dName].lat;
+                let eTarLng = this.$store.state.drone_infos[dName].lng;
 
                 let sTarPnt = new Point([sTarLng, sTarLat]).transform('EPSG:4326', 'EPSG:3857')
                 let sTarCoordinate = sTarPnt.getCoordinates();
+                let eTarPnt = new Point([eTarLng, eTarLat]).transform('EPSG:4326', 'EPSG:3857')
+                let eTarCoordinate = eTarPnt.getCoordinates();
 
-                let eTarCoordinate = this.targetedTempFeature[dName].getGeometry().getCoordinates();
-
+                if(Object.prototype.hasOwnProperty.call(this.targetedTempFeature, dName)) {
+                    eTarCoordinate = this.targetedTempFeature[dName].getGeometry().getCoordinates();
+                }
 
                 let eTarLatLng = toLonLat(eTarCoordinate);
                 this.$store.state.drone_infos[dName].targetPosition = {lat: eTarLatLng[1], lng: eTarLatLng[0]};
@@ -1192,14 +1214,16 @@ export default {
                 let dy = eTarCoordinate[1] - sTarCoordinate[1];
                 let rotation = Math.atan2(dy, dx);
 
-                this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText(['', 'bold 9px sans-serif']);
-                this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
-                this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
-                this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sTarCoordinate[0], sTarCoordinate[1]], [eTarCoordinate[0], eTarCoordinate[1]]]);
+                if(dName !== 'unknown') {
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText(['', 'bold 9px sans-serif']);
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
+                    this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sTarCoordinate[0], sTarCoordinate[1]], [eTarCoordinate[0], eTarCoordinate[1]]]);
+                }
             }
         },
 
-        getElevationProfile(eLngLats, callback) {
+        async getElevationProfile(eLngLats, callback) {
 
             eLngLats.forEach((eLngLat, idx) => {
                 [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
@@ -1211,29 +1235,21 @@ export default {
 
             let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
 
-            console.log(url);
+            try {
+                let response = await axios.get(url, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                    },
+                });
+                console.log('getElevationProfile', response.status, response.data);
 
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status <= 500;
-                },
-                method: 'get',
-                url: url,
-                headers: {
-                },
-                data: ''
-            }).then(
-                (res) => {
-                    console.log(res.data);
-                    callback(res.status, res.data);
-                }
-            ).catch(
-                (err) => {
-                    console.log(err.message);
-                    callback(500, err.message);
-                }
-            );
+                callback(response.status, response.data);
+
+            } catch (err) {
+                console.log("Error >>", err);
+            }
         },
 
         initOlTempMarker(dName) {
@@ -1282,7 +1298,7 @@ export default {
                         pIndex,
                         this.$store.state.drone_infos[dName].color,
                         '#FFFF00',
-                        '35',
+                        '25',
                         this.$store.state.tempMarkers[dName][pIndex].alt,
                         svgTempScale,
                         selectedColor
@@ -1591,7 +1607,9 @@ export default {
         }
 
         this.olMap.getView().on('change:rotation', () => {
-            this.mapHeading = -((this.olMap.getView().getRotation()*180)/Math.PI);
+            this.mapHeading = ((this.olMap.getView().getRotation()*180)/Math.PI);
+
+            console.log('change:rotation', this.mapHeading);
 
             localStorage.setItem('rotateMapVal', this.mapHeading);
         });
@@ -1795,8 +1813,19 @@ export default {
 
             if(Object.prototype.hasOwnProperty.call(this.olDroneMarkers, dName)) {
                 this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getImage().setScale(svgScale + (dAlt / 3000));
-                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getImage().setRotation(((360+this.$store.state.drone_infos[dName].heading-45-this.mapHeading)%360) * (Math.PI / 180));
-                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setText([dAlt.toFixed(1), 'bold 11px sans-serif', '\n', 'bold 10px sans-serif', (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'DISARMED' : '', 'bold 11px sans-serif',]);
+                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getImage().setRotation(((360+this.$store.state.drone_infos[dName].heading-45+this.mapHeading)%360) * (Math.PI / 180));
+
+                let speed = this.$store.state.drone_infos[dName].airSpeed;
+                if(speed < 1) {
+                    this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setText([dAlt.toFixed(1)+' m', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
+                        '', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
+                        (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'DISARMED' : '', 'bold 10px sans-serif',]);
+                }
+                else {
+                    this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setText([dAlt.toFixed(1)+' m', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
+                        speed.toFixed(1)+' m/s', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
+                        (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'DISARMED' : '', 'bold 10px sans-serif',]);
+                }
                 this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setFill(new Fill({ color: (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'red' : colorMapAlt[Math.round(dAlt / 10) * 10] }));
                 this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[1].getText().setFill(new Fill({ color: colorMapAlt[Math.round(dAlt / 10) * 10] }));
                 this.olDroneMarkers[dName].droneMarkerFeature.getGeometry().setCoordinates(coordinate);
@@ -1979,26 +2008,30 @@ export default {
                         this.targetedTempFeature[dName] = undefined;
 
                         this.updateTargetedTempMarker(dName, pIndexOld);
+                        //this.updateOlTempMarker(dName, pIndexOld);
                     }
 
+                    this.$store.state.tempMarkers[dName][pIndex].targeted = !this.$store.state.tempMarkers[dName][pIndex].targeted;
+
+                    console.log(dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted);
+
                     if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
-                        this.$store.state.tempMarkers[dName][pIndex].targeted = false;
+                          this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;
+
+                        this.addTranslate(this.targetedFeature);
+                        this.targetedTempFeatureId[dName] = (dName + '-' + pIndex);
+                        this.targetedTempFeature[dName] = this.targetedFeature;
+                    }
+                    else {
                         this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
 
                         this.deleteTranslate(this.targetedFeature);
                         this.targetedTempFeatureId[dName] = '';
                         this.targetedTempFeature[dName] = undefined;
                     }
-                    else {
-                        this.$store.state.tempMarkers[dName][pIndex].targeted = true;
-                        this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;
-
-                        this.addTranslate(this.targetedFeature);
-                        this.targetedTempFeatureId[dName] = (dName + '-' + pIndex);
-                        this.targetedTempFeature[dName] = this.targetedFeature;
-                    }
 
                     this.updateTargetedTempMarker(dName, pIndex);
+                    //this.updateOlTempMarker(dName, pIndex);
 
                     if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         this.$store.state.drone_command_prepared = false;
@@ -2084,6 +2117,7 @@ export default {
                         this.targetedTempFeatureId[dName] = '';
 
                         this.updateTargetedTempMarker(dName, pIndexOld);
+                        this.updateOlTempMarker(dName, pIndexOld);
                     }
                 });
 

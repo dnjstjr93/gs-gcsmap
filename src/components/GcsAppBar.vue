@@ -10,15 +10,15 @@
 
             <v-spacer></v-spacer>
 
-            <v-btn text @click.stop="mapDownload" :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text @click.stop="mapDownload" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
                 <v-icon>mdi-monitor-arrow-down-variant</v-icon>
             </v-btn>
 
-            <v-btn text @click.stop="mapAngleDialog=true" :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text @click.stop="mapAngleDialog=true" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
                 <v-icon>mdi-format-rotate-90</v-icon>
             </v-btn>
 
-            <v-btn text @click.stop="setGCSHomePosition" :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text @click.stop="setGCSHomePosition" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
                 <v-icon>mdi-crosshairs-gps</v-icon>
             </v-btn>
 
@@ -32,7 +32,7 @@
             <!--            <v-icon>mdi-video</v-icon>-->
             <!--        </v-btn>-->
 
-            <v-btn text @click.stop="openCam2" :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text @click.stop="openCam2" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
                 <v-icon>mdi-video</v-icon>
             </v-btn>
 
@@ -45,7 +45,7 @@
             <!--            </v-btn>-->
             <!--        </router-link>-->
 
-            <v-btn text :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED">
+            <v-btn text :disabled="!$store.state.MOBIUS_CONNECTION.connected">
                 <v-icon>mdi-account</v-icon>
             </v-btn>
 
@@ -139,7 +139,7 @@
                                         placeholder="203.253.128.177"
                                         label="HOST*"
                                         required
-                                        :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"
+                                        :disabled="$store.state.MOBIUS_CONNECTION.connected"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="3">
@@ -151,26 +151,26 @@
                                         placeholder="KETI_GCS"
                                         label="GCS*"
                                         required
-                                        :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"
+                                        :disabled="$store.state.MOBIUS_CONNECTION.connected"
                                     ></v-text-field>
                                 </v-col>
                                 <v-col cols="4">
                                     <v-btn
                                         class="mx-2 mt-1"
-                                        tile @click="GcsAppBarCreated"
+                                        tile @click="GcsAppBarConnected"
                                         elevation="5"
                                         color="primary"
-                                        :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"
+                                        :disabled="$store.state.MOBIUS_CONNECTION.connected"
                                     > {{ MOBIUS_CONNECTION_TEXT }}
                                     </v-btn>
                                     <!--            </v-col>-->
                                     <!--            <v-col cols="2">-->
                                     <v-btn
                                         class="mx-2 mt-1"
-                                        tile text outlined @click="GcsAppBarReseted"
+                                        tile text outlined @click="GcsAppBarDisconnected"
                                         elevation="1"
                                         dark
-                                        :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED"
+                                        :disabled="!$store.state.MOBIUS_CONNECTION.connected"
                                     > {{ MOBIUS_DISCONNECTION_TEXT }}
                                     </v-btn>
                                 </v-col>
@@ -183,52 +183,6 @@
                             <v-col cols="2">
                                 <v-subheader>Drone List</v-subheader>
                             </v-col>
-                            <!--                        <v-col cols="3">-->
-                            <!--&lt;!&ndash;                            <v-text-field hide-details ref="host" v-model="host" :rules="host_rule" placeholder="203.253.128.177" label="Host*" required></v-text-field>&ndash;&gt;-->
-                            <!--                            <v-text-field-->
-                            <!--                                    class="mx-2"-->
-                            <!--                                    dense hide-details-->
-                            <!--                                    ref="host"-->
-                            <!--                                    v-model="host" :rules="host_rule"-->
-                            <!--                                    placeholder="203.253.128.177"-->
-                            <!--                                    label="HOST*"-->
-                            <!--                                    required-->
-                            <!--                                    :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"-->
-                            <!--                            ></v-text-field>-->
-                            <!--                        </v-col>-->
-                            <!--                        <v-col cols="3">-->
-                            <!--                            <v-text-field-->
-                            <!--                                    class="mx-2"-->
-                            <!--                                    dense hide-details-->
-                            <!--                                    ref="gcs"-->
-                            <!--                                    v-model="gcs" :rules="gcs_rule"-->
-                            <!--                                    placeholder="KETI_GCS"-->
-                            <!--                                    label="GCS*"-->
-                            <!--                                    required-->
-                            <!--                                    :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"-->
-                            <!--                            ></v-text-field>-->
-                            <!--                        </v-col>-->
-                            <!--                        <v-col cols="2">-->
-                            <!--                            <v-btn-->
-                            <!--                                    class="mx-2"-->
-                            <!--                                    tile @click="GcsAppBarCreated"-->
-                            <!--                                    elevation="5"-->
-                            <!--                                    color="primary"-->
-                            <!--                                    :disabled="$store.state.MOBIUS_CONNECTION_CONNECTED"-->
-                            <!--                            > {{ MOBIUS_CONNECTION_TEXT }}-->
-                            <!--                            </v-btn>-->
-                            <!--                        </v-col>-->
-                            <!--                        <v-col cols="2">-->
-                            <!--                            <v-btn-->
-                            <!--                                    class="mx-0"-->
-                            <!--                                    tile @click="GcsAppBarReseted"-->
-                            <!--                                    elevation="2"-->
-                            <!--                                    color="primary"-->
-                            <!--                                    :disabled="!$store.state.MOBIUS_CONNECTION_CONNECTED"-->
-                            <!--                            > {{ MOBIUS_DISCONNECTION_TEXT }}-->
-                            <!--                            </v-btn>-->
-                            <!--                        </v-col>-->
-
                         </v-row>
                         <v-data-table
                             v-model="selected"
@@ -701,6 +655,32 @@ export default {
             );
         },
 
+        // async postAeToMobius (callback) {
+        //     try {
+        //         const response = await axios.post(url, {
+        //             headers: {
+        //                 'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+        //                 'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+        //                 'Content-Type': 'application/json;ty=2'
+        //             },
+        //             data: {
+        //                 'm2m:ae': {
+        //                     rn: name,
+        //                     api: '0.2.481.1.1111',
+        //                     lbl: [name],
+        //                     rr: true,
+        //                     poa: ["http://localhost:8080"]
+        //                 }
+        //             }
+        //         });
+        //         console.log('postAeToMobius', response.data['m2m:ae']);
+        //         callback(response.status, response.data['m2m:ae']);
+        //     }
+        //     catch(err) {
+        //         console.log("Error >>", err);
+        //     }
+        // },
+
         postAeToMobius(url, name, callback) {
             axios({
                 validateStatus: function (status) {
@@ -927,7 +907,45 @@ export default {
             );
         },
 
-        getCntListDroneInfosFromMobius(callback) {
+        async TestApiCall () {
+            try {
+                const response = await axios.post('http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/LossLteInfos', {
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                    data: {
+                        'm2m:cin': {
+                            con: this.$store.state.loss_lte_infos,
+                        }
+                    }
+                });
+                console.log('postLossLTEInfoToMobius', response.data);
+                return response.data;
+            } catch(err) {
+                console.log("Error >>", err);
+            }
+        },
+
+        async getCntListDroneInfosFromMobius (callback) {
+            try {
+                const response = await axios.get('http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos?fu=1&ty=3', {
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                console.log('getCntListDroneInfosFromMobius', response.data['m2m:uril']);
+                callback(response.status, response.data['m2m:uril']);
+            }
+            catch(err) {
+                console.log("Error >>", err);
+            }
+        },
+
+        getCntListDroneInfosFromMobius_old(callback) {
             axios({
                 validateStatus: function (status) {
                     // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
@@ -1092,6 +1110,10 @@ export default {
                             }
 
                             this.$store.state.drone_infos[dName].targeted = false;
+
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'airSpeed')) {
+                                this.$store.state.drone_infos[dName].airSpeed = 0;
+                            }
 
                             if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'headingLine')) {
                                 this.$store.state.drone_infos[dName].headingLine = [];
@@ -1628,85 +1650,340 @@ export default {
             }
         },
 
-        readyDroneInfos() {
-            EventBus.$emit('gcs-map-ready');
+        async prepareDroneInfos(callback) {
+            try {
+                let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
 
-            this.$store.state.MOBIUS_CONNECTION_CONNECTED = true;
-            localStorage.setItem('MOBIUS_CONNECTION_CONNECTED', this.$store.state.MOBIUS_CONNECTION_CONNECTED.toString());
-        },
-
-        prepareDroneInfos(callback) {
-            let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos';
-            this.postCntToMobius(url, 'unknown', () => {
-                let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/unknown';
-                let con = {};
-                con.selected = false;
-                con.lat = 37.404324133883605 + Math.random() * 0.001;
-                con.lng = 127.16124484502097 + Math.random() * 0.001;
-                con.heading = 0;
-                con.host = this.$store.state.VUE_APP_MOBIUS_HOST;
-                con.gcs = this.$store.state.VUE_APP_MOBIUS_GCS;
-                con.type = 'ardupilot';
-                con.color = '#9E9E9E';
-                con.name = 'unknown';
-                con.drone_host = this.$store.state.VUE_APP_MOBIUS_HOST;
-                con.id = 'unknown';
-                con.bat_cell = 12;
-                con.system_id = 1;
-                con.home_position = {lat: 37.4032072, lng: 127.1595933};
-                con.goto_positions = [];
-                this.postCinToMobius(url, con, () => {
-                    this.getCntListDroneInfosFromMobius((status, drones) => {
-                        console.log('------1---------------------------------GcsAppBarCreated-getCntListDroneInfosFromMobius', status, drones.length, drones);
-                        if (status === 200) {
-                            if (drones.length > 0) {
-                                this.$store.state.drone_infos = {};
-                                this.drone_infos_list = [];
-                                this.selected = [];
-                                this.initDroneInfos(drones, 0, (result) => {
-                                    if (result === 0) {
-                                        console.log('initDroneInfos-success', result, this.$store.state.drone_infos);
-
-                                        // setTimeout(() => {
-                                        //     this.readyDroneInfos();
-                                        // }, 250);
-
-                                        callback();
-                                    } else {
-                                        console.log('initDroneInfos-error', result, this.$store.state.drone_infos);
-
-                                        callback();
-                                    }
-                                });
-                            }
-                        }
-                    });
+                let url = url_base + '/DroneInfos?fu=1&ty=3';
+                let response = await axios.get(url,{
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json'
+                    },
                 });
-            });
-        },
+                console.log('prepareDroneInfos-DroneInfosList', response.status, response.data['m2m:uril']);
 
-        prepareMarkerInfos(callback) {
-            let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos';
-            this.postCntToMobius(url, 'unknown', () => {
-                this.getMarkerInfosFromMobius((status, markers) => {
-                    console.log('GcsAppBarCreated-getMarkerInfosFromMobius', status, markers.length, markers);
-                    if (status === 200) {
-                        if (markers.length === 0) {
-                            this.$store.state.tempMarkers = {};
+                let drones = JSON.parse(JSON.stringify(response.data['m2m:uril']));
 
-                            callback();
+                this.$store.state.drone_infos = {};
+                this.drone_infos_list = [];
+                this.selected = [];
+
+                for(let i = 0; i < drones.length; i++) {
+                    let dName = drones[i].split('/')[3];
+
+                    url = url_base + '/DroneInfos/' + dName + '/la';
+                    response = await axios.get(url, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json'
+                        },
+                    });
+                    console.log('prepareDroneInfos-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+
+                    if (dName !== 'unknown') {
+                        this.drone_infos_list.push(JSON.parse(JSON.stringify(response.data['m2m:cin'].con)));
+                    }
+
+                    if(dName === 'unknown' || response.data['m2m:cin'].con.selected) {
+                        this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+
+                        if (dName !== 'unknown') {
+                            this.selected.push(this.$store.state.drone_infos[dName]);
                         }
-                        else {
-                            this.$store.state.tempMarkers = {};
-                            this.initTempMarkerInfos(markers, 0, () => {
-                                console.log('GcsAppBarCreated()-2', this.$store.state.tempMarkers);
 
-                                callback();
-                            });
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'name')) {
+                            this.$store.state.drone_infos[dName].name = dName;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
+                            this.$store.state.drone_infos[dName].targeted = false;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'home_position')) {
+                            this.$store.state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'color')) {
+                            this.$store.state.drone_infos[dName].color = '#9E9E9E';
+                        }
+
+                        if(this.$store.state.drone_infos[dName].color === 'grey') {
+                            this.$store.state.drone_infos[dName].color = '#9E9E9E';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'gotoType')) {
+                            this.$store.state.drone_infos[dName].gotoType = '바로이동';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetModeSelection')) {
+                            this.$store.state.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetSpeed')) {
+                            this.$store.state.drone_infos[dName].targetSpeed = 5;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'alt')) {
+                            this.$store.state.drone_infos[dName].alt = 0;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTurningSpeed')) {
+                            this.$store.state.drone_infos[dName].targetTurningSpeed = 5;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetRadius')) {
+                            this.$store.state.drone_infos[dName].targetRadius = 50;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTakeoffAlt')) {
+                            this.$store.state.drone_infos[dName].targetTakeoffAlt = 20;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'circleType')) {
+                            this.$store.state.drone_infos[dName].circleType = '시계방향';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetAlt')) {
+                            this.$store.state.drone_infos[dName].targetAlt = 20;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'sortie_name')) {
+                            this.$store.state.drone_infos[dName].sortie_name = 'disarm';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'lastFlightTime')) {
+                            this.$store.state.drone_infos[dName].lastFlightTime = 0;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoStartIndex')) {
+                            this.$store.state.drone_infos[dName].autoStartIndex = '0';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoEndIndex')) {
+                            this.$store.state.drone_infos[dName].autoEndIndex = '0';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoDelay')) {
+                            this.$store.state.drone_infos[dName].autoDelay = 1;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoSpeed')) {
+                            this.$store.state.drone_infos[dName].autoSpeed = 5;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curArmStatus')) {
+                            this.$store.state.drone_infos[dName].curArmStatus = 'DISARMED';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffAbsoluteAlt')) {
+                            this.$store.state.drone_infos[dName].takeoffAbsoluteAlt = 0;
+                        }
+
+                        this.$store.state.drone_infos[dName].targeted = false;
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'airSpeed')) {
+                            this.$store.state.drone_infos[dName].airSpeed = 0;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'headingLine')) {
+                            this.$store.state.drone_infos[dName].headingLine = [];
+                            this.$store.state.drone_infos[dName].headingLine.push({lat: 37.4032072, lng: 127.1595933});
+                            this.$store.state.drone_infos[dName].headingLine.push({lat: 37.4032072, lng: 127.1595933});
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'directionLine')) {
+                            this.$store.state.drone_infos[dName].directionLine = [];
+                            this.$store.state.drone_infos[dName].directionLine.push({lat: 37.4032072, lng: 127.1595933});
+                            this.$store.state.drone_infos[dName].directionLine.push({lat: 37.4032072, lng: 127.1595933});
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'client')) {
+                            this.$store.state.drone_infos[dName].client = {
+                                connected: false,
+                                loading: false
+                            };
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'pausePosition')) {
+                            this.$store.state.drone_infos[dName].pausePosition = {
+                                lat: 0,
+                                lng: 0,
+                                alt: 0,
+                                heading: 0
+                            };
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetStayTime')) {
+                            this.$store.state.drone_infos[dName].targetStayTime = 0;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'yawBehavior')) {
+                            this.$store.state.drone_infos[dName].yawBehavior = 'YAW고정';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'flyShape')) {
+                            this.$store.state.drone_infos[dName].flyShape = '직선비행';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'startWay')) {
+                            this.$store.state.drone_infos[dName].startWay = '처음부터';
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curMissionItemReached')) {
+                            this.$store.state.drone_infos[dName].curMissionItemReached = 0;
+                        }
+
+                        this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
+                        this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'absolute_alt')) {
+                            this.$store.state.drone_infos[dName].absolute_alt = 0;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'rtlSpeed')) {
+                            this.$store.state.drone_infos[dName].rtlSpeed = 5;
+                        }
+
+                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffDelay')) {
+                            this.$store.state.drone_infos[dName].takeoffDelay = 6;
                         }
                     }
-                });
-            });
+                }
+
+                callback();
+
+            } catch (err) {
+                console.log("Error >>", err);
+            }
+        },
+
+        async prepareMarkerInfos(callback) {
+            try {
+                this.$store.state.tempMarkers = {};
+
+                let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        let url = url_base + '/MarkerInfos/' + dName + '/la';
+                        let response = await axios.get(url, {
+                            validateStatus: status => {
+                                return status < 500;
+                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            headers: {
+                                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+                        console.log('postCntToMobius-MarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+
+                        if (response.status === 404) {
+                            url = url_base + '/MarkerInfos';
+                            response = await axios.post(url, {
+                                'm2m:cnt': {
+                                    rn: dName,
+                                    lbl: [dName]
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=3'
+                                },
+                            });
+                            console.log('addProfile-MarkerInfos', response.status, response.data['m2m:cnt']);
+
+                            url = url_base + '/MarkerInfos/' + dName;
+                            response = await axios.post(url, {
+                                'm2m:cin': {
+                                    con: []
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=4'
+                                },
+                            });
+                            console.log('addProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+
+                            if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        }
+                        else {
+                            if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        }
+
+                        this.$store.state.tempMarkers[dName].forEach((marker) => {
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
+                                marker.elevation = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'type')) {
+                                marker.type = 'Goto';
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'mavCmd')) {
+                                marker.targetMavCmd = 16;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'targetStayTime')) {
+                                marker.targetStayTime = 1;
+                            }
+
+                            marker.targeted = false;
+                            marker.selected = false;
+                        });
+                    }
+                }
+
+                callback();
+
+            } catch (err) {
+                console.log("Error >>", err);
+            }
+            // let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos';
+            // this.postCntToMobius(url, 'unknown', () => {
+            //     this.getMarkerInfosFromMobius((status, markers) => {
+            //         console.log('GcsAppBarCreated-getMarkerInfosFromMobius', status, markers.length, markers);
+            //         if (status === 200) {
+            //             if (markers.length === 0) {
+            //                 this.$store.state.tempMarkers = {};
+            //
+            //                 callback();
+            //             }
+            //             else {
+            //                 this.$store.state.tempMarkers = {};
+            //                 this.initTempMarkerInfos(markers, 0, () => {
+            //                     console.log('GcsAppBarCreated()-2', this.$store.state.tempMarkers);
+            //
+            //                     callback();
+            //                 });
+            //             }
+            //         }
+            //     });
+            // });
         },
 
         prepareSurveyMarkerInfos(callback) {
@@ -1751,7 +2028,13 @@ export default {
             });
         },
 
-        GcsAppBarCreated() {
+        GcsAppBarConnected() {
+            this.$store.state.MOBIUS_CONNECTION.connected = true;
+
+            this.GcsAppBarCreated();
+        },
+
+        async GcsAppBarCreated() {
             this.$store.state.VUE_APP_MOBIUS_HOST = this.host;
             this.$store.state.VUE_APP_MOBIUS_GCS = this.gcs;
 
@@ -1763,42 +2046,455 @@ export default {
             localStorage.setItem('mobius_host', this.host);
             localStorage.setItem('mobius_gcs', this.gcs);
 
-            let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius';
-            this.postAeToMobius(url, this.$store.state.VUE_APP_MOBIUS_GCS, () => {
-                let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
-                this.postCntToMobius(url, 'DroneInfos', () => {
-                    this.prepareDroneInfos(() => {
-                        this.postCntToMobius(url, 'MarkerInfos', () => {
-                            this.prepareMarkerInfos(() => {
-                                this.postCntToMobius(url, 'SurveyMarkerInfos', () => {
-                                    this.prepareSurveyMarkerInfos(() => {
-                                        this.postCntToMobius(url, 'LossLteInfos', () => {
-                                            this.prepareLossLteInfos(() => {
-                                                EventBus.$emit('ready-gcs_app_bar');
-                                                setTimeout(() => {
-                                                    this.readyDroneInfos();
-                                                }, 500);
-                                            });
-                                        });
-                                    });
-                                });
+            let url_root = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius';
+            try {
+                let url = url_root;
+                let response = await axios.post(url, {
+                    'm2m:ae': {
+                        rn: this.$store.state.VUE_APP_MOBIUS_GCS,
+                        api: '0.2.481.1.1111',
+                        lbl: [this.$store.state.VUE_APP_MOBIUS_GCS],
+                        rr: true,
+                        poa: ["http://localhost:8080"]
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=2'
+                    },
+                });
+                console.log('postAeToMobius', response.status, response.data['m2m:ae']);
+
+                let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+
+                url = url_base;
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: 'DroneInfos',
+                        lbl: ['DroneInfos'],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('postCntToMobius-DroneInfos', response.status, response.data['m2m:cnt']);
+
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: 'MarkerInfos',
+                        lbl: ['MarkerInfos'],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('postCntToMobius-MarkerInfos', response.status, response.data['m2m:cnt']);
+
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: 'SurveyMarkerInfos',
+                        lbl: ['SurveyMarkerInfos'],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('postCntToMobius-SurveyMarkerInfos', response.status, response.data['m2m:cnt']);
+
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: 'LossLteInfos',
+                        lbl: ['LossLteInfos'],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('postCntToMobius-LossLteInfos', response.status, response.data['m2m:cnt']);
+
+                let dName = 'unknown';
+
+                let payload = {};
+                payload.selected = false;
+                payload.lat = 37.404324133883605 + Math.random() * 0.001;
+                payload.lng = 127.16124484502097 + Math.random() * 0.001;
+                payload.alt = 0;
+                payload.absolute_alt = 0
+                payload.heading = 0;
+                payload.host = this.$store.state.VUE_APP_MOBIUS_HOST;
+                payload.gcs = this.$store.state.VUE_APP_MOBIUS_GCS;
+                payload.type = 'ardupilot';
+                payload.color = '#9E9E9E';
+                payload.name = dName;
+                payload.drone_host = this.$store.state.VUE_APP_MOBIUS_HOST;
+                payload.id = dName;
+                payload.bat_cell = 12;
+                payload.system_id = 1;
+                payload.home_position = {lat: 37.4032072, lng: 127.1595933};
+                payload.goto_positions = [];
+                payload.headingLine = [];
+                payload.headingLine.push({lat: 0, lng: 0});
+                payload.headingLine.push({lat: 0, lng: 0});
+                payload.directionLine = [];
+                payload.directionLine.push({lat: 0, lng: 0});
+                payload.directionLine.push({lat: 0, lng: 0});
+                payload.airSpeed = 0;
+
+                url = url_base + '/DroneInfos';
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: [dName],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('addProfile-DroneInfos-' + dName, response.status, response.data['m2m:cnt']);
+
+                if (response.status === 201) {
+                    url = url_base + '/DroneInfos/' + dName;
+                    response = await axios.post(url, {
+                        'm2m:cin': {
+                            con: payload
+                        }
+                    }, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                    });
+                    console.log('addProfile-DroneInfos-' + dName, response.status, response.data['m2m:cin']);
+                }
+
+                url = url_base + '/MarkerInfos';
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: [dName],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('addProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cnt']);
+
+                if (response.status === 201) {
+                    url = url_base + '/MarkerInfos/' + dName;
+                    response = await axios.post(url, {
+                        'm2m:cin': {
+                            con: []
+                        }
+                    }, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                    });
+                    console.log('addProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+                }
+
+                url = url_base + '/SurveyMarkerInfos';
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: [dName],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cnt']);
+
+                if (response.status === 201) {
+                    url = url_base + '/SurveyMarkerInfos/' + dName;
+                    response = await axios.post(url, {
+                        'm2m:cin': {
+                            con: []
+                        }
+                    }, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                    });
+                    console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+                }
+                this.prepareDroneInfos(() => {
+                    this.prepareMarkerInfos(() => {
+                        this.prepareSurveyMarkerInfos(() => {
+                            this.prepareLossLteInfos(() => {
+                                EventBus.$emit('ready-gcs_app_bar');
+                                setTimeout(() => {
+                                    EventBus.$emit('gcs-map-ready');
+                                }, 500);
                             });
                         });
                     });
                 });
-            });
+            } catch (err) {
+                console.log("Error >>", err);
+            }
         },
 
-        GcsAppBarReseted() {
+        async GcsAppBarRecreated() {
+            this.$store.state.VUE_APP_MOBIUS_HOST = this.host;
+            this.$store.state.VUE_APP_MOBIUS_GCS = this.gcs;
+
+            localStorage.setItem('mobius_host', this.host);
+            localStorage.setItem('mobius_gcs', this.gcs);
+
+            let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+            try {
+                this.$store.state.drone_infos = {};
+                this.drone_infos_list = [];
+                this.selected = [];
+
+                let dName = 'unknown';
+                let url = url_base + '/DroneInfos/' + dName + '/la';
+
+                let response = await axios.get(url, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json'
+                    },
+                });
+                console.log('postCntToMobius-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+
+                this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+
+                for(let i = 0; i < this.$store.state.MOBIUS_CONNECTION.selected.length; i++) {
+                    //console.log('this.$store.state.MOBIUS_CONNECTION.selected', this.$store.state.MOBIUS_CONNECTION.selected[i]);
+
+                    dName = this.$store.state.MOBIUS_CONNECTION.selected[i].name;
+                    url = url_base + '/DroneInfos/' + dName + '/la';
+
+                    response = await axios.get(url, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json'
+                        },
+                    });
+                    console.log('postCntToMobius-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+
+                    this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                }
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        url = url_base + '/MarkerInfos/' + dName + '/la';
+                        response = await axios.get(url, {
+                            validateStatus: status => {
+                                return status < 500;
+                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            headers: {
+                                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+                        console.log('postCntToMobius-MarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+
+                        if (response.status === 404) {
+                            url = url_base + '/MarkerInfos';
+                            response = await axios.post(url, {
+                                'm2m:cnt': {
+                                    rn: dName,
+                                    lbl: [dName]
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=3'
+                                },
+                            });
+                            console.log('addProfile-MarkerInfos', response.status, response.data['m2m:cnt']);
+
+                            url = url_base + '/MarkerInfos/' + dName;
+                            response = await axios.post(url, {
+                                'm2m:cin': {
+                                    con: []
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=4'
+                                },
+                            });
+                            console.log('addProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+
+                            if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        }
+                        else {
+                            if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        }
+
+                        url = url_base + '/SurveyMarkerInfos/' + dName + '/la';
+                        response = await axios.get(url, {
+                            validateStatus: status => {
+                                return status < 500;
+                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            headers: {
+                                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+                        console.log('postCntToMobius-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+
+                        if (response.status === 404) {
+                            url = url_base + '/SurveyMarkerInfos';
+                            response = await axios.post(url, {
+                                'm2m:cnt': {
+                                    rn: dName,
+                                    lbl: [dName]
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=3'
+                                },
+                            });
+                            console.log('addProfile-SurveyMarkerInfos', response.status, response.data['m2m:cnt']);
+
+                            url = url_base + '/SurveyMarkerInfos/' + dName;
+                            response = await axios.post(url, {
+                                'm2m:cin': {
+                                    con: []
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=4'
+                                },
+                            });
+                            console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+
+                            if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        }
+                        else {
+                            if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        }
+                    }
+                }
+
+                EventBus.$emit('ready-gcs_app_bar');
+                setTimeout(() => {
+                    EventBus.$emit('gcs-map-ready');
+                }, 500);
+
+            } catch (err) {
+                console.log("Error >>", err);
+            }
+        },
+
+        GcsAppBarDisconnected() {
             this.selected = [];
             this.drone_infos_list = [];
 
-            this.$store.state.MOBIUS_CONNECTION_CONNECTED = false;
+            this.$store.state.MOBIUS_CONNECTION = {
+                connected: false,
+                selected: []
+            };
 
             //this.$cookies.set('MOBIUS_CONNECTION_CONNECTED', this.$store.state.MOBIUS_CONNECTION_CONNECTED);
-            localStorage.setItem('MOBIUS_CONNECTION_CONNECTED', this.$store.state.MOBIUS_CONNECTION_CONNECTED.toString());
+            localStorage.setItem('MOBIUS_CONNECTION', JSON.stringify(this.$store.state.MOBIUS_CONNECTION));
 
-            this.confirmSelected(true);
+            //this.confirmSelected(true);
         },
 
         dialogProfile() {
@@ -1812,6 +2508,10 @@ export default {
             //         }
             //     }
             // }
+
+            if (this.$store.state.MOBIUS_CONNECTION.connected) {
+                this.GcsAppBarCreated();
+            }
 
             this.dialog = true;
         },
@@ -1846,7 +2546,7 @@ export default {
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName,
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
+                    'X-M2M-Origin': 'Sponde',
                     'Content-Type': 'application/json'
                 }
             }).then(
@@ -1874,7 +2574,7 @@ export default {
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName,
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
+                    'X-M2M-Origin': 'Sponde',
                     'Content-Type': 'application/json'
                 }
             }).then(
@@ -1902,12 +2602,12 @@ export default {
                 url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName,
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
+                    'X-M2M-Origin': 'Sponde',
                     'Content-Type': 'application/json'
                 }
             }).then(
                 (res) => {
-                    console.log('deleteCntMarkerInfoToMobius-axios', dName, res.data);
+                    console.log('deleteCntSurveyMarkerInfoToMobius-axios', dName, res.data);
 
                     callback(res);
                 }
@@ -1920,38 +2620,226 @@ export default {
             );
         },
 
-        confirmSelected(dialog) {
-            console.log('vvvvvvvvvvvvvvvvvvvvvvvvvvv confirmSelected', this.selected);
+        async confirmSelected(dialog) {
+            console.log('vvvvvvvvvvvvvvvvvvvvvvvvvvv confirmSelected', this.selected, this.$store.state.drone_infos);
 
             // if (Object.keys(this.$store.state.drone_infos).length <= 1) {
             //     this.dialog = false;
             //     return;
             // }
             //
+            try {
+                for (let sel_idx = 0; sel_idx < this.drone_infos_list.length; sel_idx++) {
+                    let drone_info = this.drone_infos_list[sel_idx];
+                    let dName = this.drone_infos_list[sel_idx].name;
+                    if (drone_info.selected) {
+                        let resultCount = 0;
+                        for (let idx in this.selected) {
+                            if (Object.prototype.hasOwnProperty.call(this.selected, idx)) {
+                                if (drone_info.name === this.selected[idx].name) {
+                                    resultCount++;
+                                }
+                            }
+                        }
 
-            this.drone_infos_list.forEach((drone_info) => {
-                drone_info.selected = false;
-            });
+                        if (resultCount === 0) {
+                            drone_info.selected = false;
 
-            this.$store.state.drone_infos = {};
-            for (let idx in this.selected) {
-                if (Object.prototype.hasOwnProperty.call(this.selected, idx)) {
-                    this.$store.state.drone_infos[this.selected[idx].name] = JSON.parse(JSON.stringify(this.selected[idx]));
-                    this.$store.state.drone_infos[this.selected[idx].name].selected = true;
+                            let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
+                            let response = await axios.post(url, {
+                                'm2m:cin': {
+                                    con: this.drone_infos_list[sel_idx]
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=4'
+                                },
+                            });
+                            console.log('vvvvvvvvvv confirmSelected-DroneInfos-' + dName, response.status, response.data['m2m:cin']);
+                        }
+                    } else {
+                        let resultCount = 0;
+                        for (let idx in this.selected) {
+                            if (Object.prototype.hasOwnProperty.call(this.selected, idx)) {
+                                if (drone_info.name === this.selected[idx].name) {
+                                    resultCount++;
+                                }
+                            }
+                        }
 
-                    for(let sel_idx = 0; sel_idx < this.drone_infos_list.length; sel_idx++) {
-                        if(this.drone_infos_list[sel_idx].name === this.selected[idx].name) {
-                            this.drone_infos_list[sel_idx].selected = true;
+                        if (resultCount > 0) {
+                            drone_info.selected = true;
+
+                            let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
+                            let response = await axios.post(url, {
+                                'm2m:cin': {
+                                    con: this.drone_infos_list[sel_idx]
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=4'
+                                },
+                            });
+                            console.log('vvvvvvvv confirmSelected-DroneInfos-' + dName, response.status, response.data['m2m:cin']);
                         }
                     }
                 }
+
+                let temp = JSON.parse(JSON.stringify(this.$store.state.drone_infos['unknown']));
+
+                this.$store.state.drone_infos = {};
+                for (let idx in this.selected) {
+                    if (Object.prototype.hasOwnProperty.call(this.selected, idx)) {
+                        this.$store.state.drone_infos[this.selected[idx].name] = JSON.parse(JSON.stringify(this.selected[idx]));
+                        this.$store.state.drone_infos[this.selected[idx].name].selected = true;
+                    }
+                }
+
+                this.$store.state.drone_infos['unknown'] = JSON.parse(JSON.stringify(temp));
+
+                let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+                for (let dName in this.$store.state.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        let url = url_base + '/MarkerInfos/' + dName + '/la';
+                        let response = await axios.get(url, {
+                            validateStatus: status => {
+                                return status < 500;
+                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            headers: {
+                                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+                        console.log('postCntToMobius-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+
+                        if (response.status === 404) {
+                            url = url_base + '/MarkerInfos';
+                            response = await axios.post(url, {
+                                'm2m:cnt': {
+                                    rn: dName,
+                                    lbl: [dName]
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=3'
+                                },
+                            });
+                            console.log('addProfile-MarkerInfos', response.status, response.data['m2m:cnt']);
+
+                            url = url_base + '/MarkerInfos/' + dName;
+                            response = await axios.post(url, {
+                                'm2m:cin': {
+                                    con: []
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=4'
+                                },
+                            });
+                            console.log('addProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+
+                            if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        } else {
+                            if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        }
+
+                        url = url_base + '/SurveyMarkerInfos/' + dName + '/la';
+                        response = await axios.get(url, {
+                            validateStatus: status => {
+                                return status < 500;
+                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            headers: {
+                                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+                        console.log('postCntToMobius-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+
+                        if (response.status === 404) {
+                            url = url_base + '/SurveyMarkerInfos';
+                            response = await axios.post(url, {
+                                'm2m:cnt': {
+                                    rn: dName,
+                                    lbl: [dName]
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=3'
+                                },
+                            });
+                            console.log('addProfile-SurveyMarkerInfos', response.status, response.data['m2m:cnt']);
+
+                            url = url_base + '/SurveyMarkerInfos/' + dName;
+                            response = await axios.post(url, {
+                                'm2m:cin': {
+                                    con: []
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=4'
+                                },
+                            });
+                            console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+
+                            if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        } else {
+                            if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                            this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                        }
+                    }
+                }
+            } catch (err) {
+                console.log("Error >>", err);
             }
 
-            for(let sel_idx = 0; sel_idx < this.drone_infos_list.length; sel_idx++) {
-                let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + this.drone_infos_list[sel_idx].name;
-                this.postCinToMobius(url, this.drone_infos_list[sel_idx], () => {
-                });
-            }
+            // for(let sel_idx = 0; sel_idx < this.drone_infos_list.length; sel_idx++) {
+            //     let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + this.drone_infos_list[sel_idx].name;
+            //     this.postCinToMobius(url, this.drone_infos_list[sel_idx], () => {
+            //     });
+            // }
 
             // this.$store.state.drone_infos = null;
             // this.$store.state.drone_infos = {};
@@ -1978,6 +2866,10 @@ export default {
             EventBus.$emit('gcs-map-ready');
 
             this.$forceUpdate();
+
+            this.$store.state.MOBIUS_CONNECTION.selected = this.selected;
+
+            localStorage.setItem('MOBIUS_CONNECTION', JSON.stringify(this.$store.state.MOBIUS_CONNECTION));
         },
 
         resetForm() {
@@ -2021,10 +2913,58 @@ export default {
             this.update_dialog = true;
         },
 
-        removeProfile(item) {
+        async removeProfile(item) {
+            let dName = item.name;
+
+            let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
+            let response = await axios.delete(url, {
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'Sponde',
+                    'Content-Type': 'application/json'
+                },
+            });
+            console.log('removeProfile-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+
+            url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName;
+            response = await axios.delete(url, {
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'Sponde',
+                    'Content-Type': 'application/json'
+                },
+            });
+            console.log('removeProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+
+            url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName;
+            response = await axios.delete(url, {
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'Sponde',
+                    'Content-Type': 'application/json'
+                },
+            });
+            console.log('removeProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+
             for(let del_index = 0; del_index < this.drone_infos_list.length; del_index++) {
                 if(this.drone_infos_list[del_index].name === item.name) {
                     this.drone_infos_list.splice(del_index, 1);
+                    break;
+                }
+            }
+
+            for(let del_index = 0; del_index < this.selected.length; del_index++) {
+                if(this.selected[del_index].name === item.name) {
+                    this.selected.splice(del_index, 1);
                     break;
                 }
             }
@@ -2036,28 +2976,28 @@ export default {
             // this.drone_infos = JSON.parse(JSON.stringify(temp));
             // temp = null;
 
-            this.deleteCntDroneInfoToMobius(item.name, () => {
-                this.selected = [];
-                this.drone_infos_list = [];
-
-                for (let dName in this.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
-                        if (dName !== 'unknown') {
-                            this.drone_infos_list.push(this.drone_infos[dName]);
-                        }
-
-                        if (this.drone_infos[dName].selected) {
-                            this.selected.push(this.drone_infos[dName]);
-                        }
-                    }
-                }
-
-                this.deleteCntMarkerInfoToMobius(item.name, () => {
-                    this.deleteCntSurveyMarkerInfoToMobius(item.name, () => {
-                        this.fab = false;
-                    });
-                });
-            });
+            // this.deleteCntDroneInfoToMobius(item.name, () => {
+            //     this.selected = [];
+            //     this.drone_infos_list = [];
+            //
+            //     for (let dName in this.drone_infos) {
+            //         if (Object.prototype.hasOwnProperty.call(this.drone_infos, dName)) {
+            //             if (dName !== 'unknown') {
+            //                 this.drone_infos_list.push(this.drone_infos[dName]);
+            //             }
+            //
+            //             if (this.drone_infos[dName].selected) {
+            //                 this.selected.push(this.drone_infos[dName]);
+            //             }
+            //         }
+            //     }
+            //
+            //     this.deleteCntMarkerInfoToMobius(item.name, () => {
+            //         this.deleteCntSurveyMarkerInfoToMobius(item.name, () => {
+            //             this.fab = false;
+            //         });
+            //     });
+            // });
         },
 
         cancel() {
@@ -2065,7 +3005,144 @@ export default {
             this.add_dialog = false;
         },
 
-        submitAddProfile() {
+        async addUnknownProfile() {
+            let dName = 'unknown';
+
+            let payload = {};
+            payload.selected = false;
+            payload.lat = 37.404324133883605 + Math.random() * 0.001;
+            payload.lng = 127.16124484502097 + Math.random() * 0.001;
+            payload.alt = 0;
+            payload.absolute_alt = 0;
+            payload.heading = 0;
+            payload.host = this.$store.state.VUE_APP_MOBIUS_HOST;
+            payload.gcs = this.$store.state.VUE_APP_MOBIUS_GCS;
+            payload.type = 'ardupilot';
+            payload.color = '#9E9E9E';
+            payload.name = dName;
+            payload.drone_host = this.$store.state.VUE_APP_MOBIUS_HOST;
+            payload.id = dName;
+            payload.bat_cell = 12;
+            payload.system_id = 1;
+            payload.home_position = {lat: 37.4032072, lng: 127.1595933};
+            payload.goto_positions = [];
+            payload.headingLine = [];
+            payload.headingLine.push({lat: 0, lng: 0});
+            payload.headingLine.push({lat: 0, lng: 0});
+            payload.directionLine = [];
+            payload.directionLine.push({lat: 0, lng: 0});
+            payload.directionLine.push({lat: 0, lng: 0});
+            payload.airSpeed = 0;
+
+            let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+
+            let url =  url_base + '/DroneInfos';
+            let response = await axios.post(url, {
+                'm2m:cnt': {
+                    rn: dName,
+                    lbl: [dName],
+                }
+            }, {
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    'Content-Type': 'application/json;ty=3'
+                },
+            });
+            console.log('addProfile-DroneInfos-'+dName, response.status, response.data['m2m:cnt']);
+
+            url =  url_base + '/DroneInfos/' + dName;
+            response = await axios.post(url, {
+                'm2m:cin': {
+                    con: payload
+                }
+            }, {
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    'Content-Type': 'application/json;ty=4'
+                },
+            });
+            console.log('addProfile-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+
+            url =  url_base + '/MarkerInfos';
+            response = await axios.post(url, {
+                'm2m:cnt': {
+                    rn: dName,
+                    lbl: [dName],
+                }
+            }, {
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    'Content-Type': 'application/json;ty=3'
+                },
+            });
+            console.log('addProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cnt']);
+
+            url =  url_base + '/MarkerInfos/' + dName;
+            response = await axios.post(url, {
+                'm2m:cin': {
+                    con: []
+                }
+            }, {
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    'Content-Type': 'application/json;ty=4'
+                },
+            });
+            console.log('addProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+
+            url =  url_base + '/SurveyMarkerInfos';
+            response = await axios.post(url, {
+                'm2m:cnt': {
+                    rn: dName,
+                    lbl: [dName],
+                }
+            }, {
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    'Content-Type': 'application/json;ty=3'
+                },
+            });
+            console.log('addProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cnt']);
+
+            url =  url_base + '/SurveyMarkerInfos/' + dName;
+            response = await axios.post(url, {
+                'm2m:cin': {
+                    con: []
+                }
+            }, {
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    'Content-Type': 'application/json;ty=4'
+                },
+            });
+            console.log('addProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+        },
+
+        async submitAddProfile() {
             this.formHasErrors = false;
 
             for (let el in this.form) {
@@ -2093,6 +3170,13 @@ export default {
                 payload.system_id = this.system_id;
                 payload.home_position = {lat: 37.4032072, lng: 127.1595933};
                 payload.goto_positions = [];
+                payload.headingLine = [];
+                payload.headingLine.push({lat: 0, lng: 0});
+                payload.headingLine.push({lat: 0, lng: 0});
+                payload.directionLine = [];
+                payload.directionLine.push({lat: 0, lng: 0});
+                payload.directionLine.push({lat: 0, lng: 0});
+                payload.airSpeed = 0;
 
                 this.drone_infos_list.push(payload);
 
@@ -2113,14 +3197,119 @@ export default {
                 //     }
                 // }
 
-                this.postCntDroneInfoToMobius(this.drone_name, () => {
-                    this.postCinDroneInfoToMobius(this.drone_name, payload, () => {
-                        this.add_dialog = false;
-                        this.fab = false;
+                let dName = this.drone_name;
+                let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
 
-                        this.resetForm();
-                    });
+                let url =  url_base + '/DroneInfos';
+                let response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: [dName],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
                 });
+                console.log('addProfile-DroneInfos-'+dName, response.status, response.data['m2m:cnt']);
+
+                url =  url_base + '/DroneInfos/' + dName;
+                response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: payload
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('addProfile-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+
+                url =  url_base + '/MarkerInfos';
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: [dName],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('addProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cnt']);
+
+                url =  url_base + '/MarkerInfos/' + dName;
+                response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: []
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('addProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+
+                url =  url_base + '/SurveyMarkerInfos';
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: [dName],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('addProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cnt']);
+
+                url =  url_base + '/SurveyMarkerInfos/' + dName;
+                response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: []
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('addProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+
+
+                this.add_dialog = false;
+                this.fab = false;
+
+                this.resetForm();
             }
         },
 
@@ -2184,13 +3373,24 @@ export default {
     },
 
     created() {
-        this.$store.state.MOBIUS_CONNECTION_CONNECTED = localStorage.getItem('MOBIUS_CONNECTION_CONNECTED') ? (localStorage.getItem('MOBIUS_CONNECTION_CONNECTED') === 'true') : false;
+        if(localStorage.getItem('MOBIUS_CONNECTION')) {
+            this.$store.state.MOBIUS_CONNECTION = JSON.parse(localStorage.getItem('MOBIUS_CONNECTION'));
+        }
+        else {
+            this.$store.state.MOBIUS_CONNECTION = {
+                connected: false,
+                selected: []
+            };
+        }
     },
 
     mounted() {
-        if (this.$store.state.MOBIUS_CONNECTION_CONNECTED) {
-            this.GcsAppBarCreated();
+        if (this.$store.state.MOBIUS_CONNECTION.connected) {
+            this.GcsAppBarRecreated();
         }
+        // else {
+        //     this.GcsAppBarCreated();
+        // }
     },
 
     beforeDestroy() {

@@ -255,7 +255,7 @@
                                             fillOpacity: 1,
                                             strokeWeight: (drone.targeted)?3:2,
                                             strokeColor: (drone.targeted)?'springgreen':'#1A237E',
-                                            rotation: (360+drone.heading-45-mapHeading)%360,
+                                            rotation: (360+drone.heading-45-map.getHeading())%360,
                                             scale: scaleDroneIcon,
                                             anchor: {x: $store.state.iconSourceDrone.icon[0] / 2, y: $store.state.iconSourceDrone.icon[1] / 2},
                                             labelOrigin: {x: $store.state.iconSourceDrone.icon[0] / 2, y: $store.state.iconSourceDrone.icon[1] / 2},

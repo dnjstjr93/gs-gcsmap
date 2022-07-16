@@ -418,7 +418,10 @@ export default new Vuex.Store({
         iconSourceDrone: faLocationArrow,
         iconSourceDroneHome: faFlag, //faMapMarkerAlt,
 
-        MOBIUS_CONNECTION_CONNECTED: false,
+        MOBIUS_CONNECTION: {
+            connected: false,
+            selected: []
+        },
         VUE_APP_MOBIUS_HOST: 'gcs.iotocean.org',
         VUE_APP_MOBIUS_GCS: 'KETI_GCS',
 
@@ -759,7 +762,7 @@ export default new Vuex.Store({
         },
 
         saveCurrentDroneInfos(state, dName) {
-            if (state.MOBIUS_CONNECTION_CONNECTED) {
+            if (state.MOBIUS_CONNECTION.connected) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.

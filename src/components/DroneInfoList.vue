@@ -54,7 +54,6 @@
                                     v-bind:name="drone.name"
                                     :id="drone.id"
                                     :gcs="drone.gcs"
-                                    :sortie_name="drone.sortie_name"
                                     :bat_cell="drone.bat_cell"
                                     :goto_positions="drone.goto_positions"
                                     v-bind:airspeed_size="myWidth*0.45"
