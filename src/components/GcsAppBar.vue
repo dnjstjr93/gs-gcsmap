@@ -1689,173 +1689,179 @@ export default {
                     });
                     console.log('prepareDroneInfos-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
 
-                    if (dName !== 'unknown') {
-                        this.drone_infos_list.push(JSON.parse(JSON.stringify(response.data['m2m:cin'].con)));
+                    let drone_info = response.data['m2m:cin'].con;
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'name')) {
+                        drone_info.name = dName;
                     }
 
-                    if(dName === 'unknown' || response.data['m2m:cin'].con.selected) {
-                        this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targeted')) {
+                        drone_info.targeted = false;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'selected')) {
+                        drone_info.selected = false;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'home_position')) {
+                        drone_info.home_position = {lat: 37.4032072, lng: 127.1595933};
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'color')) {
+                        drone_info.color = '#9E9E9E';
+                    }
+
+                    if(drone_info.color === 'grey') {
+                        drone_info.color = '#9E9E9E';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'gotoType')) {
+                        drone_info.gotoType = '바로이동';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetModeSelection')) {
+                        drone_info.targetModeSelection = 'ALT_HOLD';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetSpeed')) {
+                        drone_info.targetSpeed = 5;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'alt')) {
+                        drone_info.alt = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetTurningSpeed')) {
+                        drone_info.targetTurningSpeed = 5;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetRadius')) {
+                        drone_info.targetRadius = 50;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetTakeoffAlt')) {
+                        drone_info.targetTakeoffAlt = 20;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'circleType')) {
+                        drone_info.circleType = '시계방향';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetAlt')) {
+                        drone_info.targetAlt = 20;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'sortie_name')) {
+                        drone_info.sortie_name = 'disarm';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'lastFlightTime')) {
+                        drone_info.lastFlightTime = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'autoStartIndex')) {
+                        drone_info.autoStartIndex = '0';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'autoEndIndex')) {
+                        drone_info.autoEndIndex = '0';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'autoDelay')) {
+                        drone_info.autoDelay = 1;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'autoSpeed')) {
+                        drone_info.autoSpeed = 5;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'curArmStatus')) {
+                        drone_info.curArmStatus = 'DISARMED';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'takeoffAbsoluteAlt')) {
+                        drone_info.takeoffAbsoluteAlt = 0;
+                    }
+
+                    drone_info.targeted = false;
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'airSpeed')) {
+                        drone_info.airSpeed = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'headingLine')) {
+                        drone_info.headingLine = [];
+                        drone_info.headingLine.push({lat: 37.4032072, lng: 127.1595933});
+                        drone_info.headingLine.push({lat: 37.4032072, lng: 127.1595933});
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'directionLine')) {
+                        drone_info.directionLine = [];
+                        drone_info.directionLine.push({lat: 37.4032072, lng: 127.1595933});
+                        drone_info.directionLine.push({lat: 37.4032072, lng: 127.1595933});
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'client')) {
+                        drone_info.client = {
+                            connected: false,
+                            loading: false
+                        };
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'pausePosition')) {
+                        drone_info.pausePosition = {
+                            lat: 0,
+                            lng: 0,
+                            alt: 0,
+                            heading: 0
+                        };
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetStayTime')) {
+                        drone_info.targetStayTime = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'yawBehavior')) {
+                        drone_info.yawBehavior = 'YAW고정';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'flyShape')) {
+                        drone_info.flyShape = '직선비행';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'startWay')) {
+                        drone_info.startWay = '처음부터';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'curMissionItemReached')) {
+                        drone_info.curMissionItemReached = 0;
+                    }
+
+                    drone_info.curTargetedTempMarkerIndex = -1;
+                    drone_info.curTargetedSurveyMarkerIndex = -1;
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'absolute_alt')) {
+                        drone_info.absolute_alt = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'rtlSpeed')) {
+                        drone_info.rtlSpeed = 5;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'takeoffDelay')) {
+                        drone_info.takeoffDelay = 6;
+                    }
+
+                    if(dName === 'unknown' || drone_info.selected) {
+                        this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(drone_info));
 
                         if (dName !== 'unknown') {
-                            this.selected.push(this.$store.state.drone_infos[dName]);
+                            this.selected.push(drone_info);
                         }
+                    }
 
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'name')) {
-                            this.$store.state.drone_infos[dName].name = dName;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targeted')) {
-                            this.$store.state.drone_infos[dName].targeted = false;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'home_position')) {
-                            this.$store.state.drone_infos[dName].home_position = {lat: 37.4032072, lng: 127.1595933};
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'color')) {
-                            this.$store.state.drone_infos[dName].color = '#9E9E9E';
-                        }
-
-                        if(this.$store.state.drone_infos[dName].color === 'grey') {
-                            this.$store.state.drone_infos[dName].color = '#9E9E9E';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'gotoType')) {
-                            this.$store.state.drone_infos[dName].gotoType = '바로이동';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetModeSelection')) {
-                            this.$store.state.drone_infos[dName].targetModeSelection = 'ALT_HOLD';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetSpeed')) {
-                            this.$store.state.drone_infos[dName].targetSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'alt')) {
-                            this.$store.state.drone_infos[dName].alt = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTurningSpeed')) {
-                            this.$store.state.drone_infos[dName].targetTurningSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetRadius')) {
-                            this.$store.state.drone_infos[dName].targetRadius = 50;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetTakeoffAlt')) {
-                            this.$store.state.drone_infos[dName].targetTakeoffAlt = 20;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'circleType')) {
-                            this.$store.state.drone_infos[dName].circleType = '시계방향';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetAlt')) {
-                            this.$store.state.drone_infos[dName].targetAlt = 20;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'sortie_name')) {
-                            this.$store.state.drone_infos[dName].sortie_name = 'disarm';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'lastFlightTime')) {
-                            this.$store.state.drone_infos[dName].lastFlightTime = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoStartIndex')) {
-                            this.$store.state.drone_infos[dName].autoStartIndex = '0';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoEndIndex')) {
-                            this.$store.state.drone_infos[dName].autoEndIndex = '0';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoDelay')) {
-                            this.$store.state.drone_infos[dName].autoDelay = 1;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'autoSpeed')) {
-                            this.$store.state.drone_infos[dName].autoSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curArmStatus')) {
-                            this.$store.state.drone_infos[dName].curArmStatus = 'DISARMED';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffAbsoluteAlt')) {
-                            this.$store.state.drone_infos[dName].takeoffAbsoluteAlt = 0;
-                        }
-
-                        this.$store.state.drone_infos[dName].targeted = false;
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'airSpeed')) {
-                            this.$store.state.drone_infos[dName].airSpeed = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'headingLine')) {
-                            this.$store.state.drone_infos[dName].headingLine = [];
-                            this.$store.state.drone_infos[dName].headingLine.push({lat: 37.4032072, lng: 127.1595933});
-                            this.$store.state.drone_infos[dName].headingLine.push({lat: 37.4032072, lng: 127.1595933});
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'directionLine')) {
-                            this.$store.state.drone_infos[dName].directionLine = [];
-                            this.$store.state.drone_infos[dName].directionLine.push({lat: 37.4032072, lng: 127.1595933});
-                            this.$store.state.drone_infos[dName].directionLine.push({lat: 37.4032072, lng: 127.1595933});
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'client')) {
-                            this.$store.state.drone_infos[dName].client = {
-                                connected: false,
-                                loading: false
-                            };
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'pausePosition')) {
-                            this.$store.state.drone_infos[dName].pausePosition = {
-                                lat: 0,
-                                lng: 0,
-                                alt: 0,
-                                heading: 0
-                            };
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'targetStayTime')) {
-                            this.$store.state.drone_infos[dName].targetStayTime = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'yawBehavior')) {
-                            this.$store.state.drone_infos[dName].yawBehavior = 'YAW고정';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'flyShape')) {
-                            this.$store.state.drone_infos[dName].flyShape = '직선비행';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'startWay')) {
-                            this.$store.state.drone_infos[dName].startWay = '처음부터';
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curMissionItemReached')) {
-                            this.$store.state.drone_infos[dName].curMissionItemReached = 0;
-                        }
-
-                        this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
-                        this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'absolute_alt')) {
-                            this.$store.state.drone_infos[dName].absolute_alt = 0;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'rtlSpeed')) {
-                            this.$store.state.drone_infos[dName].rtlSpeed = 5;
-                        }
-
-                        if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffDelay')) {
-                            this.$store.state.drone_infos[dName].takeoffDelay = 6;
-                        }
+                    if (dName !== 'unknown') {
+                        this.drone_infos_list.push(JSON.parse(JSON.stringify(drone_info)));
                     }
                 }
 
@@ -1926,18 +1932,26 @@ export default {
                             if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         }
                         else {
                             if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         }
 
-                        this.$store.state.tempMarkers[dName].forEach((marker) => {
+                        let temp_markers = response.data['m2m:cin'].con;
+
+                        temp_markers.forEach((marker, pIndex) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
                                 marker.elevation = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
+                                marker.name = dName;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'color')) {
+                                marker.color = this.$store.state.drone_infos[dName].color;
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'type')) {
@@ -1952,9 +1966,14 @@ export default {
                                 marker.targetStayTime = 1;
                             }
 
+                            marker.color = this.$store.state.drone_infos[dName].color;
                             marker.targeted = false;
                             marker.selected = false;
+
+                            console.log('ppppppppppppppppppppppppp prepareMarkerInfos tempMarker-targeted', dName, pIndex, marker.targeted);
                         });
+
+                        this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(temp_markers));
                     }
                 }
 
@@ -1963,54 +1982,228 @@ export default {
             } catch (err) {
                 console.log("Error >>", err);
             }
-            // let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos';
+        },
+
+        async prepareSurveyMarkerInfos(callback) {
+            try {
+                this.$store.state.surveyMarkers = {};
+
+                let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        let url = url_base + '/SurveyMarkerInfos/' + dName + '/la';
+                        let response = await axios.get(url, {
+                            validateStatus: status => {
+                                return status < 500;
+                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            headers: {
+                                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                'Content-Type': 'application/json'
+                            },
+                        });
+                        console.log('postCntToMobius-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+
+                        if (response.status === 404) {
+                            url = url_base + '/SurveyMarkerInfos';
+                            response = await axios.post(url, {
+                                'm2m:cnt': {
+                                    rn: dName,
+                                    lbl: [dName]
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=3'
+                                },
+                            });
+                            console.log('addProfile-SurveyMarkerInfos', response.status, response.data['m2m:cnt']);
+
+                            url = url_base + '/SurveyMarkerInfos/' + dName;
+                            response = await axios.post(url, {
+                                'm2m:cin': {
+                                    con: []
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=4'
+                                },
+                            });
+                            console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+
+                            if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                        }
+                        else {
+                            if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
+                                response.data['m2m:cin'].con = [];
+                            }
+                        }
+
+                        let survey_markers = response.data['m2m:cin'].con;
+
+                        survey_markers.forEach((marker, pIndex) => {
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'angleStart')) {
+                                marker.angleStart = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'dir')) {
+                                marker.dir = 'cw';
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'color')) {
+                                marker.color = 'orange';
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'gap')) {
+                                marker.gap = 10;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'pathLines')) {
+                                marker.pathLines = [];
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'polygonDraggable')) {
+                                marker.polygonDraggable = false;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'polygonEditable')) {
+                                marker.polygonEditable = false;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'wayOfSurvey')) {
+                                marker.wayOfSurvey = 'forShooting';
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'angle')) {
+                                marker.angle = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'alt')) {
+                                marker.alt = 100;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'focal')) {
+                                marker.focal = 16;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'sensor_w')) {
+                                marker.sensor_w = 23.5;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'sensor_h')) {
+                                marker.sensor_h = 15.6;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'overlap')) {
+                                marker.overlap = 0.7;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'speed')) {
+                                marker.speed = 5;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'period')) {
+                                marker.period = 5;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'total_dist')) {
+                                marker.total_dist = 400;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'area')) {
+                                marker.area = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'paramAlt')) {
+                                marker.paramAlt = 150;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'paramOffsetAlt')) {
+                                marker.paramOffsetAlt = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'flyAlt')) {
+                                marker.flyAlt = Array(256).fill(150);
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'takeoffAlt')) {
+                                marker.takeoffAlt = Array(256).fill(0);
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'offsetAlt')) {
+                                marker.offsetAlt = Array(256).fill(0);
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'flyAltType')) {
+                                marker.flyAltType = '상대고도';
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'elevations')) {
+                                marker.elevations = [];
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'elevations_location')) {
+                                marker.elevations_location = [];
+                            }
+
+                            marker.polygonDraggable = false;
+                            marker.polygonEditable = false;
+
+                            marker.options = {};
+                            marker.options.zIndex = 5;
+                            marker.color = this.$store.state.drone_infos[dName].color;
+                            marker.targeted = false;
+                            marker.selected = false;
+
+                            console.log('ppppppppppppppppppppppppp prepareSurveyMarkerInfos-targeted', dName, pIndex, marker.targeted);
+                        });
+
+                        this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(survey_markers));
+                    }
+                }
+
+                callback();
+
+            } catch (err) {
+                console.log("Error >>", err);
+            }
+
+            // let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos';
             // this.postCntToMobius(url, 'unknown', () => {
-            //     this.getMarkerInfosFromMobius((status, markers) => {
-            //         console.log('GcsAppBarCreated-getMarkerInfosFromMobius', status, markers.length, markers);
+            //     this.getSurveyMarkerInfosFromMobius((status, markers) => {
+            //         console.log('GcsAppBarCreated-getSurveyMarkerInfosFromMobius', status, markers.length, markers);
             //         if (status === 200) {
             //             if (markers.length === 0) {
-            //                 this.$store.state.tempMarkers = {};
+            //                 this.$store.state.surveyMarkers = {};
             //
             //                 callback();
             //             }
             //             else {
-            //                 this.$store.state.tempMarkers = {};
-            //                 this.initTempMarkerInfos(markers, 0, () => {
-            //                     console.log('GcsAppBarCreated()-2', this.$store.state.tempMarkers);
+            //                 this.$store.state.surveyMarkers = {};
+            //                 this.initSurveyMarkerInfos(markers, 0, () => {
+            //                     console.log('GcsAppBarCreated()-2', 'initSurveyMarkerInfos', this.$store.state.surveyMarkers);
             //
             //                     callback();
             //                 });
             //             }
             //         }
+            //         else {
+            //             callback();
+            //         }
             //     });
             // });
-        },
-
-        prepareSurveyMarkerInfos(callback) {
-            let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos';
-            this.postCntToMobius(url, 'unknown', () => {
-                this.getSurveyMarkerInfosFromMobius((status, markers) => {
-                    console.log('GcsAppBarCreated-getSurveyMarkerInfosFromMobius', status, markers.length, markers);
-                    if (status === 200) {
-                        if (markers.length === 0) {
-                            this.$store.state.surveyMarkers = {};
-
-                            callback();
-                        }
-                        else {
-                            this.$store.state.surveyMarkers = {};
-                            this.initSurveyMarkerInfos(markers, 0, () => {
-                                console.log('GcsAppBarCreated()-2', 'initSurveyMarkerInfos', this.$store.state.surveyMarkers);
-
-                                callback();
-                            });
-                        }
-                    }
-                    else {
-                        callback();
-                    }
-                });
-            });
         },
 
         prepareLossLteInfos(callback) {
@@ -2343,7 +2536,182 @@ export default {
                     });
                     console.log('postCntToMobius-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
 
-                    this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
+                    let drone_info = response.data['m2m:cin'].con;
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'name')) {
+                        drone_info.name = dName;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targeted')) {
+                        drone_info.targeted = false;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'selected')) {
+                        drone_info.selected = false;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'home_position')) {
+                        drone_info.home_position = {lat: 37.4032072, lng: 127.1595933};
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'color')) {
+                        drone_info.color = '#9E9E9E';
+                    }
+
+                    if(drone_info.color === 'grey') {
+                        drone_info.color = '#9E9E9E';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'gotoType')) {
+                        drone_info.gotoType = '바로이동';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetModeSelection')) {
+                        drone_info.targetModeSelection = 'ALT_HOLD';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetSpeed')) {
+                        drone_info.targetSpeed = 5;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'alt')) {
+                        drone_info.alt = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetTurningSpeed')) {
+                        drone_info.targetTurningSpeed = 5;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetRadius')) {
+                        drone_info.targetRadius = 50;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetTakeoffAlt')) {
+                        drone_info.targetTakeoffAlt = 20;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'circleType')) {
+                        drone_info.circleType = '시계방향';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetAlt')) {
+                        drone_info.targetAlt = 20;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'sortie_name')) {
+                        drone_info.sortie_name = 'disarm';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'lastFlightTime')) {
+                        drone_info.lastFlightTime = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'autoStartIndex')) {
+                        drone_info.autoStartIndex = '0';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'autoEndIndex')) {
+                        drone_info.autoEndIndex = '0';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'autoDelay')) {
+                        drone_info.autoDelay = 1;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'autoSpeed')) {
+                        drone_info.autoSpeed = 5;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'curArmStatus')) {
+                        drone_info.curArmStatus = 'DISARMED';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'takeoffAbsoluteAlt')) {
+                        drone_info.takeoffAbsoluteAlt = 0;
+                    }
+
+                    drone_info.targeted = false;
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'airSpeed')) {
+                        drone_info.airSpeed = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'headingLine')) {
+                        drone_info.headingLine = [];
+                        drone_info.headingLine.push({lat: 37.4032072, lng: 127.1595933});
+                        drone_info.headingLine.push({lat: 37.4032072, lng: 127.1595933});
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'directionLine')) {
+                        drone_info.directionLine = [];
+                        drone_info.directionLine.push({lat: 37.4032072, lng: 127.1595933});
+                        drone_info.directionLine.push({lat: 37.4032072, lng: 127.1595933});
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'client')) {
+                        drone_info.client = {
+                            connected: false,
+                            loading: false
+                        };
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'pausePosition')) {
+                        drone_info.pausePosition = {
+                            lat: 0,
+                            lng: 0,
+                            alt: 0,
+                            heading: 0
+                        };
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetStayTime')) {
+                        drone_info.targetStayTime = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'yawBehavior')) {
+                        drone_info.yawBehavior = 'YAW고정';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'flyShape')) {
+                        drone_info.flyShape = '직선비행';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'startWay')) {
+                        drone_info.startWay = '처음부터';
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'curMissionItemReached')) {
+                        drone_info.curMissionItemReached = 0;
+                    }
+
+                    drone_info.curTargetedTempMarkerIndex = -1;
+                    drone_info.curTargetedSurveyMarkerIndex = -1;
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'absolute_alt')) {
+                        drone_info.absolute_alt = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'rtlSpeed')) {
+                        drone_info.rtlSpeed = 5;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'takeoffDelay')) {
+                        drone_info.takeoffDelay = 6;
+                    }
+
+                    if(dName === 'unknown' || drone_info.selected) {
+                        this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(drone_info));
+
+                        if (dName !== 'unknown') {
+                            this.selected.push(drone_info);
+                        }
+                    }
+
+                    if (dName !== 'unknown') {
+                        this.drone_infos_list.push(JSON.parse(JSON.stringify(drone_info)));
+                    }
+
+                    this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(drone_info));
                 }
 
                 for(let dName in this.$store.state.drone_infos) {
@@ -2400,14 +2768,48 @@ export default {
                             if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         }
                         else {
                             if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         }
+
+                        let temp_markers = response.data['m2m:cin'].con;
+
+                        temp_markers.forEach((marker, pIndex) => {
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
+                                marker.elevation = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
+                                marker.name = dName;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'color')) {
+                                marker.color = this.$store.state.drone_infos[dName].color;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'type')) {
+                                marker.type = 'Goto';
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'mavCmd')) {
+                                marker.targetMavCmd = 16;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'targetStayTime')) {
+                                marker.targetStayTime = 1;
+                            }
+
+                            marker.color = this.$store.state.drone_infos[dName].color;
+                            marker.targeted = false;
+                            marker.selected = false;
+
+                            console.log('ppppppppppppppppppppppppp recreated MarkerInfos tempMarker-targeted', dName, pIndex, marker.targeted);
+                        });
+
+                        this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(temp_markers));
 
                         url = url_base + '/SurveyMarkerInfos/' + dName + '/la';
                         response = await axios.get(url, {
@@ -2461,14 +2863,48 @@ export default {
                             if(!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         }
                         else {
                             if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         }
+
+                        let survey_markers = response.data['m2m:cin'].con;
+
+                        survey_markers.forEach((marker, pIndex) => {
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
+                                marker.elevation = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
+                                marker.name = dName;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'color')) {
+                                marker.color = this.$store.state.drone_infos[dName].color;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'type')) {
+                                marker.type = 'Goto';
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'mavCmd')) {
+                                marker.targetMavCmd = 16;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'targetStayTime')) {
+                                marker.targetStayTime = 1;
+                            }
+
+                            marker.color = this.$store.state.drone_infos[dName].color;
+                            marker.targeted = false;
+                            marker.selected = false;
+
+                            console.log('ppppppppppppppppppppppppp recreated surveyMarkerInfos-targeted', dName, pIndex, marker.targeted);
+                        });
+
+                        this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(survey_markers));
                     }
                 }
 
@@ -2696,7 +3132,6 @@ export default {
                 }
 
                 let temp = JSON.parse(JSON.stringify(this.$store.state.drone_infos['unknown']));
-
                 this.$store.state.drone_infos = {};
                 for (let idx in this.selected) {
                     if (Object.prototype.hasOwnProperty.call(this.selected, idx)) {
@@ -2704,7 +3139,6 @@ export default {
                         this.$store.state.drone_infos[this.selected[idx].name].selected = true;
                     }
                 }
-
                 this.$store.state.drone_infos['unknown'] = JSON.parse(JSON.stringify(temp));
 
                 let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
@@ -2762,13 +3196,47 @@ export default {
                             if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         } else {
                             if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         }
+
+                        let temp_markers = response.data['m2m:cin'].con;
+
+                        temp_markers.forEach((marker, pIndex) => {
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
+                                marker.elevation = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
+                                marker.name = dName;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'color')) {
+                                marker.color = this.$store.state.drone_infos[dName].color;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'type')) {
+                                marker.type = 'Goto';
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'mavCmd')) {
+                                marker.targetMavCmd = 16;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'targetStayTime')) {
+                                marker.targetStayTime = 1;
+                            }
+
+                            marker.color = this.$store.state.drone_infos[dName].color;
+                            marker.targeted = false;
+                            marker.selected = false;
+
+                            console.log('ppppppppppppppppppppppppp confirmSelected MarkerInfos-targeted', dName, pIndex, marker.targeted);
+                        });
+
+                        this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(temp_markers));
 
                         url = url_base + '/SurveyMarkerInfos/' + dName + '/la';
                         response = await axios.get(url, {
@@ -2822,13 +3290,48 @@ export default {
                             if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         } else {
                             if (!Object.prototype.hasOwnProperty.call(response.data['m2m:cin'], 'con')) {
                                 response.data['m2m:cin'].con = [];
                             }
-                            this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(response.data['m2m:cin'].con));
                         }
+
+                        let survey_markers = response.data['m2m:cin'].con;
+
+                        survey_markers.forEach((marker, pIndex) => {
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
+                                marker.elevation = 0;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
+                                marker.name = dName;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'color')) {
+                                marker.color = this.$store.state.drone_infos[dName].color;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'type')) {
+                                marker.type = 'Goto';
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'mavCmd')) {
+                                marker.targetMavCmd = 16;
+                            }
+
+                            if (!Object.prototype.hasOwnProperty.call(marker, 'targetStayTime')) {
+                                marker.targetStayTime = 1;
+                            }
+
+                            marker.color = this.$store.state.drone_infos[dName].color;
+                            marker.targeted = false;
+                            marker.selected = false;
+
+                            console.log('ppppppppppppppppppppppppp confirmSelected surveyMarkerInfos-targeted', dName, pIndex, marker.targeted);
+                        });
+
+                        this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(survey_markers));
+
                     }
                 }
             } catch (err) {
@@ -2916,57 +3419,61 @@ export default {
         async removeProfile(item) {
             let dName = item.name;
 
-            let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
-            let response = await axios.delete(url, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'Sponde',
-                    'Content-Type': 'application/json'
-                },
-            });
-            console.log('removeProfile-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+            try {
+                let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/DroneInfos/' + dName;
+                let response = await axios.delete(url, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'Sponde',
+                        'Content-Type': 'application/json'
+                    },
+                });
+                console.log('removeProfile-DroneInfos-' + dName, response.status, response.data['m2m:cin']);
 
-            url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName;
-            response = await axios.delete(url, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'Sponde',
-                    'Content-Type': 'application/json'
-                },
-            });
-            console.log('removeProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+                url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/MarkerInfos/' + dName;
+                response = await axios.delete(url, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'Sponde',
+                        'Content-Type': 'application/json'
+                    },
+                });
+                console.log('removeProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
 
-            url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName;
-            response = await axios.delete(url, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'Sponde',
-                    'Content-Type': 'application/json'
-                },
-            });
-            console.log('removeProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+                url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName;
+                response = await axios.delete(url, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'Sponde',
+                        'Content-Type': 'application/json'
+                    },
+                });
+                console.log('removeProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
 
-            for(let del_index = 0; del_index < this.drone_infos_list.length; del_index++) {
-                if(this.drone_infos_list[del_index].name === item.name) {
-                    this.drone_infos_list.splice(del_index, 1);
-                    break;
+                for (let del_index = 0; del_index < this.drone_infos_list.length; del_index++) {
+                    if (this.drone_infos_list[del_index].name === item.name) {
+                        this.drone_infos_list.splice(del_index, 1);
+                        break;
+                    }
                 }
-            }
 
-            for(let del_index = 0; del_index < this.selected.length; del_index++) {
-                if(this.selected[del_index].name === item.name) {
-                    this.selected.splice(del_index, 1);
-                    break;
+                for (let del_index = 0; del_index < this.selected.length; del_index++) {
+                    if (this.selected[del_index].name === item.name) {
+                        this.selected.splice(del_index, 1);
+                        break;
+                    }
                 }
+            } catch (err) {
+                console.log("Error >>", err);
             }
 
             // delete this.drone_infos[item.name];
@@ -3008,138 +3515,142 @@ export default {
         async addUnknownProfile() {
             let dName = 'unknown';
 
-            let payload = {};
-            payload.selected = false;
-            payload.lat = 37.404324133883605 + Math.random() * 0.001;
-            payload.lng = 127.16124484502097 + Math.random() * 0.001;
-            payload.alt = 0;
-            payload.absolute_alt = 0;
-            payload.heading = 0;
-            payload.host = this.$store.state.VUE_APP_MOBIUS_HOST;
-            payload.gcs = this.$store.state.VUE_APP_MOBIUS_GCS;
-            payload.type = 'ardupilot';
-            payload.color = '#9E9E9E';
-            payload.name = dName;
-            payload.drone_host = this.$store.state.VUE_APP_MOBIUS_HOST;
-            payload.id = dName;
-            payload.bat_cell = 12;
-            payload.system_id = 1;
-            payload.home_position = {lat: 37.4032072, lng: 127.1595933};
-            payload.goto_positions = [];
-            payload.headingLine = [];
-            payload.headingLine.push({lat: 0, lng: 0});
-            payload.headingLine.push({lat: 0, lng: 0});
-            payload.directionLine = [];
-            payload.directionLine.push({lat: 0, lng: 0});
-            payload.directionLine.push({lat: 0, lng: 0});
-            payload.airSpeed = 0;
+            try {
+                let payload = {};
+                payload.selected = false;
+                payload.lat = 37.404324133883605 + Math.random() * 0.001;
+                payload.lng = 127.16124484502097 + Math.random() * 0.001;
+                payload.alt = 0;
+                payload.absolute_alt = 0;
+                payload.heading = 0;
+                payload.host = this.$store.state.VUE_APP_MOBIUS_HOST;
+                payload.gcs = this.$store.state.VUE_APP_MOBIUS_GCS;
+                payload.type = 'ardupilot';
+                payload.color = '#9E9E9E';
+                payload.name = dName;
+                payload.drone_host = this.$store.state.VUE_APP_MOBIUS_HOST;
+                payload.id = dName;
+                payload.bat_cell = 12;
+                payload.system_id = 1;
+                payload.home_position = {lat: 37.4032072, lng: 127.1595933};
+                payload.goto_positions = [];
+                payload.headingLine = [];
+                payload.headingLine.push({lat: 0, lng: 0});
+                payload.headingLine.push({lat: 0, lng: 0});
+                payload.directionLine = [];
+                payload.directionLine.push({lat: 0, lng: 0});
+                payload.directionLine.push({lat: 0, lng: 0});
+                payload.airSpeed = 0;
 
-            let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+                let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
 
-            let url =  url_base + '/DroneInfos';
-            let response = await axios.post(url, {
-                'm2m:cnt': {
-                    rn: dName,
-                    lbl: [dName],
-                }
-            }, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                    'Content-Type': 'application/json;ty=3'
-                },
-            });
-            console.log('addProfile-DroneInfos-'+dName, response.status, response.data['m2m:cnt']);
+                let url = url_base + '/DroneInfos';
+                let response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: [dName],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('addProfile-DroneInfos-' + dName, response.status, response.data['m2m:cnt']);
 
-            url =  url_base + '/DroneInfos/' + dName;
-            response = await axios.post(url, {
-                'm2m:cin': {
-                    con: payload
-                }
-            }, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                    'Content-Type': 'application/json;ty=4'
-                },
-            });
-            console.log('addProfile-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+                url = url_base + '/DroneInfos/' + dName;
+                response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: payload
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('addProfile-DroneInfos-' + dName, response.status, response.data['m2m:cin']);
 
-            url =  url_base + '/MarkerInfos';
-            response = await axios.post(url, {
-                'm2m:cnt': {
-                    rn: dName,
-                    lbl: [dName],
-                }
-            }, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                    'Content-Type': 'application/json;ty=3'
-                },
-            });
-            console.log('addProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cnt']);
+                url = url_base + '/MarkerInfos';
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: [dName],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('addProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cnt']);
 
-            url =  url_base + '/MarkerInfos/' + dName;
-            response = await axios.post(url, {
-                'm2m:cin': {
-                    con: []
-                }
-            }, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                    'Content-Type': 'application/json;ty=4'
-                },
-            });
-            console.log('addProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+                url = url_base + '/MarkerInfos/' + dName;
+                response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: []
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('addProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
 
-            url =  url_base + '/SurveyMarkerInfos';
-            response = await axios.post(url, {
-                'm2m:cnt': {
-                    rn: dName,
-                    lbl: [dName],
-                }
-            }, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                    'Content-Type': 'application/json;ty=3'
-                },
-            });
-            console.log('addProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cnt']);
+                url = url_base + '/SurveyMarkerInfos';
+                response = await axios.post(url, {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: [dName],
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                });
+                console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cnt']);
 
-            url =  url_base + '/SurveyMarkerInfos/' + dName;
-            response = await axios.post(url, {
-                'm2m:cin': {
-                    con: []
-                }
-            }, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                    'Content-Type': 'application/json;ty=4'
-                },
-            });
-            console.log('addProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+                url = url_base + '/SurveyMarkerInfos/' + dName;
+                response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: []
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+            } catch (err) {
+                console.log("Error >>", err);
+            }
         },
 
         async submitAddProfile() {
@@ -3200,116 +3711,120 @@ export default {
                 let dName = this.drone_name;
                 let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
 
-                let url =  url_base + '/DroneInfos';
-                let response = await axios.post(url, {
-                    'm2m:cnt': {
-                        rn: dName,
-                        lbl: [dName],
-                    }
-                }, {
-                    validateStatus: status => {
-                        return status < 500;
-                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                        'Content-Type': 'application/json;ty=3'
-                    },
-                });
-                console.log('addProfile-DroneInfos-'+dName, response.status, response.data['m2m:cnt']);
+                try {
+                    let url = url_base + '/DroneInfos';
+                    let response = await axios.post(url, {
+                        'm2m:cnt': {
+                            rn: dName,
+                            lbl: [dName],
+                        }
+                    }, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json;ty=3'
+                        },
+                    });
+                    console.log('addProfile-DroneInfos-' + dName, response.status, response.data['m2m:cnt']);
 
-                url =  url_base + '/DroneInfos/' + dName;
-                response = await axios.post(url, {
-                    'm2m:cin': {
-                        con: payload
-                    }
-                }, {
-                    validateStatus: status => {
-                        return status < 500;
-                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                        'Content-Type': 'application/json;ty=4'
-                    },
-                });
-                console.log('addProfile-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+                    url = url_base + '/DroneInfos/' + dName;
+                    response = await axios.post(url, {
+                        'm2m:cin': {
+                            con: payload
+                        }
+                    }, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                    });
+                    console.log('addProfile-DroneInfos-' + dName, response.status, response.data['m2m:cin']);
 
-                url =  url_base + '/MarkerInfos';
-                response = await axios.post(url, {
-                    'm2m:cnt': {
-                        rn: dName,
-                        lbl: [dName],
-                    }
-                }, {
-                    validateStatus: status => {
-                        return status < 500;
-                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                        'Content-Type': 'application/json;ty=3'
-                    },
-                });
-                console.log('addProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cnt']);
+                    url = url_base + '/MarkerInfos';
+                    response = await axios.post(url, {
+                        'm2m:cnt': {
+                            rn: dName,
+                            lbl: [dName],
+                        }
+                    }, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json;ty=3'
+                        },
+                    });
+                    console.log('addProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cnt']);
 
-                url =  url_base + '/MarkerInfos/' + dName;
-                response = await axios.post(url, {
-                    'm2m:cin': {
-                        con: []
-                    }
-                }, {
-                    validateStatus: status => {
-                        return status < 500;
-                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                        'Content-Type': 'application/json;ty=4'
-                    },
-                });
-                console.log('addProfile-MarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+                    url = url_base + '/MarkerInfos/' + dName;
+                    response = await axios.post(url, {
+                        'm2m:cin': {
+                            con: []
+                        }
+                    }, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                    });
+                    console.log('addProfile-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
 
-                url =  url_base + '/SurveyMarkerInfos';
-                response = await axios.post(url, {
-                    'm2m:cnt': {
-                        rn: dName,
-                        lbl: [dName],
-                    }
-                }, {
-                    validateStatus: status => {
-                        return status < 500;
-                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                        'Content-Type': 'application/json;ty=3'
-                    },
-                });
-                console.log('addProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cnt']);
+                    url = url_base + '/SurveyMarkerInfos';
+                    response = await axios.post(url, {
+                        'm2m:cnt': {
+                            rn: dName,
+                            lbl: [dName],
+                        }
+                    }, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json;ty=3'
+                        },
+                    });
+                    console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cnt']);
 
-                url =  url_base + '/SurveyMarkerInfos/' + dName;
-                response = await axios.post(url, {
-                    'm2m:cin': {
-                        con: []
-                    }
-                }, {
-                    validateStatus: status => {
-                        return status < 500;
-                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                        'Content-Type': 'application/json;ty=4'
-                    },
-                });
-                console.log('addProfile-SurveyMarkerInfos-'+dName, response.status, response.data['m2m:cin']);
+                    url = url_base + '/SurveyMarkerInfos/' + dName;
+                    response = await axios.post(url, {
+                        'm2m:cin': {
+                            con: []
+                        }
+                    }, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                            'Content-Type': 'application/json;ty=4'
+                        },
+                    });
+                    console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
 
 
-                this.add_dialog = false;
-                this.fab = false;
+                    this.add_dialog = false;
+                    this.fab = false;
 
-                this.resetForm();
+                    this.resetForm();
+                } catch (err) {
+                    console.log("Error >>", err);
+                }
             }
         },
 

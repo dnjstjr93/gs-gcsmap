@@ -33,7 +33,9 @@ import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 //import GeoJSON from 'ol/format/GeoJSON'
 import MultiPoint from 'ol/geom/MultiPoint';
-import { toLonLat } from 'ol/proj';
+import Point from 'ol/geom/Point';
+import LineString from 'ol/geom/LineString';
+import { toLonLat, getPointResolution } from 'ol/proj';
 import { Collection } from "ol";
 import {getLength} from 'ol/sphere';
 
@@ -42,8 +44,6 @@ import {Circle as CircleStyle, Fill, Stroke, Style} from 'ol/style';
 import {Icon, Text} from 'ol/style';
 // import {Geometry} from 'ol/geom';
 import Feature from 'ol/Feature';
-import Point from 'ol/geom/Point';
-import LineString from 'ol/geom/LineString';
 
 import { faLocationArrow, faMapPin, faCrosshairs, faBullseye } from "@fortawesome/free-solid-svg-icons";
 //import { faMapMarkerAlt, faCrosshairs, faFlag, faPlaneSlash, faHourglassHalf } from "@fortawesome/free-solid-svg-icons";
@@ -250,12 +250,12 @@ export default {
     },
 
     watch: {
-        geojson(value) {
-            this.updateSource(value)
-        },
-        selectedFeature(value) {
-            this.$emit('select', value)
-        },
+        // geojson(value) {
+        //     this.updateSource(value)
+        // },
+        // selectedFeature(value) {
+        //     this.$emit('select', value)
+        // },
     },
 
     computed: {
@@ -267,11 +267,29 @@ export default {
             console.log(obj.data.marker.getId());
         },
 
-        addOlTempMarker(obj) {
-            if(!Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, 'unknown')) {
-                this.$store.state.tempMarkers['unknown'] = [];
+        async addOlTempMarker(obj) {
+            let dName = 'unknown';
+            let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
 
-                this.postCntTempMarkerInfosToMobius('unknown');
+            if(!Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers, dName)) {
+                this.$store.state.tempMarkers[dName] = [];
+
+                let url = url_base + '/MarkerInfos/' + dName;
+                let response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: []
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('addOlTempMarker-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
             }
 
             let latLng = toLonLat(obj.coordinate);
@@ -279,7 +297,7 @@ export default {
             let eLngLats = [];
             eLngLats.push(JSON.parse(JSON.stringify(latLng)));
 
-            this.getElevationProfile(eLngLats, (status, result) => {
+            this.getElevationProfile(eLngLats, async (status, result) => {
                 if (status === 200) {
                     let elevation_val = result.elevationProfile[0].height;
 
@@ -300,13 +318,33 @@ export default {
                     marker.targeted = false;
                     marker.color = '#9E9E9E';
 
-                    this.$store.state.tempMarkers['unknown'].push(marker);
+                    this.$store.state.tempMarkers[dName].push(marker);
 
-                    this.initOlTempMarker('unknown');
+                    this.initOlTempMarker(dName);
 
                     this.updateSource();
 
-                    this.postCinTempMarkerInfoToMobius('unknown');
+                    try {
+                        let url = url_base + '/MarkerInfos/' + dName;
+                        let response = await axios.post(url, {
+                            'm2m:cin': {
+                                con: this.$store.state.tempMarkers[dName]
+                            }
+                        }, {
+                            validateStatus: status => {
+                                return status < 500;
+                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            headers: {
+                                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                'Content-Type': 'application/json;ty=4'
+                            },
+                        });
+                        console.log('addOlTempMarker-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+                    } catch (err) {
+                        console.log("Error >>", err);
+                    }
+
 
                     //this.doBroadcastConfirmAddTempMarker(JSON.parse(JSON.stringify(marker)));
                 }
@@ -509,7 +547,7 @@ export default {
                 }
             }).then(
                 (res) => {
-                    console.log('-------------------------------------------------------postCinTempMarkerInfoToMobius-axios', res.data);
+                    console.log('-------------------------------------------------------postCntTempMarkerInfosToMobius-axios', res.data);
                 }
             ).catch(
                 (err) => {
@@ -605,7 +643,7 @@ export default {
                 iconStyleTemp = this.getStyleTempMarker(
                     pIndex,
                     this.$store.state.drone_infos[dName].color,
-                    '#FFFF00',
+                    '#76FF03',
                     '25',
                     this.$store.state.tempMarkers[dName][pIndex].alt,
                     svgTempScale,
@@ -664,7 +702,7 @@ export default {
                     text: new Text({
                         text: [dAlt.toFixed(1)+' m', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
                             '', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
-                            (armStatus === 'DISARMED') ? 'DISARMED' : '', 'bold 10px sans-serif',],
+                            (armStatus === 'DISARMED') ? 'DISARMED' : this.$store.state.drone_infos[dName].curMode, 'bold 10px sans-serif',],
                         textAlign: 'center',
                         offsetY: -25,
                         scale: 1.5,
@@ -693,6 +731,19 @@ export default {
                         }),
                     }),
                     zIndex: 2,
+                }),
+                new Style({
+                    image: new CircleStyle({
+                        radius: 10,
+                        fill: new Fill({
+                            color: '#FAFAFA80',
+                        }),
+                    }),
+                    geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinate = feature.getGeometry().getCoordinates();
+                        return new Point(coordinate);
+                    },
                 }),
             ];
         },
@@ -765,7 +816,7 @@ export default {
                         let eLngLats = [];
                         eLngLats.push(JSON.parse(JSON.stringify(latLng)));
 
-                        this.getElevationProfile(eLngLats, (status, result) => {
+                        this.getElevationProfile(eLngLats, async (status, result) => {
                             if (status === 200) {
                                 let elevation_val = result.elevationProfile[0].height;
 
@@ -793,7 +844,29 @@ export default {
                                     }, 10);
                                 }
 
-                                this.postCinTempMarkerInfoToMobius(dName);
+                                //this.postCinTempMarkerInfoToMobius(dName);
+
+                                try {
+                                    let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+                                    let url = url_base + '/MarkerInfos/' + dName;
+                                    let response = await axios.post(url, {
+                                        'm2m:cin': {
+                                            con: this.$store.state.tempMarkers[dName]
+                                        }
+                                    }, {
+                                        validateStatus: status => {
+                                            return status < 500;
+                                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                        headers: {
+                                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                            'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                            'Content-Type': 'application/json;ty=4'
+                                        },
+                                    });
+                                    console.log('addOlTempMarker-MarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+                                } catch (err) {
+                                    console.log("Error >>", err);
+                                }
 
                                 let watchingPayload = {};
                                 watchingPayload.broadcastMission = 'broadcastUpdateTempMarkerPosition';
@@ -842,7 +915,7 @@ export default {
 
             if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
                 svgTempObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
-                svgTempObj.svg.path._attributes.stroke = '#FFFF00'.replace('#', '%23');
+                svgTempObj.svg.path._attributes.stroke = '#76FF03'.replace('#', '%23');
                 svgTempObj.svg.path._attributes['stroke-width'] = '25';
             }
             else {
@@ -870,7 +943,7 @@ export default {
         updateTargetDroneMarker(dName) {
             // if (this.$store.state.drone_infos[dName].targeted) {
             //     svgDroneObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
-            //     svgDroneObj.svg.path._attributes.stroke = '#FFFF00'.replace('#', '%23');
+            //     svgDroneObj.svg.path._attributes.stroke = '#76FF03'.replace('#', '%23');
             //     svgDroneObj.svg.path._attributes['stroke-width'] = '35';
             // }
             // else {
@@ -912,7 +985,7 @@ export default {
                     dName,
                     this.$store.state.drone_infos[dName].system_id,
                     this.$store.state.drone_infos[dName].color,
-                    '#FFFF00',
+                    '#76FF03',
                     '25',
                     this.$store.state.drone_infos[dName].alt,
                     svgScale + (this.$store.state.drone_infos[dName].alt / 3000),
@@ -1277,33 +1350,35 @@ export default {
                 });
                 tFeature.setId(dName + '-' + pIndex);
 
-                let selectedColor = '#FAFAFA80';
+                let selectedColor = '#76FF03F0';
+                let targetedColor = '#76FF03FF';
 
                 if (this.$store.state.tempMarkers[dName][pIndex].selected) {
                     selectedColor = '#76FF03F0';
                 }
+                else {
+                    selectedColor = '#FAFAFA80';
+                }
+
+                if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                    targetedColor = '#76FF03FF';
+                }
+                else {
+                    targetedColor = '#FFFDE7FF';
+                }
+
+
+                console.log('ppppppppppppppppppppppppp tempMarker-targeted', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted, targetedColor);
 
                 let iconStyleTemp = this.getStyleTempMarker(
                     pIndex,
                     this.$store.state.drone_infos[dName].color,
-                    '#FFFDE7',
+                    targetedColor,
                     '15',
                     tAlt,
                     svgTempScale,
                     selectedColor
                 );
-
-                if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
-                    iconStyleTemp = this.getStyleTempMarker(
-                        pIndex,
-                        this.$store.state.drone_infos[dName].color,
-                        '#FFFF00',
-                        '25',
-                        this.$store.state.tempMarkers[dName][pIndex].alt,
-                        svgTempScale,
-                        selectedColor
-                    );
-                }
 
                 tFeature.setStyle(iconStyleTemp);
 
@@ -1784,8 +1859,8 @@ export default {
             let dLng = this.$store.state.drone_infos[dName].lng;
             let dAlt = this.$store.state.drone_infos[dName].alt;
 
-            let pnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
-            let coordinate = pnt.getCoordinates();
+            let dPnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
+            let dCoordinate = dPnt.getCoordinates();
 
             let sLat = this.$store.state.drone_infos[dName].headingLine[0].lat;
             let sLng = this.$store.state.drone_infos[dName].headingLine[0].lng;
@@ -1819,16 +1894,21 @@ export default {
                 if(speed < 1) {
                     this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setText([dAlt.toFixed(1)+' m', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
                         '', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
-                        (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'DISARMED' : '', 'bold 10px sans-serif',]);
+                        (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'DISARMED' : this.$store.state.drone_infos[dName].curMode, 'bold 10px sans-serif',]);
                 }
                 else {
                     this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setText([dAlt.toFixed(1)+' m', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
                         speed.toFixed(1)+' m/s', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
-                        (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'DISARMED' : '', 'bold 10px sans-serif',]);
+                        (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'DISARMED' : this.$store.state.drone_infos[dName].curMode, 'bold 10px sans-serif',]);
                 }
                 this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setFill(new Fill({ color: (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'red' : colorMapAlt[Math.round(dAlt / 10) * 10] }));
                 this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[1].getText().setFill(new Fill({ color: colorMapAlt[Math.round(dAlt / 10) * 10] }));
-                this.olDroneMarkers[dName].droneMarkerFeature.getGeometry().setCoordinates(coordinate);
+                this.olDroneMarkers[dName].droneMarkerFeature.getGeometry().setCoordinates(dCoordinate);
+
+                let resolution = this.olMap.getView().getResolution();
+                let projection = this.olMap.getView().getProjection();
+                //console.log(projection, resolution, getPointResolution(projection, resolution, dCoordinate, 'm'));
+                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[2].getImage().setRadius(10 / getPointResolution(projection, resolution, dCoordinate, 'm'))
 
                 this.olDroneMarkers[dName].headingLineFeature.getGeometry().setCoordinates([[sCoordinate[0], sCoordinate[1]], [eCoordinate[0], eCoordinate[1]]]);
 
@@ -2013,7 +2093,7 @@ export default {
 
                     this.$store.state.tempMarkers[dName][pIndex].targeted = !this.$store.state.tempMarkers[dName][pIndex].targeted;
 
-                    console.log(dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted);
+                    console.log('ppppppppppppppppppppp single click', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted);
 
                     if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
                           this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;

@@ -1,7 +1,7 @@
 <template>
     <v-container :class="borderColor" class="pa-0 ma-0">
-        <v-card ref="info" tile flat :color="$store.state.drone_infos[name].color">
-            <v-row no-gutters class="mt-0">
+        <v-card ref="info" tile flat :color="$store.state.drone_infos[name].color" :style="$store.state.drone_infos[name].targeted ? 'border: 3px solid #76FF03;' : 'border: 0px solid white;'">
+            <v-row no-gutters class="mt-0" :style="'border: 0px solid white;'">
                 <v-col cols="12">
                     <v-row no-gutters align="center" justify="center">
                         <v-col cols="5">
@@ -636,7 +636,7 @@
                         </v-col>
                     </v-row>
                     <v-row no-gutters justify="center" align="center">
-                        <v-col cols="2" class="pl-1 pt-1">
+                        <v-col cols="2" class="px-1 pt-1">
                             <v-img v-if="fc_img === 'ardupilot.png'"
                                 src="../assets/ardupilot.png"
                                 alt="Ahn"
@@ -647,9 +647,9 @@
                             ></v-img>
                         </v-col>
                         <v-col cols="2">
-                            <v-select class="ma-0 pa-0 pl-1" v-model="mavVersion" :items="mavVersions"
+                            <v-select class="ma-0 pa-0" v-model="mavVersion" :items="mavVersions"
                                       @change="selectedMavVersion($event)"
-                                      dark outlined dense flat tile hide-details
+                                      outlined dense flat tile hide-details dark
                             ></v-select>
                         </v-col>
                         <v-col cols="8">
@@ -7193,6 +7193,14 @@ export default {
     border: 1px solid lightgray;
 }
 
+.targeted-border {
+    border: 3px solid #76FF03;
+}
+
+.untargeted-border {
+    border: 0 solid lightgray;
+}
+
 .indicator-border-green {
     border: 1px solid darkblue;
 }
@@ -7295,6 +7303,12 @@ export default {
     padding: 0;
 }
 
+.v-text-field.v-text-field--solo .v-input__control{
+    min-height: 10px;
+}
 
+.v-label{
+    font-size: 10px;
+}
 
 </style>
