@@ -1102,7 +1102,7 @@ export default {
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curArmStatus')) {
-                                this.$store.state.drone_infos[dName].curArmStatus = 'DISARMED';
+                                this.$store.state.drone_infos[dName].curArmStatus = 'UNKNOWN';
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'takeoffAbsoluteAlt')) {
@@ -1110,6 +1110,7 @@ export default {
                             }
 
                             this.$store.state.drone_infos[dName].targeted = false;
+                            this.$store.state.drone_infos[dName].curArmStatus = 'UNKNOWN';
 
                             if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'airSpeed')) {
                                 this.$store.state.drone_infos[dName].airSpeed = 0;
@@ -1776,7 +1777,7 @@ export default {
                     }
 
                     if (!Object.prototype.hasOwnProperty.call(drone_info, 'curArmStatus')) {
-                        drone_info.curArmStatus = 'DISARMED';
+                        drone_info.curArmStatus = 'UNKNOWN';
                     }
 
                     if (!Object.prototype.hasOwnProperty.call(drone_info, 'takeoffAbsoluteAlt')) {
@@ -1784,6 +1785,8 @@ export default {
                     }
 
                     drone_info.targeted = false;
+                    drone_info.curArmStatus = 'UNKNOWN';
+                    drone_info.curMode = 'UNKNOWN';
 
                     if (!Object.prototype.hasOwnProperty.call(drone_info, 'airSpeed')) {
                         drone_info.airSpeed = 0;
@@ -2623,7 +2626,7 @@ export default {
                     }
 
                     if (!Object.prototype.hasOwnProperty.call(drone_info, 'curArmStatus')) {
-                        drone_info.curArmStatus = 'DISARMED';
+                        drone_info.curArmStatus = 'UNKNOWN';
                     }
 
                     if (!Object.prototype.hasOwnProperty.call(drone_info, 'takeoffAbsoluteAlt')) {
@@ -2631,6 +2634,8 @@ export default {
                     }
 
                     drone_info.targeted = false;
+                    drone_info.curArmStatus = 'UNKNOWN';
+                    drone_info.curMode = 'UNKNOWN';
 
                     if (!Object.prototype.hasOwnProperty.call(drone_info, 'airSpeed')) {
                         drone_info.airSpeed = 0;

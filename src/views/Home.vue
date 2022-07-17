@@ -110,7 +110,7 @@ export default {
     }),
 
     created() {
-        this.$store.state.viewAlt = this.selected_map === 'google_maps';
+        this.$store.state.viewAlt = (this.selected_map === 'googlemaps');
 
         EventBus.$on('ready-gcs_app_bar', () => {
             this.ready_dorne_list = true;

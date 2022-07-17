@@ -45,7 +45,7 @@ import {Icon, Text} from 'ol/style';
 // import {Geometry} from 'ol/geom';
 import Feature from 'ol/Feature';
 
-import { faLocationArrow, faMapPin, faCrosshairs, faBullseye } from "@fortawesome/free-solid-svg-icons";
+import { faLocationArrow, faMapPin, faCrosshairs, faBullseye, faHome } from "@fortawesome/free-solid-svg-icons";
 //import { faMapMarkerAlt, faCrosshairs, faFlag, faPlaneSlash, faHourglassHalf } from "@fortawesome/free-solid-svg-icons";
 
 import convert from "xml-js";
@@ -69,22 +69,19 @@ svgDroneObj.svg.path = {};
 svgDroneObj.svg.path._attributes = {};
 svgDroneObj.svg.path._attributes.d = faLocationArrow.icon[4];
 
-let svgDroneGotoObj = {};
-svgDroneGotoObj.svg = {};
-svgDroneGotoObj.svg._attributes = {};
-svgDroneGotoObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
-svgDroneGotoObj.svg._attributes.x = '0';
-svgDroneGotoObj.svg._attributes.y = '0';
-svgDroneGotoObj.svg._attributes.width = faBullseye.icon[0]/3;
-svgDroneGotoObj.svg._attributes.height = faBullseye.icon[1]/3;
-svgDroneGotoObj.svg._attributes.class = faBullseye.icon[3];
-svgDroneGotoObj.svg._attributes.viewBox = '-11 -11 ' + (faBullseye.icon[0]+22) + ' ' + (faBullseye.icon[1]+22);
-svgDroneGotoObj.svg.path = {};
-svgDroneGotoObj.svg.path._attributes = {};
-svgDroneGotoObj.svg.path._attributes.d = faBullseye.icon[4];
-svgDroneGotoObj.svg.path._attributes.fill = '#4A148C'.replace('#', '%23');
-svgDroneGotoObj.svg.path._attributes.stroke = '#F3E5F5'.replace('#', '%23');
-svgDroneGotoObj.svg.path._attributes['stroke-width'] = '10';
+let svgDroneHomeObj = {};
+svgDroneHomeObj.svg = {};
+svgDroneHomeObj.svg._attributes = {};
+svgDroneHomeObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
+svgDroneHomeObj.svg._attributes.x = '0';
+svgDroneHomeObj.svg._attributes.y = '0';
+svgDroneHomeObj.svg._attributes.width = faHome.icon[0]/3;
+svgDroneHomeObj.svg._attributes.height = faHome.icon[1]/3;
+svgDroneHomeObj.svg._attributes.class = faHome.icon[3];
+svgDroneHomeObj.svg._attributes.viewBox = '-11 -11 ' + (faHome.icon[0]+22) + ' ' + (faHome.icon[1]+22);
+svgDroneHomeObj.svg.path = {};
+svgDroneHomeObj.svg.path._attributes = {};
+svgDroneHomeObj.svg.path._attributes.d = faHome.icon[4];
 
 let svgTempObj = {};
 svgTempObj.svg = {};
@@ -100,7 +97,7 @@ svgTempObj.svg.path = {};
 svgTempObj.svg.path._attributes = {};
 svgTempObj.svg.path._attributes.d = faCrosshairs.icon[4];
 
-console.log('faMapPin', faLocationArrow, faCrosshairs, faMapPin);
+console.log('svg', faMapPin, faBullseye);
 
 const svgScale = 0.18;
 const svgTempScale = 0.10;
@@ -400,7 +397,7 @@ export default {
                     this.features.push(this.olDroneMarkers[dName].headingLineFeature);
                     this.features.push(this.olDroneMarkers[dName].targetLineFeature);
                     this.features.push(this.olDroneMarkers[dName].droneMarkerFeature);
-                    //this.features.push(this.olDroneMarkers[dName].droneGotoMarkerFeature);
+                    this.features.push(this.olDroneMarkers[dName].droneHomeMarkerFeature);
                     this.features.push(this.olDroneMarkers[dName].directionLineFeature);
                     console.log('droneMarkers', this.features);
                 }
@@ -670,7 +667,7 @@ export default {
         },
 
         getStyleDroneGotoMarker() {
-            let xmlSvgDroneGotoMarker = convert.js2xml(svgDroneGotoObj, {compact: true, ignoreComment: true, spaces: 4});
+            let xmlSvgDroneGotoMarker = convert.js2xml(svgDroneHomeObj, {compact: true, ignoreComment: true, spaces: 4});
 
             return (new Style({
                 image: new Icon({
@@ -1029,12 +1026,12 @@ export default {
                     let dLng = this.$store.state.drone_infos[dName].lng;
                     let dAlt = this.$store.state.drone_infos[dName].alt;
 
-                    let pnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
-                    let coordinate = pnt.getCoordinates();
+                    let dPnt = new Point([dLng, dLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let dCoordinate = dPnt.getCoordinates();
 
                     this.olDroneMarkers[dName] = {};
                     this.olDroneMarkers[dName].droneMarkerFeature = new Feature({
-                        geometry: new Point([coordinate[0], coordinate[1]]),
+                        geometry: new Point([dCoordinate[0], dCoordinate[1]]),
                         type: 'droneMarker',
                     });
                     this.olDroneMarkers[dName].droneMarkerFeature.setId(dName);
@@ -1208,27 +1205,39 @@ export default {
 
                     this.olDroneMarkers[dName].targetLineFeature.setStyle(targetLineStyle);
 
-                    this.olDroneMarkers[dName].droneGotoMarkerFeature = new Feature({
-                        geometry: new Point([coordinate[0], coordinate[1]]),
-                        type: 'droneGotoMarker',
-                    });
-                    this.olDroneMarkers[dName].droneGotoMarkerFeature.setId(dName+'-Goto');
+                    let hLat = this.$store.state.drone_infos[dName].home_position.lat;
+                    let hLng = this.$store.state.drone_infos[dName].home_position.lng;
 
-                    let iconStyleDroneGoto = new Style({
-                        image: new CircleStyle({
-                            radius: 9,
-                            fill: new Fill({
-                                color: '#FAFAFA80',
-                            }),
+                    let hPnt = new Point([hLng, hLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let hCoordinate = hPnt.getCoordinates();
+
+                    this.olDroneMarkers[dName].droneHomeMarkerFeature = new Feature({
+                        geometry: new Point([hCoordinate[0], hCoordinate[1]]),
+                        type: 'droneHomeMarker',
+                    });
+                    this.olDroneMarkers[dName].droneHomeMarkerFeature.setId(dName+'-Home');
+
+                    svgDroneHomeObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                    svgDroneHomeObj.svg.path._attributes.stroke = '#E8F5E9'.replace('#', '%23');
+                    svgDroneHomeObj.svg.path._attributes['stroke-width'] = '10';
+                    let xmlSvgDroneHomeMarker = convert.js2xml(svgDroneHomeObj, {compact: true, ignoreComment: true, spaces: 4});
+
+                    let iconStyleDroneHome = new Style({
+                        image: new Icon({
+                            opacity: 0.8,
+                            src: 'data:image/svg+xml;utf8,' + xmlSvgDroneHomeMarker,
+                            scale: 0.13,
+                            anchor: [0.5, 0.5],
                         }),
                         geometry: function (feature) {
                             // return the coordinates of the first ring of the polygon
                             const coordinate = feature.getGeometry().getCoordinates();
                             return new Point(coordinate);
                         },
+                        zIndex: 1
                     });
 
-                    this.olDroneMarkers[dName].droneGotoMarkerFeature.setStyle(iconStyleDroneGoto);
+                    this.olDroneMarkers[dName].droneHomeMarkerFeature.setStyle(iconStyleDroneHome);
                 }
             });
         },

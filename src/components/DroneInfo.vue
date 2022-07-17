@@ -942,7 +942,7 @@ export default {
             target_pub_topic: '/Mobius/' + this.gcs + '/GCS_Data/' + this.name,
 
             colorArm: 'td-text-gray',
-            curArmStatus: 'DISARMED',
+            curArmStatus: 'UNKNOWN',
 
             // colorArming: this.$store.state.drone_infos[this.name].color + ' darken-4',
             colorArming: 'white',
@@ -1241,7 +1241,7 @@ export default {
                 wpYawBehavior: 'YAW-0',
                 colorMode: '#9E9E9E',
                 curMode: 'UNKNOWN',
-                curArmStatus: 'DISARMED',
+                curArmStatus: 'UNKNOWN',
                 severity: 6,
                 text: ''
             },
@@ -3921,8 +3921,6 @@ export default {
                     console.log('send_takeoff_command ', this.name);
                     this.doPublish(pub_topic, msg);
 
-                    this.$store.state.drone_infos[this.name].home_position = null;
-                    delete this.$store.state.drone_infos[this.name].home_position;
                     this.$store.state.drone_infos[this.name].home_position = {
                         lat: (this.gpi.lat / 10000000),
                         lng: (this.gpi.lon / 10000000)
@@ -4135,6 +4133,14 @@ export default {
                         //     this.$store.state.trackingLines[this.name] = [];
                         // }
                         // if(this.$store.state.drone_infos[this.name].curArmStatus !== 'ARMED') {
+
+                        if(this.curArmStatus === 'DISARMED') {
+                            this.$store.state.drone_infos[this.name].home_position = {
+                                lat: (this.gpi.lat / 10000000),
+                                lng: (this.gpi.lon / 10000000)
+                            };
+                        }
+
                             this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
                             this.curArmStatus = 'ARMED';
                             this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
@@ -5954,16 +5960,16 @@ export default {
             setTimeout((name, target_pub_topic, sys_id, mode) => {
                 console.log('send_set_mode_command', mode);
                 this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+
+                setTimeout((name, target_pub_topic, sys_id, param_value) => {
+                    this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
+
+                    setTimeout((name, target_pub_topic, sys_id, mode) => {
+                        console.log('send_set_mode_command', mode);
+                        this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
+                    }, parseInt(50 + (Math.random() * 2)), this.name, this.target_pub_topic, this.sys_id, pre_custom_mode);
+                }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
             }, parseInt(Math.random() * 2), this.name, this.target_pub_topic, this.sys_id, target_mode);
-
-            setTimeout((name, target_pub_topic, sys_id, param_value) => {
-                this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
-            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
-
-            setTimeout((name, target_pub_topic, sys_id, mode) => {
-                console.log('send_set_mode_command', mode);
-                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
-            }, parseInt(50 + (Math.random() * 2)), this.name, this.target_pub_topic, this.sys_id, pre_custom_mode);
         });
 
         EventBus.$on('ClickADSBMonitor', (flag) => {
