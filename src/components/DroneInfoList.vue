@@ -69,11 +69,15 @@
                     </v-card>
                 </v-card>
             </v-col>
+        </v-row>
+        <v-row no-gutters class="command_tab">
             <v-col cols="12" sm="6" md="9">
                 <v-card flat tile color="#E8F5E9">
                     <DroneCommand></DroneCommand>
                 </v-card>
             </v-col>
+        </v-row>
+        <v-row no-gutters class="drone_alt">
             <v-col v-if="$store.state.viewAlt" cols="12" sm="6" md="9">
                 <v-card flat tile>
                     <DroneAlt></DroneAlt>
@@ -808,6 +812,24 @@
 
 <style scoped>
     .drone_list {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 1;
+        z-index: 2;
+        width: 100%;
+    }
+
+    .command_tab {
+        position: absolute;
+        left: 0;
+        top: 0;
+        opacity: 1;
+        z-index: 2;
+        width: 100%;
+    }
+
+    .drone_alt {
         position: absolute;
         left: 0;
         top: 0;

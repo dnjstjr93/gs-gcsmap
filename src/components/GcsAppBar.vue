@@ -1688,7 +1688,7 @@ export default {
                             'Content-Type': 'application/json'
                         },
                     });
-                    console.log('prepareDroneInfos-DroneInfos-'+dName, response.status, response.data['m2m:cin']);
+                    console.log('prepareDroneInfos-DroneInfos-'+dName, response.status, response.data);
 
                     let drone_info = response.data['m2m:cin'].con;
 
@@ -2481,7 +2481,7 @@ export default {
                                 EventBus.$emit('ready-gcs_app_bar');
                                 setTimeout(() => {
                                     EventBus.$emit('gcs-map-ready');
-                                }, 500);
+                                }, 1000);
                             });
                         });
                     });
@@ -2916,7 +2916,7 @@ export default {
                 EventBus.$emit('ready-gcs_app_bar');
                 setTimeout(() => {
                     EventBus.$emit('gcs-map-ready');
-                }, 500);
+                }, 1000);
 
             } catch (err) {
                 console.log("Error >>", err);

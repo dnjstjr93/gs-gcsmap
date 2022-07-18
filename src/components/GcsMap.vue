@@ -30,12 +30,12 @@
                     <v-btn tile @click="cancelMarker" elevation="2" color="error">취소</v-btn>
                 </v-card>
                 <v-card>
+                    <!--                        :heading="mapHeading"-->
                     <GmapMap
                         v-if="prepared"
                         ref="mapRef" :center="center"
                         :zoom="18"
                         :mapTypeId="myMapTypeId"
-                        :heading="mapHeading"
                         :restriction="{
                             strictBounds: false,
                         }"
@@ -49,6 +49,9 @@
                         @dragstart="cancelMarker"
                         @mousemove="calcDistance"
                         @zoom_changed="changeMapId"
+                        @tilt_changed="changeTilt"
+                        @heading_changed="changeHeading"
+                        @bounds_changed="changeBounds"
                     >
 <!--                        <GmapMarker-->
 <!--                                :position="{lat: 37.40423134053018, lng: 127.16050533784832}"-->
@@ -255,7 +258,7 @@
                                             fillOpacity: 1,
                                             strokeWeight: (drone.targeted)?3:2,
                                             strokeColor: (drone.targeted)?'springgreen':'#1A237E',
-                                            rotation: (360+drone.heading-45-map.getHeading())%360,
+                                            rotation: (360+drone.heading-45+mapHeading)%360,
                                             scale: scaleDroneIcon,
                                             anchor: {x: $store.state.iconSourceDrone.icon[0] / 2, y: $store.state.iconSourceDrone.icon[1] / 2},
                                             labelOrigin: {x: $store.state.iconSourceDrone.icon[0] / 2, y: $store.state.iconSourceDrone.icon[1] / 2},
@@ -764,6 +767,9 @@
 
         data () {
             return {
+                NE: null,
+                SW: null,
+                origin: null,
                 mapHeading: 0,
                 preZoomLevel: 18,
                 myMapTypeId: "satellite",
@@ -2069,6 +2075,27 @@
                 this.cancelMarker();
             },
 
+            changeBounds(e) {
+                var bounds =  this.map.getBounds();
+                this.NE = bounds.getNorthEast();
+                this.SW = bounds.getSouthWest();
+                this.origin = bounds.getCenter();
+
+                console.log('BBBBBBBBBBBBBB', 'ne', this.NE.lat(), 'sw', this.SW.lat(), 'e', e);
+            },
+
+            changeHeading(e) {
+                //console.log(e);
+
+                this.mapHeading = -e;
+
+                localStorage.setItem('rotateMapVal', this.mapHeading);
+            },
+
+            changeTilt(e) {
+                console.log(e);
+            },
+
             changeMapId(e) {
                 const maxZoomService = new this.google.maps.MaxZoomService();
 
@@ -2407,6 +2434,10 @@
             targetDrones(dName) {
                 this.$store.state.drone_infos[dName].targeted = !this.$store.state.drone_infos[dName].targeted;
 
+                let temp = JSON.parse(JSON.stringify(this.$store.state.drone_infos));
+                this.$store.state.drone_infos = null;
+                this.$store.state.drone_infos = JSON.parse(JSON.stringify(temp));
+
                 this.$store.state.drone_command_prepared = false;
                 for (let dName in this.$store.state.drone_infos) {
                     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
@@ -2723,8 +2754,14 @@
             window.addEventListener('resize', this.onResize);
             this.onResize();
 
+            this.readyFlagGcsMap = true;
+
             this.$refs.mapRef.$mapPromise.then((map) => {
                 this.map = map;
+
+                this.lineArrow = {
+                    path: this.google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+                };
 
                 // const bounds = map.maps.LatLngBounds()
                 // for (let m of this.markers) {
@@ -2842,14 +2879,34 @@
             EventBus.$on('gcs-map-ready', () => {
                 this.readyFlagGcsMap = true;
 
-                // this.$refs.mapRef.$mapPromise.then((map) => {
-                //     //map.setTilt(45);
-                //     map.setHeading(map.getHeading()+20);
-                // });
+                this.$refs.mapRef.$mapPromise.then((map) => {
+                    //map.setTilt(45);
+                    //map.setHeading(map.getHeading()+20);
 
-                this.lineArrow = {
-                    path: this.google.maps.SymbolPath.FORWARD_CLOSED_ARROW
-                };
+                    // if(localStorage.getItem('rotateMapVal')) {
+                    //     this.mapHeading = parseInt(localStorage.getItem('rotateMapVal'));
+                    // }
+
+                    if(localStorage.getItem('rotateMapVal')) {
+                        this.mapHeading = parseInt(localStorage.getItem('rotateMapVal'));
+
+                        map.setHeading(-this.mapHeading);
+                    }
+                    else {
+                        this.mapHeading = 0;
+
+                        map.setHeading(-this.mapHeading);
+                    }
+                });
+
+                let temp = JSON.parse(JSON.stringify(this.$store.state.drone_infos));
+                this.$store.state.drone_infos = null;
+                this.$store.state.drone_infos = JSON.parse(JSON.stringify(temp));
+
+
+                // this.lineArrow = {
+                //     path: this.google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+                // };
 
                 //this.elevator = new this.google.maps.ElevationService();
 
@@ -2880,10 +2937,6 @@
                 //
                 //     console.log('gotoLines', this.gotoLines);
                 // }
-
-                if(localStorage.getItem('rotateMapVal')) {
-                    this.mapHeading = parseInt(localStorage.getItem('rotateMapVal'));
-                }
             });
 
             EventBus.$on('updatePlaneMarker', (payload) => {
@@ -2966,18 +3019,98 @@
             // });
 
             EventBus.$on('updateDroneAlt', (payload) => {
-                var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
-                var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
-                var scale = Math.pow(2, this.map.getZoom());
-                var worldPoint = this.map.getProjection().fromLatLngToPoint({lat:payload.lat, lng:payload.lng});
+                //var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
 
-                let _payload = {};
-                _payload.name = payload.name;
-                _payload.scale = scale;
-                _payload.x = (worldPoint.x - bottomLeft.x) * scale;
-                _payload.y = (worldPoint.y - topRight.y) * scale;
-                _payload.alt = payload.alt;
-                EventBus.$emit('do-draw-DroneCommand', _payload);
+                //'EPSG:4326', 'EPSG:3857'
+
+                //var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
+
+                const rotatePoint = (point, origin, angle) => {
+                    var angleRad = angle * Math.PI / 180.0;
+                    return {
+                        x: Math.cos(angleRad) * (point.x - origin.x) - Math.sin(angleRad) * (point.y - origin.y) + origin.x,
+                        y: Math.sin(angleRad) * (point.x - origin.x) + Math.cos(angleRad) * (point.y - origin.y) + origin.y
+                    };
+                }
+
+                    this.$refs.mapRef.$mapPromise.then((map) => {
+                        var nw = new this.google.maps.LatLng(
+                            this.NE.lat(),
+                            this.SW.lng()
+                        );
+                        var Center = new this.google.maps.LatLng(
+                            this.origin.lat(),
+                            this.origin.lng()
+                        );
+
+
+                        var worldCoordinateNW = map.getProjection().fromLatLngToPoint(nw);
+                        var worldCoordinateCENTER = map.getProjection().fromLatLngToPoint(Center);
+
+                        var scale = Math.pow(2, map.getZoom());
+                        var worldCoordinate = map.getProjection().fromLatLngToPoint({
+                            lat: payload.lat,
+                            lng: payload.lng
+                        });
+
+                        var rPnt = rotatePoint(worldCoordinate, worldCoordinateCENTER, this.mapHeading);
+                        var rNW = rotatePoint(worldCoordinateNW, worldCoordinateCENTER, this.mapHeading);
+
+                        var pixelOffsetCenter = new this.google.maps.Point(
+                            ((rPnt.x - worldCoordinateCENTER.x) * scale),
+                            ((rPnt.y - worldCoordinateCENTER.y) * scale)
+                        );
+
+                        var pixelOffsetNW = new this.google.maps.Point(
+                            ((rNW.x - worldCoordinateCENTER.x) * scale),
+                            ((rNW.y - worldCoordinateCENTER.y) * scale)
+                        );
+
+                        var pixelOffset = new this.google.maps.Point(
+                            ((worldCoordinate.x - worldCoordinateNW.x) * scale),
+                            ((worldCoordinate.y - worldCoordinateNW.y) * scale)
+                        );
+
+
+
+                        //var rotatedLatLng = map.getProjection().fromPointToLatLng(rPnt);
+
+
+                        // var center = this.map.getCenter();
+                        //
+                        //
+                        // var worldCoordinateC = this.map.getProjection().fromLatLngToPoint({lat:center.lat(), lng:center.lng()});
+                        //
+                        // console.log(this.map);
+                        // var pixelCenter = new this.google.maps.Point(
+                        //     ((worldCoordinateC.x - worldCoordinateCENTER.x) * scale),
+                        //     ((worldCoordinateC.y - worldCoordinateCENTER.y) * scale)
+                        // );
+
+                        //console.log(center, pixelOffset, pixelCenter);
+
+                        //let dist = Math.sqrt((pixelCenter.x - pixelOffset.x) * (pixelCenter.x - pixelOffset.x) + (pixelCenter.y - pixelOffset.y) * (pixelCenter.y - pixelOffset.y));
+                        //let new_x = dist * Math.sin(this.mapHeading * Math.PI / 180);
+                        //let new_y = dist * Math.cos(this.mapHeading * Math.PI / 180);
+
+                        // console.log(new_x, pixelOffset.x, pixelCenter.x, pixelOffset.x - new_x, pixelCenter.x - new_x, new_y, pixelOffset.y, );
+                        //this.myWidth = this.$refs.mapRef.clientWidth;
+                        this.myHeight = window.innerHeight-50;
+                        this.myWidth = window.innerWidth;
+
+                        let Offset_x = (pixelOffsetCenter.x >= 0) ? (this.myWidth/2 + pixelOffsetCenter.x) : (this.myWidth/2 + pixelOffsetCenter.x);
+                        console.log(Offset_x);
+                        console.log(this.myWidth, Math.floor(pixelOffsetCenter.x), Math.floor(pixelOffsetCenter.y), Math.floor(pixelOffsetNW.x), Math.floor(pixelOffsetNW.y), Math.floor(pixelOffset.x), Math.floor(pixelOffset.y));
+
+
+                        let _payload = {};
+                        _payload.name = payload.name;
+                        _payload.scale = scale;
+                        _payload.x = Offset_x;
+                        _payload.y = pixelOffset.y;
+                        _payload.alt = payload.alt;
+                        EventBus.$emit('do-draw-DroneCommand', _payload);
+                    });
             });
 
             EventBus.$on('on-message-handler-gcsmap', (payload) => {
@@ -2989,6 +3122,8 @@
                 this.prepared = true;
 
                 this.mapHeading = parseInt(angle);
+
+                this.map.setHeading(-this.mapHeading);
 
                 localStorage.setItem('rotateMapVal', this.mapHeading);
             });

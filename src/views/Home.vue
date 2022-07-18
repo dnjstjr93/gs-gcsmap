@@ -2,7 +2,6 @@
     <div>
         <GcsAppBar/>
         <div v-if="ready_dorne_list">
-            <DroneInfoList/>
             <div v-if="selected_map === 'googlemaps'">
                 <GcsMap/>
             </div>
@@ -11,6 +10,7 @@
                     <OlGcsMap :geojson="geojson" v-on:select="selected = $event"></OlGcsMap>
                 </v-card>
             </div>
+            <DroneInfoList/>
         </div>
     </div>
 </template>
@@ -36,8 +36,8 @@ export default {
     data: () => ({
         ready_dorne_list: false,
 
-        selected_map: 'openlayers',
-        //selected_map: 'googlemaps',
+        //selected_map: 'openlayers',
+        selected_map: 'googlemaps',
 
         selected: undefined,
         geojson: {
@@ -110,7 +110,7 @@ export default {
     }),
 
     created() {
-        this.$store.state.viewAlt = (this.selected_map === 'googlemaps');
+        //this.$store.state.viewAlt = (this.selected_map === 'googlemaps');
 
         EventBus.$on('ready-gcs_app_bar', () => {
             this.ready_dorne_list = true;

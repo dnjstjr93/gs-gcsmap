@@ -2418,6 +2418,52 @@ export default {
 
             localStorage.setItem('rotateMapVal', this.mapHeading);
         });
+
+        EventBus.$on('updateDroneAlt', (payload) => {
+            // let osmextent = this.olMap.getView().calculateExtent();
+            //
+            // let topLeft = this.olMap.getPixelFromCoordinate([osmextent[0], osmextent[1]]);
+            // // let topRight = this.olMap.getPixelFromCoordinate(osmextent[1]);
+            // // let bottomLeft = this.olMap.getPixelFromCoordinate(osmextent[2]);
+            // // let bottomRight = this.olMap.getPixelFromCoordinate(osmextent[3]);
+            //
+            // //console.log(payload, osmextent, topLeft, topRight, bottomLeft, bottomRight);
+            // console.log(topLeft[0], topLeft[1]);
+
+            let dPnt = new Point([payload.lng, payload.lat]).transform('EPSG:4326', 'EPSG:3857')
+            let dCoordinate = dPnt.getCoordinates();
+
+            let dPixel = this.olMap.getPixelFromCoordinate(dCoordinate);
+
+            //let dFeature = this.vectorLayer.getSource().getFeaturesAtCoordinate(dCoordinate);
+            //console.log(payload.name, dPixel[0], dPixel[1]);
+
+            let scale = Math.pow(2, this.olMap.getView().getZoom());
+
+            let _payload = {};
+            _payload.name = payload.name;
+            _payload.scale = scale;
+            _payload.x = dPixel[0];
+            _payload.y = dPixel[1];
+            _payload.alt = payload.alt;
+            EventBus.$emit('do-draw-DroneCommand', _payload);
+
+
+            // var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
+            // var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
+            //
+            //
+            // var scale = Math.pow(2, this.map.getZoom());
+            // var worldPoint = this.map.getProjection().fromLatLngToPoint({lat:payload.lat, lng:payload.lng});
+            //
+            // let _payload = {};
+            // _payload.name = payload.name;
+            // _payload.scale = scale;
+            // _payload.x = (worldPoint.x - bottomLeft.x) * scale;
+            // _payload.y = (worldPoint.y - topRight.y) * scale;
+            // _payload.alt = payload.alt;
+            // EventBus.$emit('do-draw-DroneCommand', _payload);
+        });
     },
 
     beforeDestroy() {
@@ -2429,6 +2475,7 @@ export default {
         EventBus.$off('do-unsetSelectedTempMarker');
         EventBus.$off('do-rotate-map');
         EventBus.$off('do-download-map');
+        EventBus.$off('updateDroneAlt');
     }
 }
 </script>

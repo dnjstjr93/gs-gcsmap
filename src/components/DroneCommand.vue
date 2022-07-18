@@ -2,7 +2,7 @@
     <v-sheet
         elevation="6"
         class="font-weight-bold tab_position"
-        :style="{top:(context_top+2)+'px', left:(context_left+10)+'px', width: ($store.state.command_tab_max_width-41)+'px'}"
+        :style="{top:(context_top+3)+'px', left:(context_left+22)+'px', width: ($store.state.command_tab_max_width-80)+'px'}"
     >
         <v-tabs
             v-if="$store.state.drone_command_prepared"
