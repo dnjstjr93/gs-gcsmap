@@ -2075,13 +2075,13 @@
                 this.cancelMarker();
             },
 
-            changeBounds(e) {
+            changeBounds() {
                 var bounds =  this.map.getBounds();
                 this.NE = bounds.getNorthEast();
                 this.SW = bounds.getSouthWest();
                 this.origin = bounds.getCenter();
 
-                console.log('BBBBBBBBBBBBBB', 'ne', this.NE.lat(), 'sw', this.SW.lat(), 'e', e);
+                //console.log('BBBBBBBBBBBBBB', 'ne', this.NE.lat(), 'sw', this.SW.lat(), 'e', e.Lat());
             },
 
             changeHeading(e) {
@@ -3019,11 +3019,6 @@
             // });
 
             EventBus.$on('updateDroneAlt', (payload) => {
-                //var topRight = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getNorthEast());
-
-                //'EPSG:4326', 'EPSG:3857'
-
-                //var bottomLeft = this.map.getProjection().fromLatLngToPoint(this.map.getBounds().getSouthWest());
 
                 const rotatePoint = (point, origin, angle) => {
                     var angleRad = angle * Math.PI / 180.0;
@@ -3033,84 +3028,60 @@
                     };
                 }
 
-                    this.$refs.mapRef.$mapPromise.then((map) => {
-                        var nw = new this.google.maps.LatLng(
-                            this.NE.lat(),
-                            this.SW.lng()
-                        );
-                        var Center = new this.google.maps.LatLng(
-                            this.origin.lat(),
-                            this.origin.lng()
-                        );
+                this.$refs.mapRef.$mapPromise.then((map) => {
+                    var nw = new this.google.maps.LatLng(
+                        this.NE.lat(),
+                        this.SW.lng()
+                    );
 
+                    var Center = new this.google.maps.LatLng(
+                        this.origin.lat(),
+                        this.origin.lng()
+                    );
 
-                        var worldCoordinateNW = map.getProjection().fromLatLngToPoint(nw);
-                        var worldCoordinateCENTER = map.getProjection().fromLatLngToPoint(Center);
+                    var worldCoordinateNW = map.getProjection().fromLatLngToPoint(nw);
+                    var worldCoordinateCENTER = map.getProjection().fromLatLngToPoint(Center);
 
-                        var scale = Math.pow(2, map.getZoom());
-                        var worldCoordinate = map.getProjection().fromLatLngToPoint({
-                            lat: payload.lat,
-                            lng: payload.lng
-                        });
-
-                        var rPnt = rotatePoint(worldCoordinate, worldCoordinateCENTER, this.mapHeading);
-                        var rNW = rotatePoint(worldCoordinateNW, worldCoordinateCENTER, this.mapHeading);
-
-                        var pixelOffsetCenter = new this.google.maps.Point(
-                            ((rPnt.x - worldCoordinateCENTER.x) * scale),
-                            ((rPnt.y - worldCoordinateCENTER.y) * scale)
-                        );
-
-                        var pixelOffsetNW = new this.google.maps.Point(
-                            ((rNW.x - worldCoordinateCENTER.x) * scale),
-                            ((rNW.y - worldCoordinateCENTER.y) * scale)
-                        );
-
-                        var pixelOffset = new this.google.maps.Point(
-                            ((worldCoordinate.x - worldCoordinateNW.x) * scale),
-                            ((worldCoordinate.y - worldCoordinateNW.y) * scale)
-                        );
-
-
-
-                        //var rotatedLatLng = map.getProjection().fromPointToLatLng(rPnt);
-
-
-                        // var center = this.map.getCenter();
-                        //
-                        //
-                        // var worldCoordinateC = this.map.getProjection().fromLatLngToPoint({lat:center.lat(), lng:center.lng()});
-                        //
-                        // console.log(this.map);
-                        // var pixelCenter = new this.google.maps.Point(
-                        //     ((worldCoordinateC.x - worldCoordinateCENTER.x) * scale),
-                        //     ((worldCoordinateC.y - worldCoordinateCENTER.y) * scale)
-                        // );
-
-                        //console.log(center, pixelOffset, pixelCenter);
-
-                        //let dist = Math.sqrt((pixelCenter.x - pixelOffset.x) * (pixelCenter.x - pixelOffset.x) + (pixelCenter.y - pixelOffset.y) * (pixelCenter.y - pixelOffset.y));
-                        //let new_x = dist * Math.sin(this.mapHeading * Math.PI / 180);
-                        //let new_y = dist * Math.cos(this.mapHeading * Math.PI / 180);
-
-                        // console.log(new_x, pixelOffset.x, pixelCenter.x, pixelOffset.x - new_x, pixelCenter.x - new_x, new_y, pixelOffset.y, );
-                        //this.myWidth = this.$refs.mapRef.clientWidth;
-                        this.myHeight = window.innerHeight-50;
-                        this.myWidth = window.innerWidth;
-
-                        let Offset_x = (pixelOffsetCenter.x >= 0) ? (this.myWidth/2 + pixelOffsetCenter.x) : (this.myWidth/2 + pixelOffsetCenter.x);
-                        console.log(Offset_x);
-                        console.log(this.myWidth, Math.floor(pixelOffsetCenter.x), Math.floor(pixelOffsetCenter.y), Math.floor(pixelOffsetNW.x), Math.floor(pixelOffsetNW.y), Math.floor(pixelOffset.x), Math.floor(pixelOffset.y));
-
-
-                        let _payload = {};
-                        _payload.name = payload.name;
-                        _payload.scale = scale;
-                        _payload.x = Offset_x;
-                        _payload.y = pixelOffset.y;
-                        _payload.alt = payload.alt;
-                        EventBus.$emit('do-draw-DroneCommand', _payload);
+                    var scale = Math.pow(2, map.getZoom());
+                    var worldCoordinate = map.getProjection().fromLatLngToPoint({
+                        lat: payload.lat,
+                        lng: payload.lng
                     });
+
+                    var rPnt = rotatePoint(worldCoordinate, worldCoordinateCENTER, this.mapHeading);
+                    //var rNW = rotatePoint(worldCoordinateNW, worldCoordinateCENTER, this.mapHeading);
+
+                    var pixelOffsetCenter = new this.google.maps.Point(
+                        ((rPnt.x - worldCoordinateCENTER.x) * scale),
+                        ((rPnt.y - worldCoordinateCENTER.y) * scale)
+                    );
+
+                    // var pixelOffsetNW = new this.google.maps.Point(
+                    //     ((rNW.x - worldCoordinateCENTER.x) * scale),
+                    //     ((rNW.y - worldCoordinateCENTER.y) * scale)
+                    // );
+
+                    var pixelOffset = new this.google.maps.Point(
+                        ((worldCoordinate.x - worldCoordinateNW.x) * scale),
+                        ((worldCoordinate.y - worldCoordinateNW.y) * scale)
+                    );
+
+                    this.myHeight = window.innerHeight-50;
+                    this.myWidth = window.innerWidth;
+
+                    let Offset_x = (pixelOffsetCenter.x >= 0) ? (this.myWidth/2 + pixelOffsetCenter.x) : (this.myWidth/2 + pixelOffsetCenter.x);
+                    //console.log(Offset_x);
+                    //console.log(this.myWidth, Math.floor(pixelOffsetCenter.x), Math.floor(pixelOffsetCenter.y), Math.floor(pixelOffsetNW.x), Math.floor(pixelOffsetNW.y), Math.floor(pixelOffset.x), Math.floor(pixelOffset.y));
+
+
+                    let _payload = {};
+                    _payload.name = payload.name;
+                    _payload.scale = scale;
+                    _payload.x = Offset_x;
+                    _payload.y = pixelOffset.y;
+                    _payload.alt = payload.alt;
+                    EventBus.$emit('do-draw-DroneCommand', _payload);
+                });
             });
 
             EventBus.$on('on-message-handler-gcsmap', (payload) => {

@@ -136,7 +136,7 @@ export default {
 
             if(Object.prototype.hasOwnProperty.call(this.$refs, 'alt')) {
                 let clientRect = this.$refs.alt.getBoundingClientRect();
-                console.log(clientRect.x, clientRect.y, clientRect.width, clientRect.height);
+                //console.log(clientRect.x, clientRect.y, clientRect.width, clientRect.height);
 
                 let diff = payload.x - clientRect.x;
                 let temp = JSON.parse(JSON.stringify(this.sliderAlt));
