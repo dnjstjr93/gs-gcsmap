@@ -4338,8 +4338,9 @@ export default {
 
                     //this.$store.state.drone_infos[this.name].offset_alt = (parseFloat(this.gpi.alt) - parseFloat(this.gpi.relative_alt)) * 1000;
 
-                    //this.airspeed = Math.sqrt(Math.pow(this.gpi.vx, 2) + Math.pow(this.gpi.vy, 2) + Math.pow(this.gpi.vz, 2)) / 100;
-                    this.airspeed = Math.abs((this.gpi.vx + this.gpi.vy + this.gpi.vz) / 100);
+                    this.airspeed = Math.abs(Math.sqrt(Math.pow(this.gpi.vx, 2) + Math.pow(this.gpi.vy, 2) + Math.pow(this.gpi.vz, 2))) / 100;
+                    //this.airspeed = Math.abs(Math.sqrt(Math.pow(this.gpi.vx, 2) + Math.pow(this.gpi.vy, 2))) / 100;
+                    //this.airspeed = Math.abs((this.gpi.vx + this.gpi.vy + this.gpi.vz) / 100);
                     this.colorAirspeed = 'td-text-green';
 
                     this.info.airSpeed = this.airspeed.toFixed(1);
