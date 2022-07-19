@@ -767,7 +767,11 @@ export default {
                     image: new CircleStyle({
                         radius: 10,
                         fill: new Fill({
-                            color: '#FAFAFA80',
+                            color: fillColor + '08',
+                        }),
+                        stroke: new Stroke({
+                            color: fillColor + '80',
+                            width: 1,
                         }),
                     }),
                     geometry: function (feature) {
@@ -2522,6 +2526,16 @@ export default {
             // _payload.alt = payload.alt;
             // EventBus.$emit('do-draw-DroneCommand', _payload);
         });
+
+        EventBus.$on('update-home-position', (dName) => {
+            let hLat = this.$store.state.drone_infos[dName].home_position.lat;
+            let hLng = this.$store.state.drone_infos[dName].home_position.lng;
+
+            let hPnt = new Point([hLng, hLat]).transform('EPSG:4326', 'EPSG:3857')
+            let hCoordinate = hPnt.getCoordinates();
+
+            this.olDroneMarkers[dName].droneHomeMarkerFeature.getGeometry().setCoordinates(hCoordinate);
+        });
     },
 
     beforeDestroy() {
@@ -2534,6 +2548,7 @@ export default {
         EventBus.$off('do-rotate-map');
         EventBus.$off('do-download-map');
         EventBus.$off('updateDroneAlt');
+        EventBus.$off('update-home-position');
     }
 }
 </script>

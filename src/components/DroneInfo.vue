@@ -3925,6 +3925,8 @@ export default {
                         lat: (this.gpi.lat / 10000000),
                         lng: (this.gpi.lon / 10000000)
                     };
+
+                    EventBus.$emit('update-home-position', this.name);
                 }
             }
             catch (ex) {
@@ -4139,6 +4141,8 @@ export default {
                                 lat: (this.gpi.lat / 10000000),
                                 lng: (this.gpi.lon / 10000000)
                             };
+
+                            EventBus.$emit('update-home-position', this.name);
                         }
 
                             this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
