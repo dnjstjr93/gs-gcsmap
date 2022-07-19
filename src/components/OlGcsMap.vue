@@ -597,7 +597,7 @@ export default {
             );
         },
 
-        getStyleTempMarker(pIndex, fillColor, strokeColor, strokeWidth, tAlt, scale, selectedColor) {
+        getStyleTempMarker(pIndex, fillColor, strokeColor, strokeWidth, tAlt, scale, selectedColor, elevation_val) {
             svgTempObj.svg.path._attributes.fill = fillColor.replace('#', '%23');
             svgTempObj.svg.path._attributes.stroke = strokeColor.replace('#', '%23');
             svgTempObj.svg.path._attributes['stroke-width'] = strokeWidth;
@@ -613,7 +613,7 @@ export default {
                         //anchor: [0.49, 0.49],
                     }),
                     text: new Text({
-                        text: [pIndex + ':' + String(tAlt), 'bold 11px sans-serif'],
+                        text: [pIndex + ':' + String(tAlt) + ':' + elevation_val.toFixed(0), 'bold 11px sans-serif'],
                         textAlign: 'center',
                         offsetY: -25,
                         scale: 1.4,
@@ -676,7 +676,8 @@ export default {
                     '25',
                     this.$store.state.tempMarkers[dName][pIndex].alt,
                     svgTempScale,
-                    selectedColor
+                    selectedColor,
+                    this.$store.state.tempMarkers[dName][pIndex].elevation,
                 );
             }
             else {
@@ -687,7 +688,8 @@ export default {
                     '15',
                     this.$store.state.tempMarkers[dName][pIndex].alt,
                     svgTempScale,
-                    selectedColor
+                    selectedColor,
+                    this.$store.state.tempMarkers[dName][pIndex].elevation,
                 );
             }
 
@@ -874,6 +876,8 @@ export default {
                                 }
 
                                 //this.postCinTempMarkerInfoToMobius(dName);
+
+                                feature.getStyle()[0].getText().setText([pIndex + ':' + String(this.$store.state.tempMarkers[dName][pIndex].alt) + ':' + elevation_val.toFixed(0), 'bold 11px sans-serif']);
 
                                 try {
                                     let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
@@ -1431,7 +1435,8 @@ export default {
                     '15',
                     tAlt,
                     svgTempScale,
-                    selectedColor
+                    selectedColor,
+                    this.$store.state.tempMarkers[dName][pIndex].elevation,
                 );
 
                 tFeature.setStyle(iconStyleTemp);
@@ -2249,13 +2254,14 @@ export default {
                 Object.keys(this.targetedTempFeatureId).forEach((dName) => {
                     if(this.targetedTempFeatureId[dName] !== '') {
                         let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
+                        console.log('pIndexOld', this.targetedTempFeatureId[dName], this.$store.state.tempMarkers[dName][pIndexOld].targeted);
 
                         this.deleteTranslate(this.targetedTempFeature[dName]);
                         this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
                         this.targetedTempFeatureId[dName] = '';
 
                         this.updateTargetedTempMarker(dName, pIndexOld);
-                        this.updateOlTempMarker(dName, pIndexOld);
+                        //this.updateOlTempMarker(dName, pIndexOld);
                     }
                 });
 
@@ -2541,7 +2547,7 @@ export default {
     left: 0;
     top: 0;
     opacity: 1;
-    z-index: 2;
+    z-index: 6;
     width: 100%;
 }
 

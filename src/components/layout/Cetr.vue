@@ -10,7 +10,7 @@
             <v-col cols="6" class="td-text-white text-right">
                 <span class="shadow_icon pr-2 text--white" :style="fontSize">
                     <v-icon class="shadow_icon pr-0" :style="iconSize">mdi-altimeter</v-icon>
-                    {{ data.altitude }} m
+                    {{ data.altitude }} m ({{ data.absolute_altitude }})
                 </span>
             </v-col>
         </v-row>

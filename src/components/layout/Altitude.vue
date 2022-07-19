@@ -4,14 +4,14 @@
             <div class="r0"></div>
         </div>
         <div :id="`number_alt_${this.data.no}`" class="alt-wrapper swiper-container">
-        <span class="alt-indicator d-flex justify-center align-center">
-            {{ Math.floor(this.data.altitude) }}
-        </span>
-        <div class="swiper-wrapper alt">
-            <div v-for="n in 100" :key="n" class="alt-item swiper-slide">
-                <span class="pr-1" :class="{ 'pr-4': data.fs }">{{ n % 5 === 0 ? n : null }}</span>
+            <span class="alt-indicator d-flex justify-center align-center">
+                {{ Math.floor(this.data.altitude) }}
+            </span>
+            <div class="swiper-wrapper alt">
+                <div v-for="n in 100" :key="n" class="alt-item swiper-slide">
+                    <span class="pr-1" :class="{ 'pr-4': data.fs }">{{ n % 5 === 0 ? n : null }}</span>
+                </div>
             </div>
-        </div>
         </div>
     </div>
 </template>
