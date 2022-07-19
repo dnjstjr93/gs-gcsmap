@@ -104,20 +104,35 @@ const svgTempScale = 0.10;
 
 const colorMapAlt = {
     0:  '#FFFFFF',
+    5: '#DD2C00',
     10:  '#FF9E80',
+    15:  '#FF6D00',
     20:  '#FFD180',
+    25:  '#FFAB00',
     30:  '#FFE57F',
+    35:  '#FFD600',
     40:  '#FFFF8D',
+    45:  '#AEEA00',
     50:  '#F4FF81',
+    55:  '#64DD17',
     60:  '#CCFF90',
+    65:  '#00C853',
     70:  '#B9F6CA',
+    75:  '#00BFA5',
     80:  '#A7FFEB',
+    85:  '#00B8D4',
     90:  '#84FFFF',
+    95:  '#0091EA',
     100:  '#80D8FF',
+    105:  '#2962FF',
     110:  '#82B1FF',
+    115:  '#304FFE',
     120:  '#8C9EFF',
+    125:  '#6200EA',
     130:  '#B388FF',
+    135:  '#AA00FF',
     140:  '#EA80FC',
+    145:  '#C51162',
     150:  '#FF80AB',
     160:  '#BF360C',
     170:  '#E65100',
@@ -607,7 +622,7 @@ export default {
                             width: 0.8,
                         }),
                         fill: new Fill({
-                            color: colorMapAlt[Math.round(tAlt / 10) * 10]
+                            color: (tAlt > 150) ? colorMapAlt[Math.round(tAlt / 10) * 10] : colorMapAlt[Math.round(tAlt / 5) * 5]
                         }),
                     }),
                     zIndex: 3,
@@ -617,6 +632,23 @@ export default {
                         radius: 9,
                         fill: new Fill({
                             color: selectedColor,
+                        }),
+                    }),
+                    geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinate = feature.getGeometry().getCoordinates();
+                        return new Point(coordinate);
+                    },
+                }),
+                new Style({
+                    image: new CircleStyle({
+                        radius: 1,
+                        fill: new Fill({
+                            color: '#E8F5E920',
+                        }),
+                        stroke: new Stroke({
+                            color: fillColor,
+                            width: 2,
                         }),
                     }),
                     geometry: function (feature) {
@@ -708,7 +740,7 @@ export default {
                             width: 0.8,
                         }),
                         fill: new Fill({
-                            color: colorMapAlt[Math.round(dAlt / 10) * 10]
+                            color: (dAlt > 150) ? colorMapAlt[Math.round(dAlt / 10) * 10] : colorMapAlt[Math.round(dAlt / 5) * 5]
                         }),
                     }),
                     zIndex: 2,
@@ -724,7 +756,7 @@ export default {
                             width: 0.8,
                         }),
                         fill: new Fill({
-                            color: colorMapAlt[Math.round(dAlt / 10) * 10]
+                            color: (dAlt > 150) ? colorMapAlt[Math.round(dAlt / 10) * 10] : colorMapAlt[Math.round(dAlt / 5) * 5]
                         }),
                     }),
                     zIndex: 2,
@@ -1278,6 +1310,20 @@ export default {
                 }
                 this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
                 this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
+
+                if (this.$store.state.currentCommandTab === '선회') {
+                    let pIndex = this.targetedTempFeatureId[dName].split('-')[1];
+
+                    let resolution = this.olMap.getView().getResolution();
+                    let projection = this.olMap.getView().getProjection();
+
+                    this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(this.$store.state.drone_infos[dName].targetRadius / getPointResolution(projection, resolution, eTarCoordinate, 'm'))
+                }
+                else {
+                    let pIndex = this.targetedTempFeatureId[dName].split('-')[1];
+
+                    this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(1);
+                }
             }
             else {
                 let sTarLat = this.$store.state.drone_infos[dName].lat;
@@ -1375,7 +1421,6 @@ export default {
                 else {
                     targetedColor = '#FFFDE7FF';
                 }
-
 
                 console.log('ppppppppppppppppppppppppp tempMarker-targeted', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted, targetedColor);
 
@@ -1910,8 +1955,8 @@ export default {
                         speed.toFixed(1)+' m/s', 'bold 10px sans-serif', '\n', 'bold 10px sans-serif',
                         (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'DISARMED' : this.$store.state.drone_infos[dName].curMode, 'bold 10px sans-serif',]);
                 }
-                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setFill(new Fill({ color: (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'red' : colorMapAlt[Math.round(dAlt / 10) * 10] }));
-                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[1].getText().setFill(new Fill({ color: colorMapAlt[Math.round(dAlt / 10) * 10] }));
+                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setFill(new Fill({ color: (this.$store.state.drone_infos[dName].curArmStatus === 'DISARMED') ? 'red' : (dAlt > 150) ? colorMapAlt[Math.round(dAlt / 10) * 10] : colorMapAlt[Math.round(dAlt / 5) * 5] }));
+                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[1].getText().setFill(new Fill({ color: (dAlt > 150) ? colorMapAlt[Math.round(dAlt / 10) * 10] : colorMapAlt[Math.round(dAlt / 5) * 5] }));
                 this.olDroneMarkers[dName].droneMarkerFeature.getGeometry().setCoordinates(dCoordinate);
 
                 let resolution = this.olMap.getView().getResolution();
@@ -2098,6 +2143,8 @@ export default {
 
                         this.updateTargetedTempMarker(dName, pIndexOld);
                         //this.updateOlTempMarker(dName, pIndexOld);
+
+                        this.olTempMarkers[dName].tempMarkerFeatures[pIndexOld].getStyle()[2].getImage().setRadius(1);
                     }
 
                     this.$store.state.tempMarkers[dName][pIndex].targeted = !this.$store.state.tempMarkers[dName][pIndex].targeted;
@@ -2117,6 +2164,8 @@ export default {
                         this.deleteTranslate(this.targetedFeature);
                         this.targetedTempFeatureId[dName] = '';
                         this.targetedTempFeature[dName] = undefined;
+
+                        this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(1);
                     }
 
                     this.updateTargetedTempMarker(dName, pIndex);
@@ -2222,7 +2271,10 @@ export default {
                     this.curInfoTempMarkerFlag = false;
 
                     this.$forceUpdate();
+
+                    this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
                 }
+
             }
 
             // this.olMap.forEachFeatureAtPixel(event.pixel, (clicked) => {
