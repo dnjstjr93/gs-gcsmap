@@ -1,10 +1,10 @@
 <template>
     <div>
-        <v-app-bar app color="primary" dark dense>
+        <v-app-bar app color="secondary" dark dense>
             <v-toolbar-title>
                 <v-row no-gutters align="center">
                     <v-icon left>mdi-monitor-dashboard</v-icon>
-                    KETI GCS
+                    UMAC Air GCS
                 </v-row>
             </v-toolbar-title>
 

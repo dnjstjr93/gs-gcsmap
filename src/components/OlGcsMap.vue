@@ -89,18 +89,18 @@ svgTempObj.svg._attributes = {};
 svgTempObj.svg._attributes.xmlns = 'http://www.w3.org/2000/svg';
 svgTempObj.svg._attributes.x = '0';
 svgTempObj.svg._attributes.y = '0';
-svgTempObj.svg._attributes.width = faCrosshairs.icon[0]/2;
-svgTempObj.svg._attributes.height = faCrosshairs.icon[1]/2;
-svgTempObj.svg._attributes.class = faCrosshairs.icon[3];
-svgTempObj.svg._attributes.viewBox = '-11 -11 ' + (faCrosshairs.icon[0]+22) + ' ' + (faCrosshairs.icon[1]+22);
+svgTempObj.svg._attributes.width = faMapPin.icon[0]/2;
+svgTempObj.svg._attributes.height = faMapPin.icon[1]/2;
+svgTempObj.svg._attributes.class = faMapPin.icon[3];
+svgTempObj.svg._attributes.viewBox = '-11 -11 ' + (faMapPin.icon[0]+22) + ' ' + (faMapPin.icon[1]+22);
 svgTempObj.svg.path = {};
 svgTempObj.svg.path._attributes = {};
-svgTempObj.svg.path._attributes.d = faCrosshairs.icon[4];
+svgTempObj.svg.path._attributes.d = faMapPin.icon[4];
 
-console.log('svg', faMapPin, faBullseye);
+console.log('svg', faMapPin, faBullseye, faCrosshairs);
 
 const svgScale = 0.18;
-const svgTempScale = 0.10;
+const svgTempScale = 0.11;
 
 const colorMapAlt = {
     0:  '#FFFFFF',
@@ -610,7 +610,7 @@ export default {
                         opacity: 1,
                         src: 'data:image/svg+xml;utf8,' + xmlSvgTempMarker,
                         scale: scale,
-                        //anchor: [0.49, 0.49],
+                        anchor: [0.5, 1],
                     }),
                     text: new Text({
                         text: [pIndex + ':' + String(tAlt) + ':' + elevation_val.toFixed(0), 'bold 11px sans-serif'],
@@ -971,7 +971,7 @@ export default {
                 opacity: 1,
                 src: 'data:image/svg+xml;utf8,' + xmlSvgDroneMarker,
                 scale: svgTempScale,
-                //anchor: [0.49, 0.49],
+                anchor: [0.5, 1],
             });
 
             this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[0].setImage(tempIcon);
@@ -1350,7 +1350,7 @@ export default {
                 let dy = eTarCoordinate[1] - sTarCoordinate[1];
                 let rotation = Math.atan2(dy, dx);
 
-                if(dName !== 'unknown') {
+                if(this.$store.state.drone_infos[dName].targeted && dName !== 'unknown') {
                     this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText(['', 'bold 9px sans-serif']);
                     this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
                     this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
@@ -2374,7 +2374,17 @@ export default {
         //     }
         // })
 
-        let pnt = new Point([127.16050533784832, 37.40423134053018]).transform('EPSG:4326', 'EPSG:3857')
+        let pnt = new Point([127.16050533784832, 37.40423134053018]).transform('EPSG:4326', 'EPSG:3857');
+
+        for(let dName in this.$store.state.drone_infos) {
+            if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                if(dName !== 'unknown') {
+                    pnt = new Point([this.$store.state.drone_infos[dName].lng, this.$store.state.drone_infos[dName]]).transform('EPSG:4326', 'EPSG:3857');
+                    break;
+                }
+            }
+        }
+
         let center_coordinate = pnt.getCoordinates();
 
         this.olMap.getView().setCenter(center_coordinate);
