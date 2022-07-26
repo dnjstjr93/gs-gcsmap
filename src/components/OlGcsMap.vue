@@ -1900,7 +1900,17 @@ export default {
             // const view = this.olMap.getView();
             // view.fit(source.getExtent())
 
-            let pnt = new Point([127.16050533784832, 37.40423134053018]).transform('EPSG:4326', 'EPSG:3857')
+            let pnt = new Point([127.16050533784832, 37.40423134053018]).transform('EPSG:4326', 'EPSG:3857');
+
+            for(let dName in this.$store.state.drone_infos) {
+                if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if(dName !== 'unknown') {
+                        pnt = new Point([this.$store.state.drone_infos[dName].lng, this.$store.state.drone_infos[dName].lat]).transform('EPSG:4326', 'EPSG:3857');
+                        break;
+                    }
+                }
+            }
+
             let center_coordinate = pnt.getCoordinates();
 
             this.olMap.getView().setCenter(center_coordinate);
@@ -2546,6 +2556,13 @@ export default {
 
             this.olDroneMarkers[dName].droneHomeMarkerFeature.getGeometry().setCoordinates(hCoordinate);
         });
+
+        EventBus.$on('do-refresh-tempMarker', (dName) => {
+
+            this.initOlTempMarker(dName);
+
+            this.updateSource();
+        });
     },
 
     beforeDestroy() {
@@ -2559,6 +2576,7 @@ export default {
         EventBus.$off('do-download-map');
         EventBus.$off('updateDroneAlt');
         EventBus.$off('update-home-position');
+        EventBus.$off('do-refresh-tempMarker');
     }
 }
 </script>

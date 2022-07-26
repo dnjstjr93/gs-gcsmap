@@ -1818,7 +1818,7 @@ export default {
             this.dialog = true;
         },
 
-        updateMyDroneInfo() {
+        async updateMyDroneInfo() {
             console.log('updateMyDroneInfo', this.strMyDroneInfo);
 
             try {
@@ -1828,7 +1828,10 @@ export default {
                 this.$store.state.drone_infos[this.name] = JSON.parse(JSON.stringify(temp));
 
                 this.$store.state.tempMarkers[this.name] = [];
-                this.$store.state.drone_infos[this.name].goto_positions.forEach((ele) => {
+                //this.$store.state.drone_infos[this.name].goto_positions.forEach(async (ele) => {
+                for(let idx = 0; idx < this.$store.state.drone_infos[this.name].goto_positions.length; idx++) {
+
+                    let ele = this.$store.state.drone_infos[this.name].goto_positions[idx];
                     let pos_arr = ele.split(':');
 
                     let marker = {};
@@ -1846,8 +1849,37 @@ export default {
                     marker.targeted = false;
                     marker.color = this.$store.state.drone_infos[this.name].color;
 
-                    this.$store.state.tempMarkers[this.name].push(marker);
-                });
+                    let eLngLats = [];
+                    eLngLats.push([marker.lng, marker.lat])
+                    eLngLats.forEach((eLngLat, idx) => {
+                        [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                        eLngLats[idx] = eLngLat;
+                    });
+
+                    let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+                    param = param.replace(/\]/g, '');
+
+                    let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+
+                    try {
+                        let response = await axios.get(url, {
+                            validateStatus: status => {
+                                return status < 500;
+                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            headers: {
+                            },
+                        });
+                        console.log('getElevationProfile', response.status, response.data);
+
+                        marker.elevation = response.data.elevationProfile[0].height;
+
+                        this.$store.state.tempMarkers[this.name].push(marker);
+
+                    }
+                    catch (err) {
+                        console.log("Error >>", err);
+                    }
+                }
 
                 // this.positions = [];
                 // for (let i in this.$store.state.drone_infos[this.name].goto_positions) {
@@ -1880,7 +1912,7 @@ export default {
                     console.log('DroneInfo.vue', 'postMarkerInfos');
                 });
 
-                //EventBus.$emit('gcs-map-ready');
+                EventBus.$emit('do-refresh-tempMarker', this.name);
             }
             catch (e) {
                 console.log('updateMyDroneInfo-JSON parsing error', e.message);
