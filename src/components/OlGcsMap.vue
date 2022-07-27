@@ -34,6 +34,7 @@ import VectorSource from 'ol/source/Vector'
 //import GeoJSON from 'ol/format/GeoJSON'
 import MultiPoint from 'ol/geom/MultiPoint';
 import Point from 'ol/geom/Point';
+import Polygon from 'ol/geom/Polygon';
 import LineString from 'ol/geom/LineString';
 import { toLonLat, getPointResolution } from 'ol/proj';
 import { Collection } from "ol";
@@ -155,6 +156,91 @@ import pinIcon from '../assets/pin_drop.png';
 import centerIcon from '../assets/center.png';
 import listIcon from '../assets/view_list.png';
 
+const get_point_dist = (latitude, longitude, distanceInKm, bearingInDegrees) => {
+    const R = 6378.1;
+    const dr = Math.PI / 180;
+    const bearing = bearingInDegrees * dr;
+    let lat = latitude * dr;
+    let lon = longitude * dr;
+
+    lat = Math.asin(Math.sin(lat) * Math.cos(distanceInKm / R) + Math.cos(lat) * Math.sin(distanceInKm / R) * Math.cos(bearing));
+    lon += Math.atan2(
+        Math.sin(bearing) * Math.sin(distanceInKm / R) * Math.cos(lat),
+        Math.cos(distanceInKm / R) - Math.sin(lat) * Math.sin(lat)
+    );
+    lat /= dr;
+    lon /= dr;
+    return {lat, lon};
+}
+
+//
+// LCC DFS 좌표변환을 위한 기초 자료
+//
+var RE = 6371.00877; // 지구 반경(km)
+var GRID = 0.001; // 격자 간격(km)
+var SLAT1 = 30.0; // 투영 위도1(degree)
+var SLAT2 = 60.0; // 투영 위도2(degree)
+var OLON = 126.0; // 기준점 경도(degree)
+var OLAT = 38.0; // 기준점 위도(degree)
+var XO = 43; // 기준점 X좌표(GRID)
+var YO = 136; // 기1준점 Y좌표(GRID)
+
+function dfs_xy_conv(code, v1, v2) {
+    var DEGRAD = Math.PI / 180.0;
+    var RADDEG = 180.0 / Math.PI;
+
+    var re = RE / GRID;
+    var slat1 = SLAT1 * DEGRAD;
+    var slat2 = SLAT2 * DEGRAD;
+    var olon = OLON * DEGRAD;
+    var olat = OLAT * DEGRAD;
+
+    var sn = Math.tan(Math.PI * 0.25 + slat2 * 0.5) / Math.tan(Math.PI * 0.25 + slat1 * 0.5);
+    sn = Math.log(Math.cos(slat1) / Math.cos(slat2)) / Math.log(sn);
+    var sf = Math.tan(Math.PI * 0.25 + slat1 * 0.5);
+    sf = Math.pow(sf, sn) * Math.cos(slat1) / sn;
+    var ro = Math.tan(Math.PI * 0.25 + olat * 0.5);
+    ro = re * sf / Math.pow(ro, sn);
+    var rs = {};
+    if (code === "toXY") {
+        rs['lat'] = v1;
+        rs['lng'] = v2;
+        var ra = Math.tan(Math.PI * 0.25 + (v1) * DEGRAD * 0.5);
+        ra = re * sf / Math.pow(ra, sn);
+        var theta = v2 * DEGRAD - olon;
+        if (theta > Math.PI) theta -= 2.0 * Math.PI;
+        if (theta < -Math.PI) theta += 2.0 * Math.PI;
+        theta *= sn;
+        rs['x'] = Math.floor(ra * Math.sin(theta) + XO + 0.5);
+        rs['y'] = Math.floor(ro - ra * Math.cos(theta) + YO + 0.5);
+    }
+    else {
+        rs['x'] = v1;
+        rs['y'] = v2;
+        var xn = v1 - XO;
+        var yn = ro - v2 + YO;
+        ra = Math.sqrt(xn * xn + yn * yn);
+        if (sn < 0.0) - ra;
+        var alat = Math.pow((re * sf / ra), (1.0 / sn));
+        alat = 2.0 * Math.atan(alat) - Math.PI * 0.5;
+
+        if (Math.abs(xn) <= 0.0) {
+            theta = 0.0;
+        }
+        else {
+            if (Math.abs(yn) <= 0.0) {
+                theta = Math.PI * 0.5;
+                if (xn < 0.0) - theta;
+            }
+            else theta = Math.atan2(xn, yn);
+        }
+        var alon = theta / sn + olon;
+        rs['lat'] = alat * RADDEG;
+        rs['lng'] = alon * RADDEG;
+    }
+    return rs;
+}
+
 export default {
     name: 'MapContainer',
     components: {
@@ -184,6 +270,7 @@ export default {
 
             olDroneMarkers: {},
             olTempMarkers: {},
+            olSurveyMarkers: {},
 
             selectedFeature: undefined,
             selectedFeatureFlag: {},
@@ -277,6 +364,690 @@ export default {
 
         deleteOlTempMarker(obj) {
             console.log(obj.data.marker.getId());
+        },
+
+        line_intersect(x1, y1, x2, y2, x3, y3, x4, y4)
+        {
+            let ua, ub, denom = (y4 - y3)*(x2 - x1) - (x4 - x3)*(y2 - y1);
+            if (denom === 0) {
+                return null;
+            }
+
+            ua = ((x4 - x3)*(y1 - y3) - (y4 - y3)*(x1 - x3))/denom;
+            ub = ((x2 - x1)*(y1 - y3) - (y2 - y1)*(x1 - x3))/denom;
+
+            var rx = x1 + ua * (x2 - x1);
+            var ry = y1 + ua * (y2 - y1);
+
+            // console.log('px:', x1, x2, x3, x4);
+            // console.log('rx:', rx);
+            // console.log('py:', y1, y2, y3, y4);
+            // console.log('ry:', ry);
+
+
+            var check_count = 0;
+            if((x1 <= rx && rx <= x2) || (x1 >= rx && rx >= x2)) {
+                check_count++;
+                //console.log('x1 x2 사이');
+
+            }
+
+            if((x3 <= rx && rx <= x4) || (x3 >= rx && rx >= x4)) {
+                check_count++;
+                //console.log('x3 x4 사이');
+            }
+
+            if((y1 <= ry && ry <= y2) || (y1 >= ry && ry >= y2)) {
+                check_count++;
+                //console.log('y1 y2 사이');
+            }
+
+            if((y3 <= ry && ry <= y4) || (y3 >= ry && ry >= y4)) {
+                check_count++;
+                //console.log('y3 y4 사이');
+            }
+
+
+            if(check_count >= 4) {
+                return {
+                    x: rx,
+                    y: ry,
+                    seg1: ua >= 0 && ua <= 1,
+                    seg2: ub >= 0 && ub <= 1
+                };
+            }
+            else {
+                return null;
+            }
+        },
+
+        checkBoundaryIntersectionNextPoint(dName, pIndex, currPoint, nextPoint) {
+            let resultPoints = [];
+            let intersectPoint = null;
+            let len = this.$store.state.surveyMarkers[dName][pIndex].paths.length;
+            for(let i = 0; i < len; i++) {
+                intersectPoint = this.line_intersect(currPoint.lat, currPoint.lon,
+                    nextPoint.lat, nextPoint.lon,
+                    this.$store.state.surveyMarkers[dName][pIndex].paths[i].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[i].lng,
+                    this.$store.state.surveyMarkers[dName][pIndex].paths[(i+1)%len].lat, this.$store.state.surveyMarkers[dName][pIndex].paths[(i+1)%len].lng,
+                );
+
+                if(intersectPoint !== null) {
+                    resultPoints.push(intersectPoint);
+                }
+            }
+
+            if(resultPoints.length > 0) {
+                return resultPoints;
+            }
+            else {
+                return null;
+            }
+        },
+
+        getCenterPoly(paths) {
+
+            console.log('getCenterPoly', paths);
+
+
+            let polyLatMin = paths[0].lat;
+            let polyLatMax = paths[0].lat;
+            let polyLngMin = paths[0].lng;
+            let polyLngMax = paths[0].lng;
+
+            for(let i = 1; i < paths.length; i++) {
+                if(polyLatMin > paths[i].lat) {
+                    polyLatMin = paths[i].lat;
+                }
+
+                if(polyLatMax < paths[i].lat) {
+                    polyLatMax = paths[i].lat;
+                }
+
+                if(polyLngMin > paths[i].lng) {
+                    polyLngMin = paths[i].lng;
+                }
+
+                if(polyLngMax < paths[i].lng) {
+                    polyLngMax = paths[i].lng;
+                }
+            }
+
+            return ({
+                center: {lat: (polyLatMin + polyLatMax) / 2, lng: (polyLngMin + polyLngMax) / 2},
+                min: {lat: polyLatMin, lng: polyLngMin},
+                max: {lat: polyLatMax, lng: polyLngMax}
+            });
+        },
+
+        updateSurveyPath(dName, pIndex, gap, angle, dir) {
+            let objCenter = this.getCenterPoly(this.$store.state.surveyMarkers[dName][pIndex].paths);
+            let center = objCenter.center;
+            let min = objCenter.min;
+            let max = objCenter.max;
+
+            this.$store.state.surveyMarkers[dName][pIndex].center = center;
+            this.$store.state.surveyMarkers[dName][pIndex].pathLines = [];
+            //this.$store.state.surveyMarkers[dName][pIndex].pathLines.push(center);
+
+            this.$store.state.surveyMarkers[dName][pIndex].gap = gap;
+            this.$store.state.surveyMarkers[dName][pIndex].angle = angle;
+            this.$store.state.surveyMarkers[dName][pIndex].dir = dir;
+
+            const max_try_num = 100;
+            for(let i = 0; i < max_try_num; i++) {
+                let prevPoint = get_point_dist(center.lat, center.lng, (gap / 1000) * i, (360+(angle+(90*dir)))%360);
+                //let intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, {lat:center.lat, lon:center.lng}, prevPoint);
+                let intersectPoint = null;
+                let checkCount = 0;
+
+                if(min.lat <= prevPoint.lat && prevPoint.lat <= max.lat) {
+                    checkCount++;
+                }
+
+                if(min.lng <= prevPoint.lon && prevPoint.lon <= max.lng){
+                    checkCount++;
+                }
+
+                if(checkCount <= 1) {
+                    break;
+                }
+
+                let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), angle);
+                let intersectPointsUp = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                if (intersectPointsUp !== null) {
+                    checkCount = 0;
+
+                    let dist = 0;
+
+                    for(let p = 0; p < intersectPointsUp.length; p++) {
+
+                        let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPointsUp[p].x, 2) + Math.pow(prevPoint.lon - intersectPointsUp[p].y, 2));
+                        if(dist < temp) {
+                            dist = temp;
+
+                            intersectPoint = {x: intersectPointsUp[p].x, y: intersectPointsUp[p].y};
+                        }
+                    }
+
+                    if (intersectPoint !== null) {
+                        if(i%2 === 1) {
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+
+                            // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                            // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                            //     lat: guidePoint.lat,
+                            //     lng: guidePoint.lon
+                            // });
+                        }
+                        else {
+                            // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                            // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                            //     lat: guidePoint.lat,
+                            //     lng: guidePoint.lon
+                            // });
+
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+                        }
+                    }
+                }
+                else {
+                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), (360+(angle+180))%360);
+                    let intersectPointsUp = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPointsUp !== null) {
+                        checkCount = 0;
+
+                        let dist = 1000000;
+                        for(let p = 0; p < intersectPointsUp.length; p++) {
+
+                            let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPointsUp[p].x, 2) + Math.pow(prevPoint.lon - intersectPointsUp[p].y, 2));
+                            if(dist > temp) {
+                                dist = temp;
+
+                                intersectPoint = {x: intersectPointsUp[p].x, y: intersectPointsUp[p].y};
+                            }
+                        }
+
+                        if (intersectPoint !== null) {
+                            if(i%2 === 1) {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle))%360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+                            }
+                            else {
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle))%360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
+                        }
+                    }
+                }
+
+                nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), (360+(angle+180))%360);
+                let intersectPointsDn = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                if (intersectPointsDn !== null) {
+                    checkCount = 0;
+
+                    let dist = 0;
+                    for(let p = 0; p < intersectPointsDn.length; p++) {
+
+                        let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPointsDn[p].x, 2) + Math.pow(prevPoint.lon - intersectPointsDn[p].y, 2));
+                        if(dist < temp) {
+                            dist = temp;
+
+                            intersectPoint = {x: intersectPointsDn[p].x, y: intersectPointsDn[p].y};
+                        }
+                    }
+
+                    if (intersectPoint !== null) {
+                        if(i%2 === 1) {
+                            // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle+180))%360);
+                            // this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-2, 0, {
+                            //     lat: guidePoint.lat,
+                            //     lng: guidePoint.lon
+                            // });
+
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1, 0, {
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+                        }
+                        else {
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+
+                            // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle+180))%360);
+                            // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                            //     lat: guidePoint.lat,
+                            //     lng: guidePoint.lon
+                            // });
+                        }
+                    }
+                }
+                else {
+                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), angle);
+                    let intersectPointsUp = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPointsUp !== null) {
+                        checkCount = 0;
+
+                        let dist = 1000000;
+                        for(let p = 0; p < intersectPointsUp.length; p++) {
+
+                            let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPointsUp[p].x, 2) + Math.pow(prevPoint.lon - intersectPointsUp[p].y, 2));
+                            if(dist > temp) {
+                                dist = temp;
+
+                                intersectPoint = {x: intersectPointsUp[p].x, y: intersectPointsUp[p].y};
+                            }
+                        }
+
+                        if (intersectPoint !== null) {
+                            if(i%2 === 1) {
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle+180))%360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-2, 0, {
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1, 0, {
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
+                            else {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360+(angle+180))%360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.push({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+                            }
+                        }
+                    }
+                }
+            }
+
+            for(let i = 1; i < max_try_num; i++) {
+                let prevPoint = get_point_dist(center.lat, center.lng, (gap / 1000) * i, (360+(angle+(90*(-dir))))%360);
+                //let intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, {lat:center.lat, lon:center.lng}, prevPoint);
+                let intersectPoint = null;
+                let checkCount = 0;
+
+                if(min.lat <= prevPoint.lat && prevPoint.lat <= max.lat) {
+                    checkCount++;
+                }
+
+                if(min.lng <= prevPoint.lon && prevPoint.lon <= max.lng){
+                    checkCount++;
+                }
+
+                if(checkCount <= 1) {
+                    break;
+                }
+
+                let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), angle);
+                let intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                if (intersectPoints !== null) {
+                    checkCount = 0;
+
+                    let dist = 0;
+
+                    for(let p = 0; p < intersectPoints.length; p++) {
+
+                        let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPoints[p].x, 2) + Math.pow(prevPoint.lon - intersectPoints[p].y, 2));
+                        if(dist < temp) {
+                            dist = temp;
+
+                            intersectPoint = {x: intersectPoints[p].x, y: intersectPoints[p].y};
+                        }
+                    }
+
+                    if (intersectPoint !== null) {
+                        if(i%2 === 1) {
+                            // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                            // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                            //     lat: guidePoint.lat,
+                            //     lng: guidePoint.lon
+                            // });
+
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+                        }
+                        else {
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+
+                            // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                            // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                            //     lat: guidePoint.lat,
+                            //     lng: guidePoint.lon
+                            // });
+                        }
+                    }
+                }
+                else {
+                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), (360+(angle+180))%360);
+                    let intersectPointsUp = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPointsUp !== null) {
+                        checkCount = 0;
+
+                        let dist = 1000000;
+                        for(let p = 0; p < intersectPointsUp.length; p++) {
+
+                            let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPointsUp[p].x, 2) + Math.pow(prevPoint.lon - intersectPointsUp[p].y, 2));
+                            if(dist > temp) {
+                                dist = temp;
+
+                                intersectPoint = {x: intersectPointsUp[p].x, y: intersectPointsUp[p].y};
+                            }
+                        }
+
+                        if (intersectPoint !== null) {
+                            if(i%2 === 1) {
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
+                            else {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+                            }
+                        }
+                    }
+                }
+
+                nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), (360+(angle+180))%360);
+                intersectPoints = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                if (intersectPoints !== null) {
+                    checkCount = 0;
+
+                    let dist = 0;
+
+                    for(let p = 0; p < intersectPoints.length; p++) {
+
+                        let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPoints[p].x, 2) + Math.pow(prevPoint.lon - intersectPoints[p].y, 2));
+                        if(dist < temp) {
+                            dist = temp;
+
+                            intersectPoint = {x: intersectPoints[p].x, y: intersectPoints[p].y};
+                        }
+                    }
+
+                    if (intersectPoint !== null) {
+                        if(i%2 === 0) {
+                            // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle+180)) % 360);
+                            // this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(2, 0, {
+                            //     lat: guidePoint.lat,
+                            //     lng: guidePoint.lon
+                            // });
+
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(1, 0, {
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+                        }
+                        else {
+                            this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                lat: intersectPoint.x,
+                                lng: intersectPoint.y
+                            });
+
+                            // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle+180)) % 360);
+                            // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                            //     lat: guidePoint.lat,
+                            //     lng: guidePoint.lon
+                            // });
+                        }
+                    }
+                }
+                else {
+                    let nextPoint = get_point_dist(prevPoint.lat, prevPoint.lon, (1000 / 1000), angle);
+                    let intersectPointsUp = this.checkBoundaryIntersectionNextPoint(dName, pIndex, prevPoint, nextPoint);
+
+                    if (intersectPointsUp !== null) {
+                        checkCount = 0;
+
+                        let dist = 1000000;
+                        for(let p = 0; p < intersectPointsUp.length; p++) {
+
+                            let temp = Math.sqrt(Math.pow(prevPoint.lat - intersectPointsUp[p].x, 2) + Math.pow(prevPoint.lon - intersectPointsUp[p].y, 2));
+                            if(dist > temp) {
+                                dist = temp;
+
+                                intersectPoint = {x: intersectPointsUp[p].x, y: intersectPointsUp[p].y};
+                            }
+                        }
+
+                        if (intersectPoint !== null) {
+                            if(i%2 === 0) {
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle+180)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(2, 0, {
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.splice(1, 0, {
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+                            }
+                            else {
+                                this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                    lat: intersectPoint.x,
+                                    lng: intersectPoint.y
+                                });
+
+                                // let guidePoint = get_point_dist(intersectPoint.x, intersectPoint.y, 0.01, (360 + (angle+180)) % 360);
+                                // this.$store.state.surveyMarkers[dName][pIndex].pathLines.unshift({
+                                //     lat: guidePoint.lat,
+                                //     lng: guidePoint.lon
+                                // });
+                            }
+                        }
+                    }
+                }
+            }
+
+            this.$store.state.surveyMarkers[dName][pIndex].dists = [];
+            let total_dist = 0;
+            for(let i = 0; i < this.$store.state.surveyMarkers[dName][pIndex].pathLines.length-1; i++) {
+                let cur_lat = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i].lat;
+                let cur_lon = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i].lng;
+                let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
+
+                let tar_lat = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i+1].lat;
+                let tar_lon = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i+1].lng;
+                let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
+
+                let dist = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2));
+
+                this.$store.state.surveyMarkers[dName][pIndex].dists.push(dist);
+                total_dist += dist;
+                //console.log('dist- ', dist);
+            }
+            this.$store.state.surveyMarkers[dName][pIndex].total_dist = total_dist;
+
+            console.log('total_dist- ', total_dist);
+
+            // let area = this.google.maps.geometry.spherical.computeArea(this.$store.state.surveyMarkers[dName][pIndex].paths);
+            // this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
+            // console.log('computeArea = ', area.toFixed(1), '㎡');
+            //
+            // const elevator = new this.google.maps.ElevationService();
+            //
+            // // Initiate the location request
+            // elevator.getElevationAlongPath({
+            //     path: this.$store.state.surveyMarkers[dName][pIndex].pathLines,
+            //     samples: 256,
+            // })
+            //     .then(({ results }) => {
+            //         if (results[0]) {
+            //             this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
+            //             this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
+            //
+            //             //console.log('getElevationAlongPath', results);
+            //
+            //             //console.log(this.$store.state.drone_infos[dName].absolute_alt);
+            //
+            //             //let diff_alt = this.$store.state.drone_infos[dName].alt - this.$store.state.drone_infos[dName].absolute_alt;
+            //
+            //             for (let i = 0; i < results.length; i++) {
+            //                 //console.log(results[i].elevation, results[i].location.lat(), results[i].location.lng());
+            //
+            //                 //this.$store.state.surveyMarkers[dName][pIndex].elevations.push((results[i].elevation - diff_alt));
+            //                 this.$store.state.surveyMarkers[dName][pIndex].elevations.push((results[i].elevation));
+            //                 this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: results[i].location.lat(), lng: results[i].location.lng()});
+            //             }
+            //         }
+            //         else {
+            //             console.log("No results found");
+            //         }
+            //
+            //         EventBus.$emit('on-update-info-survey-marker');
+            //     })
+            //     .catch((e) => {
+            //         console.log(location, "Elevation service failed due to: " + e);
+            //
+            //         EventBus.$emit('on-update-info-survey-marker');
+            //     });
+        },
+
+        async addOlSurveyMarker(obj) {
+            let dName = 'unknown';
+            let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+
+            if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, dName)) {
+                this.$store.state.surveyMarkers[dName] = [];
+
+                let url = url_base + '/SurveyMarkerInfos/' + dName;
+                let response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: []
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('addOlSurveyMarker-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+            }
+
+            let latLng = toLonLat(obj.coordinate);
+            let lat = latLng[1];
+            let lng = latLng[0];
+
+            let survey = {};
+            survey.lat = lat;
+            survey.lng = lng;
+            survey.alt = 20;
+            survey.speed = 5;
+            survey.radius = 50;
+            survey.turningSpeed = 10;
+            survey.targetMavCmd = 16;
+            survey.targetStayTime = 1;
+            survey.type = 'Survey';
+            survey.color = '#9E9E9E';
+            survey.selected = false;
+            survey.targeted = false;
+
+            let paths = [];
+            paths.push({lat: lat, lng: lng});
+            let pointU = get_point_dist(lat, lng, 0.1, 0);
+            paths.push({lat: pointU.lat, lng: pointU.lon});
+            let pointUL = get_point_dist(pointU.lat, pointU.lon, 0.1, -90);
+            paths.push({lat: pointUL.lat, lng: pointUL.lon});
+            let pointL = get_point_dist(lat, lng, 0.1, -90);
+            paths.push({lat: pointL.lat, lng: pointL.lon});
+
+            survey.paths = JSON.parse(JSON.stringify(paths));
+
+            survey.wayOfSurvey = 'forShooting';
+            survey.gap = 20;
+            survey.dir = 1;
+            survey.angle = 0;
+            survey.focal = 16;
+            survey.sensor_w = 23.5;
+            survey.sensor_h = 15.6;
+            survey.overlap = 0.7;
+            survey.speed = 5;
+            survey.period = 5;
+            survey.area = 0;
+            survey.paramAlt = 150;
+            survey.paramOffsetAlt = 0;
+            survey.flyAlt = Array(256).fill(150);
+            survey.takeoffAlt = Array(256).fill(0);
+            survey.offsetAlt = Array(256).fill(0);
+            survey.flyAltType = '상대고도';
+            survey.pathLines = [];
+            survey.elevations = [];
+            survey.elevations_location = [];
+
+            this.$store.state.surveyMarkers[dName].push(survey);
+
+            this.updateSurveyPath(dName, this.$store.state.surveyMarkers[dName].length-1, 20, 0, 1);
+
+            console.log(this.$store.state.surveyMarkers);
+
+            this.initOlSurveyMarker(dName);
+
+            this.updateSource();
         },
 
         async addOlTempMarker(obj) {
@@ -426,6 +1197,13 @@ export default {
                     // this.olTempMarkers[dName].tempMarkerTranslates.forEach((translate) => {
                     //     this.olMap.addInteraction(translate);
                     // });
+                }
+            }
+
+            for(let dName in this.olSurveyMarkers) {
+                if(Object.prototype.hasOwnProperty.call(this.olSurveyMarkers, dName)) {
+                    this.features = this.features.concat(this.olSurveyMarkers[dName].surveyLineFeatures);
+                    this.features = this.features.concat(this.olSurveyMarkers[dName].surveyMarkerFeatures);
                 }
             }
 
@@ -595,6 +1373,21 @@ export default {
                     console.log(err.message);
                 }
             );
+        },
+
+        getStyleSurveyMarker(pIndex, targetedColor, strokeWidth, selectedColor) {
+            return ([
+                new Style({
+                    stroke: new Stroke({
+                        color: targetedColor,
+                        width: strokeWidth,
+                    }),
+                    fill: new Fill({
+                        color: selectedColor
+                    }),
+                    zIndex: 3,
+                }),
+            ]);
         },
 
         getStyleTempMarker(pIndex, fillColor, strokeColor, strokeWidth, tAlt, scale, selectedColor, elevation_val) {
@@ -1282,112 +2075,6 @@ export default {
             });
         },
 
-        updateTargetLineFeature(dName) {
-            //console.log('this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName]', this.$store.state.drone_infos[dName].targeted, this.targetedTempFeatureId[dName])
-
-            if(this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeature[dName] !== undefined) {
-                let sTarLat = this.$store.state.drone_infos[dName].lat;
-                let sTarLng = this.$store.state.drone_infos[dName].lng;
-                let eTarLat = this.$store.state.drone_infos[dName].lat;
-                let eTarLng = this.$store.state.drone_infos[dName].lng;
-
-                let sTarPnt = new Point([sTarLng, sTarLat]).transform('EPSG:4326', 'EPSG:3857')
-                let sTarCoordinate = sTarPnt.getCoordinates();
-                let eTarPnt = new Point([eTarLng, eTarLat]).transform('EPSG:4326', 'EPSG:3857')
-                let eTarCoordinate = eTarPnt.getCoordinates();
-
-                if(Object.prototype.hasOwnProperty.call(this.targetedTempFeature, dName)) {
-                    eTarCoordinate = this.targetedTempFeature[dName].getGeometry().getCoordinates();
-                }
-
-                let eTarLatLng = toLonLat(eTarCoordinate);
-                this.$store.state.drone_infos[dName].targetPosition = {lat: eTarLatLng[1], lng: eTarLatLng[0]};
-
-                let dx = eTarCoordinate[0] - sTarCoordinate[0];
-                let dy = eTarCoordinate[1] - sTarCoordinate[1];
-                let rotation = Math.atan2(dy, dx);
-
-                this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sTarCoordinate[0], sTarCoordinate[1]], [eTarCoordinate[0], eTarCoordinate[1]]]);
-                let distance = getLength(this.olDroneMarkers[dName].targetLineFeature.getGeometry());
-
-                if(distance < 1000) {
-                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText([distance.toFixed(1)+' m', 'bold 9px sans-serif']);
-                }
-                else {
-                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText([(distance/1000).toFixed(1)+' km', 'bold 9px sans-serif']);
-                }
-                this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
-                this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
-
-                if (this.$store.state.currentCommandTab === '선회') {
-                    let pIndex = this.targetedTempFeatureId[dName].split('-')[1];
-
-                    let resolution = this.olMap.getView().getResolution();
-                    let projection = this.olMap.getView().getProjection();
-
-                    this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(this.$store.state.drone_infos[dName].targetRadius / getPointResolution(projection, resolution, eTarCoordinate, 'm'))
-                }
-                else {
-                    let pIndex = this.targetedTempFeatureId[dName].split('-')[1];
-
-                    this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(1);
-                }
-            }
-            else {
-                let sTarLat = this.$store.state.drone_infos[dName].lat;
-                let sTarLng = this.$store.state.drone_infos[dName].lng;
-                let eTarLat = this.$store.state.drone_infos[dName].lat;
-                let eTarLng = this.$store.state.drone_infos[dName].lng;
-
-                this.$store.state.drone_infos[dName].targetPosition = {lat: this.$store.state.drone_infos[dName].lat, lng: this.$store.state.drone_infos[dName].lng};
-
-                let sTarPnt = new Point([sTarLng, sTarLat]).transform('EPSG:4326', 'EPSG:3857')
-                let sTarCoordinate = sTarPnt.getCoordinates();
-                let eTarPnt = new Point([eTarLng, eTarLat]).transform('EPSG:4326', 'EPSG:3857')
-                let eTarCoordinate = eTarPnt.getCoordinates();
-
-                let dx = eTarCoordinate[0] - sTarCoordinate[0];
-                let dy = eTarCoordinate[1] - sTarCoordinate[1];
-                let rotation = Math.atan2(dy, dx);
-
-                if(this.$store.state.drone_infos[dName].targeted && dName !== 'unknown') {
-                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText(['', 'bold 9px sans-serif']);
-                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
-                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
-                    this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sTarCoordinate[0], sTarCoordinate[1]], [eTarCoordinate[0], eTarCoordinate[1]]]);
-                }
-            }
-        },
-
-        async getElevationProfile(eLngLats, callback) {
-
-            eLngLats.forEach((eLngLat, idx) => {
-                [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
-                eLngLats[idx] = eLngLat;
-            });
-
-            let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-            param = param.replace(/\]/g, '');
-
-            let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
-
-            try {
-                let response = await axios.get(url, {
-                    validateStatus: status => {
-                        return status < 500;
-                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                    },
-                });
-                console.log('getElevationProfile', response.status, response.data);
-
-                callback(response.status, response.data);
-
-            } catch (err) {
-                console.log("Error >>", err);
-            }
-        },
-
         initOlTempMarker(dName) {
             this.olTempMarkers[dName] = {};
             this.olTempMarkers[dName].Coordinates = [];
@@ -1562,6 +2249,262 @@ export default {
                 }
             });
         },
+
+        initOlSurveyMarker(dName) {
+            this.olSurveyMarkers[dName] = {};
+            this.olSurveyMarkers[dName].polyCoordinates = [];
+            this.olSurveyMarkers[dName].lineCoordinates = [];
+            this.olSurveyMarkers[dName].surveyLineFeatures = [];
+            this.olSurveyMarkers[dName].surveyMarkerFeatures = [];
+            this.olSurveyMarkers[dName].surveyMarkerTranslates = [];
+
+            console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker', dName, this.$store.state.surveyMarkers[dName]);
+
+            this.$store.state.surveyMarkers[dName].forEach((survey, pIndex) => {
+                let polyCoordinates = [];
+                for(let i = 0; i < survey.paths.length; i++) {
+                    let svLat = survey.paths[i].lat;
+                    let svLng = survey.paths[i].lng;
+
+                    let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let svCoordinate = svPnt.getCoordinates();
+
+                    console.log('sssssssssssssssssssssssssssssssssssss surveyMarkers', dName, pIndex, i, svCoordinate);
+
+                    polyCoordinates.push(svCoordinate);
+                }
+
+                this.olSurveyMarkers[dName].polyCoordinates[pIndex] = JSON.parse(JSON.stringify(polyCoordinates));
+
+                let svFeature = new Feature({
+                    geometry: new Polygon([this.olSurveyMarkers[dName].polyCoordinates[pIndex]]),
+                    type: 'surveyMarker',
+                    dragging: false,
+                });
+                svFeature.setId(dName + '-' + pIndex + '-survey');
+
+                let selectedColor = '#76FF03F0';
+                if (this.$store.state.surveyMarkers[dName][pIndex].selected) {
+                    selectedColor = '#76FF03F0';
+                }
+                else {
+                    selectedColor = '#FAFAFA20';
+                }
+
+                let targetedColor = '#76FF03FF';
+                if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
+                    targetedColor = '#76FF0380';
+                }
+                else {
+                    targetedColor = this.$store.state.drone_infos[dName].color + '40';
+                }
+
+                console.log('sssssssssssssssssssssssssssssss surveyMarker-targeted', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted, targetedColor);
+
+                let styleSurvey = this.getStyleSurveyMarker(
+                    pIndex,
+                    targetedColor,
+                    '5',
+                    selectedColor,
+                );
+
+                svFeature.setStyle(styleSurvey);
+
+                this.olSurveyMarkers[dName].surveyMarkerFeatures.push(svFeature);
+
+                if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
+                    this.addTranslate(svFeature);
+                }
+
+                let pathLineCoordinates = [];
+                for(let i = 0; i < survey.pathLines.length; i++) {
+                    let svLat = survey.pathLines[i].lat;
+                    let svLng = survey.pathLines[i].lng;
+
+                    let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
+                    let svCoordinate = svPnt.getCoordinates();
+
+
+                    pathLineCoordinates.push(svCoordinate);
+                }
+
+                console.log('sssssssssssssssssssssssssssssssssssss pathLines', dName, pIndex, pathLineCoordinates);
+
+                this.olSurveyMarkers[dName].lineCoordinates[pIndex] = JSON.parse(JSON.stringify(pathLineCoordinates));
+
+                let lineFeature = new Feature({
+                    geometry: new LineString(this.olSurveyMarkers[dName].lineCoordinates[pIndex]),
+                    type: 'surveyLine',
+                });
+                lineFeature.setId(dName + '-' + pIndex + '-surveyLine');
+
+                let pathLineStyle = [
+                    new Style({
+                        stroke: new Stroke({
+                            color: this.$store.state.drone_infos[dName].color + 'FF',
+                            width: 3,
+                        }),
+                    }),
+                    new Style({
+                        image: new CircleStyle({
+                            radius: 8,
+                            fill: new Fill({
+                                color: 'orange',
+                            }),
+                        }),
+                        geometry: function (feature) {
+                            // return the coordinates of the first ring of the polygon
+                            const coordinates = feature.getGeometry().getCoordinates();
+                            return new MultiPoint(coordinates);
+                        },
+                    }),
+                    new Style({
+                        text: new Text({
+                            text: ['0', 'bold 10px sans-serif'],
+                            textAlign: 'center',
+                            offsetY: 0,
+                            scale: 1.4,
+                            stroke: new Stroke({
+                                color: 'black',
+                                width: 1,
+                            }),
+                            fill: new Fill({
+                                color: 'white'
+                            }),
+                        }),
+                        geometry: function (feature) {
+                            // return the coordinates of the first ring of the polygon
+                            const coordinate = feature.getGeometry().getCoordinates()[0];
+                            return new Point(coordinate);
+                        },
+                    }),
+                ];
+
+
+                lineFeature.setStyle(pathLineStyle);
+
+                this.olSurveyMarkers[dName].surveyLineFeatures.push(lineFeature);
+            });
+        },
+
+        initOlSurveyMarkers() {
+            this.olSurveyMarkers = {};
+
+            Object.keys(this.$store.state.surveyMarkers).forEach((dName) => {
+                if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    console.log('initOlSurveyMarkers', dName);
+                    this.initOlSurveyMarker(dName);
+                }
+            });
+        },
+
+        updateTargetLineFeature(dName) {
+            //console.log('this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName]', this.$store.state.drone_infos[dName].targeted, this.targetedTempFeatureId[dName])
+
+            if(this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeature[dName] !== undefined) {
+                let sTarLat = this.$store.state.drone_infos[dName].lat;
+                let sTarLng = this.$store.state.drone_infos[dName].lng;
+                let eTarLat = this.$store.state.drone_infos[dName].lat;
+                let eTarLng = this.$store.state.drone_infos[dName].lng;
+
+                let sTarPnt = new Point([sTarLng, sTarLat]).transform('EPSG:4326', 'EPSG:3857')
+                let sTarCoordinate = sTarPnt.getCoordinates();
+                let eTarPnt = new Point([eTarLng, eTarLat]).transform('EPSG:4326', 'EPSG:3857')
+                let eTarCoordinate = eTarPnt.getCoordinates();
+
+                if(Object.prototype.hasOwnProperty.call(this.targetedTempFeature, dName)) {
+                    eTarCoordinate = this.targetedTempFeature[dName].getGeometry().getCoordinates();
+                }
+
+                let eTarLatLng = toLonLat(eTarCoordinate);
+                this.$store.state.drone_infos[dName].targetPosition = {lat: eTarLatLng[1], lng: eTarLatLng[0]};
+
+                let dx = eTarCoordinate[0] - sTarCoordinate[0];
+                let dy = eTarCoordinate[1] - sTarCoordinate[1];
+                let rotation = Math.atan2(dy, dx);
+
+                this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sTarCoordinate[0], sTarCoordinate[1]], [eTarCoordinate[0], eTarCoordinate[1]]]);
+                let distance = getLength(this.olDroneMarkers[dName].targetLineFeature.getGeometry());
+
+                if(distance < 1000) {
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText([distance.toFixed(1)+' m', 'bold 9px sans-serif']);
+                }
+                else {
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText([(distance/1000).toFixed(1)+' km', 'bold 9px sans-serif']);
+                }
+                this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
+                this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
+
+                if (this.$store.state.currentCommandTab === '선회') {
+                    let pIndex = this.targetedTempFeatureId[dName].split('-')[1];
+
+                    let resolution = this.olMap.getView().getResolution();
+                    let projection = this.olMap.getView().getProjection();
+
+                    this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(this.$store.state.drone_infos[dName].targetRadius / getPointResolution(projection, resolution, eTarCoordinate, 'm'))
+                }
+                else {
+                    let pIndex = this.targetedTempFeatureId[dName].split('-')[1];
+
+                    this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(1);
+                }
+            }
+            else {
+                let sTarLat = this.$store.state.drone_infos[dName].lat;
+                let sTarLng = this.$store.state.drone_infos[dName].lng;
+                let eTarLat = this.$store.state.drone_infos[dName].lat;
+                let eTarLng = this.$store.state.drone_infos[dName].lng;
+
+                this.$store.state.drone_infos[dName].targetPosition = {lat: this.$store.state.drone_infos[dName].lat, lng: this.$store.state.drone_infos[dName].lng};
+
+                let sTarPnt = new Point([sTarLng, sTarLat]).transform('EPSG:4326', 'EPSG:3857')
+                let sTarCoordinate = sTarPnt.getCoordinates();
+                let eTarPnt = new Point([eTarLng, eTarLat]).transform('EPSG:4326', 'EPSG:3857')
+                let eTarCoordinate = eTarPnt.getCoordinates();
+
+                let dx = eTarCoordinate[0] - sTarCoordinate[0];
+                let dy = eTarCoordinate[1] - sTarCoordinate[1];
+                let rotation = Math.atan2(dy, dx);
+
+                if(this.$store.state.drone_infos[dName].targeted && dName !== 'unknown') {
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText(['', 'bold 9px sans-serif']);
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
+                    this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sTarCoordinate[0], sTarCoordinate[1]], [eTarCoordinate[0], eTarCoordinate[1]]]);
+                }
+            }
+        },
+
+        async getElevationProfile(eLngLats, callback) {
+
+            eLngLats.forEach((eLngLat, idx) => {
+                [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                eLngLats[idx] = eLngLat;
+            });
+
+            let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+            param = param.replace(/\]/g, '');
+
+            let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+
+            try {
+                let response = await axios.get(url, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                    },
+                });
+                console.log('getElevationProfile', response.status, response.data);
+
+                callback(response.status, response.data);
+
+            } catch (err) {
+                console.log("Error >>", err);
+            }
+        },
+
+
 
         shade(inputs, data) {
             var elevationImage = inputs[0]; // 첫번째(0) 데이터소스로 elevation 객체
@@ -1757,7 +2700,6 @@ export default {
         this.olMap.addControl(ctrl);
         this.olMap.addControl(new ScaleLine());
 
-
         const contextmenuItems = [
             {
                 text: 'Center map here',
@@ -1796,6 +2738,15 @@ export default {
                     console.log('Add a Marker', obj);
 
                     this.addOlTempMarker(obj);
+                },
+            },
+            {
+                text: 'Add a Survey',
+                icon: pinIcon,
+                callback: (obj) => {
+                    console.log('Add a Survey', obj);
+
+                    this.addOlSurveyMarker(obj);
                 },
             },
             '-' // this is a separator
@@ -1895,6 +2846,8 @@ export default {
 
             this.initOlTempMarkers();
 
+            this.initOlSurveyMarkers();
+
             this.updateSource();
 
             // const view = this.olMap.getView();
@@ -1921,7 +2874,6 @@ export default {
 
                 this.olMap.getView().setRotation((this.mapHeading*Math.PI)/180);
             }
-
         });
 
         EventBus.$on('do-current-drone-position', (dName) => {
