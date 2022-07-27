@@ -1821,6 +1821,8 @@ export default {
         async updateMyDroneInfo() {
             console.log('updateMyDroneInfo', this.strMyDroneInfo);
 
+            let eLngLats = [];
+
             try {
                 let temp = JSON.parse(this.strMyDroneInfo);
 
@@ -1849,36 +1851,37 @@ export default {
                     marker.targeted = false;
                     marker.color = this.$store.state.drone_infos[this.name].color;
 
-                    let eLngLats = [];
-                    eLngLats.push([marker.lng, marker.lat])
-                    eLngLats.forEach((eLngLat, idx) => {
-                        [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
-                        eLngLats[idx] = eLngLat;
+                    eLngLats.push([marker.lng, marker.lat]);
+
+                    this.$store.state.tempMarkers[this.name].push(marker);
+                }
+
+                eLngLats.forEach((eLngLat, idx) => {
+                    [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                    eLngLats[idx] = eLngLat;
+                });
+
+                let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+                param = param.replace(/\]/g, '');
+
+                let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+
+                try {
+                    let response = await axios.get(url, {
+                        validateStatus: status => {
+                            return status < 500;
+                        }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        headers: {
+                        },
                     });
+                    console.log('getElevationProfile', response.status, response.data);
 
-                    let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-                    param = param.replace(/\]/g, '');
-
-                    let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
-
-                    try {
-                        let response = await axios.get(url, {
-                            validateStatus: status => {
-                                return status < 500;
-                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                            headers: {
-                            },
-                        });
-                        console.log('getElevationProfile', response.status, response.data);
-
-                        marker.elevation = response.data.elevationProfile[0].height;
-
-                        this.$store.state.tempMarkers[this.name].push(marker);
-
+                    for(let idx = 0; idx < response.data.elevationProfile.length; idx++) {
+                        this.$store.state.tempMarkers[this.name][idx].elevation = response.data.elevationProfile[idx].height;
                     }
-                    catch (err) {
-                        console.log("Error >>", err);
-                    }
+                }
+                catch (err) {
+                    console.log("Error >>", err);
                 }
 
                 // this.positions = [];
@@ -6461,7 +6464,6 @@ export default {
                         this.$store.state.drone_infos[name].targetLat = lat;
                         this.$store.state.drone_infos[name].targetLng = lon;
                         this.$store.state.drone_infos[name].targetAlt = alt;
-
 
                         this.watchingMission = 'goto-circle';
                         this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
