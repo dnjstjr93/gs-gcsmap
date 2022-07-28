@@ -256,6 +256,7 @@ export default {
 
         return {
             curInfoTempMarkerFlag: false,
+            curInfoSurveyMarkerFlag: false,
 
             datum: {targeted: false, lat:0.0, lng:0.0},
 
@@ -279,6 +280,7 @@ export default {
             selectedFeatureFlag: {},
             selectedFeatureId: null,
             selectedTempFeatureId: '',
+            selectedSurveyFeatureId: '',
 
             targetedFeature: undefined,
             targetedTempFeature: {},
@@ -1050,11 +1052,12 @@ export default {
 
             this.$store.state.surveyMarkers[dName].push(survey);
 
-            this.updateSurveyPath(dName, this.$store.state.surveyMarkers[dName].length-1, 20, 0, 1);
+            let pIndex = this.$store.state.surveyMarkers[dName].length-1;
+            this.updateSurveyPath(dName, pIndex, 20, 0, 1);
 
             console.log(this.$store.state.surveyMarkers);
 
-            this.initOlSurveyMarker(dName);
+            this.initOlSurveyMarker(dName, pIndex, survey);
 
             this.updateSource();
         },
@@ -1632,7 +1635,10 @@ export default {
 
                     this.$store.state.surveyMarkers[dName][pIndex].paths = JSON.parse(JSON.stringify(paths));
 
-                    this.updateSurveyPath(dName, pIndex, 20, 0, 1);
+                    let gap = this.$store.state.surveyMarkers[dName].gap;
+                    let angle = this.$store.state.surveyMarkers[dName].angle;
+                    let dir = this.$store.state.surveyMarkers[dName].dir;
+                    this.updateSurveyPath(dName, pIndex, gap, angle, dir);
 
                     let pathLineCoordinates = [];
                     for(let i = 0; i < this.$store.state.surveyMarkers[dName][pIndex].pathLines.length; i++) {
@@ -1741,6 +1747,21 @@ export default {
                         }
 
                         this.olSurveyMarkers[dName].surveyLineFeatures[pIndex].getGeometry().setCoordinates(pathLineCoordinates);
+
+                        if(this.curInfoSurveyMarkerFlag) {
+                            this.updateSelectedTempMarker(dName, pIndex);
+
+                            this.curInfoSurveyMarkerFlag = false;
+
+                            this.$forceUpdate();
+
+                            setTimeout(() => {
+                                this.curSelectedMarker = this.$store.state.surveyMarkers[dName][pIndex];
+                                this.curIndexMarker = pIndex;
+                                this.curNameMarker = dName;
+                                this.curInfoSurveyMarkerFlag = true;
+                            }, 10);
+                        }
                     }
                 });
             });
@@ -1908,7 +1929,7 @@ export default {
 
             let selectedColor = '#76FF03F0';
             if (this.$store.state.surveyMarkers[dName][pIndex].selected) {
-                selectedColor = '#76FF03F0';
+                selectedColor = '#76FF0320';
             }
             else {
                 selectedColor = '#FAFAFA20';
@@ -2446,186 +2467,175 @@ export default {
             });
         },
 
-        initOlSurveyMarker(dName) {
-            this.olSurveyMarkers[dName] = {};
-            this.olSurveyMarkers[dName].polyCoordinates = [];
-            this.olSurveyMarkers[dName].lineCoordinates = [];
-            this.olSurveyMarkers[dName].surveyLineFeatures = [];
-            this.olSurveyMarkers[dName].surveyMarkerFeatures = [];
-            this.olSurveyMarkers[dName].surveyMarkerTranslates = [];
-
-            console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker', dName, this.$store.state.surveyMarkers[dName]);
-
-            this.$store.state.surveyMarkers[dName].forEach((survey, pIndex) => {
-                let polyCoordinates = [];
-                for(let i = 0; i < survey.paths.length; i++) {
-                    let svLat = survey.paths[i].lat;
-                    let svLng = survey.paths[i].lng;
-
-                    let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
-                    let svCoordinate = svPnt.getCoordinates();
-
-                    console.log('sssssssssssssssssssssssssssssssssssss surveyMarkers', dName, pIndex, i, svCoordinate);
-
-                    polyCoordinates.push(svCoordinate);
-                }
-
-                let svLat = survey.paths[0].lat;
-                let svLng = survey.paths[0].lng;
+        initOlSurveyMarker(dName, pIndex, survey) {
+            let polyCoordinates = [];
+            for(let i = 0; i < survey.paths.length; i++) {
+                let svLat = survey.paths[i].lat;
+                let svLng = survey.paths[i].lng;
 
                 let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
                 let svCoordinate = svPnt.getCoordinates();
 
+                console.log('sssssssssssssssssssssssssssssssssssss surveyMarkers', dName, pIndex, i, svCoordinate);
+
                 polyCoordinates.push(svCoordinate);
+            }
 
-                this.olSurveyMarkers[dName].polyCoordinates[pIndex] = JSON.parse(JSON.stringify(polyCoordinates));
+            let svLat = survey.paths[0].lat;
+            let svLng = survey.paths[0].lng;
 
-                let svFeature = new Feature({
-                    geometry: new Polygon([this.olSurveyMarkers[dName].polyCoordinates[pIndex]]),
-                    type: 'surveyMarker',
-                    dragging: false,
-                });
-                svFeature.setId(dName + '-' + pIndex + '-survey');
+            let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
+            let svCoordinate = svPnt.getCoordinates();
 
-                let area = getArea(svFeature.getGeometry());
-                this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
-                console.log('computeArea = ', area.toFixed(1), '㎡');
+            polyCoordinates.push(svCoordinate);
 
-                let selectedColor = '#76FF03F0';
-                if (this.$store.state.surveyMarkers[dName][pIndex].selected) {
-                    selectedColor = '#76FF03F0';
-                }
-                else {
-                    selectedColor = '#FAFAFA20';
-                }
+            this.olSurveyMarkers[dName].polyCoordinates[pIndex] = JSON.parse(JSON.stringify(polyCoordinates));
 
-                let targetedColor = '#76FF03FF';
-                if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
-                    targetedColor = '#76FF0380';
-                }
-                else {
-                    targetedColor = this.$store.state.drone_infos[dName].color + '20';
-                }
-
-                console.log('sssssssssssssssssssssssssssssss surveyMarker-targeted', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted, targetedColor);
-
-                // let styleSurvey = this.getStyleSurveyMarker(
-                //     pIndex,
-                //     targetedColor,
-                //     '1',
-                //     selectedColor,
-                // );
-
-                let styleSurvey = new Style({
-                    stroke: new Stroke({
-                        color: targetedColor,
-                        width: 2,
-                    }),
-                    fill: new Fill({
-                        color: selectedColor
-                    }),
-                    zIndex: 3,
-                });
-
-                svFeature.setStyle(styleSurvey);
-
-                this.olSurveyMarkers[dName].surveyMarkerFeatures.push(svFeature);
-
-                if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
-                    this.addSurveyTranslate(svFeature);
-                }
-
-                let pathLineCoordinates = [];
-                for(let i = 0; i < survey.pathLines.length; i++) {
-                    let svLat = survey.pathLines[i].lat;
-                    let svLng = survey.pathLines[i].lng;
-
-                    let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
-                    let svCoordinate = svPnt.getCoordinates();
-
-
-                    pathLineCoordinates.push(svCoordinate);
-                }
-
-                console.log('sssssssssssssssssssssssssssssssssssss pathLines', dName, pIndex, pathLineCoordinates);
-
-                this.olSurveyMarkers[dName].lineCoordinates[pIndex] = JSON.parse(JSON.stringify(pathLineCoordinates));
-
-                let lineFeature = new Feature({
-                    geometry: new LineString(this.olSurveyMarkers[dName].lineCoordinates[pIndex]),
-                    type: 'surveyLine',
-                });
-                lineFeature.setId(dName + '-' + pIndex + '-surveyLine');
-
-                let pathLineStyle = [
-                    new Style({
-                        stroke: new Stroke({
-                            color: this.$store.state.drone_infos[dName].color + 'FF',
-                            width: 5,
-                        }),
-                        zIndex: 2,
-                    }),
-                    new Style({
-                        image: new CircleStyle({
-                            radius: 8,
-                            fill: new Fill({
-                                color: 'orange',
-                            }),
-                        }),
-                        geometry: function (feature) {
-                            // return the coordinates of the first ring of the polygon
-                            const coordinates = feature.getGeometry().getCoordinates();
-                            return new MultiPoint(coordinates);
-                        },
-                        zIndex: 2,
-                    }),
-                    new Style({
-                        text: new Text({
-                            text: ['0', 'bold 10px sans-serif'],
-                            textAlign: 'center',
-                            offsetY: 0,
-                            scale: 1.4,
-                            stroke: new Stroke({
-                                color: 'black',
-                                width: 1,
-                            }),
-                            fill: new Fill({
-                                color: 'white'
-                            }),
-                        }),
-                        geometry: function (feature) {
-                            // return the coordinates of the first ring of the polygon
-                            const coordinate = feature.getGeometry().getCoordinates()[0];
-                            return new Point(coordinate);
-                        },
-                        zIndex: 3,
-                    }),
-                ];
-
-                lineFeature.setStyle(pathLineStyle);
-
-                let eLngLats = [];
-
-                this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
-                this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
-
-                for(let i = 0; i < 256; i++) {
-                    let eLngLat = toLonLat(lineFeature.getGeometry().getCoordinateAt(i/255));
-                    eLngLats.push(eLngLat);
-                    this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
-                }
-
-                this.getElevationProfile(eLngLats, async (status, result) => {
-                    if (status === 200) {
-                        result.elevationProfile.forEach((ele) => {
-                            let elevation_val = ele.height;
-                            this.$store.state.surveyMarkers[dName][pIndex].elevations.push(elevation_val);
-                        });
-                    }
-                });
-
-                this.olSurveyMarkers[dName].surveyLineFeatures.push(lineFeature);
+            let svFeature = new Feature({
+                geometry: new Polygon([this.olSurveyMarkers[dName].polyCoordinates[pIndex]]),
+                type: 'surveyMarker',
+                dragging: false,
             });
+            svFeature.setId(dName + '-' + pIndex + '-survey');
+
+            let area = getArea(svFeature.getGeometry());
+            this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
+            console.log('computeArea = ', area.toFixed(1), '㎡');
+
+            let selectedColor = '#76FF03F0';
+            if (this.$store.state.surveyMarkers[dName][pIndex].selected) {
+                selectedColor = '#76FF0320';
+            }
+            else {
+                selectedColor = '#FAFAFA20';
+            }
+
+            let targetedColor = '#76FF03FF';
+            if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
+                targetedColor = '#76FF0380';
+            }
+            else {
+                targetedColor = this.$store.state.drone_infos[dName].color + '20';
+            }
+
+            console.log('sssssssssssssssssssssssssssssss surveyMarker-targeted', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted, targetedColor);
+
+            // let styleSurvey = this.getStyleSurveyMarker(
+            //     pIndex,
+            //     targetedColor,
+            //     '1',
+            //     selectedColor,
+            // );
+
+            let styleSurvey = new Style({
+                stroke: new Stroke({
+                    color: targetedColor,
+                    width: 2,
+                }),
+                fill: new Fill({
+                    color: selectedColor
+                }),
+                zIndex: 3,
+            });
+
+            svFeature.setStyle(styleSurvey);
+
+            this.olSurveyMarkers[dName].surveyMarkerFeatures.push(svFeature);
+
+            if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
+                this.addSurveyTranslate(svFeature);
+            }
+
+            let pathLineCoordinates = [];
+            for(let i = 0; i < survey.pathLines.length; i++) {
+                let svLat = survey.pathLines[i].lat;
+                let svLng = survey.pathLines[i].lng;
+
+                let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
+                let svCoordinate = svPnt.getCoordinates();
+
+
+                pathLineCoordinates.push(svCoordinate);
+            }
+
+            console.log('sssssssssssssssssssssssssssssssssssss pathLines', dName, pIndex, pathLineCoordinates);
+
+            this.olSurveyMarkers[dName].lineCoordinates[pIndex] = JSON.parse(JSON.stringify(pathLineCoordinates));
+
+            let lineFeature = new Feature({
+                geometry: new LineString(this.olSurveyMarkers[dName].lineCoordinates[pIndex]),
+                type: 'surveyLine',
+            });
+            lineFeature.setId(dName + '-' + pIndex + '-surveyLine');
+
+            let pathLineStyle = [
+                new Style({
+                    stroke: new Stroke({
+                        color: this.$store.state.drone_infos[dName].color + 'FF',
+                        width: 5,
+                    }),
+                    zIndex: 2,
+                }),
+                new Style({
+                    image: new CircleStyle({
+                        radius: 6,
+                        fill: new Fill({
+                            color: 'orange',
+                        }),
+                    }),
+                    geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinates = feature.getGeometry().getCoordinates();
+                        return new MultiPoint(coordinates);
+                    },
+                    zIndex: 2,
+                }),
+                new Style({
+                    text: new Text({
+                        text: ['0', 'bold 10px sans-serif'],
+                        textAlign: 'center',
+                        offsetY: 0,
+                        scale: 1.4,
+                        stroke: new Stroke({
+                            color: 'black',
+                            width: 1,
+                        }),
+                        fill: new Fill({
+                            color: 'white'
+                        }),
+                    }),
+                    geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinate = feature.getGeometry().getCoordinates()[0];
+                        return new Point(coordinate);
+                    },
+                    zIndex: 3,
+                }),
+            ];
+
+            lineFeature.setStyle(pathLineStyle);
+
+            let eLngLats = [];
+
+            this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
+            this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
+
+            for(let i = 0; i < 256; i++) {
+                let eLngLat = toLonLat(lineFeature.getGeometry().getCoordinateAt(i/255));
+                eLngLats.push(eLngLat);
+                this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
+            }
+
+            this.getElevationProfile(eLngLats, async (status, result) => {
+                if (status === 200) {
+                    result.elevationProfile.forEach((ele) => {
+                        let elevation_val = ele.height;
+                        this.$store.state.surveyMarkers[dName][pIndex].elevations.push(elevation_val);
+                    });
+                }
+            });
+
+            this.olSurveyMarkers[dName].surveyLineFeatures.push(lineFeature);
         },
 
         initOlSurveyMarkers() {
@@ -2634,7 +2644,19 @@ export default {
             Object.keys(this.$store.state.surveyMarkers).forEach((dName) => {
                 if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     console.log('initOlSurveyMarkers', dName);
-                    this.initOlSurveyMarker(dName);
+
+                    this.olSurveyMarkers[dName] = {};
+                    this.olSurveyMarkers[dName].polyCoordinates = [];
+                    this.olSurveyMarkers[dName].lineCoordinates = [];
+                    this.olSurveyMarkers[dName].surveyLineFeatures = [];
+                    this.olSurveyMarkers[dName].surveyMarkerFeatures = [];
+                    this.olSurveyMarkers[dName].surveyMarkerTranslates = [];
+
+                    console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker', dName, this.$store.state.surveyMarkers[dName]);
+
+                    this.$store.state.surveyMarkers[dName].forEach((survey, pIndex) => {
+                        this.initOlSurveyMarker(dName, pIndex, survey);
+                    });
                 }
             });
         },
@@ -2689,6 +2711,41 @@ export default {
 
                     this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(1);
                 }
+            }
+            else if(this.$store.state.drone_infos[dName].targeted && this.targetedSurveyFeatureId[dName] !== '' && this.targetedSurveyFeature[dName] !== undefined) {
+                let pIndex = this.targetedSurveyFeatureId[dName].split('-')[1];
+
+                let sTarLat = this.$store.state.drone_infos[dName].lat;
+                let sTarLng = this.$store.state.drone_infos[dName].lng;
+                let eTarLat = this.$store.state.surveyMarkers[dName].lat;
+                let eTarLng = this.$store.state.surveyMarkers[dName].lng;
+
+
+                let sTarPnt = new Point([sTarLng, sTarLat]).transform('EPSG:4326', 'EPSG:3857')
+                let sTarCoordinate = sTarPnt.getCoordinates();
+                let eTarPnt = new Point([eTarLng, eTarLat]).transform('EPSG:4326', 'EPSG:3857')
+                let eTarCoordinate = eTarPnt.getCoordinates();
+
+                eTarCoordinate = this.olSurveyMarkers[dName].surveyLineFeatures[pIndex].getGeometry().getCoordinates()[0];
+
+                let eTarLatLng = toLonLat(eTarCoordinate);
+                this.$store.state.drone_infos[dName].targetPosition = {lat: eTarLatLng[1], lng: eTarLatLng[0]};
+
+                let dx = eTarCoordinate[0] - sTarCoordinate[0];
+                let dy = eTarCoordinate[1] - sTarCoordinate[1];
+                let rotation = Math.atan2(dy, dx);
+
+                this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sTarCoordinate[0], sTarCoordinate[1]], [eTarCoordinate[0], eTarCoordinate[1]]]);
+                let distance = getLength(this.olDroneMarkers[dName].targetLineFeature.getGeometry());
+
+                if(distance < 1000) {
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText([distance.toFixed(1)+' m', 'bold 9px sans-serif']);
+                }
+                else {
+                    this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText([(distance/1000).toFixed(1)+' km', 'bold 9px sans-serif']);
+                }
+                this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
+                this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
             }
             else {
                 let sTarLat = this.$store.state.drone_infos[dName].lat;
@@ -3360,6 +3417,20 @@ export default {
                         this.updateTargetedSurveyMarker(dName, pIndexOld);
                     }
 
+                    if(this.targetedTempFeatureId[dName] !== '') {
+                        let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
+                        this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
+
+                        this.deleteTempTranslate(this.targetedTempFeature[dName]);
+                        this.targetedTempFeatureId[dName] = '';
+                        this.targetedTempFeature[dName] = undefined;
+
+                        this.updateTargetedTempMarker(dName, pIndexOld);
+                        //this.updateOlTempMarker(dName, pIndexOld);
+
+                        this.olTempMarkers[dName].tempMarkerFeatures[pIndexOld].getStyle()[2].getImage().setRadius(1);
+                    }
+
                     this.$store.state.surveyMarkers[dName][pIndex].targeted = !this.$store.state.surveyMarkers[dName][pIndex].targeted;
 
                     console.log('sssssssssssssssssssssssss single click', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted);
@@ -3420,6 +3491,19 @@ export default {
                         //this.updateOlTempMarker(dName, pIndexOld);
 
                         this.olTempMarkers[dName].tempMarkerFeatures[pIndexOld].getStyle()[2].getImage().setRadius(1);
+                    }
+
+                    if(this.targetedSurveyFeatureId[dName] !== '') {
+                        let pIndexOld = this.targetedSurveyFeatureId[dName].split('-')[1];
+                        this.$store.state.surveyMarkers[dName][pIndexOld].targeted = false;
+
+                        this.deleteSurveyTranslate(this.targetedSurveyFeature[dName]);
+                        this.deleteModifyInteraction(this.targetedSurveyFeature[dName]);
+
+                        this.targetedSurveyFeatureId[dName] = '';
+                        this.targetedSurveyFeature[dName] = undefined;
+
+                        this.updateTargetedSurveyMarker(dName, pIndexOld);
                     }
 
                     this.$store.state.tempMarkers[dName][pIndex].targeted = !this.$store.state.tempMarkers[dName][pIndex].targeted;
@@ -3566,6 +3650,22 @@ export default {
                     this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
                 }
 
+                if (this.selectedSurveyFeatureId !== '') {
+                    let dName = this.selectedSurveyFeatureId.split('-')[0];
+                    let pIndex = this.selectedSurveyFeatureId.split('-')[1];
+
+                    this.$store.state.surveyMarkers[dName][pIndex].selected = false;
+                    this.selectedSurveyFeatureId = '';
+
+                    this.updateTargetedSurveyMarker(dName, pIndex);
+
+                    this.curInfoSurveyMarkerFlag = false;
+
+                    this.$forceUpdate();
+
+                    this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
+                }
+
             }
 
             // this.olMap.forEachFeatureAtPixel(event.pixel, (clicked) => {
@@ -3607,6 +3707,48 @@ export default {
                     //let dName = this.selectedFeature.getId();
 
                 }
+                else if(this.selectedFeature.getProperties().type === 'surveyMarker') {
+                    let arrId = this.selectedFeature.getId().split('-');
+                    let dName = arrId[0];
+                    let pIndex = arrId[1];
+
+                    if(this.selectedSurveyFeatureId !== '' && this.selectedSurveyFeatureId !== (dName + '-' + pIndex)) {
+                        let dNameOld = this.selectedSurveyFeatureId.split('-')[0];
+                        let pIndexOld = this.selectedSurveyFeatureId.split('-')[1];
+
+                        this.$store.state.surveyMarkers[dNameOld][pIndexOld].selected = false;
+                        this.selectedSurveyFeatureId = '';
+
+                        this.updateTargetedSurveyMarker(dNameOld, pIndexOld);
+                    }
+
+                    if(this.selectedTempFeatureId !== '') {
+                        let dNameOld = this.selectedTempFeatureId.split('-')[0];
+                        let pIndexOld = this.selectedTempFeatureId.split('-')[1];
+
+                        this.$store.state.tempMarkers[dNameOld][pIndexOld].selected = false;
+                        this.selectedTempFeatureId = '';
+
+                        this.updateSelectedTempMarker(dNameOld, pIndexOld);
+                    }
+
+                    this.$store.state.surveyMarkers[dName][pIndex].selected = true;
+                    this.selectedSurveyFeatureId = (dName + '-' + pIndex);
+
+                    this.updateTargetedSurveyMarker(dName, pIndex);
+
+                    this.curInfoSurveyMarkerFlag = false;
+                    this.curInfoTempMarkerFlag = false;
+
+                    this.$forceUpdate();
+
+                    setTimeout(() => {
+                        this.curSelectedMarker = this.$store.state.surveyMarkers[dName][pIndex];
+                        this.curIndexMarker = pIndex;
+                        this.curNameMarker = dName;
+                        this.curInfoSurveyMarkerFlag = true;
+                    }, 10);
+                }
                 else if(this.selectedFeature.getProperties().type === 'tempMarker') {
                     let arrId = this.selectedFeature.getId().split('-');
                     let dName = arrId[0];
@@ -3622,12 +3764,23 @@ export default {
                         this.updateSelectedTempMarker(dNameOld, pIndexOld);
                     }
 
+                    if(this.selectedSurveyFeatureId !== '') {
+                        let dNameOld = this.selectedSurveyFeatureId.split('-')[0];
+                        let pIndexOld = this.selectedSurveyFeatureId.split('-')[1];
+
+                        this.$store.state.surveyMarkers[dNameOld][pIndexOld].selected = false;
+                        this.selectedSurveyFeatureId = '';
+
+                        this.updateTargetedSurveyMarker(dNameOld, pIndexOld);
+                    }
+
                     this.$store.state.tempMarkers[dName][pIndex].selected = true;
                     this.selectedTempFeatureId = (dName + '-' + pIndex);
 
                     this.updateSelectedTempMarker(dName, pIndex);
 
                     this.curInfoTempMarkerFlag = false;
+                    this.curInfoSurveyMarkerFlag = false;
 
                     this.$forceUpdate();
 
