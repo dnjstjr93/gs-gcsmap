@@ -1228,6 +1228,7 @@ export default {
                     this.features.push(this.olDroneMarkers[dName].droneMarkerFeature);
                     this.features.push(this.olDroneMarkers[dName].droneHomeMarkerFeature);
                     this.features.push(this.olDroneMarkers[dName].directionLineFeature);
+                    this.features.push(this.olDroneMarkers[dName].trackingLineFeature);
                     console.log('droneMarkers', this.features);
                 }
             }
@@ -2350,6 +2351,30 @@ export default {
                     });
 
                     this.olDroneMarkers[dName].droneHomeMarkerFeature.setStyle(iconStyleDroneHome);
+
+                    this.olDroneMarkers[dName].trCoordinates = [];
+                    for(let i = 0; i < this.$store.state.trackingLines[dName].length; i++) {
+                        let trLat = this.$store.state.trackingLines[dName][i].lat;
+                        let trLng = this.$store.state.trackingLines[dName][i].lng;
+                        let trPnt = new Point([trLng, trLat]).transform('EPSG:4326', 'EPSG:3857')
+                        let trCoordinate = trPnt.getCoordinates();
+
+                        this.olDroneMarkers[dName].trCoordinates.push(trCoordinate);
+                    }
+
+                    this.olDroneMarkers[dName].trackingLineFeature = new Feature({
+                        geometry: new LineString(this.olDroneMarkers[dName].trCoordinates),
+                        type: 'trackingLine-'+dName,
+                    });
+
+                    let trackingLineStyle = new Style({
+                        stroke: new Stroke({
+                            color: this.$store.state.drone_infos[dName].color + 'F0',
+                            width: 2,
+                        })
+                    });
+
+                    this.olDroneMarkers[dName].trackingLineFeature.setStyle(trackingLineStyle);
                 }
             });
         },
@@ -2826,7 +2851,7 @@ export default {
                 let dy = eTarCoordinate[1] - sTarCoordinate[1];
                 let rotation = Math.atan2(dy, dx);
 
-                if(this.$store.state.drone_infos[dName].targeted && dName !== 'unknown') {
+                if(dName !== 'unknown') {
                     this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText(['', 'bold 9px sans-serif']);
                     this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
                     this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
@@ -3302,6 +3327,12 @@ export default {
                 this.olDroneMarkers[dName].directionLineFeature.getStyle()[1].setGeometry(new Point(eDirCoordinate));
                 this.olDroneMarkers[dName].directionLineFeature.getGeometry().setCoordinates([[sDirCoordinate[0], sDirCoordinate[1]], [eDirCoordinate[0], eDirCoordinate[1]]]);
 
+                if (this.olDroneMarkers[dName].trCoordinates.length > 5000) {
+                    this.olDroneMarkers[dName].trCoordinates.shift();
+                }
+                this.olDroneMarkers[dName].trCoordinates.push(dCoordinate);
+                this.olDroneMarkers[dName].trackingLineFeature.getGeometry().setCoordinates(this.olDroneMarkers[dName].trCoordinates);
+
                 this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sDirCoordinate[0], sDirCoordinate[1]], [eDirCoordinate[0], eDirCoordinate[1]]]);
 
                 this.updateTargetLineFeature(dName);
@@ -3666,16 +3697,6 @@ export default {
             else {
                 console.log('singleclick', this.targetedFeature);
 
-                Object.keys(this.$store.state.drone_infos).forEach((dName) => {
-                    if(this.$store.state.drone_infos[dName].targeted) {
-                        this.$store.state.drone_infos[dName].targeted = false;
-
-                        this.updateTargetDroneMarker(dName);
-
-                        this.updateTargetLineFeature(dName);
-                    }
-                });
-
                 Object.keys(this.targetedTempFeatureId).forEach((dName) => {
                     if(this.targetedTempFeatureId[dName] !== '') {
                         let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
@@ -3737,6 +3758,15 @@ export default {
                     this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
                 }
 
+                Object.keys(this.$store.state.drone_infos).forEach((dName) => {
+                    if(this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.state.drone_infos[dName].targeted = false;
+
+                        this.updateTargetLineFeature(dName);
+
+                        this.updateTargetDroneMarker(dName);
+                    }
+                });
             }
 
             // this.olMap.forEachFeatureAtPixel(event.pixel, (clicked) => {
@@ -4128,6 +4158,12 @@ export default {
                 EventBus.$emit('on-update-info-survey-marker');
             }
         });
+
+        EventBus.$on('clearTrackingLines', (dName) => {
+            this.olDroneMarkers[dName].trCoordinates = [];
+
+            this.olDroneMarkers[dName].trackingLineFeature.getGeometry().setCoordinates(this.olDroneMarkers[dName].trCoordinates);
+        });
     },
 
     beforeDestroy() {
@@ -4144,6 +4180,7 @@ export default {
         EventBus.$off('update-home-position');
         EventBus.$off('do-refresh-tempMarker');
         EventBus.$off('do-update-survey-GcsMap');
+        EventBus.$off('clearTrackingLines');
     }
 }
 </script>

@@ -5793,6 +5793,8 @@ export default {
             this.$store.state.trackingLines = JSON.parse(JSON.stringify(temp));
 
             localStorage.setItem('trackingLines-' + this.name, JSON.stringify(this.$store.state.trackingLines[this.name]));
+
+            EventBus.$emit('clearTrackingLines', this.name);
         },
 
         gotoHomePosition() {
