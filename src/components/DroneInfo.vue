@@ -2254,6 +2254,46 @@ export default {
                     }
                 }
             }
+            else if (chkTopic === '/Mobius') {
+                let con = JSON.parse(message.toString());
+                if (Object.prototype.hasOwnProperty.call(con, 'rsrp')) {
+                    this.colorLteVal = '#9E9E9E';
+
+                    this.curLteVal = con.rsrp;
+                    //console.log(this.curLteVal);
+
+                    if (0 > this.curLteVal && this.curLteVal >= -80) {
+                        this.iconLte = 'mdi-network-strength-4';
+                        this.colorLteVal = '#1E88E5';
+                    }
+                    else if (-80 > this.curLteVal && this.curLteVal >= -90) {
+                        this.iconLte = 'mdi-network-strength-3';
+                        this.colorLteVal = '#76FF03';
+                    }
+                    else if (-90 > this.curLteVal && this.curLteVal >= -100) {
+                        this.iconLte = 'mdi-network-strength-2';
+                        this.colorLteVal = '#FFFF00';
+                    }
+                    else {
+                        this.iconLte = 'mdi-network-strength-1';
+                        this.colorLteVal = '#FF3D00';
+                    }
+
+                    this.info.colorLteVal = this.colorLteVal;
+                    this.info.curLteVal = this.curLteVal;
+                    this.info.iconLte = this.iconLte;
+
+                    if (this.lteTimeoutObj) {
+                        clearTimeout(this.lteTimeoutObj);
+                    }
+
+                    this.lteTimeoutObj = setTimeout(() => {
+                        this.lteTimeoutObj = null;
+                        this.colorLteVal = '#9E9E9E';
+                        this.iconLte = 'mdi-network-strength-off-outline';
+                    }, 5500);
+                }
+            }
         },
 
         createConnection() {
@@ -5703,6 +5743,7 @@ export default {
                                 if(container === 'container') {
                                     for (let idx in con['mission'][msw_name][container]) {
                                         if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name][container], idx)) {
+
                                             if (con['mission'][msw_name][container][idx] === 'LTE') {
                                                 this.missionLteUrl = '/Mobius/' + con.gcs + '/Mission_Data/' + this.name + '/' + msw_name + '/' + con['mission'][msw_name][container][idx];
                                                 console.log('this.missionLteUrl', this.missionLteUrl);
@@ -7127,10 +7168,6 @@ export default {
             }
         }
 
-        console.log('Interval getDroneMissionInfo');
-
-        this.checkMissionLteUrl();
-
         console.log('DroneInfo-mounted', this.lat, this.lng);
 
         let payload = {};
@@ -7184,6 +7221,12 @@ export default {
         else {
             this.stopFlightTimer();
         }
+
+        console.log('Interval getDroneMissionInfo');
+
+        setTimeout(() => {
+            this.checkMissionLteUrl();
+        }, 1000);
     },
 
     beforeDestroy() {
