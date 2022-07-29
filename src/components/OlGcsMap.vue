@@ -7,6 +7,13 @@
                             :marker="curSelectedMarker"
             ></InfoTempMarker>
         </v-card>
+        <v-card flat tile class="info_markers" v-if="curInfoSurveyMarkerFlag">
+            <InfoSurveyMarker v-model="curInfoSurveyMarkerFlag"
+                            :marker-name="curNameMarker"
+                            :marker-index="curIndexMarker"
+                            :marker="curSelectedMarker"
+            ></InfoSurveyMarker>
+        </v-card>
     </div>
 </template>
 
@@ -158,6 +165,7 @@ import pinIcon from '../assets/pin_drop.png';
 import centerIcon from '../assets/center.png';
 import listIcon from '../assets/view_list.png';
 import surveyIcon from '../assets/grid.png';
+import InfoSurveyMarker from "./InfoSurveyMarker";
 
 const get_point_dist = (latitude, longitude, distanceInKm, bearingInDegrees) => {
     const R = 6378.1;
@@ -247,6 +255,7 @@ function dfs_xy_conv(code, v1, v2) {
 export default {
     name: 'MapContainer',
     components: {
+        InfoSurveyMarker,
         InfoTempMarker,
     },
     props: {
@@ -1060,6 +1069,28 @@ export default {
             this.initOlSurveyMarker(dName, pIndex, survey);
 
             this.updateSource();
+
+            try {
+                let url = url_base + '/SurveyMarkerInfos/' + dName;
+                let response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: this.$store.state.surveyMarkers[dName]
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('addOlSurveyMarker-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+            }
+            catch (err) {
+                console.log("Error >>", err);
+            }
         },
 
         async addOlTempMarker(obj) {
@@ -1635,9 +1666,9 @@ export default {
 
                     this.$store.state.surveyMarkers[dName][pIndex].paths = JSON.parse(JSON.stringify(paths));
 
-                    let gap = this.$store.state.surveyMarkers[dName].gap;
-                    let angle = this.$store.state.surveyMarkers[dName].angle;
-                    let dir = this.$store.state.surveyMarkers[dName].dir;
+                    let angle = this.$store.state.surveyMarkers[dName][pIndex].angle;
+                    let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
+                    let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
                     this.updateSurveyPath(dName, pIndex, gap, angle, dir);
 
                     let pathLineCoordinates = [];
@@ -1713,7 +1744,7 @@ export default {
 
             this.targetedSurveyTranslate[dName].on('translateend', (evt) => {
                 //line.setCoordinates([coordMarker2, evt.coordinate]);
-                evt.features.forEach((feature) => {
+                evt.features.forEach(async (feature) => {
                     console.log('translateend', evt.coordinate, feature.getGeometry().getCoordinates(), feature);
 
                     if(feature.getProperties().dragging) {
@@ -1733,7 +1764,11 @@ export default {
 
                         this.$store.state.surveyMarkers[dName][pIndex].paths = JSON.parse(JSON.stringify(paths));
 
-                        this.updateSurveyPath(dName, pIndex, 20, 0, 1);
+                        let angle = this.$store.state.surveyMarkers[dName][pIndex].angle;
+                        let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
+                        let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
+
+                        this.updateSurveyPath(dName, pIndex, gap, angle, dir);
 
                         let pathLineCoordinates = [];
                         for(let i = 0; i < this.$store.state.surveyMarkers[dName][pIndex].pathLines.length; i++) {
@@ -1749,7 +1784,7 @@ export default {
                         this.olSurveyMarkers[dName].surveyLineFeatures[pIndex].getGeometry().setCoordinates(pathLineCoordinates);
 
                         if(this.curInfoSurveyMarkerFlag) {
-                            this.updateSelectedTempMarker(dName, pIndex);
+                            this.updateTargetedSurveyMarker(dName, pIndex);
 
                             this.curInfoSurveyMarkerFlag = false;
 
@@ -1760,7 +1795,34 @@ export default {
                                 this.curIndexMarker = pIndex;
                                 this.curNameMarker = dName;
                                 this.curInfoSurveyMarkerFlag = true;
+
+                                setTimeout(() => {
+                                    EventBus.$emit('on-update-info-survey-marker');
+                                }, 10);
                             }, 10);
+                        }
+
+                        try {
+                            let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+                            let url = url_base + '/SurveyMarkerInfos/' + dName;
+                            let response = await axios.post(url, {
+                                'm2m:cin': {
+                                    con: this.$store.state.surveyMarkers[dName]
+                                }
+                            }, {
+                                validateStatus: status => {
+                                    return status < 500;
+                                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                                headers: {
+                                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                                    'Content-Type': 'application/json;ty=4'
+                                },
+                            });
+                            console.log('translateend-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+                        }
+                        catch (err) {
+                            console.log("Error >>", err);
                         }
                     }
                 });
@@ -3337,6 +3399,15 @@ export default {
             }
         });
 
+        EventBus.$on('do-unsetSelectedSurveyMarker', () => {
+
+            this.initOlSurveyMarkers();
+
+            this.updateSource();
+
+            this.selectedSurveyFeatureId = '';
+        });
+
         this.olMap.on('pointermove', (event) => {
             if (event.dragging) {
                 return;
@@ -3700,7 +3771,7 @@ export default {
         this.olMap.on('dblclick', (event) => {
 
             this.selectedFeature = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
-            console.log('dblclick', this.selectedFeature);
+            console.log('dblclick', this.selectedFeature.getProperties().type);
 
             if(this.selectedFeature !== undefined && this.selectedFeature.getId() !== undefined) {
                 if(this.selectedFeature.getProperties().type === 'droneMarker') {
@@ -3747,6 +3818,10 @@ export default {
                         this.curIndexMarker = pIndex;
                         this.curNameMarker = dName;
                         this.curInfoSurveyMarkerFlag = true;
+
+                        setTimeout(() => {
+                            EventBus.$emit('on-update-info-survey-marker');
+                        }, 10);
                     }, 10);
                 }
                 else if(this.selectedFeature.getProperties().type === 'tempMarker') {
@@ -3987,6 +4062,72 @@ export default {
 
             this.updateSource();
         });
+
+        EventBus.$on('do-update-survey-GcsMap', async (payload) => {
+            let eName = payload.eName;
+
+            let dName = payload.dName;
+            let pIndex = payload.pIndex;
+            let angle = this.$store.state.surveyMarkers[dName][pIndex].angle;
+            let gap = this.$store.state.surveyMarkers[dName][pIndex].gap;
+            let dir = this.$store.state.surveyMarkers[dName][pIndex].dir;
+
+            if(eName === 'angle') {
+                angle = payload.angle;
+            }
+            else if(eName === 'gap') {
+                gap = payload.gap;
+            }
+            else if(eName === 'dir') {
+                dir = payload.dir;
+            }
+
+            this.$store.state.surveyMarkers[dName][pIndex].angle = angle;
+            this.$store.state.surveyMarkers[dName][pIndex].gap = gap;
+            this.$store.state.surveyMarkers[dName][pIndex].dir = dir;
+
+            this.updateSurveyPath(dName, pIndex, gap, angle, dir);
+
+            let pathLineCoordinates = [];
+            for(let i = 0; i < this.$store.state.surveyMarkers[dName][pIndex].pathLines.length; i++) {
+                let svLat = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i].lat;
+                let svLng = this.$store.state.surveyMarkers[dName][pIndex].pathLines[i].lng;
+
+                let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
+                let svCoordinate = svPnt.getCoordinates();
+
+                pathLineCoordinates.push(svCoordinate);
+            }
+
+            this.olSurveyMarkers[dName].surveyLineFeatures[pIndex].getGeometry().setCoordinates(pathLineCoordinates);
+
+            try {
+                let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+                let url = url_base + '/SurveyMarkerInfos/' + dName;
+                let response = await axios.post(url, {
+                    'm2m:cin': {
+                        con: this.$store.state.surveyMarkers[dName]
+                    }
+                }, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=4'
+                    },
+                });
+                console.log('translateend-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
+            }
+            catch (err) {
+                console.log("Error >>", err);
+            }
+
+            if(this.curInfoSurveyMarkerFlag) {
+                EventBus.$emit('on-update-info-survey-marker');
+            }
+        });
     },
 
     beforeDestroy() {
@@ -3996,11 +4137,13 @@ export default {
         EventBus.$off('do-centerCurrentPosition');
         EventBus.$off('do-updateTargetDroneMarker');
         EventBus.$off('do-unsetSelectedTempMarker');
+        EventBus.$off('do-unsetSelectedSurveyMarker');
         EventBus.$off('do-rotate-map');
         EventBus.$off('do-download-map');
         EventBus.$off('updateDroneAlt');
         EventBus.$off('update-home-position');
         EventBus.$off('do-refresh-tempMarker');
+        EventBus.$off('do-update-survey-GcsMap');
     }
 }
 </script>

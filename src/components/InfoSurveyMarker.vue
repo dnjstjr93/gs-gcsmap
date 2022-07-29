@@ -797,6 +797,8 @@
                     marker.polygonDraggable = false;
                     marker.polygonEditable = false;
                 });
+
+                EventBus.$emit('do-unsetSelectedSurveyMarker');
             },
 
             createEachSurveyMarkerInfoToMobius(dName, callback) {
