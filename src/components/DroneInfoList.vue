@@ -459,25 +459,25 @@
                 //     }
                 // }
 
-                if (localStorage.getItem('mqttConnection-DroneInfoList')) {
-                    if (JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList')).connected) {
-                        this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList'));
-                        console.log('DroneInfoList', 'client', this.$store.state.client);
-
-                        this.$store.state.client = {
-                            connected: false,
-                            loading: false
-                        }
-
-                        localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
-                    }
-                }
-                else {
-                    this.$store.state.client = {
-                        connected: false,
-                        loading: false
-                    }
-                }
+                // if (localStorage.getItem('mqttConnection-DroneInfoList')) {
+                //     if (JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList')).connected) {
+                //         this.$store.state.client = JSON.parse(localStorage.getItem('mqttConnection-DroneInfoList'));
+                //         console.log('DroneInfoList', 'client', this.$store.state.client);
+                //
+                //         this.$store.state.client = {
+                //             connected: false,
+                //             loading: false
+                //         }
+                //
+                //         localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
+                //     }
+                // }
+                // else {
+                //     this.$store.state.client = {
+                //         connected: false,
+                //         loading: false
+                //     }
+                // }
 
                 this.createConnection();
             }

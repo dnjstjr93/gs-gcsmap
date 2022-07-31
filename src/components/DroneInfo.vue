@@ -1845,7 +1845,7 @@ export default {
                     marker.turningSpeed = parseFloat(pos_arr[5]);
                     marker.targetMavCmd = (typeof pos_arr[6] === 'undefined') ? 16 : parseInt(pos_arr[6]);
                     marker.targetStayTime = (typeof pos_arr[7] === 'undefined') ? 1 : parseInt(pos_arr[7]);
-                    marker.elevation = (typeof pos_arr[8] === 'undefined') ? 0.0 : parseInt(pos_arr[8]);
+                    marker.elevation = (typeof pos_arr[8] === 'undefined') ? -99.0 : parseInt(pos_arr[8]);
                     marker.type = 'Goto';
                     marker.selected = false;
                     marker.targeted = false;
@@ -5734,24 +5734,26 @@ export default {
             });
             console.log('checkMissionLteUrl-'+dName, response.status, response.data['m2m:cin']);
 
-            let con = response.data['m2m:cin'].con;
-            if (Object.prototype.hasOwnProperty.call(con, 'mission')) {
-                for (let msw_name in con['mission']) {
-                    if (Object.prototype.hasOwnProperty.call(con['mission'], msw_name)) {
-                        for (let container in con['mission'][msw_name]) {
-                            if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name], container)) {
-                                if(container === 'container') {
-                                    for (let idx in con['mission'][msw_name][container]) {
-                                        if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name][container], idx)) {
+            if(response.status === 200) {
+                let con = response.data['m2m:cin'].con;
+                if (Object.prototype.hasOwnProperty.call(con, 'mission')) {
+                    for (let msw_name in con['mission']) {
+                        if (Object.prototype.hasOwnProperty.call(con['mission'], msw_name)) {
+                            for (let container in con['mission'][msw_name]) {
+                                if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name], container)) {
+                                    if (container === 'container') {
+                                        for (let idx in con['mission'][msw_name][container]) {
+                                            if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name][container], idx)) {
 
-                                            if (con['mission'][msw_name][container][idx] === 'LTE') {
-                                                this.missionLteUrl = '/Mobius/' + con.gcs + '/Mission_Data/' + this.name + '/' + msw_name + '/' + con['mission'][msw_name][container][idx];
-                                                console.log('this.missionLteUrl', this.missionLteUrl);
+                                                if (con['mission'][msw_name][container][idx] === 'LTE') {
+                                                    this.missionLteUrl = '/Mobius/' + con.gcs + '/Mission_Data/' + this.name + '/' + msw_name + '/' + con['mission'][msw_name][container][idx];
+                                                    console.log('this.missionLteUrl', this.missionLteUrl);
 
-                                                EventBus.$emit('do-subscribe', this.missionLteUrl);
+                                                    EventBus.$emit('do-subscribe', this.missionLteUrl);
 
-                                                this.missionLteUrlFlag = true;
-                                                break;
+                                                    this.missionLteUrlFlag = true;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }

@@ -539,6 +539,11 @@
                                                                 <v-subheader>{{ d.name }} 자동:
                                                                     <v-spacer></v-spacer>
                                                                     <v-switch
+                                                                        v-model="flyMarketAlt"
+                                                                        :label="`마커고도: ${flyMarketAlt.toString()}`"
+                                                                    ></v-switch>
+                                                                    <v-spacer></v-spacer>
+                                                                    <v-switch
                                                                         v-show="d.curArmStatus==='DISARMED'"
                                                                         v-model="takeoffInAuto"
                                                                         :label="`takeoffInAuto: ${takeoffInAuto.toString()}`"
@@ -572,6 +577,9 @@
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
+                                                                    :readonly="flyMarketAlt"
+                                                                    :filled="flyMarketAlt"
+                                                                    :disabled="flyMarketAlt"
                                                                     label="자동고도(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
@@ -1087,6 +1095,7 @@ export default {
             dropped_point: [],
 
             takeoffInAuto: true,
+            flyMarketAlt: false,
             mission_ch_min: 223,
             mission_ch_max: 1823,
             channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
@@ -1819,12 +1828,22 @@ export default {
 
                         this.position_selections_items[dName] = [];
 
+
                         if(start_index <= end_index) {
                             for (let pIndex = start_index; pIndex <= end_index; pIndex++) {
                                 if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
+
+                                    let targetAlt = 20;
+                                    if(this.flyMarketAlt) {
+                                        targetAlt = this.$store.state.tempMarkers[dName][pIndex].alt;
+                                    }
+                                    else {
+                                        targetAlt = this.$store.state.drone_infos[dName].targetAlt;
+                                    }
+
                                     let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
                                         this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
-                                        this.$store.state.drone_infos[dName].targetAlt + ':' +
+                                        targetAlt + ':' +
                                         this.$store.state.drone_infos[dName].autoSpeed + ':' +
                                         this.$store.state.tempMarkers[dName][pIndex].radius + ':' +
                                         this.$store.state.tempMarkers[dName][pIndex].turningSpeed + ':' +
@@ -1841,9 +1860,18 @@ export default {
                         else {
                             for (let pIndex = start_index; pIndex >= end_index; pIndex--) {
                                 if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
+
+                                    let targetAlt = 20;
+                                    if(this.flyMarketAlt) {
+                                        targetAlt = this.$store.state.tempMarkers[dName][pIndex].alt;
+                                    }
+                                    else {
+                                        targetAlt = this.$store.state.drone_infos[dName].targetAlt;
+                                    }
+
                                     let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
                                         this.$store.state.tempMarkers[dName][pIndex].lng + ':' +
-                                        this.$store.state.drone_infos[dName].targetAlt + ':' +
+                                        targetAlt + ':' +
                                         this.$store.state.drone_infos[dName].autoSpeed + ':' +
                                         this.$store.state.tempMarkers[dName][pIndex].radius + ':' +
                                         this.$store.state.tempMarkers[dName][pIndex].turningSpeed + ':' +

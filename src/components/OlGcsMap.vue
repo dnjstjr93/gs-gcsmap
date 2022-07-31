@@ -2352,6 +2352,10 @@ export default {
 
                     this.olDroneMarkers[dName].droneHomeMarkerFeature.setStyle(iconStyleDroneHome);
 
+                    if(!Object.prototype.hasOwnProperty.call(this.$store.state.trackingLines, dName)) {
+                        this.$store.state.trackingLines[dName] = [];
+                    }
+
                     this.olDroneMarkers[dName].trCoordinates = [];
                     for(let i = 0; i < this.$store.state.trackingLines[dName].length; i++) {
                         let trLat = this.$store.state.trackingLines[dName][i].lat;

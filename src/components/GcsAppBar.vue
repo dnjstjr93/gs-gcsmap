@@ -1437,7 +1437,7 @@ export default {
 
                                     this.$store.state.tempMarkers[dName].forEach((marker) => {
                                         if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
-                                            marker.elevation = 0;
+                                            marker.elevation = -99.0;
                                         }
 
                                         //console.log('YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY', dName, marker, this.$store.state.drone_infos[dName].color)
@@ -1946,7 +1946,7 @@ export default {
 
                         temp_markers.forEach((marker, pIndex) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
-                                marker.elevation = 0;
+                                marker.elevation = -99.0;
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
@@ -2225,9 +2225,10 @@ export default {
         },
 
         GcsAppBarConnected() {
-            this.$store.state.MOBIUS_CONNECTION.connected = true;
+            EventBus.$emit('ready-gcs_app_bar', false);
 
             this.GcsAppBarCreated();
+            //this.$store.state.MOBIUS_CONNECTION.connected = true;
         },
 
         async GcsAppBarCreated() {
@@ -2474,11 +2475,15 @@ export default {
                     });
                     console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
                 }
+
+                this.$store.state.MOBIUS_CONNECTION.connected = true;
+
                 this.prepareDroneInfos(() => {
                     this.prepareMarkerInfos(() => {
                         this.prepareSurveyMarkerInfos(() => {
                             this.prepareLossLteInfos(() => {
-                                EventBus.$emit('ready-gcs_app_bar');
+                                EventBus.$emit('ready-gcs_app_bar', true);
+
                                 setTimeout(() => {
                                     EventBus.$emit('gcs-map-ready');
                                 }, 1000);
@@ -2784,7 +2789,7 @@ export default {
 
                         temp_markers.forEach((marker, pIndex) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
-                                marker.elevation = 0;
+                                marker.elevation = -99.0;
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
@@ -2879,7 +2884,7 @@ export default {
 
                         survey_markers.forEach((marker, pIndex) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
-                                marker.elevation = 0;
+                                marker.elevation = -99.0;
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
@@ -2913,7 +2918,7 @@ export default {
                     }
                 }
 
-                EventBus.$emit('ready-gcs_app_bar');
+                EventBus.$emit('ready-gcs_app_bar', true);
                 setTimeout(() => {
                     EventBus.$emit('gcs-map-ready');
                 }, 1000);
@@ -3211,7 +3216,7 @@ export default {
 
                         temp_markers.forEach((marker, pIndex) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
-                                marker.elevation = 0;
+                                marker.elevation = -99.0;
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
@@ -3305,7 +3310,7 @@ export default {
 
                         survey_markers.forEach((marker, pIndex) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
-                                marker.elevation = 0;
+                                marker.elevation = -99.0;
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'name')) {
