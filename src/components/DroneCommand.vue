@@ -151,7 +151,7 @@
                                                             </v-col>
                                                         </v-row>
                                                     </v-card>
-                                                    <v-card tile flat v-if="(command.title === '이동')">
+                                                    <v-card tile flat v-if="command.title === '이동'">
                                                         <v-row no-gutters>
                                                             <v-col cols="2">
                                                                 <v-select
@@ -178,7 +178,8 @@
                                                                     outlined dense hide-details
                                                                     v-model="d.targetAlt"
                                                                     type="number"
-                                                                    :class="(d.curTargetedTempMarkerIndex === -1) ? '' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation)>d.targetAlt ? 'red' : ''"
+                                                                    :class="(d.curTargetedTempMarkerIndex === -1) ? '' : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation)>d.targetAlt ? 'orange' : ''"
+                                                                    @input="changeTargetAlt($event, d.name)"
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="2">
@@ -208,6 +209,13 @@
                                                                     type="number"
                                                                     readonly
                                                                 ></v-text-field>
+                                                            </v-col>
+                                                        </v-row>
+                                                        <v-row no-gutters>
+                                                            <v-col cols="12">
+                                                                <v-card :style="{color:'white'}" outlined tile flat>
+                                                                    <canvas :id="'elevation-chart-'+d.name" :height="80+'px'"></canvas>
+                                                                </v-card>
                                                             </v-col>
                                                         </v-row>
                                                     </v-card>
@@ -1078,6 +1086,8 @@
 import EventBus from '../EventBus';
 import JoyStick from './JoyStick';
 import axios from "axios";
+import {Chart, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement } from 'chart.js';
+Chart.register(BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement); // 👈 chart.js 모듈 Chart 모듈에 등록
 
 export default {
     name: "DroneCommand",
@@ -1088,6 +1098,8 @@ export default {
 
     data() {
         return {
+            myChart: null,
+
             drawRadiusUpdateTimer: null,
 
             items: [],
@@ -1360,6 +1372,11 @@ export default {
     },
 
     methods: {
+        changeTargetAlt(alt, dName) {
+            this.$store.state.drone_infos[dName].targetAlt = parseInt(alt);
+            this.fillGoToElevationData(dName);
+        },
+
         setPoint(point) {
             this.point = point
             console.log('setPoint', this.point);
@@ -1541,6 +1558,15 @@ export default {
             }
 
             if (this.$store.state.currentCommandTab === '이동') {
+                for(let dName in this.$store.state.drone_infos) {
+                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if(this.$store.state.drone_infos[dName].targeted) {
+                            setTimeout((dName) => {
+                                this.fillGoToElevationData(dName);
+                            }, 100, dName);
+                        }
+                    }
+                }
                 console.log(this.$store.state.currentCommandTab);
             }
             else if(this.$store.state.currentCommandTab === '선회') {
@@ -2035,6 +2061,95 @@ export default {
                 }
             }
         },
+
+        async fillGoToElevationData(dName) {
+
+            console.log('fillGoToElevationData', dName)
+
+            if(this.$store.state.drone_infos[dName].updatedTempElePathFlag) {
+                if (this.myChart) {
+                    this.myChart.destroy();
+                }
+
+                let unitVal = parseInt(this.$store.state.drone_infos[dName].targetDistance / 256);
+                console.log('unitVal', unitVal);
+                let labels = [0];
+                let dist = 0;
+                for (let i = 1; i < 256; i++) {
+                    dist += unitVal;
+                    labels.push(dist);
+                }
+
+                let arrCurAlt = Array(256).fill(parseInt(this.$store.state.drone_infos[dName].absolute_alt));
+
+                let diff = this.$store.state.drone_infos[dName].absolute_alt - this.$store.state.drone_infos[dName].alt;
+                let arrFlyAlt = Array(256).fill(parseInt(diff) + parseInt(this.$store.state.drone_infos[dName].targetAlt));
+
+                console.log('arrFlyAlt - ', this.$store.state.drone_infos[dName].absolute_alt, this.$store.state.drone_infos[dName].alt, arrFlyAlt);
+
+                const ctx = document.getElementById('elevation-chart-' + dName).getContext('2d');
+                let config = {
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                type: 'bar',
+                                data: this.$store.state.drone_infos[dName].elevations,
+                                backgroundColor: Array(256).fill('rgba(153, 102, 255, 0.2)'),
+                                // aaa: [
+                                //     //색상
+                                //     'rgba(255, 99, 132, 0.2)',
+                                //     'rgba(54, 162, 235, 0.2)',
+                                //     'rgba(255, 206, 86, 0.2)',
+                                //     'rgba(75, 192, 192, 0.2)',
+                                //     'rgba(153, 102, 255, 0.2)',
+                                //     'rgba(255, 159, 64, 0.2)'
+                                // ],
+                                borderColor: Array(256).fill('rgba(153, 102, 255, 1)'),
+                                // [
+                                //     //경계선 색상
+                                //     'rgba(255, 99, 132, 1)',
+                                //     'rgba(54, 162, 235, 1)',
+                                //     'rgba(255, 206, 86, 1)',
+                                //     'rgba(75, 192, 192, 1)',
+                                //     'rgba(153, 102, 255, 1)',
+                                //     'rgba(255, 159, 64, 1)'
+                                // ],
+                                borderWidth: 1
+                            },
+                            {
+                                type: 'line',
+                                label: '비행고도',
+                                data: arrFlyAlt,
+                                backgroundColor: Array(256).fill('rgba(255, 99, 132, 0.2)'),
+                                borderColor: Array(256).fill('rgba(255, 99, 132, 1)'),
+                            },
+                            {
+                                type: 'line',
+                                label: '드론고도',
+                                data: arrCurAlt,
+                                backgroundColor: Array(256).fill('rgba(255, 206, 86, 0.2)'),
+                                borderColor: Array(256).fill('rgba(255, 206, 86, 1)'),
+                            },
+                        ],
+                    },
+                    options: {
+                        scales: {
+                            y: {beginAtZero: true},
+                            x: {
+                                ticks: {
+                                    display: false //this will remove only the label
+                                }
+                            },
+                        },
+                        responsive: true,
+                        maintainAspectRatio: false,
+                    }
+                };
+
+                this.myChart = new Chart(ctx, config);
+            }
+        },
     },
 
     created() {
@@ -2058,6 +2173,7 @@ export default {
     },
 
     beforeDestroy() {
+        this.myChart.destroy();
     }
 }
 </script>

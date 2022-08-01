@@ -1139,6 +1139,7 @@ export default {
                     marker.targetMavCmd = 16;
                     marker.targetStayTime = 1;
                     marker.elevation = elevation_val;
+                    marker.updatedTempEleFlag = true;
                     marker.type = 'Goto';
                     marker.selected = false;
                     marker.targeted = false;
@@ -1904,6 +1905,8 @@ export default {
                                 this.$store.state.tempMarkers[dName][pIndex].lng = latLng[0];
                                 this.$store.state.tempMarkers[dName][pIndex].elevation = elevation_val;
 
+                                this.$store.state.tempMarkers[dName][pIndex].updatedTempEleFlag = true;
+
                                 if(this.curInfoTempMarkerFlag) {
                                     this.updateSelectedTempMarker(dName, pIndex);
 
@@ -1957,6 +1960,8 @@ export default {
                                 this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
                                 //this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
                                 this.$store.state.didIPublish = true;
+
+                                this.$store.state.drone_infos[dName].updatedTempElePathFlag = false;
                             }
                         });
                     }
@@ -2018,6 +2023,7 @@ export default {
             });
 
             this.olSurveyMarkers[dName].surveyMarkerFeatures[pIndex].setStyle(styleSurvey);
+            this.$forceUpdate();
         },
 
         updateTargetedTempMarker(dName, pIndex) {
@@ -2558,7 +2564,7 @@ export default {
             });
         },
 
-        initOlSurveyMarker(dName, pIndex, survey) {
+        async initOlSurveyMarker(dName, pIndex, survey) {
             let polyCoordinates = [];
             for(let i = 0; i < survey.paths.length; i++) {
                 let svLat = survey.paths[i].lat;
@@ -2706,6 +2712,8 @@ export default {
 
             lineFeature.setStyle(pathLineStyle);
 
+            this.olSurveyMarkers[dName].surveyLineFeatures.push(lineFeature);
+
             let eLngLats = [];
 
             this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
@@ -2717,16 +2725,35 @@ export default {
                 this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
             }
 
-            this.getElevationProfile(eLngLats, async (status, result) => {
-                if (status === 200) {
-                    result.elevationProfile.forEach((ele) => {
+            eLngLats.forEach((eLngLat, idx) => {
+                [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                eLngLats[idx] = eLngLat;
+            });
+
+            let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+            param = param.replace(/\]/g, '');
+
+            let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+
+            try {
+                let response = await axios.get(url, {
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                    },
+                });
+                console.log('getElevationProfile', response.status, response.data);
+
+                if (response.status === 200) {
+                    response.data.elevationProfile.forEach((ele) => {
                         let elevation_val = ele.height;
                         this.$store.state.surveyMarkers[dName][pIndex].elevations.push(elevation_val);
                     });
                 }
-            });
-
-            this.olSurveyMarkers[dName].surveyLineFeatures.push(lineFeature);
+            } catch (err) {
+                console.log("Error >>", err);
+            }
         },
 
         initOlSurveyMarkers() {
@@ -2752,7 +2779,7 @@ export default {
             });
         },
 
-        updateTargetLineFeature(dName) {
+        async updateTargetLineFeature(dName) {
             //console.log('this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName]', this.$store.state.drone_infos[dName].targeted, this.targetedTempFeatureId[dName])
 
             if(this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeature[dName] !== undefined) {
@@ -2780,6 +2807,7 @@ export default {
                 this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sTarCoordinate[0], sTarCoordinate[1]], [eTarCoordinate[0], eTarCoordinate[1]]]);
                 let distance = getLength(this.olDroneMarkers[dName].targetLineFeature.getGeometry());
 
+                this.$store.state.drone_infos[dName].targetDistance = distance;
                 if(distance < 1000) {
                     this.olDroneMarkers[dName].targetLineFeature.getStyle()[0].getText().setText([distance.toFixed(1)+' m', 'bold 9px sans-serif']);
                 }
@@ -2789,9 +2817,9 @@ export default {
                 this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].getImage().setRotation(-rotation);
                 this.olDroneMarkers[dName].targetLineFeature.getStyle()[1].setGeometry(new Point(eTarCoordinate));
 
-                if (this.$store.state.currentCommandTab === '선회') {
-                    let pIndex = this.targetedTempFeatureId[dName].split('-')[1];
+                let pIndex = this.targetedTempFeatureId[dName].split('-')[1];
 
+                if (this.$store.state.currentCommandTab === '선회') {
                     let resolution = this.olMap.getView().getResolution();
                     let projection = this.olMap.getView().getProjection();
 
@@ -2801,6 +2829,53 @@ export default {
                     let pIndex = this.targetedTempFeatureId[dName].split('-')[1];
 
                     this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(1);
+                }
+
+                if(!this.$store.state.drone_infos[dName].updatedTempElePathFlag) {
+                    this.$store.state.drone_infos[dName].updatedTempElePathFlag = true;
+
+                    let eLngLats = [];
+
+                    this.$store.state.drone_infos[dName].elevations = [];
+                    this.$store.state.drone_infos[dName].elevations_location = [];
+
+                    for (let i = 0; i < 256; i++) {
+                        let eLngLat = toLonLat(this.olDroneMarkers[dName].targetLineFeature.getGeometry().getCoordinateAt(i / 256));
+                        eLngLats.push(eLngLat);
+                        this.$store.state.drone_infos[dName].elevations_location.push({
+                            lat: eLngLat[1],
+                            lng: eLngLat[0]
+                        });
+                    }
+
+                    eLngLats.forEach((eLngLat, idx) => {
+                        [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                        eLngLats[idx] = eLngLat;
+                    });
+
+                    let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+                    param = param.replace(/\]/g, '');
+
+                    let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+
+                    try {
+                        let response = await axios.get(url, {
+                            validateStatus: status => {
+                                return status < 500;
+                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            headers: {},
+                        });
+                        console.log('getElevationProfile-updatedTempElePathFlag', response.status, response.data);
+
+                        if (response.status === 200) {
+                            response.data.elevationProfile.forEach((ele) => {
+                                let elevation_val = ele.height;
+                                this.$store.state.drone_infos[dName].elevations.push(elevation_val);
+                            });
+                        }
+                    } catch (err) {
+                        console.log("Error >>", err);
+                    }
                 }
             }
             else if(this.$store.state.drone_infos[dName].targeted && this.targetedSurveyFeatureId[dName] !== '' && this.targetedSurveyFeature[dName] !== undefined) {
@@ -3512,7 +3587,10 @@ export default {
 
                     if(this.targetedSurveyFeatureId[dName] !== '' && this.targetedSurveyFeatureId[dName] !== (dName + '-' + pIndex)) {
                         let pIndexOld = this.targetedSurveyFeatureId[dName].split('-')[1];
-                        this.$store.state.surveyMarkers[dName][pIndexOld].targeted = false;
+
+                        if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName], pIndexOld)) {
+                            this.$store.state.surveyMarkers[dName][pIndexOld].targeted = false;
+                        }
 
                         this.deleteSurveyTranslate(this.targetedSurveyFeature[dName]);
                         this.deleteModifyInteraction(this.targetedSurveyFeature[dName]);
@@ -3622,6 +3700,8 @@ export default {
                         this.addTempTranslate(this.targetedFeature);
                         this.targetedTempFeatureId[dName] = (dName + '-' + pIndex);
                         this.targetedTempFeature[dName] = this.targetedFeature;
+
+                        this.$store.state.drone_infos[dName].updatedTempElePathFlag = false;
                     }
                     else {
                         this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
@@ -3718,7 +3798,10 @@ export default {
                 Object.keys(this.targetedSurveyFeatureId).forEach((dName) => {
                     if(this.targetedSurveyFeatureId[dName] !== '') {
                         let pIndexOld = this.targetedSurveyFeatureId[dName].split('-')[1];
-                        this.$store.state.surveyMarkers[dName][pIndexOld].targeted = false;
+
+                        if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[dName], pIndexOld)) {
+                            this.$store.state.surveyMarkers[dName][pIndexOld].targeted = false;
+                        }
 
                         this.deleteSurveyTranslate(this.targetedSurveyFeature[dName]);
                         this.deleteModifyInteraction(this.targetedSurveyFeature[dName]);

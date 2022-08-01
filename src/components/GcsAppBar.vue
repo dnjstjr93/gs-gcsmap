@@ -1468,6 +1468,10 @@ export default {
                                             marker.targetStayTime = 1;
                                         }
 
+                                        if (!Object.prototype.hasOwnProperty.call(marker, 'updatedTempEleFlag')) {
+                                            marker.updatedTempEleFlag = false;
+                                        }
+
                                         marker.targeted = false;
                                         marker.selected = false;
                                     });
@@ -1782,6 +1786,22 @@ export default {
 
                     if (!Object.prototype.hasOwnProperty.call(drone_info, 'takeoffAbsoluteAlt')) {
                         drone_info.takeoffAbsoluteAlt = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'updatedTempElePathFlag')) {
+                        drone_info.updatedTempElePathFlag = false;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'targetDistance')) {
+                        drone_info.targetDistance = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'elevations')) {
+                        drone_info.elevations = [];
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'elevations_location')) {
+                        drone_info.elevations_location = [];
                     }
 
                     drone_info.targeted = false;
