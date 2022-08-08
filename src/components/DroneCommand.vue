@@ -283,11 +283,20 @@
                                                     <v-card tile flat v-if="(command.title === '패턴')">
                                                         <v-row no-gutters justify="center">
                                                             <v-spacer/>
-                                                            <v-col cols="1" class="pa-1 pt-2">
+                                                            <v-col cols="2" class="pa-1 pt-2">
+                                                                <v-text-field
+                                                                    label="Sortie Name"
+                                                                    class="text-right pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="d.curTargetedSurveyMarkerSortie"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-spacer/>
+                                                            <v-col cols="2" class="pa-1 pt-2">
                                                                 <v-text-field
                                                                     label="Index"
                                                                     class="text-right pa-1"
-                                                                    outlined dense hide-details
+                                                                    outlined dense hide-details filled
                                                                     v-model="d.curTargetedSurveyMarkerIndex"
                                                                     type="number"
                                                                     readonly
@@ -1558,16 +1567,16 @@ export default {
             }
 
             if (this.$store.state.currentCommandTab === '이동') {
-                for(let dName in this.$store.state.drone_infos) {
-                    if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if(this.$store.state.drone_infos[dName].targeted) {
-                            setTimeout((dName) => {
-                                this.fillGoToElevationData(dName);
-                            }, 100, dName);
-                        }
-                    }
-                }
-                console.log(this.$store.state.currentCommandTab);
+                // for(let dName in this.$store.state.drone_infos) {
+                //     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                //         if(this.$store.state.drone_infos[dName].targeted) {
+                //             setTimeout((dName) => {
+                //                 this.fillGoToElevationData(dName);
+                //             }, 100, dName);
+                //         }
+                //     }
+                // }
+                // console.log(this.$store.state.currentCommandTab);
             }
             else if(this.$store.state.currentCommandTab === '선회') {
                 console.log(this.$store.state.currentCommandTab);
@@ -1985,7 +1994,7 @@ export default {
                                     EventBus.$emit('command-set-auto_goto-' + dName, payload);
 
                                     payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
-                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' keti';
+                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' ' + this.$store.state.drone_infos[dName].curTargetedSurveyMarkerSortie;
                                     EventBus.$emit('do-publish-' + dName, payload);
                                 }
                             }
@@ -2028,7 +2037,7 @@ export default {
                                     EventBus.$emit('command-set-auto_goto-' + dName, payload);
 
                                     payload.topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + dName + '/msw_lx_cam/Capture';
-                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' keti';
+                                    payload.payload = 'g ' + this.$store.state.surveyMarkers[dName][pIndex].period + ' ' + this.$store.state.drone_infos[dName].curTargetedSurveyMarkerSortie;
                                     EventBus.$emit('do-publish-' + dName, payload);
                                 }
                             }
@@ -2170,10 +2179,20 @@ export default {
             };
             this.items.push(row);
         }
+
+        EventBus.$on('update-fill-goto-evevation-data', (dName) => {
+            if (this.$store.state.currentCommandTab === '이동') {
+                setTimeout((dName) => {
+                    this.fillGoToElevationData(dName);
+                }, 10, dName);
+            }
+        });
     },
 
     beforeDestroy() {
         this.myChart.destroy();
+
+        EventBus.$off('update-fill-goto-evevation-data');
     }
 }
 </script>

@@ -1164,6 +1164,10 @@ export default {
                                 this.$store.state.drone_infos[dName].curMissionItemReached = 0;
                             }
 
+                            if (!Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos[dName], 'curTargetedSurveyMarkerSortie')) {
+                                this.$store.state.drone_infos[dName].curTargetedSurveyMarkerSortie = 'KETI';
+                            }
+
                             this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
                             this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = -1;
 
@@ -1858,6 +1862,10 @@ export default {
 
                     if (!Object.prototype.hasOwnProperty.call(drone_info, 'curMissionItemReached')) {
                         drone_info.curMissionItemReached = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'curTargetedSurveyMarkerSortie')) {
+                        drone_info.curTargetedSurveyMarkerSortie = 'KETI';
                     }
 
                     drone_info.curTargetedTempMarkerIndex = -1;
@@ -2712,6 +2720,10 @@ export default {
 
                     if (!Object.prototype.hasOwnProperty.call(drone_info, 'curMissionItemReached')) {
                         drone_info.curMissionItemReached = 0;
+                    }
+
+                    if (!Object.prototype.hasOwnProperty.call(drone_info, 'curTargetedSurveyMarkerSortie')) {
+                        drone_info.curTargetedSurveyMarkerSortie = 'KETI';
                     }
 
                     drone_info.curTargetedTempMarkerIndex = -1;

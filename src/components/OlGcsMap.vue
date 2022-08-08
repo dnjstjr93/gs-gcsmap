@@ -1798,9 +1798,10 @@ export default {
                                 this.curNameMarker = dName;
                                 this.curInfoSurveyMarkerFlag = true;
 
-                                setTimeout(() => {
-                                    EventBus.$emit('on-update-info-survey-marker');
-                                }, 10);
+                                // setTimeout(() => {
+                                //     console.log('translateend', 'on-update-info-survey-marker');
+                                //     EventBus.$emit('on-update-info-survey-marker');
+                                // }, 10);
                             }, 10);
                         }
 
@@ -2872,6 +2873,8 @@ export default {
                                 let elevation_val = ele.height;
                                 this.$store.state.drone_infos[dName].elevations.push(elevation_val);
                             });
+
+                            EventBus.$emit('update-fill-goto-evevation-data', dName);
                         }
                     } catch (err) {
                         console.log("Error >>", err);
@@ -3720,7 +3723,7 @@ export default {
                         this.$store.state.drone_command_prepared = false;
                         setTimeout(() => {
                             this.$store.state.drone_command_prepared = true;
-                        }, 10);
+                        }, 100);
                     }
 
                     if(dName === 'unknown') {
@@ -3936,9 +3939,10 @@ export default {
                         this.curNameMarker = dName;
                         this.curInfoSurveyMarkerFlag = true;
 
-                        setTimeout(() => {
-                            EventBus.$emit('on-update-info-survey-marker');
-                        }, 10);
+                        // setTimeout(() => {
+                        //     console.log('dblclick', 'on-update-info-survey-marker');
+                        //     EventBus.$emit('on-update-info-survey-marker');
+                        // }, 10);
                     }, 10);
                 }
                 else if(this.selectedFeature.getProperties().type === 'tempMarker') {
@@ -4242,6 +4246,7 @@ export default {
             }
 
             if(this.curInfoSurveyMarkerFlag) {
+                console.log('do-update-survey-GcsMap', 'on-update-info-survey-marker');
                 EventBus.$emit('on-update-info-survey-marker');
             }
         });
