@@ -2741,13 +2741,17 @@ export default {
                         drone_info.takeoffDelay = 6;
                     }
 
-                    if(dName === 'unknown' || drone_info.selected) {
-                        this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(drone_info));
+                    // if(dName === 'unknown' || drone_info.selected) {
+                    //     this.$store.state.drone_infos[dName] = JSON.parse(JSON.stringify(drone_info));
+                    //
+                    //     if (dName !== 'unknown') {
+                    //         this.selected.push(drone_info);
+                    //     }
+                    // }
 
-                        if (dName !== 'unknown') {
-                            this.selected.push(drone_info);
-                        }
-                    }
+                    drone_info.selected = true;
+
+                    this.selected.push(drone_info);
 
                     if (dName !== 'unknown') {
                         this.drone_infos_list.push(JSON.parse(JSON.stringify(drone_info)));

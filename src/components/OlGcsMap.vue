@@ -1685,6 +1685,15 @@ export default {
                     }
 
                     this.olSurveyMarkers[dName].surveyLineFeatures[pIndex].getGeometry().setCoordinates(pathLineCoordinates);
+
+                    let area = getArea(feature.getGeometry());
+                    this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
+                    console.log('computeArea = ', area.toFixed(1), '㎡');
+
+                    if(this.curInfoSurveyMarkerFlag) {
+                        console.log('do-update-survey-GcsMap', 'on-update-info-survey-marker');
+                        EventBus.$emit('on-update-info-survey-marker');
+                    }
                 });
             });
 
