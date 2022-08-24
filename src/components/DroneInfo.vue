@@ -746,8 +746,40 @@
                             </v-card>
                         </v-col>
                         <v-col cols="12">
-                            <v-card :style="{color:'white'}" outlined tile flat>
-                                <canvas :id="'chart-'+name" height="50"></canvas>
+                            <v-card
+                                class="channels-container ma-0 pa-0"
+                                :style="{color:'white'}"
+                                outlined tile flat
+                            >
+                                <v-card
+                                    v-for="i in 6" :key="i"
+                                    class="channel justify-center align-center text-center ma-0 pa-0"
+                                    outlined
+                                >
+                                    <v-btn-toggle
+                                        v-model="mission_value[`ch${i+4}`][name]"
+                                        mandatory
+                                        class="text-center align-center ma-0 ppa-0"
+                                    >
+                                        <v-btn x-small class="ma-0 pa-0">
+<!--                                            <v-icon small class="ma-0 pa-0">mdi-format-align-left</v-icon>-->
+                                            T
+                                        </v-btn>
+                                        <v-btn x-small class="ma-0 pa-0">
+<!--                                            <v-icon small class="ma-0 pa-0">mdi-format-align-center</v-icon>-->
+                                            N
+                                        </v-btn>
+                                        <v-btn x-small class="ma-0 pa-0">
+<!--                                            <v-icon small class="ma-0 pa-0">mdi-format-align-right</v-icon>-->
+                                            F
+                                        </v-btn>
+                                    </v-btn-toggle>
+
+                                    <v-btn x-small fab color="lime" class="ml-1 mb-0 pa-0" @click="handlePwmClick(d.name, num, $event);">
+<!--                                        <v-icon>mdi-send</v-icon>-->
+                                        {{i+4}}
+                                    </v-btn>
+                                </v-card>
                             </v-card>
                         </v-col>
                     </v-row>
@@ -774,9 +806,6 @@ import DroneInfoHUD from "./DroneInfoHUD";
 import DroneInfoBox from "@/components/DroneInfoBox";
 import mqtt from "mqtt";
 import convert from "xml-js";
-
-import {Chart, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement } from 'chart.js'; //👈 Chart 모듈 임포트
-Chart.register(BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement); // 👈 chart.js 모듈 Chart 모듈에 등록
 
 const byteToHex = [];
 
@@ -898,9 +927,46 @@ export default {
 
     data() {
         return {
-            missionTopic: '/oneM2M/req/Mobius2/' + this.name + '/json',
+            channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
 
-            myChart: null,
+            target_mission_num: {
+                targetCh1: {},
+                targetCh2: {},
+                targetCh3: {},
+                targetCh4: {},
+                targetCh5: {},
+                targetCh6: {},
+                targetCh7: {},
+                targetCh8: {},
+                targetCh9: {},
+                targetCh10: {},
+                targetCh11: {},
+                targetCh12: {},
+                targetCh13: {},
+                targetCh14: {},
+                targetCh15: {},
+                targetCh16: {},
+            },
+            mission_value: {
+                ch1: {},
+                ch2: {},
+                ch3: {},
+                ch4: {},
+                ch5: {},
+                ch6: {},
+                ch7: {},
+                ch8: {},
+                ch9: {},
+                ch10: {},
+                ch11: {},
+                ch12: {},
+                ch13: {},
+                ch14: {},
+                ch15: {},
+                ch16: {},
+            },
+
+            missionTopic: '/oneM2M/req/Mobius2/' + this.name + '/json',
 
             yawAngle: 0,
             toggle_exclusive: undefined,
@@ -1482,37 +1548,6 @@ export default {
     },
 
     methods: {
-        fillData() {
-            const ctx = document.getElementById('chart-'+this.name).getContext('2d');
-            let config = {
-                data: {
-                    labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                    datasets: [
-                        {
-                            type: 'bar',
-                            label: '# of Votes',
-                            data: [12, 19, 3, 5, 2, 3],
-                            backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'],
-                            borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
-                            borderWidth: 1
-                        },
-                        {
-                            type: 'line',
-                            label: 'Line Dataset',
-                            data: [20, 21, 19, 18, 20, 22],
-                        }
-                    ]
-                },
-                options: {
-                    scales: {
-                        y: {beginAtZero: true}
-                    }
-                }
-            };
-
-            this.myChart = new Chart(ctx, config);
-        },
-
         selectedMavVersion: function(event) {
             // console.log("selectedMavVersion", event)
             this.mavVersion = event;
@@ -7133,8 +7168,6 @@ export default {
 
     mounted: function () {
 
-        this.fillData();
-
         this.positions = []
         // for(let i in this.goto_positions) {
         //     if(Object.prototype.hasOwnProperty.call(this.goto_positions, i)) {
@@ -7270,8 +7303,6 @@ export default {
         if (this.timer_id) {
             clearInterval(this.timer_id);
         }
-
-        this.myChart.destroy();
     }
 }
 </script>
@@ -7449,4 +7480,31 @@ export default {
     font-size: 10px;
 }
 
+.channels-container {
+    display: grid;
+    grid-template-rows: repeat(1, auto);
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.channel {
+    text-align: center;
+}
+
+.switch-toggle {
+    float: left;
+    background: #242729;
+}
+.switch-toggle input {
+    position: absolute;
+    opacity: 0;
+}
+.switch-toggle input + label {
+    padding: 7px;
+    float:left;
+    color: #fff;
+    cursor: pointer;
+}
+.switch-toggle input:checked + label {
+    background: green;
+}
 </style>
