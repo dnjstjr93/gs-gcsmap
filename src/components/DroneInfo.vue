@@ -757,7 +757,7 @@
                                     outlined
                                 >
                                     <v-btn-toggle
-                                        v-model="mission_value[`ch${i+4}`][name]"
+                                        v-model="mission_value[`ch${i+4}`]"
                                         mandatory
                                         class="text-center align-center ma-0 ppa-0"
                                     >
@@ -775,7 +775,7 @@
                                         </v-btn>
                                     </v-btn-toggle>
 
-                                    <v-btn x-small fab color="lime" class="ml-1 mb-0 pa-0" @click="handlePwmClick(d.name, num, $event);">
+                                    <v-btn x-small fab color="lime" class="ml-1 mb-0 pa-0" @click="handlePwmClick(i+4, $event);">
 <!--                                        <v-icon>mdi-send</v-icon>-->
                                         {{i+4}}
                                     </v-btn>
@@ -948,22 +948,22 @@ export default {
                 targetCh16: {},
             },
             mission_value: {
-                ch1: {},
-                ch2: {},
-                ch3: {},
-                ch4: {},
-                ch5: {},
-                ch6: {},
-                ch7: {},
-                ch8: {},
-                ch9: {},
-                ch10: {},
-                ch11: {},
-                ch12: {},
-                ch13: {},
-                ch14: {},
-                ch15: {},
-                ch16: {},
+                ch1: 0,
+                ch2: 0,
+                ch3: 0,
+                ch4: 0,
+                ch5: 0,
+                ch6: 0,
+                ch7: 0,
+                ch8: 0,
+                ch9: 0,
+                ch10: 0,
+                ch11: 0,
+                ch12: 0,
+                ch13: 0,
+                ch14: 0,
+                ch15: 0,
+                ch16: 0,
             },
 
             missionTopic: '/oneM2M/req/Mobius2/' + this.name + '/json',
@@ -1548,6 +1548,12 @@ export default {
     },
 
     methods: {
+        handlePwmClick(num) {
+            console.log(num, this.mission_value[`ch${num}`]);
+
+            this.send_reserved_control_led_command(this.name, this.target_pub_topic, this.sys_id, parseInt(num), parseInt(this.mission_value[`ch${num}`]));
+        },
+
         selectedMavVersion: function(event) {
             // console.log("selectedMavVersion", event)
             this.mavVersion = event;
@@ -3892,6 +3898,37 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
+                    this.doPublish(pub_topic, msg);
+                }
+            }
+            catch (ex) {
+                console.log('[ERROR] ' + ex);
+            }
+        },
+
+        send_reserved_control_led_command(target_name, pub_topic, target_sys_id, channel_num, control_val) {
+            mavlink.MAV_CMD_CONTROL_LED = 248;
+
+            var btn_params = {};
+            btn_params.target_system = target_sys_id;
+            btn_params.target_component = 1;
+            btn_params.command = mavlink.MAV_CMD_CONTROL_LED;
+            btn_params.confirmation = 0;
+            btn_params.param1 = channel_num; // channel_num
+            btn_params.param2 = control_val; // 0: OFF, 1-7: RGB LED ON
+            btn_params.param3 = 0; // Empty
+            btn_params.param4 = 0; // Empty
+            btn_params.param5 = 0; // Empty
+            btn_params.param6 = 0; // Empty
+            btn_params.param7 = 0; // Empty
+
+            try {
+                var msg = this.mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_COMMAND_LONG, btn_params);
+                if (msg == null) {
+                    console.log("mavlink message is null");
+                }
+                else {
+                    console.log('send_reserved_control_led_command (', channel_num, '-', control_val, ') ', this.name);
                     this.doPublish(pub_topic, msg);
                 }
             }
