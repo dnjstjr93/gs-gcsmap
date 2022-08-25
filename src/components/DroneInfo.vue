@@ -1551,7 +1551,7 @@ export default {
         handlePwmClick(num) {
             console.log(num, this.mission_value[`ch${num}`]);
 
-            this.send_reserved_control_led_command(this.name, this.target_pub_topic, this.sys_id, parseInt(num), parseInt(this.mission_value[`ch${num}`]));
+            this.send_reserved_control_command(this.name, this.target_pub_topic, this.sys_id, parseInt(num), parseInt(this.mission_value[`ch${num}`]));
         },
 
         selectedMavVersion: function(event) {
@@ -3906,7 +3906,7 @@ export default {
             }
         },
 
-        send_reserved_control_led_command(target_name, pub_topic, target_sys_id, channel_num, control_val) {
+        send_reserved_control_command(target_name, pub_topic, target_sys_id, channel_num, control_val) {
             mavlink.MAV_CMD_CONTROL_LED = 248;
 
             var btn_params = {};
@@ -3915,7 +3915,7 @@ export default {
             btn_params.command = mavlink.MAV_CMD_CONTROL_LED;
             btn_params.confirmation = 0;
             btn_params.param1 = channel_num; // channel_num
-            btn_params.param2 = control_val; // 0: OFF, 1-7: RGB LED ON
+            btn_params.param2 = control_val; // ex) 0: OFF, 1-7: RGB LED ON
             btn_params.param3 = 0; // Empty
             btn_params.param4 = 0; // Empty
             btn_params.param5 = 0; // Empty
@@ -3928,7 +3928,7 @@ export default {
                     console.log("mavlink message is null");
                 }
                 else {
-                    console.log('send_reserved_control_led_command (', channel_num, '-', control_val, ') ', this.name);
+                    console.log('send_reserved_control_command (', channel_num, '-', control_val, ') ', this.name);
                     this.doPublish(pub_topic, msg);
                 }
             }
