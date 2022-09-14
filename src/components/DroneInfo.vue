@@ -5793,34 +5793,51 @@ export default {
         },
 
         async checkMissionLteUrl() {
-            let dName = this.name;
-            let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/MUV/approval/' + this.id + '/la';
-            let response = await axios.get(url, {
-                validateStatus: status => {
-                    return status < 500;
-                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                    'Content-Type': 'application/json'
-                },
-            });
-            console.log('checkMissionLteUrl-'+dName, response.status, response.data['m2m:cin']);
-
-            if(response.status === 200) {
-                let con = response.data['m2m:cin'].con;
-                if (Object.prototype.hasOwnProperty.call(con, 'mission')) {
-                    for (let msw_name in con['mission']) {
-                        if (Object.prototype.hasOwnProperty.call(con['mission'], msw_name)) {
-                            for (let container in con['mission'][msw_name]) {
-                                if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name], container)) {
-                                    if (container === 'container') {
-                                        for (let idx in con['mission'][msw_name][container]) {
-                                            if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name][container], idx)) {
-
-                                                if (con['mission'][msw_name][container][idx] === 'LTE') {
-                                                    this.missionLteUrl = '/Mobius/' + con.gcs + '/Mission_Data/' + this.name + '/' + msw_name + '/' + con['mission'][msw_name][container][idx];
-                                                    console.log('this.missionLteUrl', this.missionLteUrl);
+            // let dName = this.name;
+            // let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/MUV/approval/' + this.id + '/la';
+            // let response = await axios.get(url, {
+            //     validateStatus: status => {
+            //         return status < 500;
+            //     }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+            //     headers: {
+            //         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+            //         'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+            //         'Content-Type': 'application/json'
+            //     },
+            // });
+            // console.log('checkMissionLteUrl-'+dName, response.status, response.data['m2m:cin']);
+            //
+            // if(response.status === 200) {
+            //     let con = response.data['m2m:cin'].con;
+            //     if (Object.prototype.hasOwnProperty.call(con, 'mission')) {
+            //         for (let msw_name in con['mission']) {
+            //             if (Object.prototype.hasOwnProperty.call(con['mission'], msw_name)) {
+            //                 for (let container in con['mission'][msw_name]) {
+            //                     if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name], container)) {
+            //                         if (container === 'container') {
+            //                             for (let idx in con['mission'][msw_name][container]) {
+            //                                 if (Object.prototype.hasOwnProperty.call(con['mission'][msw_name][container], idx)) {
+            //
+            //                                     if (con['mission'][msw_name][container][idx] === 'LTE') {
+            //                                         this.missionLteUrl = '/Mobius/' + con.gcs + '/Mission_Data/' + this.name + '/' + msw_name + '/' + con['mission'][msw_name][container][idx];
+            //                                         console.log('this.missionLteUrl', this.missionLteUrl);
+            //
+            //                                         EventBus.$emit('do-subscribe', this.missionLteUrl);
+            //
+            //                                         this.missionLteUrlFlag = true;
+            //                                         break;
+            //                                     }
+            //                                 }
+            //                             }
+            //                         }
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+            this.missionLteUrl = '/Mobius/' + this.gcs + '/Mission_Data/' + this.name + '/msw_lte/LTE';
+            console.log('this.missionLteUrl', this.missionLteUrl);
 
             EventBus.$emit('do-subscribe', this.missionLteUrl);
 
