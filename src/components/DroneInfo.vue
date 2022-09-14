@@ -2297,11 +2297,12 @@ export default {
             }
             else if (chkTopic === '/Mobius') {
                 let con = JSON.parse(message.toString());
-                if (Object.prototype.hasOwnProperty.call(con, 'rsrp')) {
+                if (Object.prototype.hasOwnProperty.call(con, 'RSRP')) {
                     this.colorLteVal = '#9E9E9E';
 
-                    this.curLteVal = con.rsrp;
-                    //console.log(this.curLteVal);
+                    let regex = /[a-zA-Z]/g;
+                    this.curLteVal = con.RSRP.replace(regex, "");
+                    // console.log(this.curLteVal);
 
                     if (0 > this.curLteVal && this.curLteVal >= -80) {
                         this.iconLte = 'mdi-network-strength-4';
@@ -5821,20 +5822,9 @@ export default {
                                                     this.missionLteUrl = '/Mobius/' + con.gcs + '/Mission_Data/' + this.name + '/' + msw_name + '/' + con['mission'][msw_name][container][idx];
                                                     console.log('this.missionLteUrl', this.missionLteUrl);
 
-                                                    EventBus.$emit('do-subscribe', this.missionLteUrl);
+            EventBus.$emit('do-subscribe', this.missionLteUrl);
 
-                                                    this.missionLteUrlFlag = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            this.missionLteUrlFlag = true;
 
             // this.getDroneMissionInfo(() => {
             //     if(this.missionLteUrl !== '') {
