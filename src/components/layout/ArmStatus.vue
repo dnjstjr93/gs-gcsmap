@@ -7,7 +7,7 @@
                 </span>
             </v-col>
         </v-row>
-        <v-row v-if="data.severity < 4" no-gutters align="start">
+        <v-row v-if="data.severity < 5" no-gutters align="start">
             <v-col cols="12" class="text-start ml-9 mt-2">
                 <span class="pl-4 shadow_icon" :style="{'font-size':'150%', 'color':'red'}">
                     {{ data.text }}
