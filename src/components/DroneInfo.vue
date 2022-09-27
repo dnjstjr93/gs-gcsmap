@@ -2301,7 +2301,7 @@ export default {
                     this.colorLteVal = '#9E9E9E';
 
                     let regex = /[a-zA-Z]/g;
-                    this.curLteVal = con.RSRP.replace(regex, "");
+                    this.curLteVal = con.RSRP.toString().replace(regex, "");
                     // console.log(this.curLteVal);
 
                     if (0 > this.curLteVal && this.curLteVal >= -80) {
