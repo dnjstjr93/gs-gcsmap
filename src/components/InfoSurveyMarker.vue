@@ -172,6 +172,16 @@
                                 </v-col>
                                 <v-col cols="1">
                                     <v-text-field
+                                        label="시작고도(m)"
+                                        v-model="paramStartAlt"
+                                        class="mt-0 pt-0"
+                                        type="number"
+                                        outlined dense hide-details readonly filled
+                                        color="amber"
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="1">
+                                    <v-text-field
                                         label="옵셋고도(m)"
                                         v-model="paramOffsetAlt"
                                         class="mt-0 pt-0"
@@ -412,6 +422,7 @@
                 paramGap: 10,
                 paramPeriod: 10,
                 paramAlt: 100,
+                paramStartAlt: 0,
                 paramOffsetAlt: 0,
                 paramSpeed: 5,
 
@@ -605,7 +616,7 @@
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = [];
                         if(this.flyAltType === '상대고도') {
                             this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(256).fill(parseInt(this.paramOffsetAlt));
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
                         }
                         else {
                             for(let i = 0; i < 256; i++) {
@@ -625,7 +636,7 @@
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = [];
                         if(this.flyAltType === '상대고도') {
                             this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(256).fill(parseInt(this.paramOffsetAlt));
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
                         }
                         else {
                             for(let i = 0; i < 256; i++) {
@@ -987,6 +998,14 @@
             this.paramGap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap;
             this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt;
             this.paramOffsetAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramOffsetAlt;
+
+            if(this.markerName === 'unknown') {
+                this.paramStartAlt = 0;
+            }
+            else {
+                this.paramStartAlt = parseInt(this.$store.state.drone_infos[this.markerName].absolute_alt - this.$store.state.drone_infos[this.markerName].alt);
+            }
+
             this.flyAltType = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAltType;
 
             if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'focal')) {

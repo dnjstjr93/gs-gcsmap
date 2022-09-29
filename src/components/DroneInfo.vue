@@ -6856,7 +6856,7 @@ export default {
 
                             this.doPublishBroadcast();
 
-                        }, parseInt(1000 + (Math.random() * 10)), name, target_pub_topic, sys_id, takeoff_alt);
+                        }, parseInt(100 + (Math.random() * 10)), name, target_pub_topic, sys_id, takeoff_alt);
 
 
                         // var auto_goto_positions = [];

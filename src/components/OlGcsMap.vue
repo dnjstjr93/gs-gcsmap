@@ -1737,7 +1737,7 @@ export default {
             });
 
             this.targetedSurveyTranslate[dName].on('translatestart', function (evt) {
-                console.log('translatestart', evt, evt.coordinate);
+                console.log('survey-translatestart', evt, evt.coordinate);
             });
 
             this.targetedSurveyTranslate[dName].on('translating', (evt) => {
@@ -1756,7 +1756,7 @@ export default {
             this.targetedSurveyTranslate[dName].on('translateend', (evt) => {
                 //line.setCoordinates([coordMarker2, evt.coordinate]);
                 evt.features.forEach(async (feature) => {
-                    console.log('translateend', evt.coordinate, feature.getGeometry().getCoordinates(), feature);
+                    console.log('survey-translateend', evt.coordinate, feature.getGeometry().getCoordinates(), feature);
 
                     if(feature.getProperties().dragging) {
 
@@ -2753,7 +2753,7 @@ export default {
                     headers: {
                     },
                 });
-                console.log('getElevationProfile', response.status, response.data);
+                console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> getElevationProfile', response.status, response.data);
 
                 if (response.status === 200) {
                     response.data.elevationProfile.forEach((ele) => {
@@ -3523,6 +3523,7 @@ export default {
 
         EventBus.$on('do-unsetSelectedSurveyMarker', () => {
 
+            console.log('>>>>>>>>>>>>>>>>>>>>>> initOlSurveyMarkers');
             this.initOlSurveyMarkers();
 
             this.updateSource();
