@@ -2735,35 +2735,44 @@ export default {
                 this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
             }
 
-            eLngLats.forEach((eLngLat, idx) => {
-                [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
-                eLngLats[idx] = eLngLat;
-            });
-
-            let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-            param = param.replace(/\]/g, '');
-
-            let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
-
-            try {
-                let response = await axios.get(url, {
-                    validateStatus: status => {
-                        return status < 500;
-                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                    },
-                });
-                console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> getElevationProfile', response.status, response.data);
-
-                if (response.status === 200) {
-                    response.data.elevationProfile.forEach((ele) => {
-                        let elevation_val = ele.height;
-                        this.$store.state.surveyMarkers[dName][pIndex].elevations.push(elevation_val);
-                    });
-                }
-            } catch (err) {
-                console.log("Error >>", err);
+            for(let i = 0; i < 256; i++) {
+                this.$store.state.surveyMarkers[dName][pIndex].elevations.push(0);
             }
+
+            // todo: elevation 정보 가져오기
+            // eLngLats.forEach((eLngLat, idx) => {
+            //     [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+            //     eLngLats[idx] = eLngLat;
+            // });
+            //
+            // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+            // param = param.replace(/\]/g, '');
+            //
+            // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+            //
+            // try {
+            //     axios.defaults.withCredentials = true;
+            //
+            //     let response = await axios.get(url, {
+            //         withCredentials: true,
+            //         validateStatus: status => {
+            //             return status < 500;
+            //         }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+            //         headers: {
+            //             'Access-Control-Allow-Origin': '*',
+            //         },
+            //     });
+            //     console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> getElevationProfile', response.status, response.data);
+            //
+            //     if (response.status === 200) {
+            //         response.data.elevationProfile.forEach((ele) => {
+            //             let elevation_val = ele.height;
+            //             this.$store.state.surveyMarkers[dName][pIndex].elevations.push(elevation_val);
+            //         });
+            //     }
+            // } catch (err) {
+            //     console.log("Error >>", err);
+            // }
         },
 
         initOlSurveyMarkers() {
@@ -2858,36 +2867,48 @@ export default {
                         });
                     }
 
-                    eLngLats.forEach((eLngLat, idx) => {
-                        [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
-                        eLngLats[idx] = eLngLat;
-                    });
-
-                    let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-                    param = param.replace(/\]/g, '');
-
-                    let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
-
-                    try {
-                        let response = await axios.get(url, {
-                            validateStatus: status => {
-                                return status < 500;
-                            }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                            headers: {},
-                        });
-                        console.log('getElevationProfile-updatedTempElePathFlag', response.status, response.data);
-
-                        if (response.status === 200) {
-                            response.data.elevationProfile.forEach((ele) => {
-                                let elevation_val = ele.height;
-                                this.$store.state.drone_infos[dName].elevations.push(elevation_val);
-                            });
-
-                            EventBus.$emit('update-fill-goto-evevation-data', dName);
-                        }
-                    } catch (err) {
-                        console.log("Error >>", err);
+                    for(let i = 0; i < 256; i++) {
+                        this.$store.state.surveyMarkers[dName][pIndex].elevations.push(0);
                     }
+
+                    EventBus.$emit('update-fill-goto-evevation-data', dName);
+
+                    // todo: elevation 정보 얻어오기
+                    // eLngLats.forEach((eLngLat, idx) => {
+                    //     [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                    //     eLngLats[idx] = eLngLat;
+                    // });
+                    //
+                    // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+                    // param = param.replace(/\]/g, '');
+                    //
+                    // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+                    //
+                    // try {
+                    //     axios.defaults.withCredentials = true;
+                    //
+                    //     let response = await axios.get(url, {
+                    //         withCredentials: true,
+                    //         validateStatus: status => {
+                    //             return status < 500;
+                    //         }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    //         headers: {
+                    //             'Access-Control-Allow-Origin': '*',
+                    //         },
+                    //     });
+                    //     console.log('getElevationProfile-updatedTempElePathFlag', response.status, response.data);
+                    //
+                    //     if (response.status === 200) {
+                    //         response.data.elevationProfile.forEach((ele) => {
+                    //             let elevation_val = ele.height;
+                    //             this.$store.state.drone_infos[dName].elevations.push(elevation_val);
+                    //         });
+                    //
+                    //         EventBus.$emit('update-fill-goto-evevation-data', dName);
+                    //     }
+                    // } catch (err) {
+                    //     console.log("Error >>", err);
+                    // }
                 }
             }
             else if(this.$store.state.drone_infos[dName].targeted && this.targetedSurveyFeatureId[dName] !== '' && this.targetedSurveyFeature[dName] !== undefined) {
@@ -2958,26 +2979,40 @@ export default {
                 eLngLats[idx] = eLngLat;
             });
 
-            let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-            param = param.replace(/\]/g, '');
+            let result = {};
+            result.elevationProfile = [];
+            result.elevationProfile.push({
+                height: 0,
+                distance: 0
+            });
 
-            let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+            callback(200, result);
 
-            try {
-                let response = await axios.get(url, {
-                    validateStatus: status => {
-                        return status < 500;
-                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                    },
-                });
-                console.log('getElevationProfile', response.status, response.data);
-
-                callback(response.status, response.data);
-
-            } catch (err) {
-                console.log("Error >>", err);
-            }
+            // todo: elevation 정보 얻어오기
+            // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+            // param = param.replace(/\]/g, '');
+            //
+            // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+            //
+            // try {
+            //     axios.defaults.withCredentials = true;
+            //
+            //     let response = await axios.get(url, {
+            //         withCredentials: true,
+            //         validateStatus: status => {
+            //             return status < 500;
+            //         }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+            //         headers: {
+            //             'Access-Control-Allow-Origin': '*',
+            //         },
+            //     });
+            //     console.log('getElevationProfile', response.status, response.data);
+            //
+            //     callback(response.status, response.data);
+            //
+            // } catch (err) {
+            //     console.log("Error >>", err);
+            // }
         },
 
 

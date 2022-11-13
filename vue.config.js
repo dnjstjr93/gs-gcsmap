@@ -1,4 +1,7 @@
 module.exports = {
+    devServer: {
+        proxy: 'http://open.mapquestapi.com'
+    },
     transpileDependencies: [
         'vuetify'
     ],
