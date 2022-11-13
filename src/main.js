@@ -7,14 +7,12 @@ import vuetify from './plugins/vuetify'
 import * as VueGoogleMaps from 'vue2-google-maps';
 import VueCookies from "vue-cookies";
 
-import axios from "axios";
-
-import AxiosPlugin from 'vue-axios-cors';
-
-Vue.use(AxiosPlugin);
-
-axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded'
-axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
+// import axios from "axios";
+// import AxiosPlugin from 'vue-axios-cors';
+//
+// Vue.use(AxiosPlugin);
+// axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded'
+// axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*';
 
 //쿠키를 사용한다.
 Vue.use(VueCookies);

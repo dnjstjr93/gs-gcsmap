@@ -1125,7 +1125,8 @@ export default {
 
             this.getElevationProfile(eLngLats, async (status, result) => {
                 if (status === 200) {
-                    let elevation_val = result.elevationProfile[0].height;
+                    //let elevation_val = result.elevationProfile[0].height;
+                    let elevation_val = result.results[0].elevation;
 
                     console.log(elevation_val);
 
@@ -1904,9 +1905,11 @@ export default {
 
                         this.getElevationProfile(eLngLats, async (status, result) => {
                             if (status === 200) {
-                                let elevation_val = result.elevationProfile[0].height;
+                                // let elevation_val = result.elevationProfile[0].height;
+                                let elevation_val = result.results[0].elevation;
 
-                                console.log('elevation_val', result.elevationProfile[0].distance, result.elevationProfile[0].height);
+                                // console.log('elevation_val', result.elevationProfile[0].distance, result.elevationProfile[0].height);
+                                console.log('elevation_val', result.results[0].elevation);
                                 this.olTempMarkers[dName].Coordinates[pIndex] = feature.getGeometry().getCoordinates();
 
                                 this.olTempMarkers[dName].guideLineFeature.getGeometry().setCoordinates(this.olTempMarkers[dName].Coordinates);
@@ -2747,7 +2750,7 @@ export default {
             //
             // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
             // param = param.replace(/\]/g, '');
-            //
+            // https://api.open-elevation.com/api/v1/lookup?locations=
             // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
             //
             // try {
@@ -2979,40 +2982,43 @@ export default {
                 eLngLats[idx] = eLngLat;
             });
 
-            let result = {};
-            result.elevationProfile = [];
-            result.elevationProfile.push({
-                height: 0,
-                distance: 0
-            });
-
-            callback(200, result);
+            // let result = {};
+            // result.elevationProfile = [];
+            // result.elevationProfile.push({
+            //     height: 0,
+            //     distance: 0
+            // });
+            //
+            // callback(200, result);
 
             // todo: elevation 정보 얻어오기
             // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
             // param = param.replace(/\]/g, '');
-            //
             // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
-            //
-            // try {
-            //     axios.defaults.withCredentials = true;
-            //
-            //     let response = await axios.get(url, {
-            //         withCredentials: true,
-            //         validateStatus: status => {
-            //             return status < 500;
-            //         }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-            //         headers: {
-            //             'Access-Control-Allow-Origin': '*',
-            //         },
-            //     });
-            //     console.log('getElevationProfile', response.status, response.data);
-            //
-            //     callback(response.status, response.data);
-            //
-            // } catch (err) {
-            //     console.log("Error >>", err);
-            // }
+
+            let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+            param = param.replace(/\]/g, '');
+            let url = 'https://api.open-elevation.com/api/v1/lookup?locations=' + param;
+
+            try {
+                //axios.defaults.withCredentials = true;
+
+                let response = await axios.get(url, {
+                    withCredentials: false,
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        // 'Access-Control-Allow-Origin': true,
+                    },
+                });
+                console.log('getElevationProfile', response.status, response.data);
+
+                callback(response.status, response.data);
+
+            } catch (err) {
+                console.log("Error >>", err);
+            }
         },
 
 

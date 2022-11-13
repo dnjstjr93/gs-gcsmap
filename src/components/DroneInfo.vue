@@ -1898,15 +1898,19 @@ export default {
                 }
 
                 // todo: elevation 정보 가져오기
-                // eLngLats.forEach((eLngLat, idx) => {
-                //     [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
-                //     eLngLats[idx] = eLngLat;
-                // });
-                //
+                eLngLats.forEach((eLngLat, idx) => {
+                    [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                    eLngLats[idx] = eLngLat;
+                });
+
                 // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
                 // param = param.replace(/\]/g, '');
-                //
                 // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
+
+                // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
+                // param = param.replace(/\]/g, '');
+                // param = param.replace(/,/g, '|');
+                // let url = 'https://api.open-elevation.com/api/v1/lookup?locations=' + param;
                 //
                 // try {
                 //     axios.defaults.withCredentials = true;

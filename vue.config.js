@@ -1,7 +1,14 @@
 module.exports = {
-    devServer: {
-        proxy: 'http://open.mapquestapi.com'
-    },
+    // devServer: {
+    //     proxy: {
+    //         '/':{
+    //             "target":'https://api.open-elevation.com',
+    //             "pathRewrite":{'^/':''},
+    //             "changeOrigin":true,
+    //             "secure":false
+    //         }
+    //     }
+    // },
     transpileDependencies: [
         'vuetify'
     ],
