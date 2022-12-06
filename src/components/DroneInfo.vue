@@ -1549,9 +1549,11 @@ export default {
 
     methods: {
         handlePwmClick(num) {
-            console.log(num, this.mission_value[`ch${num}`]);
+            console.log(parseInt(num), (1100 + (400 * parseInt(this.mission_value[`ch${num}`]))));
 
-            this.send_reserved_control_command(this.name, this.target_pub_topic, this.sys_id, parseInt(num), parseInt(this.mission_value[`ch${num}`]));
+            //this.send_reserved_control_command(this.name, this.target_pub_topic, this.sys_id, parseInt(num), parseInt(this.mission_value[`ch${num}`]));
+
+            this.send_set_servo_command(this.name, this.target_pub_topic, this.sys_id, parseInt(num), (1100 + (400 * parseInt(this.mission_value[`ch${num}`]))));
         },
 
         selectedMavVersion: function(event) {
