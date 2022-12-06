@@ -1451,7 +1451,7 @@
                 // Initiate the location request
                 elevator.getElevationAlongPath({
                     path: this.$store.state.surveyMarkers[dName][pIndex].pathLines,
-                    samples: 256,
+                    samples: this.$store.state.SAMPLES,
                 })
                 .then(({ results }) => {
                     if (results[0]) {

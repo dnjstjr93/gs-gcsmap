@@ -1859,6 +1859,49 @@ export default {
             this.dialog = true;
         },
 
+        async getElevationProfile(eLngLats, callback) {
+
+            eLngLats.forEach((eLngLat, idx) => {
+                [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+                eLngLats[idx] = eLngLat;
+            });
+
+            let param = JSON.stringify(eLngLats).replace(/\[\[/g, '');
+            param = param.replace(/\],\[/g, '|');
+            param = param.replace(/\]\]/g, '');
+            let url = 'https://api.open-elevation.com/api/v1/lookup?locations=' + param;
+
+            try {
+                //axios.defaults.withCredentials = true;
+
+                let response = await axios.get(url, {
+                    withCredentials: false,
+                    validateStatus: status => {
+                        return status < 500;
+                    }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    headers: {
+                        // 'Access-Control-Allow-Origin': true,
+                    },
+                });
+                console.log('DroneInfo', 'getElevationProfile', response.status, response.data);
+
+                callback(response.status, response.data);
+
+            } catch (err) {
+                console.log("Error >>", err);
+
+                let response_data = {};
+                response_data.results = [];
+                eLngLats.forEach(() => {
+                    response_data.results.push({
+                        elevation: 0
+                    });
+                });
+
+                callback(200, response_data);
+            }
+        },
+
         async updateMyDroneInfo() {
             console.log('updateMyDroneInfo', this.strMyDroneInfo);
 
@@ -1897,42 +1940,18 @@ export default {
                     this.$store.state.tempMarkers[this.name].push(marker);
                 }
 
-                // todo: elevation 정보 가져오기
                 eLngLats.forEach((eLngLat, idx) => {
                     [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
                     eLngLats[idx] = eLngLat;
                 });
 
-                // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-                // param = param.replace(/\]/g, '');
-                // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
-
-                // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-                // param = param.replace(/\]/g, '');
-                // param = param.replace(/,/g, '|');
-                // let url = 'https://api.open-elevation.com/api/v1/lookup?locations=' + param;
-                //
-                // try {
-                //     axios.defaults.withCredentials = true;
-                //
-                //     let response = await axios.get(url, {
-                //         withCredentials: true,
-                //         validateStatus: status => {
-                //             return status < 500;
-                //         }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                //         headers: {
-                //             'Access-Control-Allow-Origin': '*',
-                //         },
-                //     });
-                //     console.log('getElevationProfile', response.status, response.data);
-                //
-                //     for(let idx = 0; idx < response.data.elevationProfile.length; idx++) {
-                //         this.$store.state.tempMarkers[this.name][idx].elevation = response.data.elevationProfile[idx].height;
-                //     }
-                // }
-                // catch (err) {
-                //     console.log("Error >>", err);
-                // }
+                this.getElevationProfile(eLngLats, async (status, result) => {
+                    if (status === 200) {
+                        result.results.forEach((ele, idx) => {
+                            this.$store.state.tempMarkers[this.name][idx].elevation = ele.elevation;
+                        });
+                    }
+                });
 
                 // this.positions = [];
                 // for (let i in this.$store.state.drone_infos[this.name].goto_positions) {

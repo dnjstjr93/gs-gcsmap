@@ -293,6 +293,7 @@ const _defaultDroneInfo = {
 
 export default new Vuex.Store({
     state: {
+        SAMPLES: 96,
         viewAlt: true,
         drone_command_prepared: false,
 

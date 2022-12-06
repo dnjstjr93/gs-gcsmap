@@ -480,16 +480,16 @@
 
                 //console.log(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations);
 
-                let unitVal = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist / 256);
+                let unitVal = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist / this.$store.state.SAMPLES);
                 console.log('unitVal', unitVal);
                 let labels = [0];
                 let dist = 0;
-                for(let i = 1; i < 256; i++) {
+                for(let i = 1; i < this.$store.state.SAMPLES; i++) {
                     dist += unitVal;
                     labels.push(dist);
                 }
 
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt = Array(256).fill(parseInt(this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt));
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt));
 
                 console.log('takeoffAlt - ', this.$store.state.drone_infos[this.markerName].absolute_alt, this.$store.state.drone_infos[this.markerName].alt, this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt)
 
@@ -501,7 +501,7 @@
                             {
                                 type: 'bar',
                                 data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations,
-                                backgroundColor: Array(256).fill('rgba(153, 102, 255, 0.2)'),
+                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
                                 // aaa: [
                                 //     //색상
                                 //     'rgba(255, 99, 132, 0.2)',
@@ -511,7 +511,7 @@
                                 //     'rgba(153, 102, 255, 0.2)',
                                 //     'rgba(255, 159, 64, 0.2)'
                                 // ],
-                                borderColor: Array(256).fill('rgba(153, 102, 255, 1)'),
+                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
                                 // [
                                 //     //경계선 색상
                                 //     'rgba(255, 99, 132, 1)',
@@ -527,22 +527,22 @@
                                 type: 'line',
                                 label: '비행고도',
                                 data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt,
-                                backgroundColor: Array(256).fill('rgba(255, 99, 132, 0.2)'),
-                                borderColor: Array(256).fill('rgba(255, 99, 132, 1)'),
+                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 0.2)'),
+                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 1)'),
                             },
                             {
                                 type: 'line',
                                 label: '옵셋고도',
                                 data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt,
-                                backgroundColor: Array(256).fill('rgba(255, 206, 86, 0.2)'),
-                                borderColor: Array(256).fill('rgba(255, 206, 86, 1)'),
+                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 0.2)'),
+                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 1)'),
                             },
                             {
                                 type: 'line',
                                 label: '이륙고도',
                                 data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt,
-                                backgroundColor: Array(256).fill('rgba(54, 162, 235, 1)'),
-                                borderColor: Array(256).fill('rgba(54, 162, 235, 0.2)'),
+                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(54, 162, 235, 1)'),
+                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(54, 162, 235, 0.2)'),
                             },
                         ],
                     },
@@ -615,11 +615,11 @@
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = [];
                         if(this.flyAltType === '상대고도') {
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(256).fill(parseInt(this.paramOffsetAlt));
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramOffsetAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
                         }
                         else {
-                            for(let i = 0; i < 256; i++) {
+                            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
                                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
                                     parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
                                 );
@@ -635,11 +635,11 @@
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = [];
                         if(this.flyAltType === '상대고도') {
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(256).fill(parseInt(this.paramOffsetAlt));
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramOffsetAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
                         }
                         else {
-                            for(let i = 0; i < 256; i++) {
+                            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
                                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
                                     parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
                                 );
@@ -674,10 +674,10 @@
 
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
                         if(this.flyAltType === '상대고도') {
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(256).fill(parseInt(this.paramAlt));
+                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramAlt));
                         }
                         else {
-                            for(let i = 0; i < 256; i++) {
+                            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
                                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
                                     this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i] + parseInt(this.paramAlt)
                                 );
@@ -1077,7 +1077,9 @@
         beforeDestroy() {
             EventBus.$off('on-update-info-survey-marker');
 
-            this.myChart.destroy();
+            if(this.myChart) {
+                this.myChart.destroy();
+            }
         }
     }
 </script>

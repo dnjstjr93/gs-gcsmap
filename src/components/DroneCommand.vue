@@ -2080,19 +2080,19 @@ export default {
                     this.myChart.destroy();
                 }
 
-                let unitVal = parseInt(this.$store.state.drone_infos[dName].targetDistance / 256);
+                let unitVal = parseInt(this.$store.state.drone_infos[dName].targetDistance / this.$store.state.SAMPLES);
                 console.log('unitVal', unitVal);
                 let labels = [0];
                 let dist = 0;
-                for (let i = 1; i < 256; i++) {
+                for (let i = 1; i < this.$store.state.SAMPLES; i++) {
                     dist += unitVal;
                     labels.push(dist);
                 }
 
-                let arrCurAlt = Array(256).fill(parseInt(this.$store.state.drone_infos[dName].absolute_alt));
+                let arrCurAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.$store.state.drone_infos[dName].absolute_alt));
 
                 let diff = this.$store.state.drone_infos[dName].absolute_alt - this.$store.state.drone_infos[dName].alt;
-                let arrFlyAlt = Array(256).fill(parseInt(diff) + parseInt(this.$store.state.drone_infos[dName].targetAlt));
+                let arrFlyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(diff) + parseInt(this.$store.state.drone_infos[dName].targetAlt));
 
                 console.log('arrFlyAlt - ', this.$store.state.drone_infos[dName].absolute_alt, this.$store.state.drone_infos[dName].alt, arrFlyAlt);
 
@@ -2104,7 +2104,7 @@ export default {
                             {
                                 type: 'bar',
                                 data: this.$store.state.drone_infos[dName].elevations,
-                                backgroundColor: Array(256).fill('rgba(153, 102, 255, 0.2)'),
+                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
                                 // aaa: [
                                 //     //색상
                                 //     'rgba(255, 99, 132, 0.2)',
@@ -2114,7 +2114,7 @@ export default {
                                 //     'rgba(153, 102, 255, 0.2)',
                                 //     'rgba(255, 159, 64, 0.2)'
                                 // ],
-                                borderColor: Array(256).fill('rgba(153, 102, 255, 1)'),
+                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
                                 // [
                                 //     //경계선 색상
                                 //     'rgba(255, 99, 132, 1)',
@@ -2130,15 +2130,15 @@ export default {
                                 type: 'line',
                                 label: '비행고도',
                                 data: arrFlyAlt,
-                                backgroundColor: Array(256).fill('rgba(255, 99, 132, 0.2)'),
-                                borderColor: Array(256).fill('rgba(255, 99, 132, 1)'),
+                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 0.2)'),
+                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 1)'),
                             },
                             {
                                 type: 'line',
                                 label: '드론고도',
                                 data: arrCurAlt,
-                                backgroundColor: Array(256).fill('rgba(255, 206, 86, 0.2)'),
-                                borderColor: Array(256).fill('rgba(255, 206, 86, 1)'),
+                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 0.2)'),
+                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 1)'),
                             },
                         ],
                     },

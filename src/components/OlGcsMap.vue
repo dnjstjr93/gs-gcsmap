@@ -939,11 +939,6 @@ export default {
 
             console.log('total_dist- ', total_dist);
 
-
-
-
-
-
             //
             // const elevator = new this.google.maps.ElevationService();
             //
@@ -1051,9 +1046,9 @@ export default {
             survey.area = 0;
             survey.paramAlt = 150;
             survey.paramOffsetAlt = 0;
-            survey.flyAlt = Array(256).fill(150);
-            survey.takeoffAlt = Array(256).fill(0);
-            survey.offsetAlt = Array(256).fill(0);
+            survey.flyAlt = Array(this.$store.state.SAMPLES).fill(150);
+            survey.takeoffAlt = Array(this.$store.state.SAMPLES).fill(0);
+            survey.offsetAlt = Array(this.$store.state.SAMPLES).fill(0);
             survey.flyAltType = '상대고도';
             survey.pathLines = [];
             survey.elevations = [];
@@ -1687,13 +1682,52 @@ export default {
 
                     this.olSurveyMarkers[dName].surveyLineFeatures[pIndex].getGeometry().setCoordinates(pathLineCoordinates);
 
+                    let lineFeature = this.olSurveyMarkers[dName].surveyLineFeatures[pIndex];
+
+                    let eLngLats = [];
+
+                    this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
+                    this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
+
+                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                        let eLngLat = toLonLat(lineFeature.getGeometry().getCoordinateAt(i/(this.$store.state.SAMPLES-1)));
+                        eLngLats.push(eLngLat);
+                        this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
+                    }
+
+                    this.getElevationProfile(eLngLats, async (status, result) => {
+                        if (status === 200) {
+                            result.results.forEach((ele) => {
+                                this.$store.state.surveyMarkers[dName][pIndex].elevations.push(ele.elevation);
+                            });
+                        }
+                    });
+
                     let area = getArea(feature.getGeometry());
                     this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
                     console.log('computeArea = ', area.toFixed(1), '㎡');
 
                     if(this.curInfoSurveyMarkerFlag) {
-                        console.log('do-update-survey-GcsMap', 'on-update-info-survey-marker');
-                        EventBus.$emit('on-update-info-survey-marker');
+                        // console.log('do-update-survey-GcsMap', 'on-update-info-survey-marker');
+                        // EventBus.$emit('on-update-info-survey-marker');
+
+                        this.updateTargetedSurveyMarker(dName, pIndex);
+
+                        this.curInfoSurveyMarkerFlag = false;
+
+                        this.$forceUpdate();
+
+                        setTimeout(() => {
+                            this.curSelectedMarker = this.$store.state.surveyMarkers[dName][pIndex];
+                            this.curIndexMarker = pIndex;
+                            this.curNameMarker = dName;
+                            this.curInfoSurveyMarkerFlag = true;
+
+                            // setTimeout(() => {
+                            //     console.log('translateend', 'on-update-info-survey-marker');
+                            //     EventBus.$emit('on-update-info-survey-marker');
+                            // }, 10);
+                        }, 10);
                     }
                 });
             });
@@ -1794,6 +1828,27 @@ export default {
                         }
 
                         this.olSurveyMarkers[dName].surveyLineFeatures[pIndex].getGeometry().setCoordinates(pathLineCoordinates);
+
+                        let lineFeature = this.olSurveyMarkers[dName].surveyLineFeatures[pIndex];
+
+                        let eLngLats = [];
+
+                        this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
+                        this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
+
+                        for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                            let eLngLat = toLonLat(lineFeature.getGeometry().getCoordinateAt(i/(this.$store.state.SAMPLES-1)));
+                            eLngLats.push(eLngLat);
+                            this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
+                        }
+
+                        this.getElevationProfile(eLngLats, async (status, result) => {
+                            if (status === 200) {
+                                result.results.forEach((ele) => {
+                                    this.$store.state.surveyMarkers[dName][pIndex].elevations.push(ele.elevation);
+                                });
+                            }
+                        });
 
                         if(this.curInfoSurveyMarkerFlag) {
                             this.updateTargetedSurveyMarker(dName, pIndex);
@@ -2732,50 +2787,22 @@ export default {
             this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
             this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
 
-            for(let i = 0; i < 256; i++) {
-                let eLngLat = toLonLat(lineFeature.getGeometry().getCoordinateAt(i/255));
+            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                let eLngLat = toLonLat(lineFeature.getGeometry().getCoordinateAt(i/(this.$store.state.SAMPLES-1)));
                 eLngLats.push(eLngLat);
                 this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
             }
 
-            for(let i = 0; i < 256; i++) {
-                this.$store.state.surveyMarkers[dName][pIndex].elevations.push(0);
-            }
+            console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker');
 
-            // todo: elevation 정보 가져오기
-            // eLngLats.forEach((eLngLat, idx) => {
-            //     [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
-            //     eLngLats[idx] = eLngLat;
-            // });
-            //
-            // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-            // param = param.replace(/\]/g, '');
-            // https://api.open-elevation.com/api/v1/lookup?locations=
-            // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
-            //
-            // try {
-            //     axios.defaults.withCredentials = true;
-            //
-            //     let response = await axios.get(url, {
-            //         withCredentials: true,
-            //         validateStatus: status => {
-            //             return status < 500;
-            //         }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-            //         headers: {
-            //             'Access-Control-Allow-Origin': '*',
-            //         },
-            //     });
-            //     console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> getElevationProfile', response.status, response.data);
-            //
-            //     if (response.status === 200) {
-            //         response.data.elevationProfile.forEach((ele) => {
-            //             let elevation_val = ele.height;
-            //             this.$store.state.surveyMarkers[dName][pIndex].elevations.push(elevation_val);
+
+            // this.getElevationProfile(eLngLats, async (status, result) => {
+            //     if (status === 200) {
+            //         result.results.forEach((ele) => {
+            //             this.$store.state.surveyMarkers[dName][pIndex].elevations.push(ele.elevation);
             //         });
             //     }
-            // } catch (err) {
-            //     console.log("Error >>", err);
-            // }
+            // });
         },
 
         initOlSurveyMarkers() {
@@ -2861,8 +2888,8 @@ export default {
                     this.$store.state.drone_infos[dName].elevations = [];
                     this.$store.state.drone_infos[dName].elevations_location = [];
 
-                    for (let i = 0; i < 256; i++) {
-                        let eLngLat = toLonLat(this.olDroneMarkers[dName].targetLineFeature.getGeometry().getCoordinateAt(i / 256));
+                    for (let i = 0; i < this.$store.state.SAMPLES; i++) {
+                        let eLngLat = toLonLat(this.olDroneMarkers[dName].targetLineFeature.getGeometry().getCoordinateAt(i / (this.$store.state.SAMPLES-1)));
                         eLngLats.push(eLngLat);
                         this.$store.state.drone_infos[dName].elevations_location.push({
                             lat: eLngLat[1],
@@ -2870,48 +2897,15 @@ export default {
                         });
                     }
 
-                    for(let i = 0; i < 256; i++) {
-                        this.$store.state.surveyMarkers[dName][pIndex].elevations.push(0);
-                    }
+                    this.getElevationProfile(eLngLats, async (status, result) => {
+                        if (status === 200) {
+                            result.results.forEach((ele) => {
+                                this.$store.state.drone_infos[dName].elevations.push(ele.elevation);
+                            });
 
-                    EventBus.$emit('update-fill-goto-evevation-data', dName);
-
-                    // todo: elevation 정보 얻어오기
-                    // eLngLats.forEach((eLngLat, idx) => {
-                    //     [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
-                    //     eLngLats[idx] = eLngLat;
-                    // });
-                    //
-                    // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-                    // param = param.replace(/\]/g, '');
-                    //
-                    // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
-                    //
-                    // try {
-                    //     axios.defaults.withCredentials = true;
-                    //
-                    //     let response = await axios.get(url, {
-                    //         withCredentials: true,
-                    //         validateStatus: status => {
-                    //             return status < 500;
-                    //         }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    //         headers: {
-                    //             'Access-Control-Allow-Origin': '*',
-                    //         },
-                    //     });
-                    //     console.log('getElevationProfile-updatedTempElePathFlag', response.status, response.data);
-                    //
-                    //     if (response.status === 200) {
-                    //         response.data.elevationProfile.forEach((ele) => {
-                    //             let elevation_val = ele.height;
-                    //             this.$store.state.drone_infos[dName].elevations.push(elevation_val);
-                    //         });
-                    //
-                    //         EventBus.$emit('update-fill-goto-evevation-data', dName);
-                    //     }
-                    // } catch (err) {
-                    //     console.log("Error >>", err);
-                    // }
+                            EventBus.$emit('update-fill-goto-evevation-data', dName);
+                        }
+                    });
                 }
             }
             else if(this.$store.state.drone_infos[dName].targeted && this.targetedSurveyFeatureId[dName] !== '' && this.targetedSurveyFeature[dName] !== undefined) {
@@ -2982,22 +2976,9 @@ export default {
                 eLngLats[idx] = eLngLat;
             });
 
-            // let result = {};
-            // result.elevationProfile = [];
-            // result.elevationProfile.push({
-            //     height: 0,
-            //     distance: 0
-            // });
-            //
-            // callback(200, result);
-
-            // todo: elevation 정보 얻어오기
-            // let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-            // param = param.replace(/\]/g, '');
-            // let url = 'http://open.mapquestapi.com/elevation/v1/profile?key=p1bQYpZGSjapSfqhhqhqGWEC1W0GaDYX&shapeFormat=raw&latLngCollection=' + param;
-
-            let param = JSON.stringify(eLngLats).replace(/\[/g, '');
-            param = param.replace(/\]/g, '');
+            let param = JSON.stringify(eLngLats).replace(/\[\[/g, '');
+            param = param.replace(/\],\[/g, '|');
+            param = param.replace(/\]\]/g, '');
             let url = 'https://api.open-elevation.com/api/v1/lookup?locations=' + param;
 
             try {
@@ -3018,10 +2999,18 @@ export default {
 
             } catch (err) {
                 console.log("Error >>", err);
+
+                let response_data = {};
+                response_data.results = [];
+                eLngLats.forEach(() => {
+                    response_data.results.push({
+                        elevation: 0
+                    });
+                });
+
+                callback(200, response_data);
             }
         },
-
-
 
         shade(inputs, data) {
             var elevationImage = inputs[0]; // 첫번째(0) 데이터소스로 elevation 객체
@@ -3112,6 +3101,7 @@ export default {
             style: this.styles,
         });
 
+        // Todo: 오프라인맵 적용 방안 강구할 것
         this.osmSource = new XYZ({url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'}); // Google Satellite
         //this.osmSource = new XYZ({url: 'http://localhost:4500/todos/todoid/OSM_{z}_{x}_{y}'}); // My Map of Satellite
 
@@ -3580,7 +3570,6 @@ export default {
             var hit = this.olMap.hasFeatureAtPixel(this.olMap.getEventPixel(event.originalEvent));
             this.olMap.getTargetElement().style.cursor = hit ? 'pointer' : '';
 
-
             //console.log('event.dragging', event.dragging);
 
             let latLng = toLonLat(event.coordinate);
@@ -3942,9 +3931,12 @@ export default {
         this.olMap.on('dblclick', (event) => {
 
             this.selectedFeature = this.olMap.forEachFeatureAtPixel(event.pixel, (feature) => feature);
-            console.log('dblclick', this.selectedFeature.getProperties().type);
+
+            // console.log('dblclick', this.selectedFeature);
 
             if(this.selectedFeature !== undefined && this.selectedFeature.getId() !== undefined) {
+                console.log('dblclick', this.selectedFeature.getProperties().type);
+
                 if(this.selectedFeature.getProperties().type === 'droneMarker') {
                     //let dName = this.selectedFeature.getId();
 
@@ -3984,6 +3976,31 @@ export default {
 
                     this.$forceUpdate();
 
+                    let lineFeature = this.olSurveyMarkers[dName].surveyLineFeatures[pIndex];
+
+                    let eLngLats = [];
+
+                    this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
+                    this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
+
+                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                        let eLngLat = toLonLat(lineFeature.getGeometry().getCoordinateAt(i/(this.$store.state.SAMPLES-1)));
+                        eLngLats.push(eLngLat);
+                        this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
+                    }
+
+                    this.getElevationProfile(eLngLats, async (status, result) => {
+                        if (status === 200) {
+                            result.results.forEach((ele) => {
+                                this.$store.state.surveyMarkers[dName][pIndex].elevations.push(ele.elevation);
+                            });
+                        }
+                    });
+
+                    let area = getArea(this.selectedFeature.getGeometry());
+                    this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
+                    console.log('computeArea = ', area.toFixed(1), '㎡');
+
                     setTimeout(() => {
                         this.curSelectedMarker = this.$store.state.surveyMarkers[dName][pIndex];
                         this.curIndexMarker = pIndex;
@@ -3994,7 +4011,7 @@ export default {
                         //     console.log('dblclick', 'on-update-info-survey-marker');
                         //     EventBus.$emit('on-update-info-survey-marker');
                         // }, 10);
-                    }, 10);
+                    }, 100);
                 }
                 else if(this.selectedFeature.getProperties().type === 'tempMarker') {
                     let arrId = this.selectedFeature.getId().split('-');
@@ -4272,6 +4289,27 @@ export default {
             }
 
             this.olSurveyMarkers[dName].surveyLineFeatures[pIndex].getGeometry().setCoordinates(pathLineCoordinates);
+            //
+            // let lineFeature = this.olSurveyMarkers[dName].surveyLineFeatures[pIndex];
+            //
+            // let eLngLats = [];
+            //
+            // this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
+            // this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
+            //
+            // for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+            //     let eLngLat = toLonLat(lineFeature.getGeometry().getCoordinateAt(i/(this.$store.state.SAMPLES-1)));
+            //     eLngLats.push(eLngLat);
+            //     this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
+            // }
+            //
+            // this.getElevationProfile(eLngLats, async (status, result) => {
+            //     if (status === 200) {
+            //         result.results.forEach((ele) => {
+            //             this.$store.state.surveyMarkers[dName][pIndex].elevations.push(ele.elevation);
+            //         });
+            //     }
+            // });
 
             try {
                 let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;

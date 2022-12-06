@@ -1617,15 +1617,15 @@ export default {
                                 }
 
                                 if (!Object.prototype.hasOwnProperty.call(marker, 'flyAlt')) {
-                                    marker.flyAlt = Array(256).fill(150);
+                                    marker.flyAlt = Array(this.$store.state.SAMPLES).fill(150);
                                 }
 
                                 if (!Object.prototype.hasOwnProperty.call(marker, 'takeoffAlt')) {
-                                    marker.takeoffAlt = Array(256).fill(0);
+                                    marker.takeoffAlt = Array(this.$store.state.SAMPLES).fill(0);
                                 }
 
                                 if (!Object.prototype.hasOwnProperty.call(marker, 'offsetAlt')) {
-                                    marker.offsetAlt = Array(256).fill(0);
+                                    marker.offsetAlt = Array(this.$store.state.SAMPLES).fill(0);
                                 }
 
                                 if (!Object.prototype.hasOwnProperty.call(marker, 'flyAltType')) {
@@ -2166,15 +2166,15 @@ export default {
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'flyAlt')) {
-                                marker.flyAlt = Array(256).fill(150);
+                                marker.flyAlt = Array(this.$store.state.SAMPLES).fill(150);
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'takeoffAlt')) {
-                                marker.takeoffAlt = Array(256).fill(0);
+                                marker.takeoffAlt = Array(this.$store.state.SAMPLES).fill(0);
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'offsetAlt')) {
-                                marker.offsetAlt = Array(256).fill(0);
+                                marker.offsetAlt = Array(this.$store.state.SAMPLES).fill(0);
                             }
 
                             if (!Object.prototype.hasOwnProperty.call(marker, 'flyAltType')) {
