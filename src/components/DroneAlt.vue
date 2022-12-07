@@ -165,7 +165,7 @@ export default {
         },
 
         draw(x, y) {
-            this.ctx = this.$refs.alt.getContext('2d');
+            this.ctx = this.$refs.alt.getContext('2d', { willReadFrequently: true });
             this.ctx.beginPath()
             this.ctx.clearRect(0, 0, 500, 500)
             console.log('draw', x, y);

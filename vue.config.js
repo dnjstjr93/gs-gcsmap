@@ -1,14 +1,7 @@
 module.exports = {
-    // devServer: {
-    //     proxy: {
-    //         '/':{
-    //             "target":'https://api.open-elevation.com',
-    //             "pathRewrite":{'^/':''},
-    //             "changeOrigin":true,
-    //             "secure":false
-    //         }
-    //     }
-    // },
+    devServer: {
+        public: 'localhost'
+    },
     transpileDependencies: [
         'vuetify'
     ],

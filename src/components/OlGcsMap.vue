@@ -4103,7 +4103,7 @@ export default {
                     let canvas = document.createElement("canvas");
                     canvas.width = this.osmSource.getTileGrid().getTileSize(currentZoomLevel);
                     canvas.height = this.osmSource.getTileGrid().getTileSize(currentZoomLevel);
-                    let ctx = canvas.getContext("2d");
+                    let ctx = canvas.getContext('2d', { willReadFrequently: true });
                     ctx.drawImage(img, 0, 0);
                     //totalLocalStroageSize += canvas.toDataURL().length;
                     //console.log(++totalCount, canvas.toDataURL().length, totalLocalStroageSize, 'OSM_' + tileCoord[0] + '_' + tileCoord[1] + '_' + (-tileCoord[2] - 1), canvas.toDataURL());

@@ -493,7 +493,7 @@
 
                 console.log('takeoffAlt - ', this.$store.state.drone_infos[this.markerName].absolute_alt, this.$store.state.drone_infos[this.markerName].alt, this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt)
 
-                const ctx = document.getElementById('elevation-chart-'+this.markerName).getContext('2d');
+                const ctx = document.getElementById('elevation-chart-'+this.markerName).getContext('2d', { willReadFrequently: true });
                 let config = {
                     data: {
                         labels: labels,
