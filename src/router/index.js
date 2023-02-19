@@ -1,14 +1,14 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import PureunAir from '../views/PureunAir.vue'
+import Home from '../views/Home.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
     {
         path: '/',
-        name: 'PureunAir',
-        component: PureunAir
+        name: 'Home',
+        component: Home
     }
 ]
 
