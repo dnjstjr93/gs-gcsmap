@@ -3,7 +3,7 @@
         <v-app-bar app color="success" dark dense>
             <v-toolbar-title>
                 <v-row no-gutters align="center">
-                    <v-icon left>mdi-monitor-dashboard</v-icon>
+                    <v-icon left>$monitorDashboard</v-icon>
                     KETI GCS
                 </v-row>
             </v-toolbar-title>
