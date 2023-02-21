@@ -10,8 +10,8 @@
             background-color="blue-grey darken-4"
             dark center-active show-arrows
             color="red"
-            next-icon="mdi-arrow-right-bold-box-outline"
-            prev-icon="mdi-arrow-left-bold-box-outline"
+            next-icon="$arrowRightBox"
+            prev-icon="$arrowLeftBox"
             v-model="$store.state.active_tab"
             active-class="text--accent-5"
         >
@@ -55,7 +55,7 @@
                                                             class="ml-1"
                                                         >
                                                             <v-icon left>
-                                                                mdi-airplane
+                                                                $airplane
                                                             </v-icon> {{dIndex}}
                                                         </v-chip>
                                                     </v-card>
@@ -727,7 +727,7 @@
                                                             <v-col cols="2">
                                                                 <v-row no-gutters align="center" justify="center">
                                                                     <v-col cols="6" class="text-center">
-                                                                        <v-icon small class="mb-1">mdi-arrow-left-right</v-icon>
+                                                                        <v-icon small class="mb-1">$arrowLeftRight</v-icon>
                                                                         <v-select
                                                                             dense outlined hide-details
                                                                             :items="channels"
@@ -737,7 +737,7 @@
                                                                         ></v-select>
                                                                     </v-col>
                                                                     <v-col cols="6" class="text-center">
-                                                                        <v-icon small class="mb-1">mdi-arrow-up-down</v-icon>
+                                                                        <v-icon small class="mb-1">$arrowUpDown</v-icon>
                                                                         <v-select
                                                                             dense outlined hide-details
                                                                             :items="channels"
@@ -771,7 +771,7 @@
                                                             <v-col cols="2">
                                                                 <v-row no-gutters align="center" justify="center">
                                                                     <v-col cols="6" class="text-center">
-                                                                        <v-icon small class="mb-1">mdi-arrow-left-right</v-icon>
+                                                                        <v-icon small class="mb-1">$arrowLeftRight</v-icon>
                                                                         <v-select
                                                                             dense outlined hide-details
                                                                             :items="channels"
@@ -781,7 +781,7 @@
                                                                         ></v-select>
                                                                     </v-col>
                                                                     <v-col cols="6" class="text-center">
-                                                                        <v-icon small class="mb-1">mdi-arrow-up-down</v-icon>
+                                                                        <v-icon small class="mb-1">$arrowUpDown</v-icon>
                                                                         <v-select
                                                                             dense outlined hide-details
                                                                             :items="channels"
@@ -834,17 +834,17 @@
                                                                                                 class="text-center align-center mx-0"
                                                                                             >
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-left</v-icon>
+                                                                                                    <v-icon small>$formatAlignLeft</v-icon>
                                                                                                 </v-btn>
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-center</v-icon>
+                                                                                                    <v-icon small>$formatAlignCenter</v-icon>
                                                                                                 </v-btn>
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-right</v-icon>
+                                                                                                    <v-icon small>$formatAlignRight</v-icon>
                                                                                                 </v-btn>
                                                                                             </v-btn-toggle>
 
-                                                                                            <v-btn small color="primary" class="mx-1 mb-1" @click="handlePwmClick(d.name, num, $event);"><v-icon>mdi-send</v-icon></v-btn>
+                                                                                            <v-btn small color="primary" class="mx-1 mb-1" @click="handlePwmClick(d.name, num, $event);"><v-icon>$send</v-icon></v-btn>
                                                                                         </v-col>
                                                                                     </v-row>
                                                                                 </div>
@@ -869,17 +869,17 @@
                                                                                                 class="text-center align-center mx-0"
                                                                                             >
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-left</v-icon>
+                                                                                                    <v-icon small>$formatAlignLeft</v-icon>
                                                                                                 </v-btn>
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-center</v-icon>
+                                                                                                    <v-icon small>$formatAlignCenter</v-icon>
                                                                                                 </v-btn>
                                                                                                 <v-btn small>
-                                                                                                    <v-icon small>mdi-format-align-right</v-icon>
+                                                                                                    <v-icon small>$formatAlignRight</v-icon>
                                                                                                 </v-btn>
                                                                                             </v-btn-toggle>
 
-                                                                                            <v-btn small color="lime" class="mx-1 mb-1" @click="handlePwmClick(d.name, num, $event);"><v-icon>mdi-send</v-icon></v-btn>
+                                                                                            <v-btn small color="lime" class="mx-1 mb-1" @click="handlePwmClick(d.name, num, $event);"><v-icon>$send</v-icon></v-btn>
                                                                                         </v-col>
                                                                                     </v-row>
                                                                                 </div>

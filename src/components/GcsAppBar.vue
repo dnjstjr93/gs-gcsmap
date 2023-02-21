@@ -11,20 +11,20 @@
             <v-spacer></v-spacer>
 
             <v-btn text @click.stop="mapDownload" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
-                <v-icon>mdi-monitor-arrow-down-variant</v-icon>
+                <v-icon>$monitorArrowDown</v-icon>
             </v-btn>
 
             <v-btn text @click.stop="mapAngleDialog=true" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
-                <v-icon>mdi-format-rotate-90</v-icon>
+                <v-icon>$formatRotate90</v-icon>
             </v-btn>
 
             <v-btn text @click.stop="setGCSHomePosition" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
-                <v-icon>mdi-crosshairs-gps</v-icon>
+                <v-icon>$crosshairsGps</v-icon>
             </v-btn>
 
             <v-btn text @click.stop="dialogProfile">
                 <!--            <v-icon>mdi-quadcopter</v-icon>-->
-                <v-icon>mdi-cog-transfer</v-icon>
+                <v-icon>$cogTransfer</v-icon>
             </v-btn>
 
 
@@ -33,7 +33,7 @@
             <!--        </v-btn>-->
 
             <v-btn text @click.stop="openCam2" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
-                <v-icon>mdi-video</v-icon>
+                <v-icon>$video</v-icon>
             </v-btn>
 
             <!--        <router-link-->
@@ -46,7 +46,7 @@
             <!--        </router-link>-->
 
             <v-btn text :disabled="!$store.state.MOBIUS_CONNECTION.connected">
-                <v-icon>mdi-account</v-icon>
+                <v-icon>$account</v-icon>
             </v-btn>
 
             <v-dialog
@@ -58,7 +58,7 @@
                         <v-spacer/>
                         <v-col cols="2" class="text-center">
                             <v-icon>
-                                mdi-format-rotate-90
+                                $formatRotate90
                             </v-icon>
                         </v-col>
                         <v-spacer/>
@@ -101,7 +101,7 @@
             <v-dialog v-model="dialog" persistent max-width="960px">
                 <v-card id="create" class="mx-auto">
                     <v-toolbar color="teal" dark>
-                        <v-icon left>mdi-quadcopter</v-icon>
+                        <v-icon left>$quadcopter</v-icon>
                         <v-toolbar-title>Settings</v-toolbar-title>
                         <template v-slot:extension>
                             <v-speed-dial

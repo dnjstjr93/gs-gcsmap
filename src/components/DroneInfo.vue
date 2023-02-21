@@ -30,7 +30,7 @@
                                     size="20"
                                 >
                                     <v-icon dark>
-                                        mdi-heart-circle
+                                        $heartCircle
                                     </v-icon>
                                 </v-avatar>
                             </v-fade-transition>
@@ -46,7 +46,7 @@
                                         v-on="on"
                                     >
                                         <v-icon small>
-                                            mdi-briefcase-outline
+                                            $briefcase
                                         </v-icon>
                                     </v-btn>
                                 </template>
@@ -78,7 +78,7 @@
                                             v-bind="attrs"
                                             v-on="on"
                                         >
-                                            <v-icon small>mdi-video-outline</v-icon>
+                                            <v-icon small>$video</v-icon>
                                         </v-btn>
                                     </template>
                                     <span>Video On/Off</span>
@@ -95,7 +95,7 @@
                                         v-on="on"
                                     >
                                         <v-icon small>
-                                            mdi-layers-off
+                                            $layersOff
                                         </v-icon>
                                     </v-btn>
                                 </template>
@@ -114,7 +114,7 @@
                                             v-on="on"
                                         >
                                             <v-icon small>
-                                                mdi-text-box-check-outline
+                                                $textBoxCheck
                                             </v-icon>
                                         </v-btn>
                                     </template>
@@ -144,7 +144,7 @@
                                                 left
                                                 :disabled="showLoadWaypointsBtn"
                                             >
-                                                <v-icon dark class="mr-2">mdi-map-marker-path</v-icon>
+                                                <v-icon dark class="mr-2">$mapMarkerPath</v-icon>
                                                 Load
                                             </v-btn>
                                         </v-card-title>

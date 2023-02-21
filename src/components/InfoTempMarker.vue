@@ -227,7 +227,7 @@
                 </v-btn>
                 <v-spacer></v-spacer>
                 <v-btn text color="warning" fab dark @click="deleteTempMarker" outlined>
-                    <v-icon>mdi-delete</v-icon>
+                    <v-icon>$delete</v-icon>
                 </v-btn>
                 <v-spacer></v-spacer>
             </v-card-actions>
