@@ -3,13 +3,13 @@
         <v-row no-gutters align="center">
             <v-col cols="6" class="td-text-white text-left">
                 <span class="shadow_icon pl-1 text--white" :style="fontSize">
-                    <v-icon class="shadow_icon pr-0" :style="iconSize">mdi-speedometer</v-icon>
+                    <v-icon class="shadow_icon pr-0" :style="iconSize">$speedometer</v-icon>
                     {{ data.airSpeed }} m/s
                 </span>
             </v-col>
             <v-col cols="6" class="td-text-white text-right">
                 <span class="shadow_icon pr-2 text--white" :style="fontSize">
-                    <v-icon class="shadow_icon pr-0" :style="iconSize">mdi-altimeter</v-icon>
+                    <v-icon class="shadow_icon pr-0" :style="iconSize">$altimeter</v-icon>
                     {{ data.altitude }} m ({{ data.absolute_altitude }})
                 </span>
             </v-col>

@@ -3,7 +3,7 @@
         <v-row no-gutters align="center">
             <v-col cols="3" class="justify-start td-text-white text-left pt-2">
                 <span class="shadow_icon pl-1 text--white" :style="fontSize">
-                    <v-icon class="shadow_icon pr-0" :style="iconSize">mdi-map-marker-distance</v-icon>
+                    <v-icon class="shadow_icon pr-0" :style="iconSize">$mapMarkerDistance</v-icon>
                     {{ data.valueDistance }}
                 </span>
             </v-col>

@@ -3,7 +3,7 @@
         <v-snackbar v-model="snackbar" absolute top right color="success">
             <span>Action successful!</span>
             <v-icon dark right>
-                mdi-checkbox-marked-circle
+                $checkboxMarkedCircle
             </v-icon>
         </v-snackbar>
         <v-form ref="form" @submit.prevent="submit">

@@ -3,7 +3,7 @@
         <v-snackbar v-model="snackbar" absolute top right color="success">
             <span>Action successful!</span>
             <v-icon dark right>
-                mdi-checkbox-marked-circle
+                $checkboxMarkedCircle
             </v-icon>
         </v-snackbar>
         <v-form ref="form" @submit.prevent="submit">
@@ -54,7 +54,7 @@
                 </v-btn>
                 <v-spacer></v-spacer>
                 <v-btn text color="warning" fab dark @click="deleteMarker" outlined>
-                    <v-icon>mdi-delete</v-icon>
+                    <v-icon>$delete</v-icon>
                 </v-btn>
                 <v-spacer></v-spacer>
             </v-card-actions>

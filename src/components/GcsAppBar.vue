@@ -116,15 +116,15 @@
                             >
                                 <template v-slot:activator>
                                     <v-btn v-model="fab" color="blue darken-2" dark fab>
-                                        <v-icon v-if="fab">mdi-close</v-icon>
-                                        <v-icon v-else>mdi-card-bulleted-settings-outline</v-icon>
+                                        <v-icon v-if="fab">$close</v-icon>
+                                        <v-icon v-else>$cardBulletedSettingsOutline</v-icon>
                                     </v-btn>
                                 </template>
                                 <v-btn disabled fab dark small color="green">
-                                    <v-icon>mdi-pencil</v-icon>
+                                    <v-icon>$pencil</v-icon>
                                 </v-btn>
                                 <v-btn fab dark small color="indigo" @click.stop="add_dialog = true">
-                                    <v-icon>mdi-plus</v-icon>
+                                    <v-icon>$plus</v-icon>
                                 </v-btn>
                             </v-speed-dial>
 
@@ -203,12 +203,12 @@
                             </template>
                             <template v-slot:item.update="{ item }">
                                 <v-btn fab dark x-small color="green" @click.stop="updateProfile(item)">
-                                    <v-icon small>mdi-pencil</v-icon>
+                                    <v-icon small>$pencil</v-icon>
                                 </v-btn>
                             </template>
                             <template v-slot:item.del="{ item }">
                                 <v-btn fab dark x-small color="red" @click.stop="removeProfile(item)">
-                                    <v-icon small>mdi-delete</v-icon>
+                                    <v-icon small>$delete</v-icon>
                                 </v-btn>
                             </template>
                         </v-data-table>
@@ -216,7 +216,7 @@
                     <v-row no-gutters class="justify-end pb-3 pr-3">
                         <v-btn tile dark color="warning" elevation="5" class="font-weight-bold"
                                @click.stop="confirmSelected(false)">
-                            <v-icon left>mdi-ticket-confirmation-outline</v-icon>
+                            <v-icon left>$ticketConfirmationOutline</v-icon>
                             확인
                         </v-btn>
                     </v-row>

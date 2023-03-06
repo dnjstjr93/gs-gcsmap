@@ -161,7 +161,7 @@
                                                 @click.stop="saveWaypoints"
                                                 left
                                             >
-                                                <v-icon dark class="mr-2">mdi-download</v-icon>
+                                                <v-icon dark class="mr-2">$download</v-icon>
                                                 Save
                                             </v-btn>
                                             <v-spacer></v-spacer>
@@ -336,7 +336,7 @@
                                         v-on="on"
                                     >
                                         <v-icon small>
-                                            mdi-home
+                                            $home
                                         </v-icon>
                                     </v-btn>
                                 </template>
@@ -354,7 +354,7 @@
                                         v-on="on"
                                     >
                                         <v-icon small>
-                                            mdi-arrow-down-left-bold
+                                            $arrowDownLeftBold
                                         </v-icon>
                                     </v-btn>
                                 </template>
@@ -373,7 +373,7 @@
                                         v-on="on"
                                     >
                                         <v-icon small>
-                                            mdi-close-octagon-outline
+                                            $closeOctagonOutline
                                         </v-icon>
                                     </v-btn>
                                 </template>
@@ -392,7 +392,7 @@
                                         v-on="on"
                                     >
                                         <v-icon small>
-                                            mdi-radiobox-blank
+                                            $radioboxBlank
                                         </v-icon>
                                     </v-btn>
                                 </template>
@@ -410,7 +410,7 @@
                                         v-on="on"
                                     >
                                         <v-icon small>
-                                            mdi-rotate-orbit
+                                            $rotateOrbit
                                         </v-icon>
                                     </v-btn>
                                 </template>
@@ -433,7 +433,7 @@
                                         <v-spacer/>
                                         <v-col cols="2" class="text-center">
                                             <v-icon>
-                                                mdi-rotate-orbit
+                                                $rotateOrbit
                                             </v-icon>
                                         </v-col>
                                         <v-spacer/>
@@ -696,7 +696,7 @@
                                                 label outlined class="ma-0 pa-0 mx-1 px-1"
                                             >
                                                 {{ String(i) }}
-                                                <v-icon :color="evalAltColor[i]" class="ml-1">mdi-altimeter</v-icon>
+                                                <v-icon :color="evalAltColor[i]" class="ml-1">$altimeter</v-icon>
                                             </v-chip>
                                         </draggable>
                                     </v-chip-group>
@@ -995,9 +995,9 @@ export default {
             selectedItem: -1,
             colorSelectedNumber: 'deep-orange darken-4',
             positions: [
-                {type: 'Circle', text: '37.0000000:127.0000000:100.0:100.0:5', icon: 'mdi-google-circles-group'},
-                {type: 'Goto', text: '37.0000000:127.0000000:100.0', icon: 'mdi-logout-variant'},
-                {type: 'Survey', text: '37.0000000:127.0000000:100.0', icon: 'mdi-logout-variant'},
+                {type: 'Circle', text: '37.0000000:127.0000000:100.0:100.0:5', icon: this.$googleCirclesGroup},
+                {type: 'Goto', text: '37.0000000:127.0000000:100.0', icon: this.$logoutVariant},
+                {type: 'Survey', text: '37.0000000:127.0000000:100.0', icon: this.$logoutVariant},
             ],
             absolute: true,
             opacity: 0.8,
@@ -1012,105 +1012,105 @@ export default {
 
             // colorArming: this.$store.state.drone_infos[this.name].color + ' darken-4',
             colorArming: 'white',
-            iconDistance: 'mdi-map-marker-distance',
+            iconDistance: this.$mdiMapMarkerDistance,
             valueDistance: 0,
             flightTimeCount: 0,
             flightTimer: null,
-            iconFlightElapsed: 'mdi-timer-off-outline',
+            iconFlightElapsed: this.$timerOffOutline,
             flightElapsedTime: '00:00',
-            iconBattery: 'mdi-battery-off-outline',
+            iconBattery: this.$batteryOffOutline,
             colorBattery: '#9E9E9E',
             infos1: [
                 {
                     name: 'Bat',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Lat',
-                    icon: "mdi-latitude",
+                    icon: this.$latitude,
                     values: 159,
                 },
                 {
                     name: 'Lon',
-                    icon: "mdi-longitude",
+                    icon: this.$longitude,
                     values: 159,
                 },
                 {
                     name: 'Alt',
-                    icon: "mdi-altimeter",
+                    icon: this.$altimeter,
                     values: 159,
                 },
                 {
                     name: 'Ba5',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat6',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat7',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat8',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat9',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
             ],
             infos2: [
                 {
                     name: 'LTE',
-                    icon: "mdi-network-strength-4",
+                    icon: this.$networkStrength4,
                     values: 159,
                 },
                 {
                     name: 'FTime',
-                    icon: "mdi-latitude",
+                    icon: this.$latitude,
                     values: 159,
                 },
                 {
                     name: 'Lon',
-                    icon: "mdi-longitude",
+                    icon: this.$longitude,
                     values: 159,
                 },
                 {
                     name: 'Alt',
-                    icon: "mdi-altimeter",
+                    icon: this.$altimeter,
                     values: 159,
                 },
                 {
                     name: 'Ba5',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat6',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat7',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat8',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat9',
-                    icon: "mdi-battery-high",
+                    icon: this.$batteryHigh,
                     values: 159,
                 },
             ],
@@ -1122,7 +1122,7 @@ export default {
 
             curLteVal: -80,
             colorLteVal: '#9E9E9E',
-            iconLte: 'mdi-network-strength-off-outline',
+            iconLte: this.$networkStrengthOffOutline,
 
             roll: 0,
             arrRoll: [],
@@ -1297,11 +1297,11 @@ export default {
                 rssi: 0,
                 colorLteVal: '#9E9E9E',
                 curLteVal: 0,
-                iconLte: 'mdi-network-strength-off-outline',
+                iconLte: this.$networkStrengthOffOutline,
                 colorBattery: '#9E9E9E',
-                iconBattery: 'mdi-battery-off-outline',
+                iconBattery: this.$batteryOffOutline,
                 voltageBattery: 0,
-                iconFlightElapsed: 'mdi-timer-off-outline',
+                iconFlightElapsed: this.$timerOffOutline,
                 flightElapsedTime: '00:00',
                 valueDistance: '0 m',
                 wpYawBehavior: 'YAW-0',
@@ -1369,7 +1369,7 @@ export default {
                                     newData[dName][pIndex].targetMavCmd + ':' +
                                     newData[dName][pIndex].targetStayTime + ':' +
                                     newData[dName][pIndex].elevation;
-                                goto_pos.icon = 'mdi-logout-variant';
+                                goto_pos.icon = this.$logoutVariant;
 
                                 let diffAlt = newData[dName][pIndex].alt - newData[dName][pIndex].elevation;
                                 if(diffAlt > 5) {
@@ -2288,19 +2288,19 @@ export default {
                                             payload = null;
 
                                             if (0 > this.curLteVal && this.curLteVal >= -80) {
-                                                this.iconLte = 'mdi-network-strength-4';
+                                                this.iconLte = this.$networkStrength4;
                                                 this.colorLteVal = '#1E88E5';
                                             }
                                             else if (-80 > this.curLteVal && this.curLteVal >= -90) {
-                                                this.iconLte = 'mdi-network-strength-3';
+                                                this.iconLte = this.$networkStrength3;
                                                 this.colorLteVal = '#76FF03';
                                             }
                                             else if (-90 > this.curLteVal && this.curLteVal >= -100) {
-                                                this.iconLte = 'mdi-network-strength-2';
+                                                this.iconLte = this.$networkStrength2;
                                                 this.colorLteVal = '#FFFF00';
                                             }
                                             else {
-                                                this.iconLte = 'mdi-network-strength-1';
+                                                this.iconLte = this.$networkStrength1;
                                                 this.colorLteVal = '#FF3D00';
                                             }
 
@@ -2315,7 +2315,7 @@ export default {
                                             this.lteTimeoutObj = setTimeout(() => {
                                                 this.lteTimeoutObj = null;
                                                 this.colorLteVal = '#9E9E9E';
-                                                this.iconLte = 'mdi-network-strength-off-outline';
+                                                this.iconLte = this.$networkStrengthOffOutline;
                                             }, 5500);
                                         }
                                     }
@@ -2335,19 +2335,19 @@ export default {
                     // console.log(this.curLteVal);
 
                     if (0 > this.curLteVal && this.curLteVal >= -80) {
-                        this.iconLte = 'mdi-network-strength-4';
+                        this.iconLte = this.$networkStrength4;
                         this.colorLteVal = '#1E88E5';
                     }
                     else if (-80 > this.curLteVal && this.curLteVal >= -90) {
-                        this.iconLte = 'mdi-network-strength-3';
+                        this.iconLte = this.$networkStrength3;
                         this.colorLteVal = '#76FF03';
                     }
                     else if (-90 > this.curLteVal && this.curLteVal >= -100) {
-                        this.iconLte = 'mdi-network-strength-2';
+                        this.iconLte = this.$networkStrength2;
                         this.colorLteVal = '#FFFF00';
                     }
                     else {
-                        this.iconLte = 'mdi-network-strength-1';
+                        this.iconLte = this.$networkStrength1;
                         this.colorLteVal = '#FF3D00';
                     }
 
@@ -2362,7 +2362,7 @@ export default {
                     this.lteTimeoutObj = setTimeout(() => {
                         this.lteTimeoutObj = null;
                         this.colorLteVal = '#9E9E9E';
-                        this.iconLte = 'mdi-network-strength-off-outline';
+                        this.iconLte = this.$networkStrengthOffOutline;
                     }, 5500);
                 }
             }
@@ -2685,9 +2685,9 @@ export default {
                     }
 
                     this.colorArming = 'white';
-                    this.iconDistance = 'mdi-map-marker-distance';
+                    this.iconDistance = this.$mapMapMarkerDistance;
 
-                    this.iconBattery = 'mdi-battery-off-outline';
+                    this.iconBattery = this.$batteryOffOutline;
                     this.colorBattery = '#9E9E9E';
 
                     this.info.iconBattery = this.iconBattery;
@@ -4168,23 +4168,23 @@ export default {
 
         checkLteValRsrp(_curLteVal) {
             this.colorLteVal = '#9E9E9E';
-            this.iconLte = 'mdi-network-strength-off-outline';
+            this.iconLte = this.$networkStrengthOffOutline;
 
             if (0 > _curLteVal && _curLteVal >= -80) {
-                this.iconLte = 'mdi-network-strength-4';
+                this.iconLte = this.$networkStrength4;
                 this.colorLteVal = 'blue';
 
             }
             else if (-80 > _curLteVal && _curLteVal >= -90) {
-                this.iconLte = 'mdi-network-strength-3';
+                this.iconLte = this.$networkStrength3;
                 this.colorLteVal = '#76FF03';
             }
             else if (-90 > _curLteVal && _curLteVal >= -100) {
-                this.iconLte = 'mdi-network-strength-2';
+                this.iconLte = this.$networkStrength2;
                 this.colorLteVal = 'yellow';
             }
             else if (-10 > _curLteVal) {
-                this.iconLte = 'mdi-network-strength-1';
+                this.iconLte = this.$networkStrength1;
                 this.colorLteVal = 'red';
             }
 
@@ -4195,11 +4195,11 @@ export default {
             this.lteTimeoutObj = setTimeout(() => {
                 this.lteTimeoutObj = null;
                 this.colorLteVal = '#9E9E9E';
-                this.iconLte = 'mdi-network-strength-off-outline';
+                this.iconLte = this.$networkStrengthOffOutline;
             }, 2500);
         },
         startFlightTimer: function () {
-            this.iconFlightElapsed = 'mdi-timer-outline';
+            this.iconFlightElapsed = this.$timerOutline;
             if (this.flightTimer) {
                 clearInterval(this.flightTimer);
                 this.flightTimer = null;
@@ -4221,7 +4221,7 @@ export default {
         },
         stopFlightTimer: function () {
             clearInterval(this.flightTimer);
-            this.iconFlightElapsed = 'mdi-timer-off-outline';
+            this.iconFlightElapsed = this.$timerOffOutline;
             this.flightTimer = null;
 
             this.info.iconFlightElapsed = this.iconFlightElapsed;
@@ -4450,15 +4450,15 @@ export default {
                     this.ss.voltage_battery = Buffer.from(voltage_battery, 'hex').readUInt16LE(0);
 
                     if (this.mid_v < this.ss.voltage_battery) {
-                        this.iconBattery = 'mdi-battery-high';
+                        this.iconBattery = this.$batteryHigh;
                         this.colorBattery = '#76FF03';
                     }
                     else if (this.min_v < this.ss.voltage_battery && this.ss.voltage_battery <= this.mid_v) {
-                        this.iconBattery = 'mdi-battery-medium';
+                        this.iconBattery = this.$batteryMedium;
                         this.colorBattery = '#FFFF00';
                     }
                     else {
-                        this.iconBattery = 'mdi-battery-low';
+                        this.iconBattery = this.$batteryLow;
                         this.colorBattery = '#FF3D00';
                     }
 
@@ -6973,7 +6973,7 @@ export default {
                     let goto_pos = {};
                     goto_pos.type = 'Goto';
                     goto_pos.text = str;
-                    goto_pos.icon = 'mdi-logout-variant';
+                    goto_pos.icon = this.$logoutVariant;
                     this.positions.push(goto_pos);
                     goto_pos = null;
                 }

@@ -20,10 +20,8 @@
         </div>
 
         <div class="info_position" :style="{top: (hud_gap*2)+'px', left: 0}">
-            <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-satellite-variant
-            </v-icon>
-            <span class="shadow_icon px-1 text--white"
-                  :style="{color: 'white'}">{{ num_satellites }} </span>
+            <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">$satelliteVariant</v-icon>
+            <span class="shadow_icon px-1 text--white" :style="{color: 'white'}">{{ num_satellites }} </span>
         </div>
 
         <div class="info_position" :style="{top: (hud_gap*3)+'px', left: 0}">
@@ -37,7 +35,7 @@
         </div>
 
         <div class="info_position" :style="{top: (hud_gap*4)+'px', left: 0}">
-            <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-access-point</v-icon>
+            <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">$accessPoint</v-icon>
             <span class="shadow_icon px-1" :style="{color: 'white'}">{{ rssi }}</span>
         </div>
 
@@ -71,12 +69,12 @@
         </div>
 
         <div class="info_position" :style="{top: (hud_gap*3)+'px', left: (myWidth-110)+'px'}">
-            <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-altimeter</v-icon>
+            <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">$altimeter</v-icon>
             <span class="shadow_icon px-1" :style="{color: 'white'}">{{ curRelativeAlt }} m</span>
         </div>
 
         <div class="info_position" :style="{top: (hud_gap*4)+'px', left: (myWidth-110)+'px'}">
-            <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-speedometer</v-icon>
+            <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">$speedometer</v-icon>
             <span class="shadow_icon px-1" :style="{color: 'white'}">{{ airspeed }} m/s</span>
         </div>
 

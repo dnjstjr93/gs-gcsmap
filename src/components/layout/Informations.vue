@@ -5,13 +5,13 @@
             <v-row no-gutters align="center">
                 <v-col cols="2" class="td-text-white text-left">
                     <span class="shadow_icon pl-1 text--white" :style="fontSize">
-                        <v-icon class="shadow_icon pr-1" :style="iconSize">mdi-satellite-variant</v-icon>
+                        <v-icon class="shadow_icon pr-1" :style="iconSize">$satelliteVariant</v-icon>
                         {{ data.num_satellites }}
                     </span>
                 </v-col>
                 <v-col cols="2" class="text-left">
                     <span class="shadow_icon pl-1" :style="fontSize">
-                        <v-icon class="shadow_icon pr-1" :style="iconSize">mdi-access-point</v-icon>
+                        <v-icon class="shadow_icon pr-1" :style="iconSize">$accessPoint</v-icon>
                         {{ data.rssi }}
                     </span>
                 </v-col>
