@@ -2990,7 +2990,7 @@ export default {
                         return status < 500;
                     }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
                     headers: {
-                        // 'Access-Control-Allow-Origin': true,
+                        'Access-Control-Allow-Origin': '*',
                     },
                 });
                 console.log('getElevationProfile', response.status, response.data);

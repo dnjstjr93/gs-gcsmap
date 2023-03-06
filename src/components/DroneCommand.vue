@@ -1107,7 +1107,7 @@ export default {
 
     data() {
         return {
-            myChart: null,
+            myChart: {},
 
             drawRadiusUpdateTimer: null,
 
@@ -2075,89 +2075,87 @@ export default {
 
             console.log('fillGoToElevationData', dName)
 
-            if(this.$store.state.drone_infos[dName].updatedTempElePathFlag) {
-                if (this.myChart) {
-                    this.myChart.destroy();
-                }
-
-                let unitVal = parseInt(this.$store.state.drone_infos[dName].targetDistance / this.$store.state.SAMPLES);
-                console.log('unitVal', unitVal);
-                let labels = [0];
-                let dist = 0;
-                for (let i = 1; i < this.$store.state.SAMPLES; i++) {
-                    dist += unitVal;
-                    labels.push(dist);
-                }
-
-                let arrCurAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.$store.state.drone_infos[dName].absolute_alt));
-
-                let diff = this.$store.state.drone_infos[dName].absolute_alt - this.$store.state.drone_infos[dName].alt;
-                let arrFlyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(diff) + parseInt(this.$store.state.drone_infos[dName].targetAlt));
-
-                console.log('arrFlyAlt - ', this.$store.state.drone_infos[dName].absolute_alt, this.$store.state.drone_infos[dName].alt, arrFlyAlt);
-
-                const ctx = document.getElementById('elevation-chart-' + dName).getContext('2d', { willReadFrequently: true });
-                let config = {
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                type: 'bar',
-                                data: this.$store.state.drone_infos[dName].elevations,
-                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
-                                // aaa: [
-                                //     //색상
-                                //     'rgba(255, 99, 132, 0.2)',
-                                //     'rgba(54, 162, 235, 0.2)',
-                                //     'rgba(255, 206, 86, 0.2)',
-                                //     'rgba(75, 192, 192, 0.2)',
-                                //     'rgba(153, 102, 255, 0.2)',
-                                //     'rgba(255, 159, 64, 0.2)'
-                                // ],
-                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
-                                // [
-                                //     //경계선 색상
-                                //     'rgba(255, 99, 132, 1)',
-                                //     'rgba(54, 162, 235, 1)',
-                                //     'rgba(255, 206, 86, 1)',
-                                //     'rgba(75, 192, 192, 1)',
-                                //     'rgba(153, 102, 255, 1)',
-                                //     'rgba(255, 159, 64, 1)'
-                                // ],
-                                borderWidth: 1
-                            },
-                            {
-                                type: 'line',
-                                label: '비행고도',
-                                data: arrFlyAlt,
-                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 0.2)'),
-                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 1)'),
-                            },
-                            {
-                                type: 'line',
-                                label: '드론고도',
-                                data: arrCurAlt,
-                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 0.2)'),
-                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 1)'),
-                            },
-                        ],
-                    },
-                    options: {
-                        scales: {
-                            y: {beginAtZero: true},
-                            x: {
-                                ticks: {
-                                    display: false //this will remove only the label
-                                }
-                            },
-                        },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                    }
-                };
-
-                this.myChart = new Chart(ctx, config);
+            if (Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                this.myChart[dName].destroy();
             }
+
+            let unitVal = parseInt(this.$store.state.drone_infos[dName].targetDistance / this.$store.state.SAMPLES);
+            console.log('unitVal', unitVal);
+            let labels = [0];
+            let dist = 0;
+            for (let i = 1; i < this.$store.state.SAMPLES; i++) {
+                dist += unitVal;
+                labels.push(dist);
+            }
+
+            let arrCurAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.$store.state.drone_infos[dName].absolute_alt));
+
+            let diff = this.$store.state.drone_infos[dName].absolute_alt - this.$store.state.drone_infos[dName].alt;
+            let arrFlyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(diff) + parseInt(this.$store.state.drone_infos[dName].targetAlt));
+
+            console.log('arrFlyAlt - ', this.$store.state.drone_infos[dName].absolute_alt, this.$store.state.drone_infos[dName].alt, arrFlyAlt);
+
+            const ctx = document.getElementById('elevation-chart-' + dName).getContext('2d', { willReadFrequently: true });
+            let config = {
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            data: this.$store.state.drone_infos[dName].elevations,
+                            backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
+                            // aaa: [
+                            //     //색상
+                            //     'rgba(255, 99, 132, 0.2)',
+                            //     'rgba(54, 162, 235, 0.2)',
+                            //     'rgba(255, 206, 86, 0.2)',
+                            //     'rgba(75, 192, 192, 0.2)',
+                            //     'rgba(153, 102, 255, 0.2)',
+                            //     'rgba(255, 159, 64, 0.2)'
+                            // ],
+                            borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
+                            // [
+                            //     //경계선 색상
+                            //     'rgba(255, 99, 132, 1)',
+                            //     'rgba(54, 162, 235, 1)',
+                            //     'rgba(255, 206, 86, 1)',
+                            //     'rgba(75, 192, 192, 1)',
+                            //     'rgba(153, 102, 255, 1)',
+                            //     'rgba(255, 159, 64, 1)'
+                            // ],
+                            borderWidth: 1
+                        },
+                        {
+                            type: 'line',
+                            label: '비행고도',
+                            data: arrFlyAlt,
+                            backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 0.2)'),
+                            borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 1)'),
+                        },
+                        {
+                            type: 'line',
+                            label: '드론고도',
+                            data: arrCurAlt,
+                            backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 0.2)'),
+                            borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 1)'),
+                        },
+                    ],
+                },
+                options: {
+                    scales: {
+                        y: {beginAtZero: true},
+                        x: {
+                            ticks: {
+                                display: false //this will remove only the label
+                            }
+                        },
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                }
+            };
+
+            this.myChart[dName] = new Chart(ctx, config);
         },
     },
 
@@ -2183,14 +2181,27 @@ export default {
         EventBus.$on('update-fill-goto-evevation-data', (dName) => {
             if (this.$store.state.currentCommandTab === '이동') {
                 setTimeout((dName) => {
-                    this.fillGoToElevationData(dName);
+                    if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                        this.myChart[dName].update();
+                    }
+                    else {
+                        this.fillGoToElevationData(dName);
+                    }
                 }, 10, dName);
             }
         });
     },
 
     beforeDestroy() {
-        this.myChart.destroy();
+        for (let dName in this.$store.state.drone_infos) {
+            if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                        this.myChart.destroy();
+                    }
+                }
+            }
+        }
 
         EventBus.$off('update-fill-goto-evevation-data');
     }

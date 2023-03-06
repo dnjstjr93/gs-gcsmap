@@ -432,6 +432,8 @@
 
                 disableTargetSelectIndex: false,
                 disableTargetSelect: false,
+
+                labels: [0],
             }
         },
 
@@ -473,20 +475,20 @@
         },
 
         methods: {
-            fillElevationData() {
-                if(this.myChart) {
-                    this.myChart.destroy();
-                }
-
-                //console.log(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations);
-
+            initLabels() {
                 let unitVal = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist / this.$store.state.SAMPLES);
                 console.log('unitVal', unitVal);
-                let labels = [0];
+                this.labels = [0];
                 let dist = 0;
                 for(let i = 1; i < this.$store.state.SAMPLES; i++) {
                     dist += unitVal;
-                    labels.push(dist);
+                    this.labels.push(dist);
+                }
+            },
+
+            fillElevationData() {
+                if(this.myChart) {
+                    this.myChart.destroy();
                 }
 
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt));
@@ -496,31 +498,13 @@
                 const ctx = document.getElementById('elevation-chart-'+this.markerName).getContext('2d', { willReadFrequently: true });
                 let config = {
                     data: {
-                        labels: labels,
+                        labels: this.labels,
                         datasets: [
                             {
                                 type: 'bar',
                                 data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations,
                                 backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
-                                // aaa: [
-                                //     //색상
-                                //     'rgba(255, 99, 132, 0.2)',
-                                //     'rgba(54, 162, 235, 0.2)',
-                                //     'rgba(255, 206, 86, 0.2)',
-                                //     'rgba(75, 192, 192, 0.2)',
-                                //     'rgba(153, 102, 255, 0.2)',
-                                //     'rgba(255, 159, 64, 0.2)'
-                                // ],
                                 borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
-                                // [
-                                //     //경계선 색상
-                                //     'rgba(255, 99, 132, 1)',
-                                //     'rgba(54, 162, 235, 1)',
-                                //     'rgba(255, 206, 86, 1)',
-                                //     'rgba(75, 192, 192, 1)',
-                                //     'rgba(153, 102, 255, 1)',
-                                //     'rgba(255, 159, 64, 1)'
-                                // ],
                                 borderWidth: 1
                             },
                             {
@@ -1063,14 +1047,18 @@
 
             console.log('InfoSurveyMarker', this.$store.state.surveyMarkers[this.markerName]);
 
+            this.initLabels();
+
+            this.fillElevationData();
+
             EventBus.$on('on-update-info-survey-marker', () => {
                 this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
                 this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
                 this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
 
-                this.fillElevationData();
-
-                //this.$forceUpdate();
+                if(this.myChart) {
+                    this.myChart.update();
+                }
             });
         },
 
