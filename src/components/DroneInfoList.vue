@@ -72,7 +72,7 @@
         </v-row>
         <v-row no-gutters class="command_tab">
             <v-col cols="12" sm="6" md="9">
-                <v-card flat tile color="#E8F5E9">
+                <v-card v-if="$store.state.drone_command_prepared" flat tile color="#E8F5E9">
                     <DroneCommand></DroneCommand>
                 </v-card>
             </v-col>

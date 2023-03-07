@@ -5,7 +5,6 @@
         :style="{top:(context_top+3)+'px', left:(context_left+22)+'px', width: ($store.state.command_tab_max_width-80)+'px'}"
     >
         <v-tabs
-            v-if="$store.state.drone_command_prepared"
             class="font-weight-medium"
             background-color="blue-grey darken-4"
             dark center-active show-arrows
@@ -1577,6 +1576,19 @@ export default {
                 //     }
                 // }
                 // console.log(this.$store.state.currentCommandTab);
+
+                setTimeout(() => {
+                    for (let dName in this.$store.state.drone_infos) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                                if(!Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                                    this.fillGoToElevationData(dName);
+                                    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart);
+                                }
+                            }
+                        }
+                    }
+                }, 200);
             }
             else if(this.$store.state.currentCommandTab === '선회') {
                 console.log(this.$store.state.currentCommandTab);
@@ -2181,15 +2193,26 @@ export default {
         EventBus.$on('update-fill-goto-evevation-data', (dName) => {
             if (this.$store.state.currentCommandTab === '이동') {
                 setTimeout((dName) => {
+                    console.log('update-fill-goto-evevation-data', dName, this.myChart);
                     if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
                         this.myChart[dName].update();
-                    }
-                    else {
-                        this.fillGoToElevationData(dName);
                     }
                 }, 10, dName);
             }
         });
+
+        if (this.$store.state.currentCommandTab === '이동') {
+            for (let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        if (!Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                            this.fillGoToElevationData(dName);
+                            console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart[dName]);
+                        }
+                    }
+                }
+            }
+        }
     },
 
     beforeDestroy() {
@@ -2197,7 +2220,8 @@ export default {
             if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                 if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                     if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
-                        this.myChart.destroy();
+                        this.myChart[dName].destroy();
+                        console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'this.myChart[dName].destroy()');
                     }
                 }
             }

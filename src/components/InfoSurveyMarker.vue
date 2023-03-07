@@ -349,7 +349,7 @@
                 <v-row align="center" justify="center">
                     <v-col cols="12">
                         <v-card :style="{color:'white'}" outlined tile flat>
-                            <canvas :id="'elevation-chart-'+markerName" :height="120+'px'"></canvas>
+                            <canvas :id="'elevation-chart-'+markerName" :height="160+'px'"></canvas>
                         </v-card>
                     </v-col>
                 </v-row>
@@ -376,8 +376,8 @@
 <script>
     import EventBus from "@/EventBus";
     import axios from "axios";
-    import {Chart, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement } from 'chart.js'; //👈 Chart 모듈 임포트
-    Chart.register(BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement); // 👈 chart.js 모듈 Chart 모듈에 등록
+    import {Chart, Tooltip, Legend, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement } from 'chart.js';
+    Chart.register(Tooltip, Legend, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement); // 👈 chart.js 모듈 Chart 모듈에 등록
 
     export default {
         myChart: null,
@@ -434,6 +434,7 @@
                 disableTargetSelect: false,
 
                 labels: [0],
+                flyAlt: [],
             }
         },
 
@@ -502,6 +503,7 @@
                         datasets: [
                             {
                                 type: 'bar',
+                                label: '지형',
                                 data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations,
                                 backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
                                 borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
@@ -510,7 +512,7 @@
                             {
                                 type: 'line',
                                 label: '비행고도',
-                                data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt,
+                                data: this.flyAlt,
                                 backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 0.2)'),
                                 borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 1)'),
                             },
@@ -520,6 +522,7 @@
                                 data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt,
                                 backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 0.2)'),
                                 borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 1)'),
+                                hidden: (this.wayOfSurvey === 'forSearch'),
                             },
                             {
                                 type: 'line',
@@ -563,6 +566,34 @@
                     this.postCinSurveyMarkerInfoToMobius(dName);
 
                 }, 500, this.markerName);
+
+                if(this.wayOfSurvey === 'forShooting') {
+                    this.calcShootingFlyAlt();
+
+                    let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, this.paramAlt, this.paramSpeed);
+                    this.paramGap = parseInt(result.interval_l * (this.paramSensorW / this.paramSensorH));
+
+                    this.paramPeriod = parseInt(result.interval_t);
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = this.paramPeriod;
+
+                    console.log('촬영주기: ', this.paramPeriod, '초, ', '간격: ', +this.paramGap + 'm');
+
+                    this.changeGapSurveyPath(this.paramGap);
+                }
+                else {
+                    this.calcSearchFlyAlt();
+
+                    this.changeGapSurveyPath(this.paramGap);
+                }
+
+                if(this.myChart) {
+                    for(let i = 0; i < this.myChart.data.datasets.length; i++) {
+                        if(this.myChart.data.datasets[i].label === '옵셋고도') {
+                            this.myChart.data.datasets[i].hidden = (this.wayOfSurvey === 'forSearch');
+                        }
+                    }
+                    this.myChart.update();
+                }
             },
 
             calcFactorSurvey(focal, sensor_h, overlap, alt, speed) {
@@ -570,6 +601,47 @@
                 let interval_l = interval_t * speed;
 
                 return({'interval_t': interval_t, 'interval_l': interval_l});
+            },
+
+            calcShootingFlyAlt() {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
+
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
+                if(this.flyAltType === '상대고도') {
+                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                        this.flyAlt[i] = parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt[i] = parseInt(this.paramOffsetAlt);
+                    }
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
+                }
+                else {
+                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                        this.flyAlt[i] = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt);
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
+                            parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
+                        );
+                    }
+                }
+            },
+
+            calcSearchFlyAlt() {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt);
+
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
+                if(this.flyAltType === '상대고도') {
+                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                        this.flyAlt[i] = parseInt(this.paramAlt);
+                    }
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramAlt));
+                }
+                else {
+                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                        this.flyAlt[i] = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt);
+                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
+                            parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
+                        );
+                    }
+                }
             },
 
             changeParamShooting(val, factor) {
@@ -594,40 +666,20 @@
                         this.paramAlt = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt = val;
 
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
+                        this.calcShootingFlyAlt();
 
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = [];
-                        if(this.flyAltType === '상대고도') {
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramOffsetAlt));
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
-                        }
-                        else {
-                            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
-                                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
-                                    parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
-                                );
-                            }
+                        if(this.myChart) {
+                            this.myChart.update();
                         }
                     }
                     else if (factor === 'paramOffsetAlt') {
                         this.paramOffsetAlt = val;
                         this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramOffsetAlt = val;
 
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
+                        this.calcShootingFlyAlt();
 
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = [];
-                        if(this.flyAltType === '상대고도') {
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramOffsetAlt));
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
-                        }
-                        else {
-                            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
-                                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
-                                    parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
-                                );
-                            }
+                        if(this.myChart) {
+                            this.myChart.update();
                         }
                     }
                     else if (factor === 'Speed') {
@@ -654,18 +706,10 @@
                 if(val !== '') {
                     if (factor === 'paramAlt') {
                         this.paramAlt = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = val;
+                        this.calcSearchFlyAlt();
 
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
-                        if(this.flyAltType === '상대고도') {
-                            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramAlt));
-                        }
-                        else {
-                            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
-                                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
-                                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i] + parseInt(this.paramAlt)
-                                );
-                            }
+                        if(this.myChart) {
+                            this.myChart.update();
                         }
 
                         this.changeGapSurveyPath(this.paramGap);
@@ -1046,6 +1090,10 @@
             this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
 
             console.log('InfoSurveyMarker', this.$store.state.surveyMarkers[this.markerName]);
+
+            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                this.flyAlt.push(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt[i]);
+            }
 
             this.initLabels();
 
