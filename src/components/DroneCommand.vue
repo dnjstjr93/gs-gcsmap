@@ -1382,7 +1382,16 @@ export default {
     methods: {
         changeTargetAlt(alt, dName) {
             this.$store.state.drone_infos[dName].targetAlt = parseInt(alt);
-            this.fillGoToElevationData(dName);
+            if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                for(let i = 0; i < this.myChart[dName].data.datasets.length; i++) {
+                    if(this.myChart[dName].data.datasets[i].label === '비행고도(절대고도)') {
+                        let diff = this.$store.state.drone_infos[dName].absolute_alt - this.$store.state.drone_infos[dName].alt;
+                        this.myChart[dName].data.datasets[i].data = Array(this.$store.state.SAMPLES).fill(parseInt(diff) + parseInt(this.$store.state.drone_infos[dName].targetAlt));
+                    }
+                }
+
+                this.myChart[dName].update();
+            }
         },
 
         setPoint(point) {
@@ -2100,7 +2109,7 @@ export default {
                 labels.push(dist);
             }
 
-            let arrCurAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.$store.state.drone_infos[dName].absolute_alt));
+            // let arrCurAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.$store.state.drone_infos[dName].absolute_alt));
 
             let diff = this.$store.state.drone_infos[dName].absolute_alt - this.$store.state.drone_infos[dName].alt;
             let arrFlyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(diff) + parseInt(this.$store.state.drone_infos[dName].targetAlt));
@@ -2114,42 +2123,18 @@ export default {
                     datasets: [
                         {
                             type: 'bar',
+                            label: '지형고도',
                             data: this.$store.state.drone_infos[dName].elevations,
                             backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
-                            // aaa: [
-                            //     //색상
-                            //     'rgba(255, 99, 132, 0.2)',
-                            //     'rgba(54, 162, 235, 0.2)',
-                            //     'rgba(255, 206, 86, 0.2)',
-                            //     'rgba(75, 192, 192, 0.2)',
-                            //     'rgba(153, 102, 255, 0.2)',
-                            //     'rgba(255, 159, 64, 0.2)'
-                            // ],
                             borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
-                            // [
-                            //     //경계선 색상
-                            //     'rgba(255, 99, 132, 1)',
-                            //     'rgba(54, 162, 235, 1)',
-                            //     'rgba(255, 206, 86, 1)',
-                            //     'rgba(75, 192, 192, 1)',
-                            //     'rgba(153, 102, 255, 1)',
-                            //     'rgba(255, 159, 64, 1)'
-                            // ],
                             borderWidth: 1
                         },
                         {
                             type: 'line',
-                            label: '비행고도',
+                            label: '비행고도(절대고도)',
                             data: arrFlyAlt,
                             backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 0.2)'),
                             borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 1)'),
-                        },
-                        {
-                            type: 'line',
-                            label: '드론고도',
-                            data: arrCurAlt,
-                            backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 0.2)'),
-                            borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 1)'),
                         },
                     ],
                 },
