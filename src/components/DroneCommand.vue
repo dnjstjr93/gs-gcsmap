@@ -2191,7 +2191,7 @@ export default {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         if (!Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
-                            this.fillGoToElevationData(dName);
+                            //this.fillGoToElevationData(dName);
                             console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart[dName]);
                         }
                     }

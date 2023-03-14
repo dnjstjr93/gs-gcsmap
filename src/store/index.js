@@ -24,6 +24,7 @@ Vue.use(Vuex)
 
 import { faMapMarkerAlt, faMapPin, faFlag, faPlaneSlash, faHourglassHalf } from "@fortawesome/free-solid-svg-icons";
 import { faLocationArrow } from "@fortawesome/free-solid-svg-icons";
+import { faGamepad } from "@fortawesome/free-solid-svg-icons";
 //import { faQuestionCircle } from "@fortawesome/free-solid-svg-icons";
 
 const _defaultPosition = Object(
@@ -418,6 +419,7 @@ export default new Vuex.Store({
         // iconSourceDrone: droneSvgPath,
         iconSourceDrone: faLocationArrow,
         iconSourceDroneHome: faFlag, //faMapMarkerAlt,
+        iconSourceGamepad: faGamepad,
 
         MOBIUS_CONNECTION: {
             connected: false,
