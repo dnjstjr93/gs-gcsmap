@@ -2050,13 +2050,13 @@ export default {
                                     'Content-Type': 'application/json;ty=4'
                                 },
                             }).then(
-                                function (res) {
+                                (res) => {
 
                                     console.log('addOlTempMarker-MarkerInfos-' + dName, res.status, res.data['m2m:cin']);
 
                                 }
                             ).catch(
-                                function (err) {
+                                (err) => {
                                     console.log(err.message);
                                 }
                             );
@@ -2100,7 +2100,6 @@ export default {
                             }
 
                             feature.setProperties({ctrlKey: false});
-
                         }
                     }
                 });
@@ -2318,7 +2317,7 @@ export default {
                 svgTempObj.svg.path._attributes['stroke-width'] = '15';
             }
 
-            let xmlSvgDroneMarker = convert.js2xml(svgTempObj, {
+            let xmlSvgTempMarker = convert.js2xml(svgTempObj, {
                 compact: true,
                 ignoreComment: true,
                 spaces: 4
@@ -2326,7 +2325,7 @@ export default {
 
             let tempIcon = new Icon({
                 opacity: 1,
-                src: 'data:image/svg+xml;utf8,' + xmlSvgDroneMarker,
+                src: 'data:image/svg+xml;utf8,' + xmlSvgTempMarker,
                 scale: svgTempScale,
                 anchor: [0.5, 1],
             });
@@ -3206,19 +3205,19 @@ export default {
             let url = 'http://172.20.0.102/api/v1/lookup?locations=' + param;
 
             try {
-                //axios.defaults.withCredentials = true;
+                axios.defaults.withCredentials = false;
 
                 let response = await axios.get(url, {
-                    withCredentials: false,
+                    //withCredentials: true,
                     validateStatus: status => {
                         return status < 500;
                     }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                        'Access-Control-Allow-Origin': "*",
-                        'Access-Control-Allow-Credentials': true,
-                        'Access-Control-Allow-Methods': "POST, PUT, PATCH, GET, DELETE, OPTIONS",
-                        'Access-Control-Allow-Headers': "Origin, X-Api-Key, X-Requested-With, Content-Type, Accept, Authorization",
-                    },
+                    // headers: {
+                    //     'Access-Control-Allow-Origin': "*",
+                    //     'Access-Control-Allow-Credentials': true,
+                    //     'Access-Control-Allow-Methods': "POST, PUT, PATCH, GET, DELETE, OPTIONS",
+                    //     'Access-Control-Allow-Headers': "Origin, X-Api-Key, X-Requested-With, Content-Type, Accept, Authorization",
+                    // },
                 });
                 console.log('getElevationProfile', response.status, response.data);
 
@@ -3833,7 +3832,35 @@ export default {
                     if(this.$store.state.tempMarkers[dName][pIndex].targeted && this.$store.state.drone_infos[dName].targeted) {
 
                         if (event.dragging) {
+                            // if(hovered.getProperties().ctrlKey !== event.originalEvent.ctrlKey) {
                             hovered.setProperties({ctrlKey: event.originalEvent.ctrlKey});
+
+                            if (event.originalEvent.ctrlKey) {
+                                svgTempObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                                svgTempObj.svg.path._attributes.stroke = '#FF1744'.replace('#', '%23');
+                                svgTempObj.svg.path._attributes['stroke-width'] = '45';
+                            }
+                            else {
+                                svgTempObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
+                                svgTempObj.svg.path._attributes.stroke = '#76FF03'.replace('#', '%23');
+                                svgTempObj.svg.path._attributes['stroke-width'] = '25';
+                            }
+
+                            let xmlSvgTempMarker = convert.js2xml(svgTempObj, {
+                                compact: true,
+                                ignoreComment: true,
+                                spaces: 4
+                            });
+
+                            let tempIcon = new Icon({
+                                opacity: 1,
+                                src: 'data:image/svg+xml;utf8,' + xmlSvgTempMarker,
+                                scale: svgTempScale,
+                                anchor: [0.5, 1],
+                            });
+
+                            this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[0].setImage(tempIcon);
+                            // }
 
                             //console.log(hovered.getProperties().type, event.originalEvent.ctrlKey, event.pixel, event.coordinate);
                         }

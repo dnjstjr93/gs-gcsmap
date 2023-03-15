@@ -1863,10 +1863,10 @@ export default {
 
         async getElevationProfile(eLngLats, callback) {
 
-            eLngLats.forEach((eLngLat, idx) => {
-                [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
-                eLngLats[idx] = eLngLat;
-            });
+            // eLngLats.forEach((eLngLat, idx) => {
+            //     [eLngLat[0], eLngLat[1]] = [eLngLat[1], eLngLat[0]];
+            //     eLngLats[idx] = eLngLat;
+            // });
 
             let param = JSON.stringify(eLngLats).replace(/\[\[/g, '');
             param = param.replace(/\],\[/g, '|');
