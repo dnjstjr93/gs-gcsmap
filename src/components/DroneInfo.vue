@@ -1874,19 +1874,19 @@ export default {
             let url = 'http://172.20.0.102/api/v1/lookup?locations=' + param;
 
             try {
-                //axios.defaults.withCredentials = true;
+                axios.defaults.withCredentials = false;
 
                 let response = await axios.get(url, {
-                    withCredentials: false,
+                    // withCredentials: false,
                     validateStatus: status => {
                         return status < 500;
                     }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    headers: {
-                        'Access-Control-Allow-Origin': "*",
-                        'Access-Control-Allow-Credentials': true,
-                        'Access-Control-Allow-Methods': "POST, PUT, PATCH, GET, DELETE, OPTIONS",
-                        'Access-Control-Allow-Headers': "Origin, X-Api-Key, X-Requested-With, Content-Type, Accept, Authorization",
-                    },
+                    // headers: {
+                    //     'Access-Control-Allow-Origin': "*",
+                    //     'Access-Control-Allow-Credentials': true,
+                    //     'Access-Control-Allow-Methods': "POST, PUT, PATCH, GET, DELETE, OPTIONS",
+                    //     'Access-Control-Allow-Headers': "Origin, X-Api-Key, X-Requested-With, Content-Type, Accept, Authorization",
+                    // },
                 });
                 console.log('DroneInfo', 'getElevationProfile', response.status, response.data);
 
