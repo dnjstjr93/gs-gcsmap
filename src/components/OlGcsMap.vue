@@ -3202,7 +3202,7 @@ export default {
             let param = JSON.stringify(eLngLats).replace(/\[\[/g, '');
             param = param.replace(/\],\[/g, '|');
             param = param.replace(/\]\]/g, '');
-            let url = 'http://172.20.0.102/api/v1/lookup?locations=' + param;
+            let url = 'http://gcs.iotocean.org:9980/api/v1/lookup?locations=' + param;
 
             try {
                 axios.defaults.withCredentials = false;
