@@ -1107,6 +1107,7 @@ export default {
     data() {
         return {
             myChart: {},
+            elevations: {},
 
             drawRadiusUpdateTimer: null,
 
@@ -1590,9 +1591,16 @@ export default {
                     for (let dName in this.$store.state.drone_infos) {
                         if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                             if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                                if(!Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                                if (!Object.prototype.hasOwnProperty.call(this.elevations, dName)) {
+                                    this.elevations[dName] = Array(this.$store.state.SAMPLES).fill(0);
+                                }
+
+                                if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                                    this.myChart[dName].update();
+                                }
+                                else {
                                     this.fillGoToElevationData(dName);
-                                    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart);
+                                    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart[dName]);
                                 }
                             }
                         }
@@ -2124,7 +2132,7 @@ export default {
                         {
                             type: 'bar',
                             label: '지형고도',
-                            data: this.$store.state.drone_infos[dName].elevations,
+                            data: this.elevations[dName],
                             backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
                             borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
                             borderWidth: 1
@@ -2180,7 +2188,10 @@ export default {
                 setTimeout((dName) => {
                     console.log('update-fill-goto-evevation-data', dName, this.myChart);
                     if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
-                        this.myChart[dName].update();
+                        for(let i = 0; i < this.$store.state.drone_infos[dName].elevations.length; i++) {
+                            this.elevations[dName][i] = this.$store.state.drone_infos[dName].elevations[i];
+                            this.myChart[dName].update();
+                        }
                     }
                 }, 10, dName);
             }
@@ -2190,8 +2201,15 @@ export default {
             for (let dName in this.$store.state.drone_infos) {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                        if (!Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
-                            //this.fillGoToElevationData(dName);
+                        if (!Object.prototype.hasOwnProperty.call(this.elevations, dName)) {
+                            this.elevations[dName] = Array(this.$store.state.SAMPLES).fill(0);
+                        }
+
+                        if (Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                            this.myChart[dName].update();
+                        }
+                        else {
+                            this.fillGoToElevationData(dName);
                             console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart[dName]);
                         }
                     }
