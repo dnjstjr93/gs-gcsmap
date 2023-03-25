@@ -22,16 +22,52 @@
 
             <v-tab-item value="virtual" class=""></v-tab-item>
             <v-tab-item v-for="(command) in $store.state.commands" :key="command.title" :value="command.title" class="">
-                <v-card outlined color="grey lighten-4" style="opacity: 0.86" class="pa-0 overflow-y-auto" :max-height="$store.state.command_tab_max_height+'px'">
+                <v-card outlined color="grey lighten-4" style="opacity: 0.86" class="pa-0 overflow-y-auto" :max-height="($store.state.command_tab_max_height-174-174-174)+'px'">
 <!--                    <v-card-title primary-title class="headline">-->
 <!--                        {{command.title}}-->
 <!--                    </v-card-title>-->
                     <v-card-subtitle class="pl-1 pa-0">
-                        {{command.text}}
+                        <v-row class="my-1" no-gutters align="center">
+                            <v-col cols="10">
+                                {{command.text}}
+                            </v-col>
+                            <v-col cols="2">
+                                <v-card class="pa-1 align-self-center text-center" outlined tile>
+                                    <v-btn
+                                        v-if="command.title !== '투하'" color="blue" @click="curTab = command.title; mode_sheet = !mode_sheet;"
+                                        :disabled="(command.title === '임무')"
+                                    >
+                                        <span v-if="command.title === '모드'">모드확인</span>
+                                        <span v-else-if="command.title === '시동'">시동확인</span>
+                                        <span v-else-if="command.title === '이륙'">이륙확인</span>
+                                        <span v-else-if="command.title === '고도'">고도확인</span>
+                                        <span v-else-if="command.title === '이동'">이동확인</span>
+                                        <span v-else-if="command.title === '패턴'">패턴확인</span>
+                                        <span v-else-if="command.title === '선회'">선회확인</span>
+                                        <span v-else-if="command.title === '속도'">속도확인</span>
+                                        <span v-else-if="command.title === '관심'">관심확인</span>
+                                        <span v-else-if="command.title === '정지'">정지확인</span>
+                                        <span v-else-if="command.title === '착륙'">착륙확인</span>
+                                        <span v-else-if="command.title === '귀환'">귀환확인</span>
+                                        <span v-else-if="command.title === '제어'">제어확인</span>
+                                        <span v-else-if="command.title === '자동'">자동확인</span>
+                                        <span v-else-if="command.title === '종료'">종료확인</span>
+                                        <span v-else-if="command.title === '설정'">설정확인</span>
+                                        <span v-else-if="command.title === 'WP_YAW'">설정확인</span>
+                                    </v-btn>
+                                    <v-btn
+                                        v-else-if="command.title === '투하'" color="blue"
+                                        @click="setDropCommand()"
+                                    >
+                                        <span>투하확인</span>
+                                    </v-btn>
+                                </v-card>
+                            </v-col>
+                        </v-row>
                     </v-card-subtitle>
                     <v-card style="opacity: 0.86" class="pa-0">
                         <v-row class="mb-2" no-gutters align="center">
-                            <v-col cols="10">
+                            <v-col cols="12">
                                 <v-card>
 <!--                                        <v-toolbar flat dense-->
 <!--                                            v-if="((command.title === $store.state.commands[0].title) || (command.title === $store.state.commands[2].title) || (command.title === $store.state.commands[3].title))"-->
@@ -152,6 +188,15 @@
                                                     </v-card>
                                                     <v-card tile flat v-if="command.title === '이동'">
                                                         <v-row no-gutters>
+                                                            <v-col cols="1">
+                                                                <v-select
+                                                                    dense outlined hide-details
+                                                                    :items="Object.keys($store.state.tempMarkers[d.name])" label="Target Index"
+                                                                    :value="d.curTargetedTempMarkerIndex"
+                                                                    @change="targetedTempIndex($event, d.name)"
+                                                                    class="pa-1"
+                                                                ></v-select>
+                                                            </v-col>
                                                             <v-col cols="2">
                                                                 <v-select
                                                                     dense outlined hide-details
@@ -161,16 +206,7 @@
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
-                                                            <v-col cols="2">
-                                                                <v-select
-                                                                    dense outlined hide-details
-                                                                    :items="['YAW고정', 'YAW회전']"
-                                                                    label="YAW설정"
-                                                                    v-model="d.yawBehavior"
-                                                                    class="pa-1"
-                                                                ></v-select>
-                                                            </v-col>
-                                                            <v-col cols="2">
+                                                            <v-col cols="1">
                                                                 <v-text-field
                                                                     label="이동고도(m)"
                                                                     class="pa-1 text-right"
@@ -181,16 +217,17 @@
                                                                     @input="changeTargetAlt($event, d.name)"
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="2">
+                                                            <v-col cols="1">
                                                                 <v-text-field
                                                                     label="지형높이(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
                                                                     :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : parseFloat($store.state.tempMarkers[d.name][d.curTargetedTempMarkerIndex].elevation).toFixed(1)"
                                                                     readonly
+                                                                    filled
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="2">
+                                                            <v-col cols="1">
                                                                 <v-text-field
                                                                     label="이동속도(m/s)"
                                                                     class="pa-1 text-right"
@@ -199,24 +236,29 @@
                                                                     type="number"
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="2">
+                                                            <v-col cols="1">
                                                                 <v-text-field
                                                                     label="지점거리(m)"
                                                                     class="pa-1 text-right"
                                                                     outlined dense hide-details
-                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : (isNaN($store.state.distanceTarget[d.name]) ? -1 : parseInt($store.state.distanceTarget[d.name]))"
+                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : (isNaN($store.state.drone_infos[d.name].targetDistance) ? -1 : parseInt($store.state.drone_infos[d.name].targetDistance+0.5))"
                                                                     type="number"
                                                                     readonly
                                                                 ></v-text-field>
                                                             </v-col>
-                                                        </v-row>
-                                                        <v-row no-gutters>
-                                                            <v-col cols="12">
+                                                            <v-col cols="5">
                                                                 <v-card :style="{color:'white'}" outlined tile flat>
-                                                                    <canvas :id="'elevation-chart-'+d.name" :height="80+'px'"></canvas>
+                                                                    <canvas :id="'elevation-chart-'+d.name" :height="40+'px'"></canvas>
                                                                 </v-card>
                                                             </v-col>
                                                         </v-row>
+<!--                                                        <v-row no-gutters>-->
+<!--                                                            <v-col cols="6">-->
+<!--                                                                <v-card :style="{color:'white'}" outlined tile flat>-->
+<!--                                                                    <canvas :id="'elevation-chart-'+d.name" :height="80+'px'"></canvas>-->
+<!--                                                                </v-card>-->
+<!--                                                            </v-col>-->
+<!--                                                        </v-row>-->
                                                     </v-card>
                                                     <v-card tile flat v-if="(command.title === '선회')">
                                                         <v-row no-gutters>
@@ -302,31 +344,6 @@
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-spacer/>
-                                                            <v-col cols="2" class="pl-4 px-1 mt-n4 mb-1">
-<!--                                                                <v-select-->
-<!--                                                                    @change="changeYawBehavior($event, d.name)"-->
-<!--                                                                    dense outlined hide-details-->
-<!--                                                                    :items="['YAW고정', 'YAW회전']"-->
-<!--                                                                    label="YAW설정"-->
-<!--                                                                    v-model="yawBehavior[d.name]"-->
-<!--                                                                    class="pa-1"-->
-<!--                                                                ></v-select>-->
-                                                                <v-radio-group
-                                                                    v-model="d.yawBehavior"
-                                                                    column mandatory hide-details
-                                                                >
-                                                                    <v-radio
-                                                                        label="YAW고정"
-                                                                        value="YAW고정"
-                                                                        color="red"
-                                                                    ></v-radio>
-                                                                    <v-radio
-                                                                        label="YAW회전"
-                                                                        value="YAW회전"
-                                                                        color="primary"
-                                                                    ></v-radio>
-                                                                </v-radio-group>
-                                                            </v-col>
                                                             <v-col cols="2" class="pl-4 px-1 mt-n4 mb-1">
                                                                 <v-radio-group
                                                                     v-model="d.flyShape"
@@ -566,15 +583,6 @@
                                                                     ></v-switch>
                                                                 </v-subheader>
                                                             </v-col>
-                                                            <v-col cols="2">
-                                                                <v-select
-                                                                    dense outlined hide-details
-                                                                    :items="['YAW고정', 'YAW회전']"
-                                                                    label="YAW설정"
-                                                                    v-model="d.yawBehavior"
-                                                                    class="pa-1"
-                                                                ></v-select>
-                                                            </v-col>
                                                             <v-col cols="2" v-if="Object.prototype.hasOwnProperty.call($store.state.tempMarkers, d.name)">
                                                                 <v-select
                                                                     dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
@@ -625,9 +633,9 @@
                                                             </v-col>
                                                         </v-row>
                                                     </v-card>
-                                                    <v-card tile flat v-if="(command.title === '설정')">
+                                                    <v-card tile flat v-if="(command.title === 'WP_YAW')">
                                                         <v-row no-gutters>
-                                                            <v-col cols="3">
+                                                            <v-col cols="6">
                                                                 <v-select
                                                                     dense outlined hide-details
                                                                     :items="items_wp_yaw_behavior"
@@ -636,6 +644,10 @@
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
+                                                        </v-row>
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '설정')">
+                                                        <v-row no-gutters>
                                                             <v-col cols="3">
                                                                 <v-text-field
                                                                     label="SLEW_YAW (meterdgrees/s), 5-180, 1"
@@ -964,37 +976,7 @@
                                     </div>
                                 </v-card>
                             </v-col>
-                            <v-col cols="2">
-                                <v-card class="pa-1 align-self-center text-center" outlined tile>
-                                    <v-btn
-                                        v-if="command.title !== '투하'" color="blue" @click="curTab = command.title; mode_sheet = !mode_sheet;"
-                                        :disabled="(command.title === '임무')"
-                                    >
-                                        <span v-if="command.title === '모드'">모드확인</span>
-                                        <span v-else-if="command.title === '시동'">시동확인</span>
-                                        <span v-else-if="command.title === '이륙'">이륙확인</span>
-                                        <span v-else-if="command.title === '고도'">고도확인</span>
-                                        <span v-else-if="command.title === '이동'">이동확인</span>
-                                        <span v-else-if="command.title === '패턴'">패턴확인</span>
-                                        <span v-else-if="command.title === '선회'">선회확인</span>
-                                        <span v-else-if="command.title === '속도'">속도확인</span>
-                                        <span v-else-if="command.title === '관심'">관심확인</span>
-                                        <span v-else-if="command.title === '정지'">정지확인</span>
-                                        <span v-else-if="command.title === '착륙'">착륙확인</span>
-                                        <span v-else-if="command.title === '귀환'">귀환확인</span>
-                                        <span v-else-if="command.title === '제어'">제어확인</span>
-                                        <span v-else-if="command.title === '자동'">자동확인</span>
-                                        <span v-else-if="command.title === '종료'">종료확인</span>
-                                        <span v-else-if="command.title === '설정'">설정확인</span>
-                                    </v-btn>
-                                    <v-btn
-                                        v-else-if="command.title === '투하'" color="blue"
-                                        @click="setDropCommand()"
-                                    >
-                                        <span>투하확인</span>
-                                    </v-btn>
-                                </v-card>
-                            </v-col>
+
 <!--                            <v-col cols="1">-->
 <!--                                <v-card class="pa-2" outlined tile>-->
 <!--                                    <v-progress-linear-->
@@ -1080,6 +1062,9 @@
                     </span>
                     <span v-else-if="curTab === '종료'">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">시동 끄기</span> 명령 전송.
+                    </span>
+                    <span v-else-if="curTab === 'WP_YAW'">
+                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '설정'">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
@@ -1208,7 +1193,6 @@ export default {
             autoDelay: {},
 
             gotoType: {},
-            yawBehavior: {},
             flyShape: {},
             startWay: {},
             showMissionParam: false,
@@ -1217,7 +1201,6 @@ export default {
             rtlSpeed: {},
 
             // params: {
-            //     wpYawBehavior: {},
             //     atcSlewYaw: {},
             //     wpnavSpeedUp: {},
             //     wpnavSpeedDn: {},
@@ -1549,20 +1532,30 @@ export default {
             this.target_alt++
         },
 
-        // selectedPosition: function(event, d) {
-        //     this.position_selections_index[d.name] = this.position_selections_items[d.name].indexOf(event);
-        //
-        //     let pIndex = this.position_selections_index[d.name];
-        //     let pName = d.name;
-        //     this.position_selections_elevation[pName] = parseFloat(this.$store.state.tempMarkers[pName][pIndex].elevation).toFixed(1);
-        //
-        //     let payload = {};
-        //     payload.pName = d.name;
-        //     payload.pIndex = this.position_selections_index[d.name];
-        //     payload.targeted = true;
-        //
-        //     EventBus.$emit('do-targetTempMarker', payload);
-        // },
+        targetedTempIndex(event, dName) {
+            let i = event;
+            let payload = {};
+            payload.dName = dName;
+            payload.pIndex = i;
+            payload.targeted = true;
+
+            console.log('targetedTempIndex', dName, i);
+
+            // for(let p = 0; p < this.$store.state.tempMarkers[dName].length; p++) {
+            //     this.$store.state.tempMarkers[dName][p].targeted = false;
+            //
+            // }
+            // this.$store.state.tempMarkers[dName][i].targeted = true;
+            this.$store.state.drone_infos.curTargetedTempMarkerIndex = i;
+
+            //this.selectedItem = -1;
+
+            //(this.selectedItem === i) ? (this.selectedItem = -1) : (this.selectedItem);
+
+            // EventBus.$emit('do-centerCurrentPosition', {lat: this.$store.state.tempMarkers[dName][i].lat, lng: this.$store.state.tempMarkers[dName][i].lng});
+
+            EventBus.$emit('do-makeTargetTempMarker', payload);
+        },
 
         tab_click(title) {
             this.$store.state.currentCommandTab = title;
@@ -1666,6 +1659,9 @@ export default {
             else if(this.curTab === '종료') {
                 this.setDisarm();
             }
+            else if(this.curTab === 'WP_YAW') {
+                this.setWpYawParam();
+            }
             else if(this.curTab === '설정') {
                 this.setParams();
             }
@@ -1767,7 +1763,6 @@ export default {
 
                             console.log('DroneCommand-setGoto', strPos);
                             //this.$store.state.drone_infos[name].gotoType = this.gotoType[name];
-                            //this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
                             //this.$store.state.drone_infos[dName].targetSpeed = parseInt(this.targetSpeed[dName]);
                             //this.$store.state.drone_infos[dName].targetAlt = parseInt(this.targetAlt[dName]);
 
@@ -1963,8 +1958,6 @@ export default {
             this.curTab = 'virtual';
             this.$store.state.active_tab = 'virtual';
 
-            this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
-
             console.log('doMissionRewind - ', this.$store.state.drone_infos[dName].curMissionItemReached);
 
             EventBus.$emit('command-set-mission_rewind-' + dName, this.$store.state.drone_infos[dName].curMissionItemReached);
@@ -1979,7 +1972,6 @@ export default {
                             this.$store.state.drone_infos[dName].autoDelay = parseInt(this.$store.state.drone_infos[dName].targetStayTime);
                             //this.$store.state.drone_infos[dName].autoSpeed = parseInt(this.targetSpeed[dName]);
                             this.$store.state.drone_infos[dName].autoSpeed = this.$store.state.surveyMarkers[dName][pIndex].speed;
-                            //this.$store.state.drone_infos[dName].yawBehavior = this.yawBehavior[dName];
                             //this.$store.state.drone_infos[dName].flyShape = this.flyShape[dName];
                             //this.$store.state.drone_infos[dName].startWay = this.startWay[dName];
 
@@ -2089,6 +2081,17 @@ export default {
             }
         },
 
+        setWpYawParam() {
+            console.log(this.$store.state.params);
+            for (let name in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                        EventBus.$emit('command-set-wp-yaw-param-' + name, this.$store.state.params);
+                    }
+                }
+            }
+        },
+
         setParams() {
             console.log(this.$store.state.params);
             for (let name in this.$store.state.drone_infos) {
@@ -2135,7 +2138,7 @@ export default {
                             data: this.elevations[dName],
                             backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
                             borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
-                            borderWidth: 1
+                            borderWidth: 0.5
                         },
                         {
                             type: 'line',
@@ -2143,12 +2146,16 @@ export default {
                             data: arrFlyAlt,
                             backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 0.2)'),
                             borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 1)'),
+                            borderWidth: 0.5,
                         },
                     ],
                 },
                 options: {
                     scales: {
-                        y: {beginAtZero: true},
+                        y: {
+                            display: false,
+                            beginAtZero: true,
+                        },
                         x: {
                             ticks: {
                                 display: false //this will remove only the label
@@ -2157,6 +2164,12 @@ export default {
                     },
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                            position: 'top',
+                        },
+                    },
                 }
             };
 

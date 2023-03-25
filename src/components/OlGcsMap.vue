@@ -2079,9 +2079,9 @@ export default {
 
                         this.$store.state.drone_infos[dName].updatedTempElePathFlag = false;
 
-                        if(feature.getProperties().ctrlKey) {
+                        if(feature.getProperties().altKey) {
 
-                            console.log('tempMarker dragging ctrlKey', dName, feature.getProperties().ctrlKey, this.$store.state.drone_infos[dName].alt);
+                            console.log('tempMarker dragging altKey', dName, feature.getProperties().altKey, this.$store.state.drone_infos[dName].alt);
 
                             if(this.$store.state.drone_infos[dName].alt > 5) {
                                 let strPos = this.$store.state.tempMarkers[dName][pIndex].lat + ':' +
@@ -2099,7 +2099,7 @@ export default {
                                 EventBus.$emit('command-set-goto-' + dName, strPos);
                             }
 
-                            feature.setProperties({ctrlKey: false});
+                            feature.setProperties({altKey: false});
                         }
                     }
                 });
@@ -2702,7 +2702,7 @@ export default {
                     geometry: new Point([tCoordinate[0], tCoordinate[1]]),
                     type: 'tempMarker',
                     dragging: false,
-                    ctrlKey: false,
+                    altKey: false,
                 });
                 tFeature.setId(dName + '-' + pIndex);
 
@@ -3053,9 +3053,9 @@ export default {
         },
 
         async updateTargetLineFeature(dName) {
-            //console.log('this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName]', this.$store.state.drone_infos[dName].targeted, this.targetedTempFeatureId[dName])
-
             if(this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeature[dName] !== undefined) {
+                // console.log('this.$store.state.drone_infos[dName].targeted && this.targetedTempFeatureId[dName]', this.$store.state.drone_infos[dName].targeted, this.targetedTempFeatureId[dName])
+
                 let sTarLat = this.$store.state.drone_infos[dName].lat;
                 let sTarLng = this.$store.state.drone_infos[dName].lng;
                 let eTarLat = this.$store.state.drone_infos[dName].lat;
@@ -3313,6 +3313,84 @@ export default {
                 }
             }
             return {data: shadeData, width: width, height: height};
+        },
+
+        makeTargetTempMarker(dName, pIndex) {
+            if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeatureId, dName)) {
+                this.targetedTempFeatureId[dName] = '';
+            }
+
+            if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeature, dName)) {
+                this.targetedTempFeature[dName] = undefined;
+            }
+
+            if(this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeatureId[dName] !== (dName + '-' + pIndex)) {
+                let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
+                this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
+
+                this.deleteTempTranslate(this.targetedTempFeature[dName]);
+                this.targetedTempFeatureId[dName] = '';
+                this.targetedTempFeature[dName] = undefined;
+
+                this.updateTargetedTempMarker(dName, pIndexOld);
+                //this.updateOlTempMarker(dName, pIndexOld);
+
+                this.olTempMarkers[dName].tempMarkerFeatures[pIndexOld].getStyle()[2].getImage().setRadius(1);
+            }
+
+            if(this.targetedSurveyFeatureId[dName] !== '') {
+                let pIndexOld = this.targetedSurveyFeatureId[dName].split('-')[1];
+                this.$store.state.surveyMarkers[dName][pIndexOld].targeted = false;
+
+                this.deleteSurveyTranslate(this.targetedSurveyFeature[dName]);
+                this.deleteModifyInteraction(this.targetedSurveyFeature[dName]);
+
+                this.targetedSurveyFeatureId[dName] = '';
+                this.targetedSurveyFeature[dName] = undefined;
+
+                this.updateTargetedSurveyMarker(dName, pIndexOld);
+            }
+
+            this.$store.state.tempMarkers[dName][pIndex].targeted = !this.$store.state.tempMarkers[dName][pIndex].targeted;
+
+            // console.log('ppppppppppppppppppppp single click', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted);
+
+            if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;
+
+                this.addTempTranslate(this.targetedFeature);
+                this.targetedTempFeatureId[dName] = (dName + '-' + pIndex);
+                this.targetedTempFeature[dName] = this.targetedFeature;
+
+                this.$store.state.drone_infos[dName].updatedTempElePathFlag = false;
+            }
+            else {
+                this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
+
+                this.deleteTempTranslate(this.targetedFeature);
+                this.targetedTempFeatureId[dName] = '';
+                this.targetedTempFeature[dName] = undefined;
+
+                this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(1);
+            }
+
+            this.updateTargetedTempMarker(dName, pIndex);
+            //this.updateOlTempMarker(dName, pIndex);
+
+            if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                this.$store.state.drone_command_prepared = false;
+                setTimeout(() => {
+                    this.$store.state.drone_command_prepared = true;
+                }, 100);
+            }
+
+            if(dName === 'unknown') {
+                this.datum.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
+                this.datum.lat = this.$store.state.tempMarkers[dName][pIndex].lat;
+                this.datum.lng = this.$store.state.tempMarkers[dName][pIndex].lng;
+            }
+
+            this.updateTargetLineFeature(dName);
         },
     },
 
@@ -3715,6 +3793,15 @@ export default {
             this.olMap.getView().setZoom(18);
         });
 
+        EventBus.$on('do-makeTargetTempMarker', (payload) => {
+            let dName = payload.dName;
+            let pIndex = payload.pIndex;
+
+            this.targetedFeature = this.olTempMarkers[dName].tempMarkerFeatures[pIndex];
+
+            this.makeTargetTempMarker(dName, pIndex);
+        });
+
         EventBus.$on('do-updateTargetDroneMarker', (dName) => {
             this.updateTargetDroneMarker(dName);
         });
@@ -3832,10 +3919,10 @@ export default {
                     if(this.$store.state.tempMarkers[dName][pIndex].targeted && this.$store.state.drone_infos[dName].targeted) {
 
                         if (event.dragging) {
-                            // if(hovered.getProperties().ctrlKey !== event.originalEvent.ctrlKey) {
-                            hovered.setProperties({ctrlKey: event.originalEvent.ctrlKey});
+                            // if(hovered.getProperties().altKey !== event.originalEvent.altKey) {
+                            hovered.setProperties({altKey: event.originalEvent.altKey});
 
-                            if (event.originalEvent.ctrlKey) {
+                            if (event.originalEvent.altKey) {
                                 svgTempObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
                                 svgTempObj.svg.path._attributes.stroke = '#FF1744'.replace('#', '%23');
                                 svgTempObj.svg.path._attributes['stroke-width'] = '45';
@@ -3862,7 +3949,7 @@ export default {
                             this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[0].setImage(tempIcon);
                             // }
 
-                            //console.log(hovered.getProperties().type, event.originalEvent.ctrlKey, event.pixel, event.coordinate);
+                            //console.log(hovered.getProperties().type, event.originalEvent.altKey, event.pixel, event.coordinate);
                         }
                     }
                 }
@@ -3979,81 +4066,83 @@ export default {
                     let dName = arrId[0];
                     let pIndex = arrId[1];
 
-                    if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeatureId, dName)) {
-                        this.targetedTempFeatureId[dName] = '';
-                    }
+                    this.makeTargetTempMarker(dName, pIndex);
 
-                    if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeature, dName)) {
-                        this.targetedTempFeature[dName] = undefined;
-                    }
-
-                    if(this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeatureId[dName] !== (dName + '-' + pIndex)) {
-                        let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
-                        this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
-
-                        this.deleteTempTranslate(this.targetedTempFeature[dName]);
-                        this.targetedTempFeatureId[dName] = '';
-                        this.targetedTempFeature[dName] = undefined;
-
-                        this.updateTargetedTempMarker(dName, pIndexOld);
-                        //this.updateOlTempMarker(dName, pIndexOld);
-
-                        this.olTempMarkers[dName].tempMarkerFeatures[pIndexOld].getStyle()[2].getImage().setRadius(1);
-                    }
-
-                    if(this.targetedSurveyFeatureId[dName] !== '') {
-                        let pIndexOld = this.targetedSurveyFeatureId[dName].split('-')[1];
-                        this.$store.state.surveyMarkers[dName][pIndexOld].targeted = false;
-
-                        this.deleteSurveyTranslate(this.targetedSurveyFeature[dName]);
-                        this.deleteModifyInteraction(this.targetedSurveyFeature[dName]);
-
-                        this.targetedSurveyFeatureId[dName] = '';
-                        this.targetedSurveyFeature[dName] = undefined;
-
-                        this.updateTargetedSurveyMarker(dName, pIndexOld);
-                    }
-
-                    this.$store.state.tempMarkers[dName][pIndex].targeted = !this.$store.state.tempMarkers[dName][pIndex].targeted;
-
-                    console.log('ppppppppppppppppppppp single click', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted);
-
-                    if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
-                          this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;
-
-                        this.addTempTranslate(this.targetedFeature);
-                        this.targetedTempFeatureId[dName] = (dName + '-' + pIndex);
-                        this.targetedTempFeature[dName] = this.targetedFeature;
-
-                        this.$store.state.drone_infos[dName].updatedTempElePathFlag = false;
-                    }
-                    else {
-                        this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
-
-                        this.deleteTempTranslate(this.targetedFeature);
-                        this.targetedTempFeatureId[dName] = '';
-                        this.targetedTempFeature[dName] = undefined;
-
-                        this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(1);
-                    }
-
-                    this.updateTargetedTempMarker(dName, pIndex);
-                    //this.updateOlTempMarker(dName, pIndex);
-
-                    if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                        this.$store.state.drone_command_prepared = false;
-                        setTimeout(() => {
-                            this.$store.state.drone_command_prepared = true;
-                        }, 100);
-                    }
-
-                    if(dName === 'unknown') {
-                        this.datum.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
-                        this.datum.lat = this.$store.state.tempMarkers[dName][pIndex].lat;
-                        this.datum.lng = this.$store.state.tempMarkers[dName][pIndex].lng;
-                    }
-
-                    this.updateTargetLineFeature(dName);
+                    // if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeatureId, dName)) {
+                    //     this.targetedTempFeatureId[dName] = '';
+                    // }
+                    //
+                    // if(!Object.prototype.hasOwnProperty.call(this.targetedTempFeature, dName)) {
+                    //     this.targetedTempFeature[dName] = undefined;
+                    // }
+                    //
+                    // if(this.targetedTempFeatureId[dName] !== '' && this.targetedTempFeatureId[dName] !== (dName + '-' + pIndex)) {
+                    //     let pIndexOld = this.targetedTempFeatureId[dName].split('-')[1];
+                    //     this.$store.state.tempMarkers[dName][pIndexOld].targeted = false;
+                    //
+                    //     this.deleteTempTranslate(this.targetedTempFeature[dName]);
+                    //     this.targetedTempFeatureId[dName] = '';
+                    //     this.targetedTempFeature[dName] = undefined;
+                    //
+                    //     this.updateTargetedTempMarker(dName, pIndexOld);
+                    //     //this.updateOlTempMarker(dName, pIndexOld);
+                    //
+                    //     this.olTempMarkers[dName].tempMarkerFeatures[pIndexOld].getStyle()[2].getImage().setRadius(1);
+                    // }
+                    //
+                    // if(this.targetedSurveyFeatureId[dName] !== '') {
+                    //     let pIndexOld = this.targetedSurveyFeatureId[dName].split('-')[1];
+                    //     this.$store.state.surveyMarkers[dName][pIndexOld].targeted = false;
+                    //
+                    //     this.deleteSurveyTranslate(this.targetedSurveyFeature[dName]);
+                    //     this.deleteModifyInteraction(this.targetedSurveyFeature[dName]);
+                    //
+                    //     this.targetedSurveyFeatureId[dName] = '';
+                    //     this.targetedSurveyFeature[dName] = undefined;
+                    //
+                    //     this.updateTargetedSurveyMarker(dName, pIndexOld);
+                    // }
+                    //
+                    // this.$store.state.tempMarkers[dName][pIndex].targeted = !this.$store.state.tempMarkers[dName][pIndex].targeted;
+                    //
+                    // console.log('ppppppppppppppppppppp single click', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted);
+                    //
+                    // if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                    //       this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = pIndex;
+                    //
+                    //     this.addTempTranslate(this.targetedFeature);
+                    //     this.targetedTempFeatureId[dName] = (dName + '-' + pIndex);
+                    //     this.targetedTempFeature[dName] = this.targetedFeature;
+                    //
+                    //     this.$store.state.drone_infos[dName].updatedTempElePathFlag = false;
+                    // }
+                    // else {
+                    //     this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = -1;
+                    //
+                    //     this.deleteTempTranslate(this.targetedFeature);
+                    //     this.targetedTempFeatureId[dName] = '';
+                    //     this.targetedTempFeature[dName] = undefined;
+                    //
+                    //     this.olTempMarkers[dName].tempMarkerFeatures[pIndex].getStyle()[2].getImage().setRadius(1);
+                    // }
+                    //
+                    // this.updateTargetedTempMarker(dName, pIndex);
+                    // //this.updateOlTempMarker(dName, pIndex);
+                    //
+                    // if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                    //     this.$store.state.drone_command_prepared = false;
+                    //     setTimeout(() => {
+                    //         this.$store.state.drone_command_prepared = true;
+                    //     }, 100);
+                    // }
+                    //
+                    // if(dName === 'unknown') {
+                    //     this.datum.targeted = this.$store.state.tempMarkers[dName][pIndex].targeted;
+                    //     this.datum.lat = this.$store.state.tempMarkers[dName][pIndex].lat;
+                    //     this.datum.lng = this.$store.state.tempMarkers[dName][pIndex].lng;
+                    // }
+                    //
+                    // this.updateTargetLineFeature(dName);
                 }
                 else if(this.targetedFeature.getProperties().type === 'guideLine') {
 
@@ -4633,6 +4722,7 @@ export default {
         EventBus.$off('do-current-drone-position');
         EventBus.$off('gcs-map-ready');
         EventBus.$off('do-centerCurrentPosition');
+        EventBus.$off('do-makeTargetTempMarker');
         EventBus.$off('do-updateTargetDroneMarker');
         EventBus.$off('do-unsetSelectedTempMarker');
         EventBus.$off('do-unsetSelectedSurveyMarker');

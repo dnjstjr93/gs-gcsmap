@@ -432,6 +432,7 @@
 
                 this.$store.state.commands = [];
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['WP_YAW']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
@@ -604,24 +605,25 @@
                     }
                 }
 
-                for (let dName in this.$store.state.drone_infos) {
-                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                        if(this.$store.state.drone_infos[dName].selected) {
-                            if (Object.prototype.hasOwnProperty.call(this.$store.state.rtlModeMonitor, dName)) {
-                                if (this.$store.state.rtlModeMonitor[dName]) {
-                                    if (this.$store.state.drone_infos[dName].selected &&
-                                        this.$store.state.drone_infos[dName].curMode === 'RTL' &&
-                                        this.$store.state.drone_infos[dName].curArmStatus === 'ARMED') {
-
-                                        if (parseInt(this.$store.state.params.wpYawBehavior[dName]) !== 1) {
-                                            EventBus.$emit('setWpYawBehavior-' + dName, 1);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                // todo: RTL일 때 YAW를 회전할 지 고려해야함
+                // for (let dName in this.$store.state.drone_infos) {
+                //     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                //         if(this.$store.state.drone_infos[dName].selected) {
+                //             if (Object.prototype.hasOwnProperty.call(this.$store.state.rtlModeMonitor, dName)) {
+                //                 if (this.$store.state.rtlModeMonitor[dName]) {
+                //                     if (this.$store.state.drone_infos[dName].selected &&
+                //                         this.$store.state.drone_infos[dName].curMode === 'RTL' &&
+                //                         this.$store.state.drone_infos[dName].curArmStatus === 'ARMED') {
+                //
+                //                         if (parseInt(this.$store.state.params.wpYawBehavior[dName]) !== 1) {
+                //                             EventBus.$emit('setWpYawBehavior-' + dName, 1);
+                //                         }
+                //                     }
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
             }, 1000);
 
             // EventBus.$on('gcs-map-ready', () => {
