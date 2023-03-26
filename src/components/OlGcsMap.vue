@@ -3123,9 +3123,13 @@ export default {
 
                     this.getElevationProfile(eLngLats, async (status, result) => {
                         if (status === 200) {
-                            result.results.forEach((ele) => {
-                                this.$store.state.drone_infos[dName].elevations.push(ele.elevation);
-                            });
+                            // result.results.forEach((ele) => {
+                            //     this.$store.state.drone_infos[dName].elevations.push(ele.elevation);
+                            // });
+
+                            for(let i = 0; i < result.results.length; i++) {
+                                this.$store.state.drone_infos[dName].elevations[i] = result.results[i].elevation;
+                            }
 
                             EventBus.$emit('update-fill-goto-evevation-data', dName);
                         }

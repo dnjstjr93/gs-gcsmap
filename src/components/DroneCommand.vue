@@ -2215,7 +2215,15 @@ export default {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         if (!Object.prototype.hasOwnProperty.call(this.elevations, dName)) {
-                            this.elevations[dName] = Array(this.$store.state.SAMPLES).fill(0);
+                            if(this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex === -1) {
+                                this.elevations[dName] = Array(this.$store.state.SAMPLES).fill(0);
+                            }
+                            else {
+                                this.elevations[dName] = [];
+                                for (let i = 0; i < this.$store.state.drone_infos[dName].elevations.length; i++) {
+                                    this.elevations[dName].push(this.$store.state.drone_infos[dName].elevations[i]);
+                                }
+                            }
                         }
 
                         if (Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
