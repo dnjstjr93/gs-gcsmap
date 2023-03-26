@@ -2142,7 +2142,13 @@ export default {
 
             //EventBus.$emit('do-targetDrone');
 
-            this.$store.state.drone_infos[this.name].targeted = checked;
+            let payload = {};
+            payload.dName = this.name;
+            payload.targeted = checked;
+            EventBus.$emit('do-target-drone', payload);
+
+
+                    this.$store.state.drone_infos[this.name].targeted = checked;
 
             this.$store.state.drone_command_prepared = false;
             for (let dName in this.$store.state.drone_infos) {

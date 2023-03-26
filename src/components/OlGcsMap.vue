@@ -4271,6 +4271,8 @@ export default {
                         this.updateTargetDroneMarker(dName);
                     }
                 });
+
+                EventBus.$emit('do-clear-target-drones');
             }
 
             // this.olMap.forEachFeatureAtPixel(event.pixel, (clicked) => {

@@ -6,7 +6,7 @@
                     <v-card flat tile outlined>
                         <v-row justify="space-around">
                             <v-col cols="1">
-                                <v-btn-toggle active-class="warning" @change="targetDrones($event)">
+                                <v-btn-toggle active-class="warning" v-model="toggle_exclusive" @change="targetDrones($event)">
                                     <v-btn elevation="1">
                                         <v-icon>$selectAll</v-icon>
                                     </v-btn>
@@ -20,9 +20,11 @@
                                     <v-chip-group
                                         multiple
                                         active-class="warning"
+                                        v-model="chips"
                                     >
                                         <v-chip
                                             label
+                                            @click="targetDrone(i)"
                                             v-for="(tag, i) in tags"
                                             :key="'tag'+i"
                                         >
@@ -277,6 +279,8 @@
         data: function() {
             return {
                 tags: [],
+                toggle_exclusive: [],
+                chips: [],
 
                 strMouse: 'NaN',
                 myHeight: window.innerHeight-50,
@@ -317,9 +321,41 @@
         },
 
         methods: {
+            targetDrone(idx) {
+                setTimeout(() => {
+                    console.log(this.chips);
+
+                    //let idx = this.chips[this.chips.length-1]
+                    let dName = this.tags[idx];
+
+                    let targeted = false;
+                    for(let i = 0; i < this.chips.length; i++) {
+                        if(this.chips[i] === idx) {
+                            targeted = true;
+                            break;
+                        }
+                    }
+                    console.log(dName, targeted);
+
+                    this.$store.state.drone_infos[dName].targeted = targeted;
+
+                    EventBus.$emit('do-updateTargetDroneMarker', dName);
+
+                    this.$store.state.drone_command_prepared = false;
+                    for (let dName in this.$store.state.drone_infos) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                                this.$store.state.drone_command_prepared = true;
+                                break;
+                            }
+                        }
+                    }
+                }, 0);
+
+            },
+
             targetDrones(e) {
                 if(e !== undefined) {
-                    this.$store.state.drone_command_prepared = false;
                     for (let dName in this.$store.state.drone_infos) {
                         if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                             if (this.$store.state.drone_infos[dName].selected) {
@@ -329,9 +365,17 @@
                             }
                         }
                     }
+
+                    for(let i = 0; i < this.tags.length; i++) {
+                        if(!Object.prototype.hasOwnProperty.call(this.chips, i)) {
+                            this.chips.push(i);
+                        }
+                        else {
+                            this.chips[i] = i;
+                        }
+                    }
                 }
                 else {
-                    this.$store.state.drone_command_prepared = false;
                     for (let dName in this.$store.state.drone_infos) {
                         if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                             if (this.$store.state.drone_infos[dName].selected) {
@@ -341,7 +385,13 @@
                             }
                         }
                     }
+
+                    for(let i = 0; i < this.tags.length; i++) {
+                        this.chips.pop();
+                    }
                 }
+
+                this.$forceUpdate();
 
                 this.$store.state.drone_command_prepared = false;
                 for (let dName in this.$store.state.drone_infos) {
@@ -352,23 +402,6 @@
                         }
                     }
                 }
-
-
-                // EventBus.$emit('do-updateTargetDroneMarker', this.name);
-                //
-                // //EventBus.$emit('do-targetDrone');
-                //
-                // this.$store.state.drone_infos[this.name].targeted = checked;
-                //
-                // this.$store.state.drone_command_prepared = false;
-                // for (let dName in this.$store.state.drone_infos) {
-                //     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                //         if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                //             this.$store.state.drone_command_prepared = true;
-                //             break;
-                //         }
-                //     }
-                // }
             },
 
             onResize() {
@@ -951,6 +984,49 @@
 
             EventBus.$emit('ws-connect');
 
+            EventBus.$on('do-clear-target-drones', () => {
+                this.toggle_exclusive = [];
+
+                for(let i = 0; i < this.tags.length; i++) {
+                    this.chips.pop();
+                }
+            });
+
+            EventBus.$on('do-target-drone', (payload) => {
+                let dName = payload.dName;
+                let targeted = payload.targeted;
+
+                if(targeted) {
+                    for (let i = 0; i < this.tags.length; i++) {
+                        if (this.tags[i] === dName) {
+                            let test = false;
+                            for(let j = 0; j < this.chips.length; j++) {
+                                if(this.chips[j] === i) {
+                                    test = true;
+                                    break;
+                                }
+                            }
+
+                            if(test === false) {
+                                this.chips.push(i);
+                            }
+                        }
+                    }
+                }
+                else {
+                    for (let i = 0; i < this.tags.length; i++) {
+                        if (this.tags[i] === dName) {
+                            for(let j = 0; j < this.chips.length; j++) {
+                                if(this.chips[j] === i) {
+                                    this.chips.splice(j, 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
             this.readyDroneInfoList();
         },
 
@@ -965,6 +1041,7 @@
             EventBus.$off('ws-send-message');
             EventBus.$off('do-calcDistance');
             EventBus.$off('do-subscribe');
+            EventBus.$off('do-clear-target-drones');
         }
     }
 </script>
