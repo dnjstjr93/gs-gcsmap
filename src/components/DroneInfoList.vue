@@ -3,50 +3,149 @@
         <v-row no-gutters>
             <v-col cols="12" sm="6" md="2" class="drone_list">
                 <v-card flat tile outlined color="#E8F5E9" :min-width="(myMinWidth+1)+'px'" :width="myMinWidth+'px'" :max-width="myMinWidth+'px'">
-                    <v-card ref="prev" flat tile class="overflow-y-auto" :style="listHeight" :min-width="(myMinWidth+1)+'px'" :width="myMinWidth+'px'" :max-width="myMinWidth+'px'">
-                        <v-card flat tile outlined>
-                            <v-row no-gutters justify="center" align="center">
-                                <v-col cols="4">
-                                    <v-switch
-                                        dense hide-details
-                                        v-model="distanceMonitor"
-                                        label="드론근접감시"
-                                        color="warning"
-                                        class="ma-0 pa-0 pl-1 py-1"
-                                    ></v-switch>
-                                </v-col>
-                                <v-col cols="3">
-                                    <v-switch
-                                        dense hide-details
-                                        v-model="ADSBMonitor"
-                                        label="ADS-B"
-                                        color="warning"
-                                        class="ma-0 pa-0 pl-1 py-1"
-                                        @change="switchADSBMonitor($event)"
-                                    ></v-switch>
-                                </v-col>
-                                <v-col cols="2" class="text-right pr-1" >
-                                    <v-card class="pr-1" outlined tile>
-                                        <span style="font-size: 14px">{{ strMouse }}</span>
-                                    </v-card>
-                                </v-col>
-                                <v-col cols="3" class="text-right" >
-                                    <v-btn class="mr-2" x-small @click.stop="zoomNormal">
-                                        <v-icon small>
-                                            $magnifyMinusOutline
-                                        </v-icon>
+                    <v-card flat tile outlined>
+                        <v-row justify="space-around">
+                            <v-col cols="1">
+                                <v-btn-toggle active-class="warning" @change="targetDrones($event)">
+                                    <v-btn elevation="1">
+                                        <v-icon>$selectAll</v-icon>
                                     </v-btn>
-                                    <v-btn class="mr-2" x-small @click.stop="zoomDouble">
-                                        <v-icon small>
-                                            $magnifyPlusOutline
-                                        </v-icon>
-                                    </v-btn>
-                                </v-col>
-                            </v-row>
-                            <v-card v-if=!$store.state.client.connected class="py-3 px-2" color="orange">
-                                <span class="text-h5 font-weight-bold">Connection Failed!!!</span>
-                            </v-card>
+                                </v-btn-toggle>
+                            </v-col>
+                            <v-col cols="11">
+                                <v-sheet
+                                    elevation="1"
+                                    class="ml-2 py-0 px-0"
+                                >
+                                    <v-chip-group
+                                        multiple
+                                        active-class="warning"
+                                    >
+                                        <v-chip
+                                            label
+                                            v-for="(tag, i) in tags"
+                                            :key="'tag'+i"
+                                        >
+                                            {{ tag }}
+                                        </v-chip>
+                                    </v-chip-group>
+                                </v-sheet>
+                            </v-col>
+                        </v-row>
+                        <v-row no-gutters justify="center" align="center">
+                            <v-col cols="4">
+                                <v-switch
+                                    dense hide-details
+                                    v-model="distanceMonitor"
+                                    label="드론근접감시"
+                                    color="warning"
+                                    class="ma-0 pa-0 pl-1 py-1"
+                                ></v-switch>
+                            </v-col>
+                            <v-col cols="3">
+                                <v-switch
+                                    dense hide-details
+                                    v-model="ADSBMonitor"
+                                    label="ADS-B"
+                                    color="warning"
+                                    class="ma-0 pa-0 pl-1 py-1"
+                                    @change="switchADSBMonitor($event)"
+                                ></v-switch>
+                            </v-col>
+                            <v-col cols="2" class="text-right pr-1" >
+                                <v-card class="pr-1" outlined tile>
+                                    <span style="font-size: 14px">{{ strMouse }}</span>
+                                </v-card>
+                            </v-col>
+                            <v-col cols="3" class="text-right" >
+                                <v-btn class="mr-2" x-small @click.stop="zoomNormal">
+                                    <v-icon small>
+                                        $magnifyMinusOutline
+                                    </v-icon>
+                                </v-btn>
+                                <v-btn class="mr-2" x-small @click.stop="zoomDouble">
+                                    <v-icon small>
+                                        $magnifyPlusOutline
+                                    </v-icon>
+                                </v-btn>
+                            </v-col>
+                        </v-row>
+                        <v-card v-if=!$store.state.client.connected class="py-3 px-2" color="orange">
+                            <span class="text-h5 font-weight-bold">Connection Failed!!!</span>
                         </v-card>
+                    </v-card>
+                    <v-card ref="prev" flat tile class="overflow-y-auto" :style="listHeight" :min-width="(myMinWidth+1)+'px'" :width="myMinWidth+'px'" :max-width="myMinWidth+'px'">
+<!--                        <v-card flat tile outlined>-->
+<!--                            <v-row justify="space-around">-->
+<!--                                <v-col cols="1">-->
+<!--                                    <v-btn-toggle active-class="warning" @change="targetDrones($event)">-->
+<!--                                        <v-btn elevation="1">-->
+<!--                                            <v-icon>$selectAll</v-icon>-->
+<!--                                        </v-btn>-->
+<!--                                    </v-btn-toggle>-->
+<!--                                </v-col>-->
+<!--                                <v-col cols="11">-->
+<!--                                    <v-sheet-->
+<!--                                        elevation="1"-->
+<!--                                        class="ml-2 py-0 px-0"-->
+<!--                                    >-->
+<!--                                        <v-chip-group-->
+<!--                                            multiple-->
+<!--                                            active-class="warning"-->
+<!--                                        >-->
+<!--                                            <v-chip-->
+<!--                                                label-->
+<!--                                                v-for="(tag, i) in tags"-->
+<!--                                                :key="'tag'+i"-->
+<!--                                            >-->
+<!--                                                {{ tag }}-->
+<!--                                            </v-chip>-->
+<!--                                        </v-chip-group>-->
+<!--                                    </v-sheet>-->
+<!--                                </v-col>-->
+<!--                            </v-row>-->
+<!--                            <v-row no-gutters justify="center" align="center">-->
+<!--                                <v-col cols="4">-->
+<!--                                    <v-switch-->
+<!--                                        dense hide-details-->
+<!--                                        v-model="distanceMonitor"-->
+<!--                                        label="드론근접감시"-->
+<!--                                        color="warning"-->
+<!--                                        class="ma-0 pa-0 pl-1 py-1"-->
+<!--                                    ></v-switch>-->
+<!--                                </v-col>-->
+<!--                                <v-col cols="3">-->
+<!--                                    <v-switch-->
+<!--                                        dense hide-details-->
+<!--                                        v-model="ADSBMonitor"-->
+<!--                                        label="ADS-B"-->
+<!--                                        color="warning"-->
+<!--                                        class="ma-0 pa-0 pl-1 py-1"-->
+<!--                                        @change="switchADSBMonitor($event)"-->
+<!--                                    ></v-switch>-->
+<!--                                </v-col>-->
+<!--                                <v-col cols="2" class="text-right pr-1" >-->
+<!--                                    <v-card class="pr-1" outlined tile>-->
+<!--                                        <span style="font-size: 14px">{{ strMouse }}</span>-->
+<!--                                    </v-card>-->
+<!--                                </v-col>-->
+<!--                                <v-col cols="3" class="text-right" >-->
+<!--                                    <v-btn class="mr-2" x-small @click.stop="zoomNormal">-->
+<!--                                        <v-icon small>-->
+<!--                                            $magnifyMinusOutline-->
+<!--                                        </v-icon>-->
+<!--                                    </v-btn>-->
+<!--                                    <v-btn class="mr-2" x-small @click.stop="zoomDouble">-->
+<!--                                        <v-icon small>-->
+<!--                                            $magnifyPlusOutline-->
+<!--                                        </v-icon>-->
+<!--                                    </v-btn>-->
+<!--                                </v-col>-->
+<!--                            </v-row>-->
+<!--                            <v-card v-if=!$store.state.client.connected class="py-3 px-2" color="orange">-->
+<!--                                <span class="text-h5 font-weight-bold">Connection Failed!!!</span>-->
+<!--                            </v-card>-->
+<!--                        </v-card>-->
                         <v-card flat tile v-for="drone in $store.state.drone_infos" :key="drone.id">
                             <div v-if="drone.selected">
                                 <DroneInfo
@@ -177,6 +276,8 @@
 
         data: function() {
             return {
+                tags: [],
+
                 strMouse: 'NaN',
                 myHeight: window.innerHeight-50,
                 myWidth: 480,
@@ -207,7 +308,7 @@
 
         computed: {
             listHeight() {
-                return ("max-height: " + (this.myHeight) + "px");
+                return ("max-height: " + (this.myHeight-90) + "px");
             }
         },
 
@@ -216,6 +317,60 @@
         },
 
         methods: {
+            targetDrones(e) {
+                if(e !== undefined) {
+                    this.$store.state.drone_command_prepared = false;
+                    for (let dName in this.$store.state.drone_infos) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if (this.$store.state.drone_infos[dName].selected) {
+                                this.$store.state.drone_infos[dName].targeted = true;
+
+                                EventBus.$emit('do-updateTargetDroneMarker', dName);
+                            }
+                        }
+                    }
+                }
+                else {
+                    this.$store.state.drone_command_prepared = false;
+                    for (let dName in this.$store.state.drone_infos) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if (this.$store.state.drone_infos[dName].selected) {
+                                this.$store.state.drone_infos[dName].targeted = false;
+
+                                EventBus.$emit('do-updateTargetDroneMarker', dName);
+                            }
+                        }
+                    }
+                }
+
+                this.$store.state.drone_command_prepared = false;
+                for (let dName in this.$store.state.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                            this.$store.state.drone_command_prepared = true;
+                            break;
+                        }
+                    }
+                }
+
+
+                // EventBus.$emit('do-updateTargetDroneMarker', this.name);
+                //
+                // //EventBus.$emit('do-targetDrone');
+                //
+                // this.$store.state.drone_infos[this.name].targeted = checked;
+                //
+                // this.$store.state.drone_command_prepared = false;
+                // for (let dName in this.$store.state.drone_infos) {
+                //     if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                //         if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                //             this.$store.state.drone_command_prepared = true;
+                //             break;
+                //         }
+                //     }
+                // }
+            },
+
             onResize() {
                 this.myWidth = this.$refs.prev.$el.clientWidth;
                 console.log(this.myWidth);
@@ -496,6 +651,8 @@
                             this.$store.state.drone_infos[dName].sortie_name = 'disarm';
                             localStorage.setItem(this.$store.state.drone_infos[dName].name + '_sortie_name', this.$store.state.drone_infos[dName].sortie_name);
                         }
+
+                        this.tags.push(dName);
 
                         console.log(this.$store.state.drone_infos[dName].name + '_sortie_name', this.$store.state.drone_infos[dName].sortie_name)
                     }

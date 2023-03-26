@@ -57,6 +57,7 @@ const Icons = {
         magnifyPlusOutline: 'mdi-magnify-plus-outline',
         satelliteVariant: 'mdi-satellite-variant',
         accessPoint: 'mdi-access-point',
+        selectAll: 'mdi-select-all'
     }
 }
 
