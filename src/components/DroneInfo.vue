@@ -6387,52 +6387,13 @@ export default {
             //this.watchingMission = 'disarm';
         });
 
-        EventBus.$on('command-set-pwms-' + this.name, (pwms) => {
-            if (Object.prototype.hasOwnProperty.call(pwms, 'ch9')) {
-                if (pwms.ch9[this.name] !== undefined) {
-                    let pwm_value = parseInt(pwms.ch9[this.name]);
+        EventBus.$on('command-set-pwms-' + this.name, async (payload) => {
+            await sleep(parseInt(1+Math.random()*4));
 
-                    setTimeout((name, target_pub_topic, sys_id, pwm_value) => {
-                        this.send_set_servo_command(name, target_pub_topic, sys_id, 9, pwm_value);
+            let channel = parseInt(payload.channel.split('CH')[1]);
+            let value = parseInt(payload.value);
 
-                    }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, pwm_value);
-                }
-            }
-
-            if (Object.prototype.hasOwnProperty.call(pwms, 'ch10')) {
-                if (pwms.ch10[this.name] !== undefined) {
-                    let pwm_value = parseInt(pwms.ch10[this.name]);
-
-                    setTimeout((name, target_pub_topic, sys_id, pwm_value) => {
-                        this.send_set_servo_command(name, target_pub_topic, sys_id, 10, pwm_value);
-
-                    }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, pwm_value);
-                }
-            }
-
-            if (Object.prototype.hasOwnProperty.call(pwms, 'ch11')) {
-                if (pwms.ch11[this.name] !== undefined) {
-                    let pwm_value = parseInt(pwms.ch11[this.name]);
-
-                    setTimeout((name, target_pub_topic, sys_id, pwm_value) => {
-                        this.send_set_servo_command(name, target_pub_topic, sys_id, 11, pwm_value);
-
-                    }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, pwm_value);
-                }
-            }
-
-            if (Object.prototype.hasOwnProperty.call(pwms, 'ch12')) {
-                if (pwms.ch12[this.name] !== undefined) {
-                    let pwm_value = parseInt(pwms.ch12[this.name]);
-
-                    setTimeout((name, target_pub_topic, sys_id, pwm_value) => {
-                        this.send_set_servo_command(name, target_pub_topic, sys_id, 12, pwm_value);
-
-                    }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, pwm_value);
-                }
-            }
-
-            //this.watchingMission = 'pwms';
+            this.send_set_servo_command(this.name, this.target_pub_topic, this.sys_id, channel, value);
         });
 
         EventBus.$on('command-set-auto_goto-' + this.name, async (payload) => {

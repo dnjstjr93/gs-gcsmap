@@ -518,48 +518,20 @@
                                                     </v-card>
                                                     <v-card tile flat v-if="(command.title === '제어')">
                                                         <v-row no-gutters>
-                                                            <v-col cols="12">
-                                                                <v-subheader>{{ d.name }} 임무제어(PWM):</v-subheader>
+                                                            <v-col cols="3">
+                                                                <v-select
+                                                                    dense outlined :items="['CH5', 'CH6', 'CH7', 'CH8', 'CH9', 'CH10', 'CH11', 'CH12']"
+                                                                    label="PWM Channel" v-model="curPwmChannel[d.name]"
+                                                                    class="pa-1"
+                                                                    hide-details
+                                                                ></v-select>
                                                             </v-col>
                                                             <v-col cols="3">
                                                                 <v-text-field
-                                                                    label="CH9"
-                                                                    class="mx-2 pt-0"
-                                                                    outlined dense
-                                                                    v-model="pwms.ch9[d.name]"
-                                                                    type="number"
-                                                                    min="1100" max="1900"
-                                                                    hint="1100 ~ 1900"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col cols="3">
-                                                                <v-text-field
-                                                                    label="CH10"
-                                                                    class="mx-2 pt-0"
-                                                                    outlined dense
-                                                                    v-model="pwms.ch10[d.name]"
-                                                                    type="number"
-                                                                    min="1100" max="1900"
-                                                                    hint="1100 ~ 1900"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col cols="3">
-                                                                <v-text-field
-                                                                    label="CH11"
-                                                                    class="mx-2 pt-0"
-                                                                    outlined dense
-                                                                    v-model="pwms.ch11[d.name]"
-                                                                    type="number"
-                                                                    min="1100" max="1900"
-                                                                    hint="1100 ~ 1900"
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col cols="3">
-                                                                <v-text-field
-                                                                    label="CH12"
-                                                                    class="mx-2 pt-0"
-                                                                    outlined dense
-                                                                    v-model="pwms.ch12[d.name]"
+                                                                    label="PWM Value (1100 ~ 1900)"
+                                                                    class="mx-2 pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="curPwmValue[d.name]"
                                                                     type="number"
                                                                     min="1100" max="1900"
                                                                     hint="1100 ~ 1900"
@@ -1220,7 +1192,10 @@ export default {
                 ch10: {},
                 ch11: {},
                 ch12: {}
-            }
+            },
+
+            curPwmChannel: {},
+            curPwmValue: {},
         }
     },
 
@@ -1871,12 +1846,15 @@ export default {
         },
 
         setPwms() {
-            console.log(this.pwms);
-            for(let name in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
-                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
-                        EventBus.$emit('command-set-pwms-' + name, this.pwms);
-                    }
+            console.log(this.curPwmChannel);
+            console.log(this.curPwmValue);
+
+            for(let dName in this.curPwmChannel) {
+                if (Object.prototype.hasOwnProperty.call(this.curPwmChannel, dName)) {
+                    let payload = {};
+                    payload.channel = this.curPwmChannel[dName];
+                    payload.value = this.curPwmValue[dName];
+                    EventBus.$emit('command-set-pwms-' + dName, payload);
                 }
             }
         },
