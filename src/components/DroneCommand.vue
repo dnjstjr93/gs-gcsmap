@@ -54,6 +54,7 @@
                                         <span v-else-if="command.title === '종료'">종료확인</span>
                                         <span v-else-if="command.title === '설정'">설정확인</span>
                                         <span v-else-if="command.title === 'WP_YAW'">설정확인</span>
+                                        <span v-else-if="command.title === 'SLEW_YAW'">설정확인</span>
                                     </v-btn>
                                     <v-btn
                                         v-else-if="command.title === '투하'" color="blue"
@@ -646,9 +647,9 @@
                                                             </v-col>
                                                         </v-row>
                                                     </v-card>
-                                                    <v-card tile flat v-if="(command.title === '설정')">
+                                                    <v-card tile flat v-if="(command.title === 'SLEW_YAW')">
                                                         <v-row no-gutters>
-                                                            <v-col cols="3">
+                                                            <v-col cols="6">
                                                                 <v-text-field
                                                                     label="SLEW_YAW (meterdgrees/s), 5-180, 1"
                                                                     class="pa-1"
@@ -661,6 +662,10 @@
                                                                     hint="Range:5~180, Increment:1"
                                                                 ></v-text-field>
                                                             </v-col>
+                                                        </v-row>
+                                                    </v-card>
+                                                    <v-card tile flat v-if="(command.title === '설정')">
+                                                        <v-row no-gutters>
                                                             <v-col cols="2">
                                                                 <v-text-field
                                                                     label="SPEED_UP (m/s), 0.1-10.0, 0.5"
@@ -1064,6 +1069,9 @@
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">시동 끄기</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === 'WP_YAW'">
+                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
+                    </span>
+                    <span v-else-if="curTab === 'SLEW_YAW'">
                         비행체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '설정'">
@@ -1662,6 +1670,9 @@ export default {
             else if(this.curTab === 'WP_YAW') {
                 this.setWpYawParam();
             }
+            else if(this.curTab === 'SLEW_YAW') {
+                this.setSlewYawParam();
+            }
             else if(this.curTab === '설정') {
                 this.setParams();
             }
@@ -2076,6 +2087,17 @@ export default {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         EventBus.$emit('command-set-disarm-' + name);
+                    }
+                }
+            }
+        },
+
+        setSlewYawParam() {
+            console.log(this.$store.state.params);
+            for (let name in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                        EventBus.$emit('command-set-slew-yaw-param-' + name, this.$store.state.params);
                     }
                 }
             }

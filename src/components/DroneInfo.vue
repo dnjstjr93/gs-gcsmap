@@ -6281,6 +6281,17 @@ export default {
             //this.watchingMission = 'pwms-mission';
         });
 
+        EventBus.$on('command-set-slew-yaw-param-' + this.name, async (params) => {
+            if (Object.prototype.hasOwnProperty.call(params, 'atcSlewYaw')) {
+                if (params.atcSlewYaw[this.name] !== undefined) {
+                    await sleep(parseInt(1 + Math.random() * 2));
+
+                    let param_value = parseFloat(params.atcSlewYaw[this.name]);
+                    this.send_atc_slew_yaw_param_set_command(this.name, this.target_pub_topic, this.sys_id, param_value);
+                }
+            }
+        });
+
         EventBus.$on('command-set-wp-yaw-param-' + this.name, async (params) => {
             if (Object.prototype.hasOwnProperty.call(params, 'wpYawBehavior')) {
                 if (params.wpYawBehavior[this.name] !== undefined) {
@@ -6311,17 +6322,6 @@ export default {
         });
 
         EventBus.$on('command-set-params-' + this.name, (params) => {
-            if (Object.prototype.hasOwnProperty.call(params, 'atcSlewYaw')) {
-                if (params.atcSlewYaw[this.name] !== undefined) {
-                    let param_value = parseFloat(params.atcSlewYaw[this.name]);
-
-                    setTimeout((name, target_pub_topic, sys_id, param_value) => {
-                        this.send_atc_slew_yaw_param_set_command(name, target_pub_topic, sys_id, param_value);
-
-                    }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
-                }
-            }
-
             if (Object.prototype.hasOwnProperty.call(params, 'wpnavSpeedUp')) {
                 if (params.wpnavSpeedUp[this.name] !== undefined) {
                     let param_value = parseFloat(params.wpnavSpeedUp[this.name]);
@@ -6387,91 +6387,6 @@ export default {
             //this.watchingMission = 'disarm';
         });
 
-        EventBus.$on('command-set-auto_goto-' + this.name, (payload) => {
-            let start_idx = payload.start_index;
-            let end_idx = payload.end_index;
-            let delay = this.$store.state.drone_infos[this.name].autoDelay;
-            let auto_speed = this.$store.state.drone_infos[this.name].autoSpeed;
-
-            this.send_wpnav_speed_param_set_command(this.name, this.target_pub_topic, this.sys_id, auto_speed);
-
-            let target_mode = 'LOITER';
-            if (this.fcType === 'px4') {
-                target_mode = 'AUTO_LOITER';
-            }
-
-            setTimeout((name, target_pub_topic, sys_id, mode) => {
-                console.log('send_set_mode_command', mode);
-                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
-            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
-
-            let yaw_behavior = 0;
-            if(this.$store.state.drone_infos[this.name].yawBehavior !== 'YAW고정') {
-                yaw_behavior = 1;
-            }
-
-            setTimeout((name, target_pub_topic, sys_id, param_value) => {
-                this.send_wp_yaw_behavior_param_set_command(name, target_pub_topic, sys_id, param_value);
-            }, 15 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, yaw_behavior);
-
-            target_mode = 'GUIDED';
-            if(this.fcType === 'px4') {
-                target_mode = 'AUTO_LOITER';
-            }
-
-            setTimeout((name, target_pub_topic, sys_id, mode) => {
-                console.log('send_set_mode_command', mode);
-                this.send_set_mode_command(name, target_pub_topic, sys_id, mode);
-            }, 25 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
-
-            console.log('auto_goto_position1', payload.goto_positions);
-
-            var auto_goto_positions = payload.goto_positions.slice(0, (end_idx + 1));
-            let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:16:1';
-            auto_goto_positions.unshift(ele0);
-
-            console.log('auto_goto_position2', start_idx, end_idx, auto_goto_positions);
-
-            setTimeout((name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx) => {
-
-                if (this.curArmStatus === 'DISARMED') {
-                    this.$store.state.drone_infos[name].targetTakeoffAlt = auto_goto_positions[1].split(':')[2];
-                    this.$store.state.drone_infos[name].takeoffDelay = 7;
-
-                    let payload = {};
-                    payload.targetTakeoffAlt = auto_goto_positions[1].split(':')[2];
-                    payload.takeoffDelay = 7;
-
-                    EventBus.$emit('command-set-takeoff-' + this.name, payload);
-                }
-                else {
-                    this.watchingMission = 'takeoff-complete';
-                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
-                }
-
-                const checkMission = (name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx) => {
-                    if (this.$store.state.drone_infos[this.name].watchingMission === 'takeoff-complete') {
-                        setTimeout(this.send_auto_command, 50, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
-
-                        this.watchingMission = 'auto-goto';
-                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
-                        this.watchingMissionStatus = 0;
-
-                        this.postDroneInfos((res) => {
-                            console.log('postDroneInfos - auto-goto', res);
-                        });
-
-                        this.doPublishBroadcast();
-                    }
-                    else {
-                        setTimeout(checkMission, 250, name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
-                    }
-                }
-
-                checkMission(name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
-            }, 35 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, start_idx, end_idx, delay, start_idx);
-        });
-
         EventBus.$on('command-set-pwms-' + this.name, (pwms) => {
             if (Object.prototype.hasOwnProperty.call(pwms, 'ch9')) {
                 if (pwms.ch9[this.name] !== undefined) {
@@ -6520,41 +6435,110 @@ export default {
             //this.watchingMission = 'pwms';
         });
 
-        EventBus.$on('command-set-roi-' + this.name, (position) => {
+        EventBus.$on('command-set-auto_goto-' + this.name, async (payload) => {
+            await sleep(parseInt(1+Math.random()*4));
+
+            let start_idx = payload.start_index;
+            let end_idx = payload.end_index;
+            let delay = this.$store.state.drone_infos[this.name].autoDelay;
+            let auto_speed = this.$store.state.drone_infos[this.name].autoSpeed;
+
+            this.send_wpnav_speed_param_set_command(this.name, this.target_pub_topic, this.sys_id, auto_speed);
+
+            await sleep(parseInt(1+Math.random()*4));
+
             let target_mode = 'GUIDED';
             if(this.fcType === 'px4') {
                 target_mode = 'AUTO_LOITER';
             }
-            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
+            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+            console.log('auto_goto_position1', payload.goto_positions);
+
+            var auto_goto_positions = payload.goto_positions.slice(0, (end_idx + 1));
+            let ele0 = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:16:1';
+            auto_goto_positions.unshift(ele0);
+
+            console.log('auto_goto_position2', start_idx, end_idx, auto_goto_positions);
+
+            await sleep(parseInt(10+Math.random()*10));
+
+            if (this.curArmStatus === 'DISARMED') {
+                this.$store.state.drone_infos[name].targetTakeoffAlt = auto_goto_positions[1].split(':')[2];
+                this.$store.state.drone_infos[name].takeoffDelay = 7;
+
+                let payload = {};
+                payload.targetTakeoffAlt = auto_goto_positions[1].split(':')[2];
+                payload.takeoffDelay = 7;
+
+                EventBus.$emit('command-set-takeoff-' + this.name, payload);
+            }
+            else {
+                this.watchingMission = 'takeoff-complete';
+                this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+            }
+
+            const checkMission = (name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx) => {
+                if (this.$store.state.drone_infos[this.name].watchingMission === 'takeoff-complete') {
+                    this.send_auto_command(name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
+
+                    this.watchingMission = 'auto-goto';
+                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                    this.watchingMissionStatus = 0;
+
+                    this.postDroneInfos((res) => {
+                        console.log('postDroneInfos - auto-goto', res);
+                    });
+
+                    this.doPublishBroadcast();
+                }
+                else {
+                    setTimeout(checkMission, parseInt(250 + Math.random() * 5), name, target_pub_topic, sys_id, auto_goto_positions, start_idx, end_idx, delay, cur_idx);
+                }
+            }
+
+            checkMission(this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, start_idx, end_idx, delay, start_idx);
+        });
+
+        EventBus.$on('command-set-roi-' + this.name, async (position) => {
+            await sleep(parseInt(1+Math.random()*4));
+
+            let target_mode = 'GUIDED';
+            if(this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
+
+            await sleep(parseInt(1+Math.random()*4));
 
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
             var lng = parseFloat(arr_cur_goto_position[1]);
             let alt = parseFloat(arr_cur_goto_position[2]);
-
             console.log('send_set_roi_command - lat: ', lat, ', lng: ', lng, ', alt: ', alt);
-            setTimeout(this.send_set_roi_command, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lng, alt);
+            this.send_set_roi_command(this.name, this.target_pub_topic, this.sys_id, lat, lng, alt);
         });
 
-        EventBus.$on('command-set-rtl-' + this.name, (rtl_speed) => {
-            setTimeout((name, target_pub_topic, sys_id, rtl_speed) => {
-                this.send_rtl_speed_param_set_command(name, target_pub_topic, sys_id, rtl_speed);
+        EventBus.$on('command-set-rtl-' + this.name, async (rtl_speed) => {
+            await sleep(parseInt(1+Math.random()*4));
 
-                setTimeout((name, target_pub_topic, sys_id) => {
-                    this.send_rtl_command(name, target_pub_topic, sys_id);
+            this.send_rtl_speed_param_set_command(this.name, this.target_pub_topic, this.sys_id, rtl_speed);
 
-                    this.watchingMission = 'rtl';
-                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
-                    this.watchingInitDist = this.valueDistance;
+            await sleep(parseInt(1+Math.random()*4));
 
-                    this.doPublishBroadcast();
+            this.send_rtl_command(this.name, this.target_pub_topic, this.sys_id);
 
-                }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id);
-            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, rtl_speed);
+            this.watchingMission = 'rtl';
+            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+            this.watchingInitDist = this.valueDistance;
+
+            this.doPublishBroadcast();
         });
 
-        EventBus.$on('command-set-land-' + this.name, () => {
-            setTimeout(this.send_land_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id);
+        EventBus.$on('command-set-land-' + this.name, async () => {
+            await sleep(parseInt(1+Math.random()*4));
+
+            this.send_land_command(this.name, this.target_pub_topic, this.sys_id);
 
             this.watchingMission = 'land';
             this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
@@ -6570,24 +6554,25 @@ export default {
             this.doPublishBroadcast();
         });
 
-        EventBus.$on('command-set-stop-' + this.name, () => {
+        EventBus.$on('command-set-stop-' + this.name, async () => {
+            await sleep(parseInt(1+Math.random()*4));
 
             let target_mode = 'LOITER';
             if(this.fcType === 'px4') {
                 target_mode = 'AUTO_LOITER';
             }
-            setTimeout(this.send_set_mode_command, 0, this.name, this.target_pub_topic, this.sys_id, target_mode);
-
-            //this.watchingMission = 'stop';
+            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
         });
 
-        EventBus.$on('command-set-change-speed-' + this.name, (target_speed) => {
-            setTimeout(this.send_change_speed_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_speed);
+        EventBus.$on('command-set-change-speed-' + this.name, async (target_speed) => {
+            await sleep(parseInt(1+Math.random()*4));
 
-            //this.watchingMission = 'change-speed';
+            this.send_change_speed_command(this.name, this.target_pub_topic, this.sys_id, target_speed);
         });
 
-        EventBus.$on('command-set-goto-circle-' + this.name, (position) => {
+        EventBus.$on('command-set-goto-circle-' + this.name, async (position) => {
+            await sleep(parseInt(1+Math.random()*4));
+
             var dir = (this.$store.state.drone_infos[this.name].circleType === '시계방향') ? (1) : (-1);
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
@@ -6598,122 +6583,78 @@ export default {
             var circle_speed = parseFloat(arr_cur_goto_position[5]);
             var degree_speed = dir * parseInt((circle_speed / radius) * (180 / 3.14), 10);
 
-            setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed) => {
-                this.send_circle_radius_param_set_command(name, target_pub_topic, sys_id, radius);
+            this.send_circle_radius_param_set_command(this.name, this.target_pub_topic, this.sys_id, radius);
 
-                setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed) => {
-                    this.send_circle_rate_param_set_command(name, target_pub_topic, sys_id, degree_speed);
+            await sleep(parseInt(1+Math.random()*4));
 
-                    setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed) => {
-                        let target_mode = 'GUIDED';
-                        if(this.fcType === 'px4') {
-                            target_mode = 'AUTO_LOITER';
-                        }
-                        this.send_set_mode_command(name, target_pub_topic, sys_id, target_mode);
+            this.send_circle_rate_param_set_command(this.name, this.target_pub_topic, this.sys_id, degree_speed);
 
-                        var auto_goto_positions = [];
+            await sleep(parseInt(1+Math.random()*4));
 
-                        let ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_WAYPOINT) + ':1';
-                        auto_goto_positions.push(ele);
+            let target_mode = 'GUIDED';
+            if(this.fcType === 'px4') {
+                target_mode = 'AUTO_LOITER';
+            }
+            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
 
-                        ele = lat.toString() + ':' + lon.toString() + ':' + alt.toString() + ':' + degree_speed + ':' + radius + ':10:' + String(mavlink.MAV_CMD_NAV_LOITER_TURNS)
-                        auto_goto_positions.push(ele);
+            await sleep(parseInt(1+Math.random()*4));
 
-                        //console.log('auto_goto_positions', auto_goto_positions);
+            var auto_goto_positions = [];
 
-                        setTimeout(this.send_auto_command, 50, this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, 0, 0, 1, 0);
+            let ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (this.gpi.relative_alt / 1000).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_WAYPOINT) + ':1';
+            auto_goto_positions.push(ele);
 
-                        delete this.$store.state.missionLines[name];
-                        this.$store.state.missionCircles[name] = null;
-                        delete this.$store.state.missionCircles[name];
-                        this.$store.state.missionCircles[name] = {
-                            lat: lat,
-                            lng: lon,
-                            radius: radius,
-                            options: {
-                                strokeColor: this.$store.state.drone_infos[this.name].color,
-                                strokeOpacity: 1,
-                                strokeWeight: 5,
-                                fillOpacity: 0.1
-                            }
-                        };
+            ele = lat.toString() + ':' + lon.toString() + ':' + alt.toString() + ':' + degree_speed + ':' + radius + ':10:' + String(mavlink.MAV_CMD_NAV_LOITER_TURNS)
+            auto_goto_positions.push(ele);
 
-                        this.$store.state.missionCircles = this.clone(this.$store.state.missionCircles);
+            this.send_auto_command(this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, 0, 0, 1, 0);
 
-                        console.log('send_goto_circle_command', this.$store.state.missionCircles);
+            delete this.$store.state.missionLines[this.name];
+            this.$store.state.missionCircles[this.name] = null;
+            delete this.$store.state.missionCircles[this.name];
+            this.$store.state.missionCircles[this.name] = {
+                lat: lat,
+                lng: lon,
+                radius: radius,
+                options: {
+                    strokeColor: this.$store.state.drone_infos[this.name].color,
+                    strokeOpacity: 1,
+                    strokeWeight: 5,
+                    fillOpacity: 0.1
+                }
+            };
 
-                        let cur_lat = this.gpi.lat / 10000000;
-                        let cur_lon = this.gpi.lon / 10000000;
-                        let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
+            this.$store.state.missionCircles = this.clone(this.$store.state.missionCircles);
 
-                        var result2 = dfs_xy_conv('toXY', lat, lon);
+            console.log('send_goto_circle_command', this.$store.state.missionCircles);
 
-                        this.$store.state.drone_infos[name].targetLat = lat;
-                        this.$store.state.drone_infos[name].targetLng = lon;
-                        this.$store.state.drone_infos[name].targetAlt = alt;
+            let cur_lat = this.gpi.lat / 10000000;
+            let cur_lon = this.gpi.lon / 10000000;
+            let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
-                        this.watchingMission = 'goto-circle';
-                        this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
-                        this.watchingMissionStatus = 0;
+            var result2 = dfs_xy_conv('toXY', lat, lon);
 
-                        let deg = (Math.atan2((result2.y - result1.y), (result2.x - result1.x)) * (180/3.14));
-                        deg = 360-deg;
-                        deg -= 90;
-                        deg %= 360;
+            this.$store.state.drone_infos[this.name].targetLat = lat;
+            this.$store.state.drone_infos[this.name].targetLng = lon;
+            this.$store.state.drone_infos[this.name].targetAlt = alt;
 
-                        this.droneStatus.initHeading = (deg + 180) % 360;
-                        this.droneStatus.radius = radius;
+            this.watchingMission = 'goto-circle';
+            this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+            this.watchingMissionStatus = 0;
 
-                        this.doPublishBroadcast();
+            let deg = (Math.atan2((result2.y - result1.y), (result2.x - result1.x)) * (180/3.14));
+            deg = 360-deg;
+            deg -= 90;
+            deg %= 360;
 
-                        // setTimeout((name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed) => {
-                        //     this.send_goto_circle_command(name, target_pub_topic, sys_id, lat, lon, alt, degree_speed, radius);
-                        //
-                        //     delete this.$store.state.missionLines[name];
-                        //     this.$store.state.missionCircles[name] = null;
-                        //     delete this.$store.state.missionCircles[name];
-                        //     this.$store.state.missionCircles[name] = {
-                        //         lat: lat,
-                        //         lng: lon,
-                        //         radius: radius,
-                        //         options: {
-                        //             strokeColor: this.$store.state.drone_infos[this.name].color,
-                        //             strokeOpacity: 0.4,
-                        //             strokeWeight: 5,
-                        //             fillOpacity: 0.1
-                        //         }
-                        //     };
-                        //
-                        //     this.$store.state.missionCircles = this.clone(this.$store.state.missionCircles);
-                        //
-                        //     console.log('send_goto_circle_command', this.$store.state.missionCircles);
-                        //
-                        //     this.watchingMission = 'goto-circle';
-                        //
-                        // }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed);
-                    }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed);
-                }, 5 + parseInt(Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, radius, degree_speed);
-            }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, lat, lon, alt, radius, degree_speed);
+            this.droneStatus.initHeading = (deg + 180) % 360;
+            this.droneStatus.radius = radius;
+
+            this.doPublishBroadcast();
         });
 
         EventBus.$on('command-set-goto-' + this.name, async (position) => {
-
-            // let target_mode = 'LOITER';
-            // if (this.fcType === 'px4') {
-            //     target_mode = 'AUTO_LOITER';
-            // }
-            //
-            // await sleep(parseInt(1+Math.random()));
-            //
-            // this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
-            // await sleep(parseInt(5+Math.random()*5));
-            //
-            // let yaw_behavior = 0;
-            // if(this.$store.state.drone_infos[this.name].yawBehavior !== 'YAW고정') {
-            //     yaw_behavior = 1;
-            // }
-            // this.send_wp_yaw_behavior_param_set_command(this.name, this.target_pub_topic, this.sys_id, yaw_behavior);
-            // await sleep(parseInt(5+Math.random()*5));
+            await sleep(parseInt(1+Math.random()*4));
 
             let target_mode = 'GUIDED';
             if(this.fcType === 'px4') {
@@ -6721,7 +6662,6 @@ export default {
             }
             console.log('send_set_mode_command', target_mode);
             this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
-            await sleep(parseInt(5+Math.random()*5));
 
             var arr_cur_goto_position = position.split(':');
             var lat = parseFloat(arr_cur_goto_position[0]);
@@ -6753,6 +6693,8 @@ export default {
             this.$store.state.missionLines = this.clone(this.$store.state.missionLines)
 
             if (this.$store.state.drone_infos[this.name].gotoType === '고도먼저') {
+                await sleep(parseInt(1+Math.random()*4));
+
                 this.$store.state.drone_infos[this.name].targetAlt = alt;
 
                 console.log('send_goto_alt_command - alt: ', alt);
@@ -6776,10 +6718,25 @@ export default {
                 this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
             }
 
+            const checkMission = (name, target_pub_topic, sys_id, lat, lon, alt, speed) => {
+                if (this.$store.state.drone_infos[this.name].watchingMission === 'goto-alt-complete') {
+                    nextProc(name, target_pub_topic, sys_id, lat, lon, alt, speed);
+                }
+                else if (this.$store.state.drone_infos[this.name].watchingMission === 'fail') {
+                    console.log('command-set-goto-', name, ' fail');
+                }
+                else {
+                    setTimeout(checkMission, parseInt(100 + Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, speed);
+                }
+            }
+
             const nextProc = async (name, target_pub_topic, sys_id, lat, lon, alt, speed) => {
+                await sleep(parseInt(1+Math.random()*4));
+
                 this.send_goto_command(this.name, this.target_pub_topic, this.sys_id, lat, lon, alt);
 
-                await sleep(parseInt(15+Math.random()*5));
+                await sleep(parseInt(10+Math.random()*10));
+
                 this.send_change_speed_command(this.name, this.target_pub_topic, this.sys_id, speed);
 
                 delete this.$store.state.missionCircles[name];
@@ -6829,27 +6786,17 @@ export default {
                 this.doPublishBroadcast();
             }
 
-            const checkMission = (name, target_pub_topic, sys_id, lat, lon, alt, speed) => {
-                if (this.$store.state.drone_infos[this.name].watchingMission === 'goto-alt-complete') {
-                    nextProc(name, target_pub_topic, sys_id, lat, lon, alt, speed);
-                }
-                else if (this.$store.state.drone_infos[this.name].watchingMission === 'fail') {
-                    console.log('command-set-goto-', name, ' fail');
-                }
-                else {
-                    setTimeout(checkMission, parseInt(100 + Math.random() * 5), name, target_pub_topic, sys_id, lat, lon, alt, speed);
-                }
-            }
-
             checkMission(this.name, this.target_pub_topic, this.sys_id, lat, lon, alt, speed);
         });
 
-        EventBus.$on('command-set-goto-alt-' + this.name, (_alt) => {
+        EventBus.$on('command-set-goto-alt-' + this.name, async (_alt) => {
+            await sleep(parseInt(1+Math.random()*4));
+
             let target_mode = 'GUIDED';
             if(this.fcType === 'px4') {
                 target_mode = 'AUTO_LOITER';
             }
-            setTimeout(this.send_set_mode_command, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, target_mode);
+            this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
 
             this.watchingMission = 'goto-alt';
             this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
@@ -6864,47 +6811,55 @@ export default {
 
             this.doPublishBroadcast();
 
+            await sleep(parseInt(1+Math.random()*4));
+
             console.log('send_goto_alt_command - alt: ', _alt);
-            setTimeout(this.send_goto_alt_command, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, _alt);
+            this.send_goto_alt_command(this.name, this.target_pub_topic, this.sys_id, _alt);
         });
 
         EventBus.$on('command-set-takeoff-' + this.name, async (payload) => {
-            if(this.curArmStatus === 'ARMED' && (this.gpi.alt / 1000).toFixed(1) > 1) {
+            if(this.curArmStatus === 'ARMED' && parseFloat((this.gpi.alt / 1000).toFixed(1)) > 1) {
                 console.log("비행체가 이륙된 상태 입니다.");
             }
             else {
+                await sleep(parseInt(1+Math.random()*4));
+
                 let target_mode = 'ALT_HOLD';
                 if(this.fcType === 'px4') {
                     target_mode = 'AUTO_LOITER';
                 }
                 this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
                 console.log('send_arm_command ', this.name);
+
                 await sleep(parseInt(1+Math.random()*4));
 
                 let takeoffDelay = payload.takeoffDelay;
                 let relativeAlt = payload.targetTakeoffAlt;
                 let absoluteAlt = parseFloat((this.gpi.alt / 1000) + relativeAlt);
-
-                let takeoff_alt = relativeAlt;
+                let takeoffAlt = relativeAlt;
                 if(this.fcType === 'px4') {
-                    takeoff_alt = absoluteAlt;
+                    takeoffAlt = absoluteAlt;
                 }
-
                 this.send_arm_command(this.name, this.target_pub_topic, this.sys_id, 1, 0);
-                await sleep(takeoffDelay*1000);
+
+                await sleep(parseInt(takeoffDelay*500));
 
                 //this.send_set_do_set_home(this.name, this.target_pub_topic, this.sys_id);
                 // setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
                 if (this.curArmStatus === 'ARMED') {
+                    console.log('send_takeoff_command - alt - delay: ', relativeAlt, takeoffDelay);
+
+                    await sleep(parseInt(takeoffDelay*500));
+
                     target_mode = 'GUIDED';
                     if(this.fcType === 'px4') {
                         target_mode = 'AUTO_LOITER';
                     }
                     this.send_set_mode_command(this.name, this.target_pub_topic, this.sys_id, target_mode);
+
                     await sleep(parseInt(1+Math.random()*3));
-                    // setTimeout((name, target_pub_topic, sys_id, takeoff_alt) => {
-                    console.log('send_takeoff_command - alt - delay: ', relativeAlt, takeoffDelay);
-                    this.send_takeoff_command(this.name, this.target_pub_topic, this.sys_id, takeoff_alt);
+
+                    this.send_takeoff_command(this.name, this.target_pub_topic, this.sys_id, takeoffAlt);
 
                     this.watchingMission = 'takeoff';
                     this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
@@ -6918,26 +6873,10 @@ export default {
                     }
 
                     this.doPublishBroadcast();
-
-                    // }, parseInt(100 + (Math.random() * 10)), name, target_pub_topic, sys_id, takeoff_alt);
-
-
-                    // var auto_goto_positions = [];
-                    //
-                    // let ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (takeoff_alt).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_TAKEOFF);
-                    // auto_goto_positions.push(ele);
-                    // ele = (this.gpi.lat / 10000000).toString() + ':' + (this.gpi.lon / 10000000).toString() + ':' + (takeoff_alt).toString() + ':5:250:10:' + String(mavlink.MAV_CMD_NAV_WAYPOINT);
-                    // auto_goto_positions.push(ele);
-                    //
-                    // //console.log('auto_goto_positions', auto_goto_positions);
-                    //
-                    // setTimeout(this.send_auto_command, 50, this.name, this.target_pub_topic, this.sys_id, auto_goto_positions, 0, 0, 0, 0);
-                    // this.watchingMission = 'auto-goto';
                 }
                 else {
                     console.log("시동이 걸리지 않았습니다.");
                 }
-                // }, parseInt((takeoffDelay*1000) + Math.random()*10), this.name, this.target_pub_topic, this.sys_id, _alt);
             }
         });
 
@@ -7380,6 +7319,7 @@ export default {
         EventBus.$off('command-set-pwms-mission-' + this.name);
         EventBus.$off('command-set-params-' + this.name);
         EventBus.$off('command-set-wp-yaw-param-' + this.name);
+        EventBus.$off('command-set-slew-yaw-param-' + this.name);
         EventBus.$off('command-set-disarm-' + this.name);
         EventBus.$off('command-set-auto_goto-' + this.name);
         EventBus.$off('command-set-pwms-' + this.name);

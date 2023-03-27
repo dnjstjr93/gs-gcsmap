@@ -621,6 +621,7 @@
                 this.$store.state.commands = [];
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['WP_YAW']]);
+                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['SLEW_YAW']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
