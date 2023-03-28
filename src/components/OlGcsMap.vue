@@ -1085,9 +1085,11 @@ export default {
 
             console.log(this.$store.state.surveyMarkers);
 
-            this.initOlSurveyMarker(dName, pIndex, survey);
+            //this.initOlSurveyMarker(dName, pIndex, survey);
 
-            this.updateSource();
+            this.pushOlSurveyMarker(survey, dName, pIndex);
+
+            //this.updateSource();
 
             try {
                 let url = url_base + '/SurveyMarkerInfos/' + dName;
@@ -1167,9 +1169,11 @@ export default {
 
                     this.$store.state.tempMarkers[dName].push(marker);
 
-                    this.initOlTempMarker(dName);
+                    //this.initOlTempMarker(dName);
 
-                    this.updateSource();
+                    this.pushOlTempMarker(marker, dName, this.$store.state.tempMarkers[dName].length-1);
+
+                    //this.updateSource();
 
                     try {
                         let url = url_base + '/MarkerInfos/' + dName;
@@ -1257,7 +1261,7 @@ export default {
 
             for(let dName in this.olTempMarkers) {
                 if(Object.prototype.hasOwnProperty.call(this.olTempMarkers, dName)) {
-                    this.features.push(this.olTempMarkers[dName].guideLineFeature);
+                    //임시//this.features.push(this.olTempMarkers[dName].guideLineFeature);
                     this.features = this.features.concat(this.olTempMarkers[dName].tempMarkerFeatures);
 
                     // this.olTempMarkers[dName].tempMarkerTranslates.forEach((translate) => {
@@ -2031,7 +2035,7 @@ export default {
 
                         this.olTempMarkers[dName].Coordinates[pIndex] = feature.getGeometry().getCoordinates();
 
-                        this.olTempMarkers[dName].guideLineFeature.getGeometry().setCoordinates(this.olTempMarkers[dName].Coordinates);
+                        //임시//this.olTempMarkers[dName].guideLineFeature.getGeometry().setCoordinates(this.olTempMarkers[dName].Coordinates);
 
                         try {
                             let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
@@ -2176,7 +2180,7 @@ export default {
                                 console.log('elevation_val', result.results[0].elevation);
                                 this.olTempMarkers[dName].Coordinates[pIndex] = feature.getGeometry().getCoordinates();
 
-                                this.olTempMarkers[dName].guideLineFeature.getGeometry().setCoordinates(this.olTempMarkers[dName].Coordinates);
+                                //임시//this.olTempMarkers[dName].guideLineFeature.getGeometry().setCoordinates(this.olTempMarkers[dName].Coordinates);
 
                                 this.$store.state.tempMarkers[dName][pIndex].lat = latLng[1];
                                 this.$store.state.tempMarkers[dName][pIndex].lng = latLng[0];
@@ -2583,7 +2587,7 @@ export default {
                     let targetLineStyle = [
                         new Style({
                             stroke: new Stroke({
-                                color: this.$store.state.drone_infos[dName].color + '80',
+                                color: this.$store.state.drone_infos[dName].color + 'FF',
                                 width: 5,
                             }),
                             text: new Text({
@@ -2607,8 +2611,8 @@ export default {
                                 rotateWithView: true,
                                 rotation: -rotation,
                                 color: this.$store.state.drone_infos[dName].color,
-                                opacity: 0.5,
-                                scale: 1.5
+                                opacity: 1,
+                                scale: 1.7
                             })
                         }),
                     ];
@@ -2678,6 +2682,67 @@ export default {
                     this.olDroneMarkers[dName].trackingLineFeature.setStyle(trackingLineStyle);
                 }
             });
+        },
+
+        pushOlTempMarker(marker, dName, pIndex) {
+            let tLat = marker.lat;
+            let tLng = marker.lng;
+            let tAlt = marker.alt;
+
+            let tPnt = new Point([tLng, tLat]).transform('EPSG:4326', 'EPSG:3857');
+            let tCoordinate = tPnt.getCoordinates();
+
+            console.log('OOOOOOOOOOOOOOOOOOOOOOOOOO tempMarkers', dName, pIndex, tCoordinate);
+
+            this.olTempMarkers[dName].Coordinates.push(tCoordinate);
+
+            let tFeature = new Feature({
+                geometry: new Point([tCoordinate[0], tCoordinate[1]]),
+                type: 'tempMarker',
+                dragging: false,
+                altKey: false,
+            });
+            tFeature.setId(dName + '-' + pIndex);
+
+            let selectedColor = '#76FF03F0';
+            let targetedColor = '#76FF03FF';
+
+            if (this.$store.state.tempMarkers[dName][pIndex].selected) {
+                selectedColor = '#76FF03F0';
+            }
+            else {
+                selectedColor = '#FAFAFA80';
+            }
+
+            if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                targetedColor = '#76FF03FF';
+            }
+            else {
+                targetedColor = '#FFFDE7FF';
+            }
+
+            console.log('ppppppppppppppppppppppppp tempMarker-targeted', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted, targetedColor);
+
+            let iconStyleTemp = this.getStyleTempMarker(
+                pIndex,
+                this.$store.state.drone_infos[dName].color,
+                targetedColor,
+                '15',
+                tAlt,
+                svgTempScale,
+                selectedColor,
+                this.$store.state.tempMarkers[dName][pIndex].elevation,
+            );
+
+            tFeature.setStyle(iconStyleTemp);
+
+            this.olTempMarkers[dName].tempMarkerFeatures.push(tFeature);
+            const source = this.vectorLayer.getSource();
+            source.addFeature(tFeature);
+
+            if (this.$store.state.tempMarkers[dName][pIndex].targeted) {
+                this.addTempTranslate(tFeature);
+            }
         },
 
         initOlTempMarker(dName) {
@@ -2829,21 +2894,21 @@ export default {
             //
             // this.olTempMarkers[dName].tempMarkerTranslates.push(tTranslate);
 
-            this.olTempMarkers[dName].guideLineFeature = new Feature({
-                geometry: new LineString(this.olTempMarkers[dName].Coordinates),
-                type: 'guideLine',
-            });
+            //임시//this.olTempMarkers[dName].guideLineFeature = new Feature({
+            //임시//    geometry: new LineString(this.olTempMarkers[dName].Coordinates),
+            //임시//    type: 'guideLine',
+            //임시//});
 
-            let guideLineStyle = new Style({
-                stroke: new Stroke({
-                    color: this.$store.state.drone_infos[dName].color + '25',
-                    width: 9,
-                })
-            });
+            //임시//let guideLineStyle = new Style({
+            //임시//    stroke: new Stroke({
+            //임시//        color: this.$store.state.drone_infos[dName].color + '25',
+            //임시//        width: 9,
+            //임시//    })
+            //임시//});
 
-            this.olTempMarkers[dName].guideLineFeature.setId(dName + '-' + 'guideLine');
+            //임시//this.olTempMarkers[dName].guideLineFeature.setId(dName + '-' + 'guideLine');
 
-            this.olTempMarkers[dName].guideLineFeature.setStyle(guideLineStyle);
+            //임시//this.olTempMarkers[dName].guideLineFeature.setStyle(guideLineStyle);
         },
 
         initOlTempMarkers() {
@@ -2854,6 +2919,157 @@ export default {
                     this.initOlTempMarker(dName);
                 }
             });
+        },
+
+        pushOlSurveyMarker(survey, dName, pIndex) {
+            let polyCoordinates = [];
+            for(let i = 0; i < survey.paths.length; i++) {
+                let svLat = survey.paths[i].lat;
+                let svLng = survey.paths[i].lng;
+
+                let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
+                let svCoordinate = svPnt.getCoordinates();
+
+                console.log('sssssssssssssssssssssssssssssssssssss surveyMarkers', dName, pIndex, i, svCoordinate);
+
+                polyCoordinates.push(svCoordinate);
+            }
+
+            this.olSurveyMarkers[dName].polyCoordinates[pIndex] = JSON.parse(JSON.stringify(polyCoordinates));
+
+            let svFeature = new Feature({
+                geometry: new Polygon([this.olSurveyMarkers[dName].polyCoordinates[pIndex]]),
+                type: 'surveyMarker',
+                dragging: false,
+            });
+            svFeature.setId(dName + '-' + pIndex + '-survey');
+
+            let area = getArea(svFeature.getGeometry());
+            this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
+            console.log('computeArea = ', area.toFixed(1), '㎡');
+
+            let selectedColor = '#76FF03F0';
+            if (this.$store.state.surveyMarkers[dName][pIndex].selected) {
+                selectedColor = '#76FF0320';
+            }
+            else {
+                selectedColor = '#FAFAFA20';
+            }
+
+            let targetedColor = '#76FF03FF';
+            if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
+                targetedColor = '#76FF0380';
+            }
+            else {
+                targetedColor = this.$store.state.drone_infos[dName].color + '20';
+            }
+
+            console.log('sssssssssssssssssssssssssssssss surveyMarker-targeted', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted, targetedColor);
+
+            let styleSurvey = new Style({
+                stroke: new Stroke({
+                    color: targetedColor,
+                    width: 2,
+                }),
+                fill: new Fill({
+                    color: selectedColor
+                }),
+                zIndex: 3,
+            });
+
+            svFeature.setStyle(styleSurvey);
+
+            this.olSurveyMarkers[dName].surveyMarkerFeatures.push(svFeature);
+            const source = this.vectorLayer.getSource();
+            source.addFeature(svFeature);
+
+            if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
+                this.addSurveyTranslate(svFeature);
+            }
+
+            let pathLineCoordinates = [];
+            for(let i = 0; i < survey.pathLines.length; i++) {
+                let svLat = survey.pathLines[i].lat;
+                let svLng = survey.pathLines[i].lng;
+
+                let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
+                let svCoordinate = svPnt.getCoordinates();
+
+                pathLineCoordinates.push(svCoordinate);
+            }
+
+            console.log('sssssssssssssssssssssssssssssssssssss pathLines', dName, pIndex, pathLineCoordinates);
+
+            this.olSurveyMarkers[dName].lineCoordinates[pIndex] = JSON.parse(JSON.stringify(pathLineCoordinates));
+
+            let lineFeature = new Feature({
+                geometry: new LineString(this.olSurveyMarkers[dName].lineCoordinates[pIndex]),
+                type: 'surveyLine',
+            });
+            lineFeature.setId(dName + '-' + pIndex + '-surveyLine');
+
+            let pathLineStyle = [
+                new Style({
+                    stroke: new Stroke({
+                        color: this.$store.state.drone_infos[dName].color + 'FF',
+                        width: 5,
+                    }),
+                    zIndex: 2,
+                }),
+                new Style({
+                    image: new CircleStyle({
+                        radius: 6,
+                        fill: new Fill({
+                            color: 'orange',
+                        }),
+                    }),
+                    geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinates = feature.getGeometry().getCoordinates();
+                        return new MultiPoint(coordinates);
+                    },
+                    zIndex: 2,
+                }),
+                new Style({
+                    text: new Text({
+                        text: ['0', 'bold 10px sans-serif'],
+                        textAlign: 'center',
+                        offsetY: 0,
+                        scale: 1.4,
+                        stroke: new Stroke({
+                            color: 'black',
+                            width: 1,
+                        }),
+                        fill: new Fill({
+                            color: 'white'
+                        }),
+                    }),
+                    geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinate = feature.getGeometry().getCoordinates()[0];
+                        return new Point(coordinate);
+                    },
+                    zIndex: 3,
+                }),
+            ];
+
+            lineFeature.setStyle(pathLineStyle);
+
+            this.olSurveyMarkers[dName].surveyLineFeatures.push(lineFeature);
+            source.addFeature(lineFeature);
+
+            let eLngLats = [];
+
+            this.$store.state.surveyMarkers[dName][pIndex].elevations = [];
+            this.$store.state.surveyMarkers[dName][pIndex].elevations_location = [];
+
+            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                let eLngLat = toLonLat(lineFeature.getGeometry().getCoordinateAt(i/(this.$store.state.SAMPLES-1)));
+                eLngLats.push(eLngLat);
+                this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
+            }
+
+            console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker');
         },
 
         async initOlSurveyMarker(dName, pIndex, survey) {
@@ -3710,7 +3926,6 @@ export default {
         EventBus.$on('do-current-drone-position', (dName) => {
             //console.log((this.olMap.getView().getRotation()*180)/Math.PI);
 
-
             let dLat = this.$store.state.drone_infos[dName].lat;
             let dLng = this.$store.state.drone_infos[dName].lng;
             let dAlt = this.$store.state.drone_infos[dName].alt;
@@ -3743,6 +3958,7 @@ export default {
             var rotation = Math.atan2(dy, dx);
 
             if(Object.prototype.hasOwnProperty.call(this.olDroneMarkers, dName)) {
+                //console.log(this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0]);
                 this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getImage().setScale(svgScale + (dAlt / 3000));
                 this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getImage().setRotation(((360+this.$store.state.drone_infos[dName].heading-45+this.mapHeading)%360) * (Math.PI / 180));
 
@@ -3781,6 +3997,17 @@ export default {
                 this.olDroneMarkers[dName].targetLineFeature.getGeometry().setCoordinates([[sDirCoordinate[0], sDirCoordinate[1]], [eDirCoordinate[0], eDirCoordinate[1]]]);
 
                 this.updateTargetLineFeature(dName);
+            }
+        });
+
+        EventBus.$on('do-clear-drone-position', (dName) => {
+            if(Object.prototype.hasOwnProperty.call(this.olDroneMarkers, dName)) {
+                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[0].getText().setText('');
+                this.olDroneMarkers[dName].droneMarkerFeature.getStyle()[1].getText().setText('');
+
+                const source = this.vectorLayer.getSource();
+                source.removeFeature(this.olDroneMarkers[dName].droneMarkerFeature);
+                source.addFeature(this.olDroneMarkers[dName].droneMarkerFeature);
             }
         });
 
@@ -4148,7 +4375,7 @@ export default {
                     //
                     // this.updateTargetLineFeature(dName);
                 }
-                else if(this.targetedFeature.getProperties().type === 'guideLine') {
+                //임시//else if(this.targetedFeature.getProperties().type === 'guideLine') {
 
                     // let eLngLats = [];
                     // let eLngLat = toLonLat(this.selectedFeature.getGeometry().getCoordinateAt(0));
@@ -4193,7 +4420,7 @@ export default {
                     //         console.log(err.message);
                     //     }
                     // );
-                }
+                //임시//}
             }
             else {
                 console.log('singleclick', this.targetedFeature);
@@ -4739,6 +4966,7 @@ export default {
         EventBus.$off('do-refresh-tempMarker');
         EventBus.$off('do-update-survey-GcsMap');
         EventBus.$off('clearTrackingLines');
+        EventBus.$off('do-clear-drone-position');
     }
 }
 </script>

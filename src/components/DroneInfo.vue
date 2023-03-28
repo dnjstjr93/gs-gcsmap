@@ -2686,6 +2686,7 @@ export default {
                 this.statusTextColor = 'indicator-text-black';
                 this.borderColor = 'indicator-border-green';
                 this.flagReceiving = true;
+                this.$store.state.drone_infos[this.name].flagReceiving = true;
 
                 //setTimeout(this.parseMavFromDrone, 0, mavPacket);
 
@@ -2732,6 +2733,7 @@ export default {
                     this.mavStr = '...';
                     this.timeoutObj = null;
                     this.flagReceiving = false;
+                    this.$store.state.drone_infos[this.name].flagReceiving = false;
                     this.sys_id = 0;
 
                     this.colorMode = 'td-text-gray';
@@ -6185,6 +6187,11 @@ export default {
 
         this.timer_id = setInterval(() => {
             this.bpm = this.recv_counter;
+
+            if(this.recv_counter < 3) {
+                EventBus.$emit('do-clear-drone-position', (this.name));
+            }
+
             this.recv_counter = 1;
 
             //this.info.headingDirection = parseInt(Math.random() * 359);
@@ -6192,7 +6199,6 @@ export default {
             //this.info.altitude = parseInt(Math.random() * 150);
             //this.info.anglePitch = -90 + parseInt(Math.random() * 180);
             //this.info.bankAngle = -90 + parseInt(Math.random() * 180);
-
         }, 3000);
 
 
@@ -6261,6 +6267,7 @@ export default {
 
         EventBus.$on('initialize-' + this.name, (payload) => {
             this.flagReceiving = false;
+            this.$store.state.drone_infos[this.name].flagReceiving = false;
 
             console.log('DroneInfo-initialize-' + this.name, payload);
 
