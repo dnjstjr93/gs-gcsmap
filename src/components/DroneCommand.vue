@@ -2275,19 +2275,19 @@ export default {
             this.items.push(row);
         }
 
-        EventBus.$on('update-fill-goto-evevation-data', (dName) => {
-            if (this.$store.state.currentCommandTab === '이동') {
-                setTimeout((dName) => {
-                    console.log('update-fill-goto-evevation-data', dName, this.myChart);
-                    if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
-                        for(let i = 0; i < this.$store.state.drone_infos[dName].elevations.length; i++) {
-                            this.elevations[dName][i] = this.$store.state.drone_infos[dName].elevations[i];
-                            this.myChart[dName].update();
-                        }
-                    }
-                }, 10, dName);
-            }
-        });
+        // EventBus.$on('update-fill-goto-evevation-data', (dName) => {
+        //     if (this.$store.state.currentCommandTab === '이동') {
+        //         setTimeout((dName) => {
+        //             console.log('update-fill-goto-evevation-data', dName, this.myChart);
+        //             if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+        //                 for(let i = 0; i < this.$store.state.drone_infos[dName].elevations.length; i++) {
+        //                     this.elevations[dName][i] = this.$store.state.drone_infos[dName].elevations[i];
+        //                     this.myChart[dName].update();
+        //                 }
+        //             }
+        //         }, 10, dName);
+        //     }
+        // });
 
         // if (this.$store.state.currentCommandTab === '이동') {
         //     for (let dName in this.$store.state.drone_infos) {
@@ -2330,7 +2330,7 @@ export default {
             }
         }
 
-        EventBus.$off('update-fill-goto-evevation-data');
+        //EventBus.$off('update-fill-goto-evevation-data');
     }
 }
 </script>

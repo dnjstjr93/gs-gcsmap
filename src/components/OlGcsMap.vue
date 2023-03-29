@@ -3526,7 +3526,7 @@ export default {
                                 this.$store.state.drone_infos[dName].elevations[i] = result.results[i].elevation;
                             }
 
-                            EventBus.$emit('update-fill-goto-evevation-data', dName);
+                            //EventBus.$emit('update-fill-goto-evevation-data', dName);
                         }
                     });
                 }
