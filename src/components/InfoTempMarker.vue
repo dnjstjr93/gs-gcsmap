@@ -35,6 +35,14 @@
                                     {{ data.item }}
                                 </v-chip>
                             </template>
+                            <template v-slot:item="{ index, item }">
+                                <v-chip
+                                    :color="$store.state.drone_infos[`${item}`].color"
+                                    label
+                                >
+                                    {{ item }}
+                                </v-chip>
+                            </template>
                         </v-combobox>
                     </v-col>
                     <v-col cols="1">

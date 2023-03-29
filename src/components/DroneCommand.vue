@@ -28,9 +28,33 @@
 <!--                    </v-card-title>-->
                     <v-card-subtitle class="pl-1 pa-0">
                         <v-row class="my-1" no-gutters align="center">
-                            <v-col cols="10">
+                            <v-col cols="2">
                                 {{command.text}}
                             </v-col>
+                            <v-spacer></v-spacer>
+                            <v-col cols="2">
+                                <v-card class="pa-1 align-self-center text-center" outlined tile>
+                                    <v-select
+                                        v-if="command.title === '이동'"
+                                        dense outlined hide-details
+                                        :items="indexItemList"
+                                        label="Index"
+                                        class="pa-1"
+                                        @change="changeAllGotoIndex($event)"
+                                    ></v-select>
+                                </v-card>
+                            </v-col>
+                            <v-spacer></v-spacer>
+                            <v-col cols="2">
+                                <v-card class="pa-1 align-self-center text-center" outlined tile>
+                                    <v-btn
+                                        v-if="command.title === '이동'" color="orange"
+                                        @click="checkAltitude"
+                                    > 지형고도체크
+                                    </v-btn>
+                                </v-card>
+                            </v-col>
+                            <v-spacer></v-spacer>
                             <v-col cols="2">
                                 <v-card class="pa-1 align-self-center text-center" outlined tile>
                                     <v-btn
@@ -189,7 +213,7 @@
                                                     </v-card>
                                                     <v-card tile flat v-if="command.title === '이동'">
                                                         <v-row no-gutters>
-                                                            <v-col cols="1">
+                                                            <v-col cols="2">
                                                                 <v-select
                                                                     dense outlined hide-details
                                                                     :items="Object.keys($store.state.tempMarkers[d.name])" label="Target Index"
@@ -207,7 +231,7 @@
                                                                     class="pa-1"
                                                                 ></v-select>
                                                             </v-col>
-                                                            <v-col cols="1">
+                                                            <v-col cols="2">
                                                                 <v-text-field
                                                                     label="이동고도(m)"
                                                                     class="pa-1 text-right"
@@ -218,7 +242,7 @@
                                                                     @input="changeTargetAlt($event, d.name)"
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="1">
+                                                            <v-col cols="2">
                                                                 <v-text-field
                                                                     label="지형높이(m)"
                                                                     class="pa-1 text-right"
@@ -228,7 +252,7 @@
                                                                     filled
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="1">
+                                                            <v-col cols="2">
                                                                 <v-text-field
                                                                     label="이동속도(m/s)"
                                                                     class="pa-1 text-right"
@@ -237,17 +261,17 @@
                                                                     type="number"
                                                                 ></v-text-field>
                                                             </v-col>
-                                                            <v-col cols="1">
-                                                                <v-text-field
-                                                                    label="지점거리(m)"
-                                                                    class="pa-1 text-right"
-                                                                    outlined dense hide-details
-                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : (isNaN($store.state.drone_infos[d.name].targetDistance) ? -1 : parseInt($store.state.drone_infos[d.name].targetDistance+0.5))"
-                                                                    type="number"
-                                                                    readonly
-                                                                ></v-text-field>
-                                                            </v-col>
-                                                            <v-col cols="5">
+<!--                                                            <v-col cols="1">-->
+<!--                                                                <v-text-field-->
+<!--                                                                    label="지점거리(m)"-->
+<!--                                                                    class="pa-1 text-right"-->
+<!--                                                                    outlined dense hide-details-->
+<!--                                                                    :value="(d.curTargetedTempMarkerIndex === -1) ? -1 : (isNaN($store.state.drone_infos[d.name].targetDistance) ? -1 : parseInt($store.state.drone_infos[d.name].targetDistance+0.5))"-->
+<!--                                                                    type="number"-->
+<!--                                                                    readonly-->
+<!--                                                                ></v-text-field>-->
+<!--                                                            </v-col>-->
+                                                            <v-col cols="2">
                                                                 <v-card :style="{color:'white'}" outlined tile flat>
                                                                     <canvas :id="'elevation-chart-'+d.name" :height="40+'px'"></canvas>
                                                                 </v-card>
@@ -1200,6 +1224,14 @@ export default {
     },
 
     computed: {
+        indexItemList() {
+            let item = [];
+            for(let i = 0; i < 100; i++) {
+                item.push(String(i));
+            }
+            return item;
+        },
+
         color() {
             if (this.target_alt < 25) return 'indigo'
             if (this.target_alt < 50) return 'teal'
@@ -1347,6 +1379,53 @@ export default {
     },
 
     methods: {
+        checkAltitude() {
+            if (this.$store.state.currentCommandTab === '이동') {
+                for (let dName in this.$store.state.drone_infos) {
+                    if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                        if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                            if (!Object.prototype.hasOwnProperty.call(this.elevations, dName)) {
+                                if(this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex === -1) {
+                                    this.elevations[dName] = Array(this.$store.state.SAMPLES).fill(0);
+                                }
+                                else {
+                                    this.elevations[dName] = [];
+                                    for (let i = 0; i < this.$store.state.drone_infos[dName].elevations.length; i++) {
+                                        this.elevations[dName].push(this.$store.state.drone_infos[dName].elevations[i]);
+                                    }
+                                }
+                            }
+
+                            if (Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                                this.myChart[dName].update();
+                            }
+                            else {
+                                this.fillGoToElevationData(dName);
+                                console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart[dName]);
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        changeAllGotoIndex(i) {
+            for (let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = i;
+
+                        let payload = {};
+                        payload.dName = dName;
+                        payload.pIndex = i;
+                        payload.targeted = true;
+
+                        EventBus.$emit('do-makeTargetTempMarker', payload);
+                    }
+                }
+            }
+        },
+
         changeTargetAlt(alt, dName) {
             this.$store.state.drone_infos[dName].targetAlt = parseInt(alt);
             if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
@@ -1529,7 +1608,7 @@ export default {
             //
             // }
             // this.$store.state.tempMarkers[dName][i].targeted = true;
-            this.$store.state.drone_infos.curTargetedTempMarkerIndex = i;
+            this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex = i;
 
             //this.selectedItem = -1;
 
@@ -1563,25 +1642,25 @@ export default {
                 // }
                 // console.log(this.$store.state.currentCommandTab);
 
-                setTimeout(() => {
-                    for (let dName in this.$store.state.drone_infos) {
-                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                            if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                                if (!Object.prototype.hasOwnProperty.call(this.elevations, dName)) {
-                                    this.elevations[dName] = Array(this.$store.state.SAMPLES).fill(0);
-                                }
-
-                                if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
-                                    this.myChart[dName].update();
-                                }
-                                else {
-                                    this.fillGoToElevationData(dName);
-                                    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart[dName]);
-                                }
-                            }
-                        }
-                    }
-                }, 200);
+                // setTimeout(() => {
+                //     for (let dName in this.$store.state.drone_infos) {
+                //         if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                //             if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                //                 if (!Object.prototype.hasOwnProperty.call(this.elevations, dName)) {
+                //                     this.elevations[dName] = Array(this.$store.state.SAMPLES).fill(0);
+                //                 }
+                //
+                //                 if(Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+                //                     this.myChart[dName].update();
+                //                 }
+                //                 else {
+                //                     this.fillGoToElevationData(dName);
+                //                     console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart[dName]);
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }, 200);
             }
             else if(this.$store.state.currentCommandTab === '선회') {
                 console.log(this.$store.state.currentCommandTab);
@@ -2210,33 +2289,33 @@ export default {
             }
         });
 
-        if (this.$store.state.currentCommandTab === '이동') {
-            for (let dName in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
-                        if (!Object.prototype.hasOwnProperty.call(this.elevations, dName)) {
-                            if(this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex === -1) {
-                                this.elevations[dName] = Array(this.$store.state.SAMPLES).fill(0);
-                            }
-                            else {
-                                this.elevations[dName] = [];
-                                for (let i = 0; i < this.$store.state.drone_infos[dName].elevations.length; i++) {
-                                    this.elevations[dName].push(this.$store.state.drone_infos[dName].elevations[i]);
-                                }
-                            }
-                        }
-
-                        if (Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
-                            this.myChart[dName].update();
-                        }
-                        else {
-                            this.fillGoToElevationData(dName);
-                            console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart[dName]);
-                        }
-                    }
-                }
-            }
-        }
+        // if (this.$store.state.currentCommandTab === '이동') {
+        //     for (let dName in this.$store.state.drone_infos) {
+        //         if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+        //             if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+        //                 if (!Object.prototype.hasOwnProperty.call(this.elevations, dName)) {
+        //                     if(this.$store.state.drone_infos[dName].curTargetedTempMarkerIndex === -1) {
+        //                         this.elevations[dName] = Array(this.$store.state.SAMPLES).fill(0);
+        //                     }
+        //                     else {
+        //                         this.elevations[dName] = [];
+        //                         for (let i = 0; i < this.$store.state.drone_infos[dName].elevations.length; i++) {
+        //                             this.elevations[dName].push(this.$store.state.drone_infos[dName].elevations[i]);
+        //                         }
+        //                     }
+        //                 }
+        //
+        //                 if (Object.prototype.hasOwnProperty.call(this.myChart, dName)) {
+        //                     this.myChart[dName].update();
+        //                 }
+        //                 else {
+        //                     this.fillGoToElevationData(dName);
+        //                     console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>', 'fillGoToElevationData', this.myChart[dName]);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     },
 
     beforeDestroy() {
