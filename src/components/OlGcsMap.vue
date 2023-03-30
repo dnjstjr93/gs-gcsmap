@@ -4338,6 +4338,10 @@ export default {
                             // if(hovered.getProperties().altKey !== event.originalEvent.altKey) {
                             hovered.setProperties({altKey: event.originalEvent.altKey});
 
+                            this.translateTempFeatures.forEach((feature) => {
+                                feature.setProperties({altKey: event.originalEvent.altKey});
+                            });
+
                             if (event.originalEvent.altKey) {
                                 svgTempObj.svg.path._attributes.fill = this.$store.state.drone_infos[dName].color.replace('#', '%23');
                                 svgTempObj.svg.path._attributes.stroke = '#FF1744'.replace('#', '%23');
