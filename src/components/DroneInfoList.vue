@@ -945,7 +945,7 @@
 
                 this.ws.onmessage = (message) => {
                     let parsedMessage = JSON.parse(message.data);
-                    let droneName = parsedMessage.droneName;
+                    let droneName = parsedMessage.droneName.substring(0, parsedMessage.droneName.length - 5);
 
                     EventBus.$emit('ws-on-message-' + droneName, parsedMessage);
                 };
