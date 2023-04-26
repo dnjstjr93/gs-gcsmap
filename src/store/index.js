@@ -294,6 +294,9 @@ const _defaultDroneInfo = {
 
 export default new Vuex.Store({
     state: {
+        userInfo: null,
+        isLogin: false,
+
         SAMPLES: 96,
         viewAlt: true,
         drone_command_prepared: false,
@@ -685,15 +688,15 @@ export default new Vuex.Store({
     },
 
     mutations: {
-        // initTempMarkers(state, payload) {
-        //     state.tempMarkers.unknown = null;
-        //     state.tempMarkers.unknown = [];
-        //     state.tempMarkers.unknown = JSON.parse(JSON.stringify(payload));
-        // },
-        //
-        // setDroneColorMap(state, payload) {
-        //     state.drone_infos[payload.pName].color = payload.color;
-        // },
+        loginSuccess(state, payload) {
+            state.isLogin = true
+            state.userInfo = payload
+        },
+        logout(state) {
+            state.isLogin = false
+            state.userInfo = null
+            localStorage.removeItem("access_token")
+        },
 
         updatePosition(state, payload) {
             console.log(payload);
@@ -805,6 +808,22 @@ export default new Vuex.Store({
             }
         },
     },
-    actions: {},
+    actions: {
+        getAccountInfo({ commit }) {
+            let token = localStorage.getItem("access_token")
+            axios
+                .get("/userinfo", {
+                    headers: {
+                        "X-AUTH-TOKEN": token
+                    }
+                })
+                .then((response) => {
+                    commit("loginSuccess", response.data.data)
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+        }
+    },
     modules: {}
 })

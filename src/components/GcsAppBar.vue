@@ -45,7 +45,7 @@
             <!--            </v-btn>-->
             <!--        </router-link>-->
 
-            <v-btn text :disabled="!$store.state.MOBIUS_CONNECTION.connected">
+            <v-btn text :disabled="!$store.state.MOBIUS_CONNECTION.connected" @click="logout">
                 <v-icon>$account</v-icon>
             </v-btn>
 
@@ -586,6 +586,11 @@ export default {
     },
 
     methods: {
+        logout() {
+            window.localStorage.removeItem('loginEmail');
+            this.$router.push({ name: "login" });
+        },
+
         mapDownload() {
             EventBus.$emit('do-download-map');
             console.log('mapDownload');
