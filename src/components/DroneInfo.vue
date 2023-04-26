@@ -4241,6 +4241,8 @@ export default {
             this.flightTimer = setInterval(() => {
                 this.flightTimeCount += 1;
 
+                console.log('startFlightTimer: ' + this.gpi.time_boot_ms);
+
                 var min = parseInt(this.flightTimeCount / 60).toString().padStart(2, '0');
                 let sec = (this.flightTimeCount % 60).toString().padStart(2, '0');
                 // let min = parseInt(this.stat_flttime_param.param_value / 60).toString().padStart(2, '0');
