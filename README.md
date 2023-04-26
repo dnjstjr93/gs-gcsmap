@@ -1,5 +1,8 @@
 # ve-gcsmap
 
+## Prerequisite
+Nodejs 16.x
+
 ## Project setup
 ```
 yarn install

@@ -21,7 +21,7 @@ module.exports = {
             builderOptions: {
                 // options placed here will be merged with default configuration and passed to electron-builder
                 appId: 'kr.re.keti.app',
-                productName: "ve-pureun",
+                productName: "ve-gcsmap",
                 win: {
                     icon: "./public/logo.png",
                     target: [
@@ -36,17 +36,17 @@ module.exports = {
                     perMachine: true,
                     allowToChangeInstallationDirectory: true
                 },
-                publish: [
-                    {
-                        provider: "github",
-                        owner: "IoTKETI",
-                        releaseType: "release",
-                        channel: "latest",
-                        url: "https://github.com/IoTKETI/ve-gcsmap.git",
-                        private: true,
-                        token: process.env.GH_TOKEN
-                    }
-                ]
+                // publish: [
+                //     {
+                //         provider: "github",
+                //         owner: "IoTKETI",
+                //         releaseType: "release",
+                //         channel: "latest",
+                //         url: "https://github.com/IoTKETI/ve-gcsmap.git",
+                //         private: true,
+                //         token: process.env.GH_TOKEN
+                //     }
+                // ]
             }
         }
     }

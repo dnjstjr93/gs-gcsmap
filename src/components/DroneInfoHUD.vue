@@ -23,14 +23,14 @@
 
 <script>
 import HudContainer from '@/components/layout/HudContainer'
-
+import axios from 'axios'
 import EventBus from '../EventBus';
 import kurentoUtils from 'kurento-utils';
 
 function Drone(name, bitrate, wrapper, video) {
     this.name = name;
     this.video = video;
-
+    console.log(this.name)
     this.viewer = function () {
         if (!this.webRtcPeer) {
             //showSpinner(this.video);
@@ -100,6 +100,7 @@ export default {
             droneHudContainer: null,
             webRtcPeer: null,
             drone: null,
+            room_name: null
         };
     },
 
@@ -138,12 +139,37 @@ export default {
         },
 
         videoOn() {
-            if (this.info.isVideo) {
-                this.viewer_start(this.drone_name, this.bitrate)
-            }
-            else {
-                this.viewer_stop();
-            }
+            let config = {
+                method: 'get',
+                maxBodyLength: Infinity,
+                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + this.drone_name + '/msw_webrtc_crow/room_name/la',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-M2M-RI': '12345',
+                    'X-M2M-Origin': 'SVue'
+                }
+            };
+
+            axios.request(config)
+                .then((response) => {
+                    this.room_name = response.data["m2m:cin"].con;
+                    console.log(this.room_name);
+                    if (this.info.isVideo) {
+                        this.viewer_start(this.room_name, this.bitrate)
+                    }
+                    else {
+                        this.viewer_stop();
+                    }})
+                .catch((error) => {
+                    console.log(error);
+                });
+
+            // if (this.info.isVideo) {
+            //     this.viewer_start(this.drone_name, this.bitrate)
+            // }
+            // else {
+            //     this.viewer_stop();
+            // }
         },
 
         shaka() {
@@ -209,6 +235,7 @@ export default {
 
                 switch (parsedMessage.id) {
                     case 'viewerResponse':
+                        console.log('viewerResponse -', parsedMessage)
                         if (parsedMessage.response !== 'accepted') {
                             var errorMsg = parsedMessage.message ? parsedMessage.message : 'Unknow error';
                             //console.warn('Call not accepted for the following reason: ' + errorMsg);
@@ -236,7 +263,7 @@ export default {
         this.droneWrapper = document.querySelector(`#${this.drone_name}_wrapper`);
 
         this.droneVideo = this.droneWrapper.querySelector('.video');
-        this.droneVideo.id = 'video-' + this.drone_name;
+        this.droneVideo.id = 'video-' + this.room_name;
 
         this.droneHudContainer = this.droneWrapper.querySelector('#hud-container');
 
