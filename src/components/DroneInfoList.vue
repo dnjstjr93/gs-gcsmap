@@ -305,7 +305,8 @@
                 broadcast_topic: {},
                 droneSubscribeSuccess: {},
                 //wsUrl: 'wss://' + 'webrtc.intellicode.info:443' + '/webRTC',
-                wsUrl: 'wss://' + 'gcs.iotocean.org:7598' + '/webRTC',
+                //wsUrl: 'wss://' + 'gcs.iotocean.org:7598' + '/webRTC',
+                wsUrl: 'wss://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7598' + '/webRTC',
                 ws: null,
             };
         },
@@ -489,7 +490,7 @@
                         this.$store.state.client = mqtt.connect(connectUrl, options);
 
                         this.$store.state.client.on('connect', () => {
-                            console.log(host, 'DroneInfoList Connection succeeded!');
+                            console.log(host, 'DroneInfoList MQTT Connection succeeded!');
 
                             this.$store.state.client.connected = true;
                             this.$store.state.client.loading = false;
@@ -940,12 +941,13 @@
 
                     setTimeout(() => {
                         EventBus.$emit('ws-connect');
-                    }, (2 * 1000 * 60));
+                    }, (2 * 1000));
                 };
 
                 this.ws.onmessage = (message) => {
                     let parsedMessage = JSON.parse(message.data);
-                    let droneName = parsedMessage.droneName.substring(0, parsedMessage.droneName.length - 5);
+                    // let droneName = parsedMessage.droneName.substring(0, parsedMessage.droneName.length - 5);
+                    let droneName = parsedMessage.droneName;
 
                     EventBus.$emit('ws-on-message-' + droneName, parsedMessage);
                 };

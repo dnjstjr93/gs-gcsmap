@@ -949,6 +949,8 @@ export default {
 
     data() {
         return {
+            time_boot_ms_armed: 0,
+
             channels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
 
             target_mission_num: {
@@ -4231,8 +4233,24 @@ export default {
                 this.iconLte = this.$networkStrengthOffOutline;
             }, 2500);
         },
-        startFlightTimer: function () {
+        startFlightTimer: async function () {
             this.iconFlightElapsed = this.$timerOutline;
+
+            let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
+            let url = url_base + '/Drone_Data/' + this.name + '/' + this.sortie_name;
+            let response = await axios.get(url,{
+                validateStatus: status => {
+                    return status < 500;
+                }, // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    'Content-Type': 'application/json'
+                },
+            });
+
+            this.time_boot_ms_armed = response.data['m2m:cnt'].lbl[0];
+
             if (this.flightTimer) {
                 clearInterval(this.flightTimer);
                 this.flightTimer = null;
@@ -4241,7 +4259,7 @@ export default {
             this.flightTimer = setInterval(() => {
                 this.flightTimeCount += 1;
 
-                console.log('startFlightTimer: ' + this.gpi.time_boot_ms);
+                console.log('startFlightTimer: ' + this.gpi.time_boot_ms, this.time_boot_ms_armed);
 
                 var min = parseInt(this.flightTimeCount / 60).toString().padStart(2, '0');
                 let sec = (this.flightTimeCount % 60).toString().padStart(2, '0');
