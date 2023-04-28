@@ -4249,7 +4249,13 @@ export default {
                 },
             });
 
-            this.time_boot_ms_armed = response.data['m2m:cnt'].lbl[0];
+            if(isNaN(response.data['m2m:cnt'].lbl[0])) {
+                // number 가 아님
+                this.time_boot_ms_armed = this.gpi.time_boot_ms;
+            }
+            else {
+                this.time_boot_ms_armed = response.data['m2m:cnt'].lbl[0];
+            }
 
             if (this.flightTimer) {
                 clearInterval(this.flightTimer);
@@ -4259,7 +4265,9 @@ export default {
             this.flightTimer = setInterval(() => {
                 this.flightTimeCount += 1;
 
-                console.log('startFlightTimer: ' + this.gpi.time_boot_ms, this.time_boot_ms_armed);
+                // console.log('startFlightTimer: ' + this.gpi.time_boot_ms, this.time_boot_ms_armed);
+
+                this.flightTimeCount = parseInt((parseInt(this.gpi.time_boot_ms) - parseInt(this.time_boot_ms_armed)) / 1000);
 
                 var min = parseInt(this.flightTimeCount / 60).toString().padStart(2, '0');
                 let sec = (this.flightTimeCount % 60).toString().padStart(2, '0');
