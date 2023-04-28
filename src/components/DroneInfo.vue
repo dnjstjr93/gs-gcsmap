@@ -1019,9 +1019,9 @@ export default {
             selectedItem: -1,
             colorSelectedNumber: 'deep-orange darken-4',
             positions: [
-                {type: 'Circle', text: '37.0000000:127.0000000:100.0:100.0:5', icon: this.$googleCirclesGroup},
-                {type: 'Goto', text: '37.0000000:127.0000000:100.0', icon: this.$logoutVariant},
-                {type: 'Survey', text: '37.0000000:127.0000000:100.0', icon: this.$logoutVariant},
+                {type: 'Circle', text: '37.0000000:127.0000000:100.0:100.0:5', icon: this.$vuetify.icons.values.googleCirclesGroup},
+                {type: 'Goto', text: '37.0000000:127.0000000:100.0', icon: this.$vuetify.icons.values.logoutVariant},
+                {type: 'Survey', text: '37.0000000:127.0000000:100.0', icon: this.$vuetify.icons.values.logoutVariant},
             ],
             absolute: true,
             opacity: 0.8,
@@ -1036,105 +1036,105 @@ export default {
 
             // colorArming: this.$store.state.drone_infos[this.name].color + ' darken-4',
             colorArming: 'white',
-            iconDistance: this.$mdiMapMarkerDistance,
+            iconDistance: this.$vuetify.icons.values.mapMarkerDistance,
             valueDistance: 0,
             flightTimeCount: 0,
             flightTimer: null,
-            iconFlightElapsed: this.$timerOffOutline,
+            iconFlightElapsed: this.$vuetify.icons.values.timerOffOutline,
             flightElapsedTime: '00:00',
-            iconBattery: this.$batteryOffOutline,
+            iconBattery: this.$vuetify.icons.values.batteryOffOutline,
             colorBattery: '#9E9E9E',
             infos1: [
                 {
                     name: 'Bat',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Lat',
-                    icon: this.$latitude,
+                    icon: this.$vuetify.icons.values.latitude,
                     values: 159,
                 },
                 {
                     name: 'Lon',
-                    icon: this.$longitude,
+                    icon: this.$vuetify.icons.values.longitude,
                     values: 159,
                 },
                 {
                     name: 'Alt',
-                    icon: this.$altimeter,
+                    icon: this.$vuetify.icons.values.altimeter,
                     values: 159,
                 },
                 {
                     name: 'Ba5',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat6',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat7',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat8',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat9',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
             ],
             infos2: [
                 {
                     name: 'LTE',
-                    icon: this.$networkStrength4,
+                    icon: this.$vuetify.icons.values.networkStrength4,
                     values: 159,
                 },
                 {
                     name: 'FTime',
-                    icon: this.$latitude,
+                    icon: this.$vuetify.icons.values.latitude,
                     values: 159,
                 },
                 {
                     name: 'Lon',
-                    icon: this.$longitude,
+                    icon: this.$vuetify.icons.values.longitude,
                     values: 159,
                 },
                 {
                     name: 'Alt',
-                    icon: this.$altimeter,
+                    icon: this.$vuetify.icons.values.altimeter,
                     values: 159,
                 },
                 {
                     name: 'Ba5',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat6',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat7',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat8',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
                 {
                     name: 'Bat9',
-                    icon: this.$batteryHigh,
+                    icon: this.$vuetify.icons.values.batteryHigh,
                     values: 159,
                 },
             ],
@@ -1146,7 +1146,7 @@ export default {
 
             curLteVal: -80,
             colorLteVal: '#9E9E9E',
-            iconLte: this.$networkStrengthOffOutline,
+            iconLte: this.$vuetify.icons.values.networkStrengthOffOutline,
 
             roll: 0,
             arrRoll: [],
@@ -1321,11 +1321,11 @@ export default {
                 rssi: 0,
                 colorLteVal: '#9E9E9E',
                 curLteVal: 0,
-                iconLte: this.$networkStrengthOffOutline,
+                iconLte: this.$vuetify.icons.values.networkStrengthOffOutline,
                 colorBattery: '#9E9E9E',
-                iconBattery: this.$batteryOffOutline,
+                iconBattery: this.$vuetify.icons.values.batteryOffOutline,
                 voltageBattery: 0,
-                iconFlightElapsed: this.$timerOffOutline,
+                iconFlightElapsed: this.$vuetify.icons.values.timerOffOutline,
                 flightElapsedTime: '00:00',
                 valueDistance: '0 m',
                 wpYawBehavior: 'YAW-0',
@@ -1393,7 +1393,7 @@ export default {
                                     newData[dName][pIndex].targetMavCmd + ':' +
                                     newData[dName][pIndex].targetStayTime + ':' +
                                     newData[dName][pIndex].elevation;
-                                goto_pos.icon = this.$logoutVariant;
+                                goto_pos.icon = this.$vuetify.icons.values.logoutVariant;
 
                                 let diffAlt = newData[dName][pIndex].alt - newData[dName][pIndex].elevation;
                                 if(diffAlt > 5) {
@@ -2321,19 +2321,19 @@ export default {
                                             payload = null;
 
                                             if (0 > this.curLteVal && this.curLteVal >= -80) {
-                                                this.iconLte = this.$networkStrength4;
+                                                this.iconLte = this.$vuetify.icons.values.networkStrength4;
                                                 this.colorLteVal = '#1E88E5';
                                             }
                                             else if (-80 > this.curLteVal && this.curLteVal >= -90) {
-                                                this.iconLte = this.$networkStrength3;
+                                                this.iconLte = this.$vuetify.icons.values.networkStrength3;
                                                 this.colorLteVal = '#76FF03';
                                             }
                                             else if (-90 > this.curLteVal && this.curLteVal >= -100) {
-                                                this.iconLte = this.$networkStrength2;
+                                                this.iconLte = this.$vuetify.icons.values.networkStrength2;
                                                 this.colorLteVal = '#FFFF00';
                                             }
                                             else {
-                                                this.iconLte = this.$networkStrength1;
+                                                this.iconLte = this.$vuetify.icons.values.networkStrength1;
                                                 this.colorLteVal = '#FF3D00';
                                             }
 
@@ -2348,7 +2348,7 @@ export default {
                                             this.lteTimeoutObj = setTimeout(() => {
                                                 this.lteTimeoutObj = null;
                                                 this.colorLteVal = '#9E9E9E';
-                                                this.iconLte = this.$networkStrengthOffOutline;
+                                                this.iconLte = this.$vuetify.icons.values.networkStrengthOffOutline;
                                             }, 5500);
                                         }
                                     }
@@ -2368,19 +2368,19 @@ export default {
                     // console.log(this.curLteVal);
 
                     if (0 > this.curLteVal && this.curLteVal >= -80) {
-                        this.iconLte = this.$networkStrength4;
+                        this.iconLte = this.$vuetify.icons.values.networkStrength4;
                         this.colorLteVal = '#1E88E5';
                     }
                     else if (-80 > this.curLteVal && this.curLteVal >= -90) {
-                        this.iconLte = this.$networkStrength3;
+                        this.iconLte = this.$vuetify.icons.values.networkStrength3;
                         this.colorLteVal = '#76FF03';
                     }
                     else if (-90 > this.curLteVal && this.curLteVal >= -100) {
-                        this.iconLte = this.$networkStrength2;
+                        this.iconLte = this.$vuetify.icons.values.networkStrength2;
                         this.colorLteVal = '#FFFF00';
                     }
                     else {
-                        this.iconLte = this.$networkStrength1;
+                        this.iconLte = this.$vuetify.icons.values.networkStrength1;
                         this.colorLteVal = '#FF3D00';
                     }
 
@@ -2395,7 +2395,7 @@ export default {
                     this.lteTimeoutObj = setTimeout(() => {
                         this.lteTimeoutObj = null;
                         this.colorLteVal = '#9E9E9E';
-                        this.iconLte = this.$networkStrengthOffOutline;
+                        this.iconLte = this.$vuetify.icons.values.networkStrengthOffOutline;
                     }, 5500);
                 }
             }
@@ -2675,7 +2675,7 @@ export default {
                         console.log(diff.unix());
 
                         this.flightTimeCount = diff.unix();
-                        this.startFlightTimer();
+                        setTimeout(this.startFlightTimer, 500);
                     }
                     else {
                         this.stopFlightTimer();
@@ -2719,9 +2719,9 @@ export default {
                     }
 
                     this.colorArming = 'white';
-                    this.iconDistance = this.$mapMapMarkerDistance;
+                    this.iconDistance = this.$vuetify.icons.values.mapMapMarkerDistance;
 
-                    this.iconBattery = this.$batteryOffOutline;
+                    this.iconBattery = this.$vuetify.icons.values.batteryOffOutline;
                     this.colorBattery = '#9E9E9E';
 
                     this.info.iconBattery = this.iconBattery;
@@ -4203,23 +4203,23 @@ export default {
 
         checkLteValRsrp(_curLteVal) {
             this.colorLteVal = '#9E9E9E';
-            this.iconLte = this.$networkStrengthOffOutline;
+            this.iconLte = this.$vuetify.icons.values.networkStrengthOffOutline;
 
             if (0 > _curLteVal && _curLteVal >= -80) {
-                this.iconLte = this.$networkStrength4;
+                this.iconLte = this.$vuetify.icons.values.networkStrength4;
                 this.colorLteVal = 'blue';
 
             }
             else if (-80 > _curLteVal && _curLteVal >= -90) {
-                this.iconLte = this.$networkStrength3;
+                this.iconLte = this.$vuetify.icons.values.networkStrength3;
                 this.colorLteVal = '#76FF03';
             }
             else if (-90 > _curLteVal && _curLteVal >= -100) {
-                this.iconLte = this.$networkStrength2;
+                this.iconLte = this.$vuetify.icons.values.networkStrength2;
                 this.colorLteVal = 'yellow';
             }
             else if (-10 > _curLteVal) {
-                this.iconLte = this.$networkStrength1;
+                this.iconLte = this.$vuetify.icons.values.networkStrength1;
                 this.colorLteVal = 'red';
             }
 
@@ -4230,11 +4230,11 @@ export default {
             this.lteTimeoutObj = setTimeout(() => {
                 this.lteTimeoutObj = null;
                 this.colorLteVal = '#9E9E9E';
-                this.iconLte = this.$networkStrengthOffOutline;
+                this.iconLte = this.$vuetify.icons.values.networkStrengthOffOutline;
             }, 2500);
         },
         startFlightTimer: async function () {
-            this.iconFlightElapsed = this.$timerOutline;
+            this.iconFlightElapsed = this.$vuetify.icons.values.timerOutline;
 
             let url_base = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS;
             let url = url_base + '/Drone_Data/' + this.name + '/' + this.sortie_name;
@@ -4265,7 +4265,7 @@ export default {
             this.flightTimer = setInterval(() => {
                 this.flightTimeCount += 1;
 
-                // console.log('startFlightTimer: ' + this.gpi.time_boot_ms, this.time_boot_ms_armed);
+                //console.log('startFlightTimer: ' + this.gpi.time_boot_ms, this.time_boot_ms_armed);
 
                 this.flightTimeCount = parseInt((parseInt(this.gpi.time_boot_ms) - parseInt(this.time_boot_ms_armed)) / 1000);
 
@@ -4282,7 +4282,7 @@ export default {
         },
         stopFlightTimer: function () {
             clearInterval(this.flightTimer);
-            this.iconFlightElapsed = this.$timerOffOutline;
+            this.iconFlightElapsed = this.$vuetify.icons.values.timerOffOutline;
             this.flightTimer = null;
 
             this.info.iconFlightElapsed = this.iconFlightElapsed;
@@ -4511,15 +4511,15 @@ export default {
                     this.ss.voltage_battery = Buffer.from(voltage_battery, 'hex').readUInt16LE(0);
 
                     if (this.mid_v < this.ss.voltage_battery) {
-                        this.iconBattery = this.$batteryHigh;
+                        this.iconBattery = this.$vuetify.icons.values.batteryHigh;
                         this.colorBattery = '#76FF03';
                     }
                     else if (this.min_v < this.ss.voltage_battery && this.ss.voltage_battery <= this.mid_v) {
-                        this.iconBattery = this.$batteryMedium;
+                        this.iconBattery = this.$vuetify.icons.values.batteryMedium;
                         this.colorBattery = '#FFFF00';
                     }
                     else {
-                        this.iconBattery = this.$batteryLow;
+                        this.iconBattery = this.$vuetify.icons.values.batteryLow;
                         this.colorBattery = '#FF3D00';
                     }
 
@@ -6939,7 +6939,7 @@ export default {
                     let goto_pos = {};
                     goto_pos.type = 'Goto';
                     goto_pos.text = str;
-                    goto_pos.icon = this.$logoutVariant;
+                    goto_pos.icon = this.$vuetify.icons.values.logoutVariant;
                     this.positions.push(goto_pos);
                     goto_pos = null;
                 }
@@ -7293,7 +7293,7 @@ export default {
             console.log(diff.unix());
 
             this.flightTimeCount = diff.unix();
-            this.startFlightTimer();
+            setTimeout(this.startFlightTimer, 500);
         }
         else {
             this.stopFlightTimer();

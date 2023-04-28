@@ -42,6 +42,7 @@ const Icons = {
         plus: 'mdi-plus',
         ticketConfirmationOutline: 'mdi-ticket-confirmation-outline',
         timerOffOutline: 'mdi-timer-off-outline',
+        timerOutline: 'mdi-timer-outline',
         batteryOffOutline: 'mdi-battery-off-outline',
         batteryMedium: 'mdi-battery-medium',
         batteryLow: 'mdi-battery-low',

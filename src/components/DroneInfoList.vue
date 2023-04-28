@@ -597,18 +597,22 @@
                 }
             },
             zoomDouble() {
-                this.myMinWidth = 640;
+                if(this.myMinWidth < 800) {
+                    this.myMinWidth += 160;
 
-                setTimeout(() => {
-                    this.onResize();
-                }, 100);
+                    setTimeout(() => {
+                        this.onResize();
+                    }, 100);
+                }
             },
             zoomNormal() {
-                this.myMinWidth = 480;
+                if(this.myMinWidth > 480) {
+                    this.myMinWidth -= 160;
 
-                setTimeout(() => {
-                    this.onResize();
-                }, 100);
+                    setTimeout(() => {
+                        this.onResize();
+                    }, 100);
+                }
             },
 
             switchADSBMonitor(e) {
