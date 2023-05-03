@@ -36,28 +36,28 @@
                         </v-row>
                         <v-row no-gutters justify="center" align="center">
                             <v-col cols="4">
-                                <v-switch
-                                    dense hide-details
-                                    v-model="distanceMonitor"
-                                    label="드론근접감시"
-                                    color="warning"
-                                    class="ma-0 pa-0 pl-1 py-1"
-                                ></v-switch>
+<!--                                <v-switch-->
+<!--                                    dense hide-details-->
+<!--                                    v-model="distanceMonitor"-->
+<!--                                    label="드론근접감시"-->
+<!--                                    color="warning"-->
+<!--                                    class="ma-0 pa-0 pl-1 py-1"-->
+<!--                                ></v-switch>-->
                             </v-col>
                             <v-col cols="3">
-                                <v-switch
-                                    dense hide-details
-                                    v-model="ADSBMonitor"
-                                    label="ADS-B"
-                                    color="warning"
-                                    class="ma-0 pa-0 pl-1 py-1"
-                                    @change="switchADSBMonitor($event)"
-                                ></v-switch>
+<!--                                <v-switch-->
+<!--                                    dense hide-details-->
+<!--                                    v-model="ADSBMonitor"-->
+<!--                                    label="ADS-B"-->
+<!--                                    color="warning"-->
+<!--                                    class="ma-0 pa-0 pl-1 py-1"-->
+<!--                                    @change="switchADSBMonitor($event)"-->
+<!--                                ></v-switch>-->
                             </v-col>
                             <v-col cols="2" class="text-right pr-1" >
-                                <v-card class="pr-1" outlined tile>
-                                    <span style="font-size: 14px">{{ strMouse }}</span>
-                                </v-card>
+<!--                                <v-card class="pr-1" outlined tile>-->
+<!--                                    <span style="font-size: 14px">{{ strMouse }}</span>-->
+<!--                                </v-card>-->
                             </v-col>
                             <v-col cols="3" class="text-right" >
                                 <v-btn class="mr-2" x-small @click.stop="zoomNormal">
@@ -640,8 +640,8 @@
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
-                this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
+                // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
+                // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
 
                 // this.drones_selected = null;

@@ -382,22 +382,22 @@
                         </v-col>
                         <v-spacer></v-spacer>
                         <v-col cols="1">
-                            <v-tooltip top>
-                                <template v-slot:activator="{ on, attrs }">
-                                    <v-btn
-                                        :disabled="false"
-                                        class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                        @click.stop="reservedQuick"
-                                        v-bind="attrs"
-                                        v-on="on"
-                                    >
-                                        <v-icon small>
-                                            $radioboxBlank
-                                        </v-icon>
-                                    </v-btn>
-                                </template>
-                                <span>Reserved</span>
-                            </v-tooltip>
+<!--                            <v-tooltip top>-->
+<!--                                <template v-slot:activator="{ on, attrs }">-->
+<!--                                    <v-btn-->
+<!--                                        :disabled="false"-->
+<!--                                        class="mr-1 my-1" dark x-small text outlined elevation="5"-->
+<!--                                        @click.stop="reservedQuick"-->
+<!--                                        v-bind="attrs"-->
+<!--                                        v-on="on"-->
+<!--                                    >-->
+<!--                                        <v-icon small>-->
+<!--                                            $radioboxBlank-->
+<!--                                        </v-icon>-->
+<!--                                    </v-btn>-->
+<!--                                </template>-->
+<!--                                <span>Reserved</span>-->
+<!--                            </v-tooltip>-->
                         </v-col>
                         <v-col cols="1">
                             <v-tooltip top>

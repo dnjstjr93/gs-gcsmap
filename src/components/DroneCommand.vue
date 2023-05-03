@@ -80,12 +80,12 @@
                                         <span v-else-if="command.title === 'WP_YAW'">설정확인</span>
                                         <span v-else-if="command.title === 'SLEW_YAW'">설정확인</span>
                                     </v-btn>
-                                    <v-btn
-                                        v-else-if="command.title === '투하'" color="blue"
-                                        @click="setDropCommand()"
-                                    >
-                                        <span>투하확인</span>
-                                    </v-btn>
+<!--                                    <v-btn-->
+<!--                                        v-else-if="command.title === '투하'" color="blue"-->
+<!--                                        @click="setDropCommand()"-->
+<!--                                    >-->
+<!--                                        <span>투하확인</span>-->
+<!--                                    </v-btn>-->
                                 </v-card>
                             </v-col>
                         </v-row>
@@ -166,6 +166,7 @@
                                                                     v-model="d.targetTakeoffAlt"
                                                                     type="number"
                                                                     class="pa-1"
+                                                                    min="3" max="150"
                                                                 ></v-text-field>
                                                             </v-col>
                                                             <v-col cols="6">
@@ -943,34 +944,34 @@
                                                             </v-col>
                                                         </v-row>
                                                     </v-card>
-                                                    <v-card tile flat v-if="(command.title === '투하')">
-                                                        <v-row no-gutters>
-                                                            <v-col cols="12">
-                                                                <v-subheader>{{ d.name }} 투하 장치 제어:
-                                                                </v-subheader>
-                                                            </v-col>
-                                                            <table>
-                                                                <tr v-for="item in items" :key="item.first">
-                                                                    <td @click="setPoint(item.first)"><span
-                                                                        v-html="item.first"></span></td>
-                                                                    <td @click="setPoint(item.second)"><span
-                                                                        v-html="item.second"></span></td>
-                                                                    <td @click="setPoint(item.third)"><span
-                                                                        v-html="item.third"></span></td>
-                                                                    <td @click="setPoint(item.fourth)"><span
-                                                                        v-html="item.fourth"></span></td>
-                                                                    <td @click="setPoint(item.fifth)"><span
-                                                                        v-html="item.fifth"></span></td>
-                                                                    <td @click="setPoint(item.sixth)"><span
-                                                                        v-html="item.sixth"></span></td>
-                                                                    <td @click="setPoint(item.seventh)"><span
-                                                                        v-html="item.seventh"></span></td>
-                                                                    <td @click="setPoint(item.eighth)"><span
-                                                                        v-html="item.eighth"></span></td>
-                                                                </tr>
-                                                            </table>
-                                                        </v-row>
-                                                    </v-card>
+<!--                                                    <v-card tile flat v-if="(command.title === '투하')">-->
+<!--                                                        <v-row no-gutters>-->
+<!--                                                            <v-col cols="12">-->
+<!--                                                                <v-subheader>{{ d.name }} 투하 장치 제어:-->
+<!--                                                                </v-subheader>-->
+<!--                                                            </v-col>-->
+<!--                                                            <table>-->
+<!--                                                                <tr v-for="item in items" :key="item.first">-->
+<!--                                                                    <td @click="setPoint(item.first)"><span-->
+<!--                                                                        v-html="item.first"></span></td>-->
+<!--                                                                    <td @click="setPoint(item.second)"><span-->
+<!--                                                                        v-html="item.second"></span></td>-->
+<!--                                                                    <td @click="setPoint(item.third)"><span-->
+<!--                                                                        v-html="item.third"></span></td>-->
+<!--                                                                    <td @click="setPoint(item.fourth)"><span-->
+<!--                                                                        v-html="item.fourth"></span></td>-->
+<!--                                                                    <td @click="setPoint(item.fifth)"><span-->
+<!--                                                                        v-html="item.fifth"></span></td>-->
+<!--                                                                    <td @click="setPoint(item.sixth)"><span-->
+<!--                                                                        v-html="item.sixth"></span></td>-->
+<!--                                                                    <td @click="setPoint(item.seventh)"><span-->
+<!--                                                                        v-html="item.seventh"></span></td>-->
+<!--                                                                    <td @click="setPoint(item.eighth)"><span-->
+<!--                                                                        v-html="item.eighth"></span></td>-->
+<!--                                                                </tr>-->
+<!--                                                            </table>-->
+<!--                                                        </v-row>-->
+<!--                                                    </v-card>-->
                                                 </v-col>
                                             </v-row>
                                         </div>

@@ -18,9 +18,9 @@
                 <v-icon>$formatRotate90</v-icon>
             </v-btn>
 
-            <v-btn text @click.stop="setGCSHomePosition" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
-                <v-icon>$crosshairsGps</v-icon>
-            </v-btn>
+<!--            <v-btn text @click.stop="setGCSHomePosition" :disabled="!$store.state.MOBIUS_CONNECTION.connected">-->
+<!--                <v-icon>$crosshairsGps</v-icon>-->
+<!--            </v-btn>-->
 
             <v-btn text @click.stop="dialogProfile">
                 <!--            <v-icon>mdi-quadcopter</v-icon>-->
@@ -32,9 +32,9 @@
             <!--            <v-icon>mdi-video</v-icon>-->
             <!--        </v-btn>-->
 
-            <v-btn text @click.stop="openCam2" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
-                <v-icon>$video</v-icon>
-            </v-btn>
+<!--            <v-btn text @click.stop="openCam2" :disabled="!$store.state.MOBIUS_CONNECTION.connected">-->
+<!--                <v-icon>$video</v-icon>-->
+<!--            </v-btn>-->
 
             <!--        <router-link-->
             <!--                to="/cam"-->
