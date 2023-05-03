@@ -25,7 +25,7 @@
         "idb": "^7.0.2",
         "json-server": "^0.17.0",
         "jspack": "^0.0.4",
-        "kurento-utils": "^6.16.0",
+        "kurento-utils": "6.16.0",
         "lowdb": "^3.0.0",
         "moment": "^2.29.1",
         "mqtt": "^4.2.8",
