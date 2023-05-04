@@ -153,8 +153,7 @@ export default {
             axios.request(config)
                 .then((response) => {
                     this.room_name = response.data["m2m:cin"].con;
-                    console.log(this.room_name);
-                    console.log(this.info.isVideo);
+                    console.log(this.room_name, this.info.isVideo);
                     if (this.info.isVideo) {
                         this.viewer_start(this.room_name, this.bitrate)
                     }
@@ -267,22 +266,40 @@ export default {
                             var errorMsg = parsedMessage.message ? parsedMessage.message : 'Unknow error';
                             //console.warn('Call not accepted for the following reason: ' + errorMsg);
                             drone.stop();
-                            if (parsedMessage.message.includes("No active presenter")) {
-                                console.log(errorMsg);
-                                this.info.isVideo = true;
-                                setTimeout(() => {
-                                    this.videoOn();
-                                }, 1000);
-                            }
-                            else {
-                                if (parsedMessage.data.type === "MEDIA_OBJECT_NOT_FOUND") {
+                            if (typeof parsedMessage.message === 'string'){
+                                if (parsedMessage.message.includes("No active presenter")) {
+                                    this.info.isVideo = false;
+                                    this.viewer_stop();
+
+                                    console.log(errorMsg);
+
                                     this.info.isVideo = true;
                                     setTimeout(() => {
                                         this.videoOn();
                                     }, 1000);
-                                } else {
+                                }
+                                else {
                                     console.log(errorMsg);
                                     this.info.isVideo = false;
+                                }
+                            }
+                            else if (typeof parsedMessage.message === 'object') {
+                                if (Object.prototype.hasOwnProperty.call(parsedMessage.message,'data')) {
+                                    if (Object.prototype.hasOwnProperty.call(parsedMessage.message.data,'type')) {
+                                        if (parsedMessage.message.data.type === "MEDIA_OBJECT_NOT_FOUND") {
+                                            this.info.isVideo = false;
+                                            this.viewer_stop();
+
+                                            this.info.isVideo = true;
+                                            setTimeout(() => {
+                                                this.videoOn();
+                                            }, 1000);
+                                        }
+                                        else {
+                                            console.log(errorMsg);
+                                            this.info.isVideo = false;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -426,6 +443,7 @@ export default {
         EventBus.$off('do-video-on-' + this.drone_name);
         EventBus.$off('ws-on-message-' + this.drone_name);
         EventBus.$off('refresh-video-' + this.drone_name);
+        EventBus.$off('reconnect-video-' + this.drone_name);
     }
 }
 </script>
