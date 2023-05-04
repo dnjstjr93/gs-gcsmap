@@ -308,6 +308,8 @@
                 //wsUrl: 'wss://' + 'gcs.iotocean.org:7598' + '/webRTC',
                 wsUrl: 'wss://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7598' + '/webRTC',
                 ws: null,
+
+                room_name: ''
             };
         },
 
@@ -526,6 +528,51 @@
 
                             if(arr_topic[3] === 'Drone_Data') {
                                 EventBus.$emit('on-drone-message-handler-' + arr_topic[4], payload);
+                            }
+                            else if (topic.includes('/oneM2M/req')) {
+                                var jsonObj = JSON.parse(message.toString());
+
+                                let topic_arr = topic.split('/');
+                                let drone_name = topic_arr[4].substring(1, topic_arr[4].length);
+                                // let idx = this.list.findIndex(el => el.drone === drone_name);
+
+                                if (jsonObj['m2m:rqp'] == null) {
+                                    jsonObj['m2m:rqp'] = jsonObj;
+                                }
+
+                                if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'], 'pc')) {
+
+                                    // console.log(Object.keys(jsonObj['m2m:rqp'].pc)[0]);
+                                    // console.log(jsonObj['m2m:rqp'].pc);
+
+                                    let arr_topic = topic.split('/');
+                                    let resp_topic = topic.replace('/req/', '/resp/');
+                                    let rsp_message = {};
+                                    rsp_message['m2m:rsp'] = {};
+                                    rsp_message['m2m:rsp'].rsc = 2001;
+                                    rsp_message['m2m:rsp'].to = '';
+                                    rsp_message['m2m:rsp'].fr = arr_topic[4];
+                                    rsp_message['m2m:rsp'].rqi = '12345';
+                                    rsp_message['m2m:rsp'].pc = '';
+
+                                    //console.log(resp_topic);
+
+                                    this.doPublish(resp_topic, JSON.stringify(rsp_message['m2m:rsp']));
+
+                                    rsp_message = null;
+
+                                    if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'].pc, 'm2m:sgn')) {
+                                        if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'].pc['m2m:sgn'], 'nev')) {
+                                            if (Object.prototype.hasOwnProperty.call(jsonObj['m2m:rqp'].pc['m2m:sgn'].nev, 'rep')) {
+                                                if (Object.keys(jsonObj['m2m:rqp'].pc['m2m:sgn'].nev.rep)[0] === 'm2m:cin') {
+                                                    this.room_name = jsonObj["m2m:rqp"].pc['m2m:sgn'].nev.rep["m2m:cin"].con;
+                                                    console.log('noti room_name', this.room_name);
+                                                    EventBus.$emit('refresh-video-' + drone_name, this.room_name);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             else {
                                 EventBus.$emit('on-message-handler-' + arr_topic[4], payload);
@@ -923,22 +970,34 @@
 
                 this.ws.onopen = () => {
                     console.log('WebRTC server connected');
+                    for (let dName in this.$store.state.drone_infos) {
+                        if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                            if (dName === 'unknown') {
+                                continue;
+                            }
+
+                            if (this.$store.state.drone_infos[dName].selected) {
+                                EventBus.$emit('reconnect-video-' + dName);
+                                console.log('reconnect-video-' + dName);
+                            }
+                        }
+                    }
                 };
 
                 this.ws.onclose = () => {
                     console.log("Server is already in CLOSING or CLOSED state.\nPlease refresh the page after running the server.");
 
-                    for(let dName in this.$store.state.drone_infos) {
-                        if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                            if(dName === 'unknown') {
-                                continue;
-                            }
-
-                            if(this.$store.state.drone_infos[dName].selected) {
-                                EventBus.$emit('do-video-close-' + dName);
-                            }
-                        }
-                    }
+                    // for(let dName in this.$store.state.drone_infos) {
+                    //     if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    //         if(dName === 'unknown') {
+                    //             continue;
+                    //         }
+                    //
+                    //         if(this.$store.state.drone_infos[dName].selected) {
+                    //             EventBus.$emit('do-video-close-' + dName);
+                    //         }
+                    //     }
+                    // }
 
                     this.ws.close();
                     this.ws = null;

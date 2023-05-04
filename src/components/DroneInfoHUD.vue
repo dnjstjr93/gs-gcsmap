@@ -30,7 +30,7 @@ import kurentoUtils from 'kurento-utils';
 function Drone(name, bitrate, wrapper, video) {
     this.name = name;
     this.video = video;
-    console.log(this.name)
+
     this.viewer = function () {
         if (!this.webRtcPeer) {
             //showSpinner(this.video);
@@ -154,6 +154,7 @@ export default {
                 .then((response) => {
                     this.room_name = response.data["m2m:cin"].con;
                     console.log(this.room_name);
+                    console.log(this.info.isVideo);
                     if (this.info.isVideo) {
                         this.viewer_start(this.room_name, this.bitrate)
                     }
@@ -229,6 +230,32 @@ export default {
             this.videoOn();
         });
 
+        EventBus.$on('reconnect-video-' + this.drone_name, () => {
+            console.log(this.drone_name + '-' + this.info.isVideo)
+            if (this.info.isVideo) {
+                this.info.isVideo = false;
+                this.viewer_stop();
+
+                this.info.isVideo = true;
+                setTimeout(() => {
+                    this.videoOn();
+                }, 1000);
+            }
+        });
+
+        EventBus.$on('refresh-video-' + this.drone_name, (room_name) => {
+            console.log('[refresh-video-' + this.drone_name + ']\n' + room_name);
+            if (this.info.isVideo) {
+                this.info.isVideo = false;
+                this.viewer_stop();
+
+                this.info.isVideo = true;
+                setTimeout(() => {
+                    this.viewer_start(room_name, 0);
+                }, 3000);
+            }
+        });
+
         EventBus.$on('ws-on-message-' + this.drone_name, (parsedMessage) => {
             if (this.drone) {
                 let drone = this.drone;
@@ -240,9 +267,24 @@ export default {
                             var errorMsg = parsedMessage.message ? parsedMessage.message : 'Unknow error';
                             //console.warn('Call not accepted for the following reason: ' + errorMsg);
                             drone.stop();
-                            alert(errorMsg);
-
-                            this.info.isVideo = false;
+                            if (parsedMessage.message.includes("No active presenter")) {
+                                console.log(errorMsg);
+                                this.info.isVideo = true;
+                                setTimeout(() => {
+                                    this.videoOn();
+                                }, 1000);
+                            }
+                            else {
+                                if (parsedMessage.data.type === "MEDIA_OBJECT_NOT_FOUND") {
+                                    this.info.isVideo = true;
+                                    setTimeout(() => {
+                                        this.videoOn();
+                                    }, 1000);
+                                } else {
+                                    console.log(errorMsg);
+                                    this.info.isVideo = false;
+                                }
+                            }
                         }
                         else {
                             drone.webRtcPeer.processAnswer(parsedMessage.sdpAnswer);
@@ -267,6 +309,110 @@ export default {
 
         this.droneHudContainer = this.droneWrapper.querySelector('#hud-container');
 
+        const subscription_name = 'webrtc_' + this.drone_name + '_sub';
+        axios({
+            validateStatus: function (status) {
+                // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                return status < 500;
+            },
+            method: 'get',
+            url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + this.drone_name + '/msw_webrtc_crow/room_name' + '/' + subscription_name,
+            headers: {
+                'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                'X-M2M-Origin': 'SVue'
+            }
+        }).then((res) => {
+                console.log('getSubscription', res);
+
+                if (res.status === 200) {
+                    let room_name_topic = '/oneM2M/req/Mobius2/' + 'S' + this.drone_name + '/json';
+                    setTimeout(() => {
+                        EventBus.$emit('do-subscribe', room_name_topic);
+                        // this.doSubscribe(room_name_topic);
+                        console.log('App-room_name_topic - Subscribe to ', room_name_topic);
+                    }, 500);
+                } else {
+                    axios({
+                        validateStatus: function (status) {
+                            // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                            return status < 500;
+                        },
+                        method: 'post',
+                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + this.drone_name + '/msw_webrtc_crow/room_name',
+                        headers: {
+                            'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                            'X-M2M-Origin': 'S' + this.drone_name,
+                            'Content-Type': 'application/json;ty=23'
+                        },
+                        data: {
+                            'm2m:sub': {
+                                rn: 'webrtc_' + this.drone_name + '_sub',
+                                enc: {
+                                    'net': [
+                                        1,
+                                        2,
+                                        3,
+                                        4
+                                    ]
+                                },
+                                nu: ["mqtt://gcs.iotocean.org/" + 'S' + this.drone_name + "?ct=json"],
+                                nct: 2,
+                            }
+                        }
+                    }).then(
+                        (res) => {
+                            console.log(res)
+                            console.log(res.status, '');
+                        }
+                    ).catch(
+                        (err) => {
+                            console.log(err.message);
+                        }
+                    );
+                }
+            }
+        ).catch(
+            function (err) {
+                console.log(err.message);
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'post',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/Mission_Data/' + this.drone_name + '/msw_webrtc_crow/room_name',
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                        'Content-Type': 'application/json;ty=23'
+                    },
+                    data: {
+                        'm2m:sub': {
+                            rn: 'webrtc_' + this.drone_name + '_sub',
+                            enc: {
+                                'net': [
+                                    1,
+                                    2,
+                                    3,
+                                    4
+                                ]
+                            },
+                            nu: ["mqtt://gcs.iotocean.org/" + 'S' + this.drone_name + "?ct=json"],
+                            nct: 2,
+                        }
+                    }
+                }).then(
+                    (res) => {
+                        console.log(res)
+                        console.log(res.status, '');
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err.message);
+                    }
+                );
+            }
+        );
     },
 
     beforeDestroy() {
@@ -279,7 +425,7 @@ export default {
         EventBus.$off('do-video-close-' + this.drone_name);
         EventBus.$off('do-video-on-' + this.drone_name);
         EventBus.$off('ws-on-message-' + this.drone_name);
-        //EventBus.$off('hud-data-' + this.drone_name);
+        EventBus.$off('refresh-video-' + this.drone_name);
     }
 }
 </script>
