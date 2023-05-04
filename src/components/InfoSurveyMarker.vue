@@ -202,7 +202,7 @@
                                         outlined dense hide-details
                                         color="amber"
                                         min="3"
-                                        max="500"
+                                        max="150"
                                         @input="changeParamShooting($event, 'paramAlt')"
                                     ></v-text-field>
                                 </v-col>
@@ -214,8 +214,8 @@
                                         type="number"
                                         outlined dense hide-details
                                         color="amber"
-                                        min="3"
-                                        max="500"
+                                        min="1"
+                                        max="20"
                                         @input="changeParamShooting($event, 'Speed')"
                                     ></v-text-field>
                                 </v-col>
@@ -287,7 +287,7 @@
                                         outlined dense hide-details
                                         color="amber"
                                         min="3"
-                                        max="500"
+                                        max="150"
                                         @input="changeParamSearch($event, 'paramAlt')"
                                     ></v-text-field>
                                 </v-col>
@@ -299,8 +299,8 @@
                                         type="number"
                                         outlined dense hide-details
                                         color="amber"
-                                        min="3"
-                                        max="500"
+                                        min="1"
+                                        max="20"
                                         @input="changeParamSearch($event, 'Speed')"
                                     ></v-text-field>
                                 </v-col>
@@ -374,750 +374,769 @@
 </template>
 
 <script>
-    import EventBus from "@/EventBus";
-    import axios from "axios";
-    import {Chart, Tooltip, Legend, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement } from 'chart.js';
-    Chart.register(Tooltip, Legend, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement); // 👈 chart.js 모듈 Chart 모듈에 등록
+import EventBus from "@/EventBus";
+import axios from "axios";
+import {Chart, Tooltip, Legend, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement } from 'chart.js';
+Chart.register(Tooltip, Legend, BarElement, BarController, LinearScale, CategoryScale, LineElement, LineController, PointElement); // 👈 chart.js 모듈 Chart 모듈에 등록
 
-    export default {
-        myChart: null,
+export default {
+    myChart: null,
 
-        name: "InfoSurveyMarker",
+    name: "InfoSurveyMarker",
 
-        props: [
-            'value',
-            'markerName',
-            'markerIndex',
-        ],
+    props: [
+        'value',
+        'markerName',
+        'markerIndex',
+    ],
 
-        data() {
-            return {
-                wayOfSurvey: 'forShooting',
-                total_count: 0,
-                total_dist: 400,
-                paramFocal: 16,
-                paramSensorW: 23.5,
-                paramSensorH: 15.6,
-                paramOverlap: 0.7,
+    data() {
+        return {
+            wayOfSurvey: 'forShooting',
+            total_count: 0,
+            total_dist: 400,
+            paramFocal: 16,
+            paramSensorW: 23.5,
+            paramSensorH: 15.6,
+            paramOverlap: 0.7,
 
-                targets: [],
+            targets: [],
 
-                area: 0,
+            area: 0,
 
-                flyAltType: "상대고도",
-                targetSelectName: '',
-                targetSelectIndex: '0',
-                targetSpeed: 5,
-                targetRadius: 10,
-                targetTurningSpeed: 10,
+            flyAltType: "상대고도",
+            targetSelectName: '',
+            targetSelectIndex: '0',
+            targetSpeed: 5,
+            targetRadius: 10,
+            targetTurningSpeed: 10,
 
-                idAngleUpdateTimer: null,
-                idDirUpdateTimer: null,
-                idGapUpdateTimer: null,
-                idAltUpdateTimer: null,
-                idWayUpdateTimer: null,
+            idAngleUpdateTimer: null,
+            idDirUpdateTimer: null,
+            idGapUpdateTimer: null,
+            idAltUpdateTimer: null,
+            idWayUpdateTimer: null,
 
-                paramAngle: 0,
-                paramDir: 'cw',
-                paramGap: 10,
-                paramPeriod: 10,
-                paramAlt: 100,
-                paramStartAlt: 0,
-                paramOffsetAlt: 0,
-                paramSpeed: 5,
+            paramAngle: 0,
+            paramDir: 'cw',
+            paramGap: 10,
+            paramPeriod: 10,
+            paramAlt: 100,
+            paramStartAlt: 0,
+            paramOffsetAlt: 0,
+            paramSpeed: 5,
 
-                elevation: 0,
+            elevation: 0,
 
-                snackbar: false,
+            snackbar: false,
 
-                disableTargetSelectIndex: false,
-                disableTargetSelect: false,
+            disableTargetSelectIndex: false,
+            disableTargetSelect: false,
 
-                labels: [0],
-                flyAlt: [],
+            labels: [0],
+            flyAlt: [],
+        }
+    },
+
+    watch: {
+        markerName: function (newVal) {
+            this.targetSelectName = newVal;
+        },
+
+        targetSelectName: function (newVal) {
+            this.disableTargetSelectIndex = (this.markerName !== newVal);
+        },
+
+        targetSelectIndex: function (newVal) {
+            this.disableTargetSelect = (String(this.markerIndex) !== newVal);
+        },
+    },
+
+    computed: {
+        targetIndexList() {
+            console.log()
+            let arrIndex = [];
+            for(let idx in this.$store.state.surveyMarkers[this.markerName]) {
+                if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName], idx)) {
+                    arrIndex.push(idx);
+                }
+            }
+
+            return (arrIndex);
+        },
+
+        conditions() {
+            return !((this.markerName !== this.targetSelectName) ||
+                (String(this.markerIndex) !== this.targetSelectIndex));
+        },
+
+        curDroneColorMap() {
+            return (this.$store.state.drone_infos[this.targetSelectName].color);
+        },
+    },
+
+    methods: {
+        initLabels() {
+            let unitVal = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist / this.$store.state.SAMPLES);
+            console.log('unitVal', unitVal);
+            this.labels = [0];
+            let dist = 0;
+            for(let i = 1; i < this.$store.state.SAMPLES; i++) {
+                dist += unitVal;
+                this.labels.push(dist);
             }
         },
 
-        watch: {
-            markerName: function (newVal) {
-                this.targetSelectName = newVal;
-            },
+        fillElevationData() {
+            if(this.myChart) {
+                this.myChart.destroy();
+            }
 
-            targetSelectName: function (newVal) {
-                this.disableTargetSelectIndex = (this.markerName !== newVal);
-            },
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt));
 
-            targetSelectIndex: function (newVal) {
-                this.disableTargetSelect = (String(this.markerIndex) !== newVal);
-            },
-        },
+            console.log('takeoffAlt - ', this.$store.state.drone_infos[this.markerName].absolute_alt, this.$store.state.drone_infos[this.markerName].alt, this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt)
 
-        computed: {
-            targetIndexList() {
-                console.log()
-                let arrIndex = [];
-                for(let idx in this.$store.state.surveyMarkers[this.markerName]) {
-                    if(Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName], idx)) {
-                        arrIndex.push(idx);
-                    }
-                }
-
-                return (arrIndex);
-            },
-
-            conditions() {
-                return !((this.markerName !== this.targetSelectName) ||
-                    (String(this.markerIndex) !== this.targetSelectIndex));
-            },
-
-            curDroneColorMap() {
-                return (this.$store.state.drone_infos[this.targetSelectName].color);
-            },
-        },
-
-        methods: {
-            initLabels() {
-                let unitVal = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist / this.$store.state.SAMPLES);
-                console.log('unitVal', unitVal);
-                this.labels = [0];
-                let dist = 0;
-                for(let i = 1; i < this.$store.state.SAMPLES; i++) {
-                    dist += unitVal;
-                    this.labels.push(dist);
-                }
-            },
-
-            fillElevationData() {
-                if(this.myChart) {
-                    this.myChart.destroy();
-                }
-
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt));
-
-                console.log('takeoffAlt - ', this.$store.state.drone_infos[this.markerName].absolute_alt, this.$store.state.drone_infos[this.markerName].alt, this.$store.state.drone_infos[this.markerName].takeoffAbsoluteAlt)
-
-                const ctx = document.getElementById('elevation-chart-'+this.markerName).getContext('2d', { willReadFrequently: true });
-                let config = {
-                    data: {
-                        labels: this.labels,
-                        datasets: [
-                            {
-                                type: 'bar',
-                                label: '지형',
-                                data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations,
-                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
-                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
-                                borderWidth: 1
-                            },
-                            {
-                                type: 'line',
-                                label: '비행고도',
-                                data: this.flyAlt,
-                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 0.2)'),
-                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 1)'),
-                            },
-                            {
-                                type: 'line',
-                                label: '옵셋고도',
-                                data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt,
-                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 0.2)'),
-                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 1)'),
-                                hidden: (this.wayOfSurvey === 'forSearch'),
-                            },
-                            {
-                                type: 'line',
-                                label: '이륙고도',
-                                data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt,
-                                backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(54, 162, 235, 1)'),
-                                borderColor: Array(this.$store.state.SAMPLES).fill('rgba(54, 162, 235, 0.2)'),
-                            },
-                        ],
-                    },
-                    options: {
-                        scales: {
-                            y: {beginAtZero: true}
+            const ctx = document.getElementById('elevation-chart-'+this.markerName).getContext('2d', { willReadFrequently: true });
+            let config = {
+                data: {
+                    labels: this.labels,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: '지형',
+                            data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations,
+                            backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 0.2)'),
+                            borderColor: Array(this.$store.state.SAMPLES).fill('rgba(153, 102, 255, 1)'),
+                            borderWidth: 1
                         },
-                        responsive: true,
-                        maintainAspectRatio: false,
-                    }
-                };
-
-                this.myChart = new Chart(ctx, config);
-            },
-
-            changeFlyAltType(altType) {
-                console.log(altType, this.markerName);
-
-                this.flyAltType = altType;
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAltType = altType;
-
-                this.changeParamShooting(this.paramAlt, 'paramAlt');
-            },
-
-            changeWayOfSurvey(val) {
-                this.wayOfSurvey = val;
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey = val;
-
-                if(this.idWayUpdateTimer !== null) {
-                    clearTimeout(this.idWayUpdateTimer);
-                }
-
-                this.idWayUpdateTimer = setTimeout((dName) => {
-                    this.postCinSurveyMarkerInfoToMobius(dName);
-
-                }, 500, this.markerName);
-
-                if(this.wayOfSurvey === 'forShooting') {
-                    this.calcShootingFlyAlt();
-
-                    let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, this.paramAlt, this.paramSpeed);
-                    this.paramGap = parseInt(result.interval_l * (this.paramSensorW / this.paramSensorH));
-
-                    this.paramPeriod = parseInt(result.interval_t);
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = this.paramPeriod;
-
-                    console.log('촬영주기: ', this.paramPeriod, '초, ', '간격: ', +this.paramGap + 'm');
-
-                    this.changeGapSurveyPath(this.paramGap);
-                }
-                else {
-                    this.calcSearchFlyAlt();
-
-                    this.changeGapSurveyPath(this.paramGap);
-                }
-
-                if(this.myChart) {
-                    for(let i = 0; i < this.myChart.data.datasets.length; i++) {
-                        if(this.myChart.data.datasets[i].label === '옵셋고도') {
-                            this.myChart.data.datasets[i].hidden = (this.wayOfSurvey === 'forSearch');
-                        }
-                    }
-                    this.myChart.update();
-                }
-            },
-
-            calcFactorSurvey(focal, sensor_h, overlap, alt, speed) {
-                let interval_t = (sensor_h * alt * (1-overlap)) / (focal * speed);
-                let interval_l = interval_t * speed;
-
-                return({'interval_t': interval_t, 'interval_l': interval_l});
-            },
-
-            calcShootingFlyAlt() {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
-
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
-                if(this.flyAltType === '상대고도') {
-                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
-                        this.flyAlt[i] = parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt[i] = parseInt(this.paramOffsetAlt);
-                    }
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
-                }
-                else {
-                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
-                        this.flyAlt[i] = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt);
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
-                            parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
-                        );
-                    }
-                }
-            },
-
-            calcSearchFlyAlt() {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt);
-
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
-                if(this.flyAltType === '상대고도') {
-                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
-                        this.flyAlt[i] = parseInt(this.paramAlt);
-                    }
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramAlt));
-                }
-                else {
-                    for(let i = 0; i < this.$store.state.SAMPLES; i++) {
-                        this.flyAlt[i] = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt);
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
-                            parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
-                        );
-                    }
-                }
-            },
-
-            changeParamShooting(val, factor) {
-                if(val !== '') {
-                    if (factor === 'Focal') {
-                        this.paramFocal = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal = val;
-                    } else if (factor === 'SensorH') {
-                        this.paramSensorH = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h = val;
-                    } else if (factor === 'SensorW') {
-                        this.paramSensorW = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w = val;
-                    } else if (factor === 'SensorH') {
-                        this.paramSensorH = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h = val;
-                    } else if (factor === 'Overlap') {
-                        this.paramOverlap = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap = val;
-                    }
-                    else if (factor === 'paramAlt') {
-                        this.paramAlt = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt = val;
-
-                        this.calcShootingFlyAlt();
-
-                        if(this.myChart) {
-                            this.myChart.update();
-                        }
-                    }
-                    else if (factor === 'paramOffsetAlt') {
-                        this.paramOffsetAlt = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramOffsetAlt = val;
-
-                        this.calcShootingFlyAlt();
-
-                        if(this.myChart) {
-                            this.myChart.update();
-                        }
-                    }
-                    else if (factor === 'Speed') {
-                        this.paramSpeed = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = val;
-                    }
-
-                    // let interval_t = (this.paramSensorH * 100 * (1-this.paramOverlap)) / (this.paramFocal * 5);
-                    // let interval_l = interval_t * 5;
-
-                    let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, this.paramAlt, this.paramSpeed);
-                    this.paramGap = parseInt(result.interval_l * (this.paramSensorW / this.paramSensorH));
-
-                    this.paramPeriod = parseInt(result.interval_t);
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = this.paramPeriod;
-
-                    console.log('촬영주기: ', this.paramPeriod, '초, ', '간격: ', +this.paramGap + 'm');
-
-                    this.changeGapSurveyPath(this.paramGap);
-                }
-            },
-
-            changeParamSearch(val, factor) {
-                if(val !== '') {
-                    if (factor === 'paramAlt') {
-                        this.paramAlt = val;
-                        this.calcSearchFlyAlt();
-
-                        if(this.myChart) {
-                            this.myChart.update();
-                        }
-
-                        this.changeGapSurveyPath(this.paramGap);
-                    } else if (factor === 'Speed') {
-                        this.paramSpeed = val;
-                        this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = val;
-                    }
-                }
-            },
-
-            changeGapSurveyPath(gap) {
-                if(gap !== '') {
-                    if (this.idGapUpdateTimer !== null) {
-                        clearTimeout(this.idGapUpdateTimer);
-                    }
-
-                    this.idGapUpdateTimer = setTimeout((dName, pIndex) => {
-                        EventBus.$emit('do-update-survey-GcsMap', {
-                            eName: 'gap',
-                            dName: dName,
-                            pIndex: pIndex,
-                            gap: parseInt(gap)
-                        });
-                    }, 500, this.markerName, this.markerIndex);
-                }
-            },
-
-            changeAngleSurveyPath(angle) {
-                if(angle !== '') {
-                    if (this.idAngleUpdateTimer !== null) {
-                        clearTimeout(this.idAngleUpdateTimer);
-                    }
-
-                    this.idAngleUpdateTimer = setTimeout((dName, pIndex) => {
-                        EventBus.$emit('do-update-survey-GcsMap', {
-                            eName: 'angle',
-                            dName: dName,
-                            pIndex: pIndex,
-                            angle: parseInt(angle)
-                        });
-                    }, 500, this.markerName, this.markerIndex);
-                }
-            },
-
-            changeDirSurveyPath(strDir) {
-                if(this.idDirUpdateTimer !== null) {
-                    clearTimeout(this.idDirUpdateTimer);
-                }
-
-                let dir = 1;
-                if(strDir === 'ccw') {
-                    dir = -1;
-                }
-
-                this.idDirUpdateTimer = setTimeout((dName, pIndex) => {
-                    EventBus.$emit('do-update-survey-GcsMap', {
-                        eName: 'dir',
-                        dName: dName,
-                        pIndex: pIndex,
-                        dir: parseInt(dir)
-                    });
-                }, 500, this.markerName, this.markerIndex);
-            },
-
-            deleteMarker() {
-                let watchingPayload = {};
-                watchingPayload.payload = {
-                    dName: this.markerName,
-                    pIndex: this.markerIndex,
-                };
-
-                if(this.markerName === 'unknown') {
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].selected = false;
-                    this.$store.state.surveyMarkers[this.markerName].splice(this.markerIndex, 1);
-
-                    watchingPayload.broadcastMission = 'removeSurveyMarker';
-
-                    this.postCinSurveyMarkerInfoToMobius(this.markerName);
-                }
-                else {
-                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].selected = false;
-                    this.$store.state.surveyMarkers.unknown.push(
-                        JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[this.markerName][this.markerIndex]))
-                    );
-                    this.$store.state.surveyMarkers[this.markerName].splice(this.markerIndex, 1);
-
-                    watchingPayload.broadcastMission = 'deleteSurveyMarker';
-
-                    this.postCinSurveyMarkerInfoToMobius(this.markerName);
-
-                    this.postCinSurveyMarkerInfoToMobius('unknown');
-                }
-
-                this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
-                this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
-
-                this.$store.state.didIPublish = true;
-
-                this.snackbar = true;
-
-                setTimeout(() => {
-                    this.resetForm();
-                }, 100);
-            },
-
-            doPublish(topic, payload) {
-                if (this.$store.state.client.connected) {
-                    this.$store.state.client.publish(topic, payload, 0, error => {
-                        if (error) {
-                            console.log('Publish error', error)
-                        }
-                    });
-                }
-            },
-
-            resetForm() {
-                // this.form = Object.assign({}, this.defaultForm)
-                // this.$refs.form.reset()
-
-                this.$emit('input', false);
-
-                this.$store.state.surveyMarkers[this.markerName].forEach((marker) => {
-                    marker.selected = false;
-                    marker.polygonDraggable = false;
-                    marker.polygonEditable = false;
-                });
-
-                EventBus.$emit('do-unsetSelectedSurveyMarker');
-            },
-
-            createEachSurveyMarkerInfoToMobius(dName, callback) {
-                axios({
-                    validateStatus: function (status) {
-                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                        return status < 500;
+                        {
+                            type: 'line',
+                            label: '비행고도',
+                            data: this.flyAlt,
+                            backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 0.2)'),
+                            borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 99, 132, 1)'),
+                        },
+                        {
+                            type: 'line',
+                            label: '옵셋고도',
+                            data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt,
+                            backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 0.2)'),
+                            borderColor: Array(this.$store.state.SAMPLES).fill('rgba(255, 206, 86, 1)'),
+                            hidden: (this.wayOfSurvey === 'forSearch'),
+                        },
+                        {
+                            type: 'line',
+                            label: '이륙고도',
+                            data: this.$store.state.surveyMarkers[this.markerName][this.markerIndex].takeoffAlt,
+                            backgroundColor: Array(this.$store.state.SAMPLES).fill('rgba(54, 162, 235, 1)'),
+                            borderColor: Array(this.$store.state.SAMPLES).fill('rgba(54, 162, 235, 0.2)'),
+                        },
+                    ],
+                },
+                options: {
+                    scales: {
+                        y: {beginAtZero: true}
                     },
-                    method: 'post',
-                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos',
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'SVue',
-                        'Content-Type': 'application/json;ty=3'
-                    },
-                    data: {
-                        'm2m:cnt': {
-                            rn: dName,
-                            lbl: ['dName'],
-                        }
-                    }
-                }).then(
-                    function (res) {
-                        callback(res.status, '');
-                    }
-                ).catch(
-                    function (err) {
-                        console.log(err.message);
-                    }
-                );
-            },
-
-            postCinSurveyMarkerInfoToMobius(dName) {
-                axios({
-                    validateStatus: function (status) {
-                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                        return status < 500;
-                    },
-                    method: 'post',
-                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName,
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'SVue',
-                        'Content-Type': 'application/json;ty=4'
-                    },
-                    data: {
-                        'm2m:cin': {
-                            con: this.$store.state.surveyMarkers[dName]
-                        }
-                    }
-                }).then(
-                    function (res) {
-                        console.log('++++++++ postCinSurveyMarkerInfoToMobius-axios', res.data);
-                    }
-                ).catch(
-                    function (err) {
-                        console.log(err.message);
-                    }
-                );
-            },
-
-            postCntToMobius(url, name, callback) {
-                axios({
-                    validateStatus: function (status) {
-                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                        return status < 500;
-                    },
-                    method: 'post',
-                    url: url,
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                        'Content-Type': 'application/json;ty=3'
-                    },
-                    data: {
-                        'm2m:cnt': {
-                            rn: name,
-                            lbl: [name],
-                        }
-                    }
-                }).then(
-                    (res) => {
-                        callback(res.status, '');
-                    }
-                ).catch(
-                    (err) => {
-                        console.log(err.message);
-                    }
-                );
-            },
-
-            postCinToMobius(url, con, callback) {
-                axios({
-                    validateStatus: function (status) {
-                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                        return status < 500;
-                    },
-                    method: 'post',
-                    url: url,
-                    headers: {
-                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                        'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
-                        'Content-Type': 'application/json;ty=4'
-                    },
-                    data: {
-                        'm2m:cin': {
-                            con: con
-                        }
-                    }
-                }).then(
-                    (res) => {
-                        callback(res.status, '');
-                    }
-                ).catch(
-                    (err) => {
-                        console.log(err.message);
-                    }
-                );
-            },
-
-            registerSurveyMarker(oldName, oldIndex, newName) {
-
-                this.$store.state.surveyMarkers[oldName][oldIndex].selected = false;
-                this.$store.state.surveyMarkers[oldName][oldIndex].targeted = false;
-                this.$store.state.surveyMarkers[oldName][oldIndex].polygonDraggable = false;
-                this.$store.state.surveyMarkers[oldName][oldIndex].polygonEditable = false;
-
-                this.$store.state.surveyMarkers[newName].push(
-                    JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[oldName][oldIndex]))
-                );
-                this.$store.state.surveyMarkers[oldName].splice(oldIndex, 1);
-
-                this.postCinSurveyMarkerInfoToMobius(newName);
-
-                this.postCinSurveyMarkerInfoToMobius(oldName);
-
-                this.snackbar = true;
-
-                setTimeout(() => {
-                    this.resetForm();
-                }, 100);
-            },
-
-            submit() {
-                if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, this.targetSelectName)) {
-                    this.$store.state.surveyMarkers[this.targetSelectName] = [];
-
-                    let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos';
-                    this.postCntToMobius(url, this.targetSelectName, () => {
-                        let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + this.targetSelectName;
-                        this.postCinToMobius(url, this.$store.state.surveyMarkers[this.targetSelectName], () => {
-                            this. registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
-                        });
-                    });
+                    responsive: true,
+                    maintainAspectRatio: false,
                 }
-                else {
-                    this. registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
-                }
-            },
+            };
+
+            this.myChart = new Chart(ctx, config);
         },
 
-        created() {
-            this.targets = [];
+        changeFlyAltType(altType) {
+            console.log(altType, this.markerName);
 
-            for (var dName in this.$store.state.drone_infos) {
-                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
-                    if (dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
-                        this.targets.push(dName);
-                    }
-                }
-            }
+            this.flyAltType = altType;
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAltType = altType;
+
+            this.changeParamShooting(this.paramAlt, 'paramAlt');
         },
 
-        mounted() {
-            this.targetSelectName = this.markerName;
-            this.targetSelectIndex = String(this.markerIndex);
+        changeWayOfSurvey(val) {
+            this.wayOfSurvey = val;
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey = val;
 
-            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'wayOfSurvey')) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey = 'forShooting';
+            if(this.idWayUpdateTimer !== null) {
+                clearTimeout(this.idWayUpdateTimer);
             }
 
-            this.wayOfSurvey = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey;
+            this.idWayUpdateTimer = setTimeout((dName) => {
+                this.postCinSurveyMarkerInfoToMobius(dName);
 
-            this.paramAngle = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].angle;
-            this.paramDir = (this.$store.state.surveyMarkers[this.markerName][this.markerIndex].dir === 1) ? 'cw' : 'ccw';
-            this.paramGap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap;
-            this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt;
-            this.paramOffsetAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramOffsetAlt;
-
-            if(this.markerName === 'unknown') {
-                this.paramStartAlt = 0;
-            }
-            else {
-                this.paramStartAlt = parseInt(this.$store.state.drone_infos[this.markerName].absolute_alt - this.$store.state.drone_infos[this.markerName].alt);
-            }
-
-            this.flyAltType = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAltType;
-
-            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'focal')) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal = 16;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'sensor_w')) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w = 23.5;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'sensor_h')) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h = 15.6;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'overlap')) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap = 0.7;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'speed')) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = 5;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'period')) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = 5;
-            }
-
-            if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'total_dist')) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist = 400;
-            }
-
-            this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
-            this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
-            this.paramFocal = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal;
-            this.paramSensorW = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w;
-            this.paramSensorH = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h;
-            this.paramOverlap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap;
-            this.paramSpeed = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed;
-            this.paramPeriod = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period;
+            }, 500, this.markerName);
 
             if(this.wayOfSurvey === 'forShooting') {
+                this.calcShootingFlyAlt();
+
                 let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, this.paramAlt, this.paramSpeed);
                 this.paramGap = parseInt(result.interval_l * (this.paramSensorW / this.paramSensorH));
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap = this.paramGap;
 
                 this.paramPeriod = parseInt(result.interval_t);
                 this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = this.paramPeriod;
 
+                console.log('촬영주기: ', this.paramPeriod, '초, ', '간격: ', +this.paramGap + 'm');
+
+                this.changeGapSurveyPath(this.paramGap);
+            }
+            else {
+                this.calcSearchFlyAlt();
+
                 this.changeGapSurveyPath(this.paramGap);
             }
 
-            if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'area')) {
-                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area = 0;
-            }
-            this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
-
-            console.log('InfoSurveyMarker', this.$store.state.surveyMarkers[this.markerName]);
-
-            for(let i = 0; i < this.$store.state.SAMPLES; i++) {
-                this.flyAlt.push(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt[i]);
-            }
-
-            this.initLabels();
-
-            this.fillElevationData();
-
-            EventBus.$on('on-update-info-survey-marker', () => {
-                this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
-                this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
-                this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
-
-                if(this.myChart) {
-                    this.myChart.update();
+            if(this.myChart) {
+                for(let i = 0; i < this.myChart.data.datasets.length; i++) {
+                    if(this.myChart.data.datasets[i].label === '옵셋고도') {
+                        this.myChart.data.datasets[i].hidden = (this.wayOfSurvey === 'forSearch');
+                    }
                 }
-            });
+                this.myChart.update();
+            }
         },
 
-        beforeDestroy() {
-            EventBus.$off('on-update-info-survey-marker');
+        calcFactorSurvey(focal, sensor_h, overlap, alt, speed) {
+            let interval_t = (sensor_h * alt * (1-overlap)) / (focal * speed);
+            let interval_l = interval_t * speed;
 
-            if(this.myChart) {
-                this.myChart.destroy();
+            return({'interval_t': interval_t, 'interval_l': interval_l});
+        },
+
+        calcShootingFlyAlt() {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
+
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
+            if(this.flyAltType === '상대고도') {
+                for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                    this.flyAlt[i] = parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt);
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].offsetAlt[i] = parseInt(this.paramOffsetAlt);
+                }
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramStartAlt) + parseInt(this.paramAlt) + parseInt(this.paramOffsetAlt));
+            }
+            else {
+                for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                    this.flyAlt[i] = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt);
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
+                        parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
+                    );
+                }
+            }
+        },
+
+        calcSearchFlyAlt() {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].alt = parseInt(this.paramAlt);
+
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = [];
+            if(this.flyAltType === '상대고도') {
+                for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                    this.flyAlt[i] = parseInt(this.paramAlt);
+                }
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt = Array(this.$store.state.SAMPLES).fill(parseInt(this.paramAlt));
+            }
+            else {
+                for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+                    this.flyAlt[i] = parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt);
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt.push(
+                        parseInt(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].elevations[i]) + parseInt(this.paramAlt)
+                    );
+                }
+            }
+        },
+
+        changeParamShooting(val, factor) {
+            if(val !== '') {
+                if (factor === 'Focal') {
+                    this.paramFocal = val;
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal = val;
+                } else if (factor === 'SensorH') {
+                    this.paramSensorH = val;
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h = val;
+                } else if (factor === 'SensorW') {
+                    this.paramSensorW = val;
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w = val;
+                } else if (factor === 'SensorH') {
+                    this.paramSensorH = val;
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h = val;
+                } else if (factor === 'Overlap') {
+                    if (0.0 > val) {
+                        this.paramOverlap = 0.0;
+                    } else if (val > 1.0) {
+                        this.paramOverlap = 1.0
+                    }
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap = val;
+                }
+                else if (factor === 'paramAlt') {
+                    this.paramAlt = val;
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt = val;
+
+                    this.calcShootingFlyAlt();
+
+                    if(this.myChart) {
+                        this.myChart.update();
+                    }
+                }
+                else if (factor === 'paramOffsetAlt') {
+                    this.paramOffsetAlt = val;
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramOffsetAlt = val;
+
+                    this.calcShootingFlyAlt();
+
+                    if(this.myChart) {
+                        this.myChart.update();
+                    }
+                }
+                else if (factor === 'Speed') {
+                    this.paramSpeed = val;
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = val;
+                }
+
+                // let interval_t = (this.paramSensorH * 100 * (1-this.paramOverlap)) / (this.paramFocal * 5);
+                // let interval_l = interval_t * 5;
+
+                let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, this.paramAlt, this.paramSpeed);
+                this.paramGap = parseInt(result.interval_l * (this.paramSensorW / this.paramSensorH));
+
+                this.paramPeriod = parseInt(result.interval_t);
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = this.paramPeriod;
+
+                console.log('촬영주기: ', this.paramPeriod, '초, ', '간격: ', +this.paramGap + 'm');
+
+                this.changeGapSurveyPath(this.paramGap);
+            }
+        },
+
+        changeParamSearch(val, factor) {
+            if(val !== '') {
+                if (factor === 'paramAlt') {
+                    if (val > 150) {
+                        val = 150;
+                    } else if (val < 3) {
+                        val = 3;
+                    }
+                    this.paramAlt = val;
+                    this.calcSearchFlyAlt();
+
+                    if(this.myChart) {
+                        this.myChart.update();
+                    }
+
+                    this.changeGapSurveyPath(this.paramGap);
+                } else if (factor === 'Speed') {
+                    if (val < 1) {
+                        val = 1;
+                    } else if (val > 20) {
+                        val = 20;
+                    }
+                    this.paramSpeed = val;
+                    this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = val;
+                }
+            }
+        },
+
+        changeGapSurveyPath(gap) {
+            if(gap !== '') {
+                if (this.idGapUpdateTimer !== null) {
+                    clearTimeout(this.idGapUpdateTimer);
+                }
+
+                this.idGapUpdateTimer = setTimeout((dName, pIndex) => {
+                    EventBus.$emit('do-update-survey-GcsMap', {
+                        eName: 'gap',
+                        dName: dName,
+                        pIndex: pIndex,
+                        gap: parseInt(gap)
+                    });
+                }, 500, this.markerName, this.markerIndex);
+            }
+        },
+
+        changeAngleSurveyPath(angle) {
+            if(angle !== '') {
+                if (angle > 360) {
+                    angle = 360;
+                } else if (angle < -360) {
+                    angle = -360;
+                }
+                if (this.idAngleUpdateTimer !== null) {
+                    clearTimeout(this.idAngleUpdateTimer);
+                }
+
+                this.idAngleUpdateTimer = setTimeout((dName, pIndex) => {
+                    EventBus.$emit('do-update-survey-GcsMap', {
+                        eName: 'angle',
+                        dName: dName,
+                        pIndex: pIndex,
+                        angle: parseInt(angle)
+                    });
+                }, 500, this.markerName, this.markerIndex);
+            }
+        },
+
+        changeDirSurveyPath(strDir) {
+            if(this.idDirUpdateTimer !== null) {
+                clearTimeout(this.idDirUpdateTimer);
+            }
+
+            let dir = 1;
+            if(strDir === 'ccw') {
+                dir = -1;
+            }
+
+            this.idDirUpdateTimer = setTimeout((dName, pIndex) => {
+                EventBus.$emit('do-update-survey-GcsMap', {
+                    eName: 'dir',
+                    dName: dName,
+                    pIndex: pIndex,
+                    dir: parseInt(dir)
+                });
+            }, 500, this.markerName, this.markerIndex);
+        },
+
+        deleteMarker() {
+            let watchingPayload = {};
+            watchingPayload.payload = {
+                dName: this.markerName,
+                pIndex: this.markerIndex,
+            };
+
+            if(this.markerName === 'unknown') {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].selected = false;
+                this.$store.state.surveyMarkers[this.markerName].splice(this.markerIndex, 1);
+
+                watchingPayload.broadcastMission = 'removeSurveyMarker';
+
+                this.postCinSurveyMarkerInfoToMobius(this.markerName);
+            }
+            else {
+                this.$store.state.surveyMarkers[this.markerName][this.markerIndex].selected = false;
+                this.$store.state.surveyMarkers.unknown.push(
+                    JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[this.markerName][this.markerIndex]))
+                );
+                this.$store.state.surveyMarkers[this.markerName].splice(this.markerIndex, 1);
+
+                watchingPayload.broadcastMission = 'deleteSurveyMarker';
+
+                this.postCinSurveyMarkerInfoToMobius(this.markerName);
+
+                this.postCinSurveyMarkerInfoToMobius('unknown');
+            }
+
+            this.broadcast_gcsmap_topic = '/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/watchingMission/gcsmap';
+            this.doPublish(this.broadcast_gcsmap_topic, JSON.stringify(watchingPayload));
+
+            this.$store.state.didIPublish = true;
+
+            this.snackbar = true;
+
+            setTimeout(() => {
+                this.resetForm();
+            }, 100);
+        },
+
+        doPublish(topic, payload) {
+            if (this.$store.state.client.connected) {
+                this.$store.state.client.publish(topic, payload, 0, error => {
+                    if (error) {
+                        console.log('Publish error', error)
+                    }
+                });
+            }
+        },
+
+        resetForm() {
+            // this.form = Object.assign({}, this.defaultForm)
+            // this.$refs.form.reset()
+
+            this.$emit('input', false);
+
+            this.$store.state.surveyMarkers[this.markerName].forEach((marker) => {
+                marker.selected = false;
+                marker.polygonDraggable = false;
+                marker.polygonEditable = false;
+            });
+
+            EventBus.$emit('do-unsetSelectedSurveyMarker');
+        },
+
+        createEachSurveyMarkerInfoToMobius(dName, callback) {
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos',
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=3'
+                },
+                data: {
+                    'm2m:cnt': {
+                        rn: dName,
+                        lbl: ['dName'],
+                    }
+                }
+            }).then(
+                function (res) {
+                    callback(res.status, '');
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
+        },
+
+        postCinSurveyMarkerInfoToMobius(dName) {
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + dName,
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: this.$store.state.surveyMarkers[dName]
+                    }
+                }
+            }).then(
+                function (res) {
+                    console.log('++++++++ postCinSurveyMarkerInfoToMobius-axios', res.data);
+                }
+            ).catch(
+                function (err) {
+                    console.log(err.message);
+                }
+            );
+        },
+
+        postCntToMobius(url, name, callback) {
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: url,
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    'Content-Type': 'application/json;ty=3'
+                },
+                data: {
+                    'm2m:cnt': {
+                        rn: name,
+                        lbl: [name],
+                    }
+                }
+            }).then(
+                (res) => {
+                    callback(res.status, '');
+                }
+            ).catch(
+                (err) => {
+                    console.log(err.message);
+                }
+            );
+        },
+
+        postCinToMobius(url, con, callback) {
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'post',
+                url: url,
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'S' + this.$store.state.VUE_APP_MOBIUS_GCS,
+                    'Content-Type': 'application/json;ty=4'
+                },
+                data: {
+                    'm2m:cin': {
+                        con: con
+                    }
+                }
+            }).then(
+                (res) => {
+                    callback(res.status, '');
+                }
+            ).catch(
+                (err) => {
+                    console.log(err.message);
+                }
+            );
+        },
+
+        registerSurveyMarker(oldName, oldIndex, newName) {
+
+            this.$store.state.surveyMarkers[oldName][oldIndex].selected = false;
+            this.$store.state.surveyMarkers[oldName][oldIndex].targeted = false;
+            this.$store.state.surveyMarkers[oldName][oldIndex].polygonDraggable = false;
+            this.$store.state.surveyMarkers[oldName][oldIndex].polygonEditable = false;
+
+            this.$store.state.surveyMarkers[newName].push(
+                JSON.parse(JSON.stringify(this.$store.state.surveyMarkers[oldName][oldIndex]))
+            );
+            this.$store.state.surveyMarkers[oldName].splice(oldIndex, 1);
+
+            this.postCinSurveyMarkerInfoToMobius(newName);
+
+            this.postCinSurveyMarkerInfoToMobius(oldName);
+
+            this.snackbar = true;
+
+            setTimeout(() => {
+                this.resetForm();
+            }, 100);
+        },
+
+        submit() {
+            if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers, this.targetSelectName)) {
+                this.$store.state.surveyMarkers[this.targetSelectName] = [];
+
+                let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos';
+                this.postCntToMobius(url, this.targetSelectName, () => {
+                    let url = 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/' + this.$store.state.VUE_APP_MOBIUS_GCS + '/SurveyMarkerInfos/' + this.targetSelectName;
+                    this.postCinToMobius(url, this.$store.state.surveyMarkers[this.targetSelectName], () => {
+                        this. registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
+                    });
+                });
+            }
+            else {
+                this. registerSurveyMarker(this.markerName, this.markerIndex, this.targetSelectName);
+            }
+        },
+    },
+
+    created() {
+        this.targets = [];
+
+        for (var dName in this.$store.state.drone_infos) {
+            if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                if (dName === 'unknown' || this.$store.state.drone_infos[dName].selected) {
+                    this.targets.push(dName);
+                }
             }
         }
+    },
+
+    mounted() {
+        this.targetSelectName = this.markerName;
+        this.targetSelectIndex = String(this.markerIndex);
+
+        if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'wayOfSurvey')) {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey = 'forShooting';
+        }
+
+        this.wayOfSurvey = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].wayOfSurvey;
+
+        this.paramAngle = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].angle;
+        this.paramDir = (this.$store.state.surveyMarkers[this.markerName][this.markerIndex].dir === 1) ? 'cw' : 'ccw';
+        this.paramGap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap;
+        this.paramAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramAlt;
+        this.paramOffsetAlt = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].paramOffsetAlt;
+
+        if(this.markerName === 'unknown') {
+            this.paramStartAlt = 0;
+        }
+        else {
+            this.paramStartAlt = parseInt(this.$store.state.drone_infos[this.markerName].absolute_alt - this.$store.state.drone_infos[this.markerName].alt);
+        }
+
+        this.flyAltType = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAltType;
+
+        if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'focal')) {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal = 16;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'sensor_w')) {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w = 23.5;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'sensor_h')) {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h = 15.6;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'overlap')) {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap = 0.7;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'speed')) {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed = 5;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'period')) {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = 5;
+        }
+
+        if (!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'total_dist')) {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist = 400;
+        }
+
+        this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
+        this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
+        this.paramFocal = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].focal;
+        this.paramSensorW = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_w;
+        this.paramSensorH = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].sensor_h;
+        this.paramOverlap = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].overlap;
+        this.paramSpeed = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].speed;
+        this.paramPeriod = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period;
+
+        if(this.wayOfSurvey === 'forShooting') {
+            let result = this.calcFactorSurvey(this.paramFocal, this.paramSensorH, this.paramOverlap, this.paramAlt, this.paramSpeed);
+            this.paramGap = parseInt(result.interval_l * (this.paramSensorW / this.paramSensorH));
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].gap = this.paramGap;
+
+            this.paramPeriod = parseInt(result.interval_t);
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].period = this.paramPeriod;
+
+            this.changeGapSurveyPath(this.paramGap);
+        }
+
+        if(!Object.prototype.hasOwnProperty.call(this.$store.state.surveyMarkers[this.markerName][this.markerIndex], 'area')) {
+            this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area = 0;
+        }
+        this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
+
+        console.log('InfoSurveyMarker', this.$store.state.surveyMarkers[this.markerName]);
+
+        for(let i = 0; i < this.$store.state.SAMPLES; i++) {
+            this.flyAlt.push(this.$store.state.surveyMarkers[this.markerName][this.markerIndex].flyAlt[i]);
+        }
+
+        this.initLabels();
+
+        this.fillElevationData();
+
+        EventBus.$on('on-update-info-survey-marker', () => {
+            this.area = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].area;
+            this.total_dist = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].total_dist;
+            this.total_count = this.$store.state.surveyMarkers[this.markerName][this.markerIndex].pathLines.length-2;
+
+            if(this.myChart) {
+                this.myChart.update();
+            }
+        });
+    },
+
+    beforeDestroy() {
+        EventBus.$off('on-update-info-survey-marker');
+
+        if(this.myChart) {
+            this.myChart.destroy();
+        }
     }
+}
 </script>
 
 <style scoped>

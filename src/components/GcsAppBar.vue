@@ -514,8 +514,8 @@ export default {
             system_id_rule: [
                 v => !!v || '드론 시스템 아이디는 필수 입력사항입니다.',
                 v => /^[0-9]*$/.test(v) || '드론 시스템 아이디는 숫자만 입력 가능합니다.',
-                v => !(v > 254) || '드론 시스템 아이디는 255를 넘을 수 없습니다.',
-                v => !(v <= 0) || '드론 시스템 아이디는 1 이상의 수만 입력 가능합니다.'
+                v => !(v > 254) || '드론 시스템 아이디는 254를 넘을 수 없습니다.',
+                v => !(v < 0) || '드론 시스템 아이디는 1 이상의 수만 입력 가능합니다.'
             ],
             //host: this.$cookies.isKey('mobius_host')?(this.$cookies.get('mobius_host')):(this.$store.state.VUE_APP_MOBIUS_HOST),
             host: localStorage.getItem('mobius_host') ? (localStorage.getItem('mobius_host')) : (this.$store.state.VUE_APP_MOBIUS_HOST),
