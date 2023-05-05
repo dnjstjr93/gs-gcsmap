@@ -53,17 +53,7 @@
                                 <span>LTE 미션 확인</span>
                             </v-tooltip>
                         </v-col>
-                        <!--                                        :disabled="missionLteUrlFlag"-->
                         <v-col cols="1">
-<!--                                    <v-switch-->
-<!--                                        dense hide-details flat inset-->
-<!--                                        prepend-icon="mdi-video-outline"-->
-<!--                                        color="white"-->
-<!--                                        class="ma-0 pa-0 pr-1"-->
-<!--                                        v-model="info.isVideo"-->
-<!--                                        @change="onVideoHandler(name)"-->
-<!--                                    >-->
-<!--                                    </v-switch>-->
                             <v-btn-toggle
                                 dense dark
                                 v-model="toggle_exclusive"
@@ -382,22 +372,6 @@
                         </v-col>
                         <v-spacer></v-spacer>
                         <v-col cols="1">
-<!--                            <v-tooltip top>-->
-<!--                                <template v-slot:activator="{ on, attrs }">-->
-<!--                                    <v-btn-->
-<!--                                        :disabled="false"-->
-<!--                                        class="mr-1 my-1" dark x-small text outlined elevation="5"-->
-<!--                                        @click.stop="reservedQuick"-->
-<!--                                        v-bind="attrs"-->
-<!--                                        v-on="on"-->
-<!--                                    >-->
-<!--                                        <v-icon small>-->
-<!--                                            $radioboxBlank-->
-<!--                                        </v-icon>-->
-<!--                                    </v-btn>-->
-<!--                                </template>-->
-<!--                                <span>Reserved</span>-->
-<!--                            </v-tooltip>-->
                         </v-col>
                         <v-col cols="1">
                             <v-tooltip top>
@@ -479,7 +453,7 @@
                             <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0"
                                     :class="colorArming"
                                     @click="currentPosition">
-                                <DroneInfoBox v-if="false"
+                                  <DroneInfoBox v-if="false"
                                     :name="name"
                                     :heading="heading"
                                     :heading_size="heading_size"
@@ -515,112 +489,6 @@
                             </v-card>
                         </v-col>
                     </v-row>
-<!--                    <v-row no-gutters class="d-flex justify-center" align="center">-->
-<!--                        <v-col cols="12" class="text-center align-self-center">-->
-<!--                            <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0"-->
-<!--                                    :class="colorArming"-->
-<!--                                    @click="currentPosition">-->
-<!--                                &lt;!&ndash;                    <v-icon x-large :class="colorArming">{{ iconArming }}</v-icon>&ndash;&gt;-->
-<!--                                <div class="py-0">-->
-<!--                                    <Heading :size="heading_size" :heading="heading"/>-->
-<!--                                    <v-fade-transition>-->
-<!--                                        <v-avatar-->
-<!--                                            v-if="isPlaying"-->
-<!--                                            :color="color"-->
-<!--                                            :style="{animationDuration: animationDuration, top: '1px', left: (myWidth/2-12)+'px'}"-->
-<!--                                            class="mt-1 ml-1 v-avatar&#45;&#45;metronome"-->
-<!--                                            size="14"-->
-<!--                                        ></v-avatar>-->
-<!--                                    </v-fade-transition>-->
-<!--                                    <Attitude :size="attitude_size" :roll="roll" :pitch="pitch"/>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position align-self-center" :style="{top: 0, left: 0}">-->
-<!--                                    <v-input :style="{'font-size': '26px'}" :class="colorMode" :color="$store.state.drone_infos[name].color"-->
-<!--                                        class="shadow_icon px-1">{{ curMode }}</v-input>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position" :style="{top: (hud_gap*2)+'px', left: 0}">-->
-<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-satellite-variant-->
-<!--                                    </v-icon>-->
-<!--                                    <span class="shadow_icon px-1 text&#45;&#45;white"-->
-<!--                                          :style="{color: 'white'}">{{ num_satellites }} </span>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position" :style="{top: (hud_gap*3)+'px', left: 0}">-->
-<!--                                    <v-icon :class="colorLteVal" :style="iconSize" class="shadow_icon pl-1">{{-->
-<!--                                            iconLte-->
-<!--                                        }}-->
-<!--                                    </v-icon>-->
-<!--                                    <span :class="colorLteVal" :style="fontSize" class="shadow_icon px-1">{{-->
-<!--                                            curLteVal-->
-<!--                                        }}</span>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position" :style="{top: (hud_gap*4)+'px', left: 0}">-->
-<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-access-point</v-icon>-->
-<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ rssi }}</span>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position" :style="{top: (hud_gap*5)+'px', left: 0}">-->
-<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{-->
-<!--                                            iconFlightElapsed-->
-<!--                                        }}-->
-<!--                                    </v-icon>-->
-<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{-->
-<!--                                            flightElapsedTime-->
-<!--                                        }}</span>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position text-center" :style="{top: (hud_gap*6)+'px', left: 0}">-->
-<!--                                    <span class="shadow_icon px-2" :style="{color: 'white'}">{{-->
-<!--                                            (gpi.lat / 10000000).toFixed(7)-->
-<!--                                        }} : {{ (gpi.lon / 10000000).toFixed(7) }} : <span style="font-size: 20px">{{-->
-<!--                                                (gpi.relative_alt / 1000).toFixed(1)-->
-<!--                                            }}</span> ({{ (gpi.alt / 1000).toFixed(1) }})</span>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position"-->
-<!--                                     :style="{top: 0, left: ((curArmStatus==='ARMED')?(myWidth-110):(myWidth-138))+'px'}">-->
-<!--                                    <v-input :style="{'font-size': '26px'}" :class="colorArm" :color="$store.state.drone_infos[name].color"-->
-<!--                                        class="shadow_icon px-1">{{ curArmStatus }}</v-input>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position" :style="{top: (hud_gap*2)+'px', left: (myWidth-110)+'px'}">-->
-<!--                                    <v-icon :class="colorBattery" :style="iconSize" class="shadow_icon pl-1">-->
-<!--                                        {{ iconBattery }}-->
-<!--                                    </v-icon>-->
-<!--                                    <span class="shadow_icon px-1" :class="colorBattery">{{-->
-<!--                                            (ss.voltage_battery / 1000).toFixed(1)-->
-<!--                                        }} V</span>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position" :style="{top: (hud_gap*3)+'px', left: (myWidth-110)+'px'}">-->
-<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-altimeter</v-icon>-->
-<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{-->
-<!--                                            (gpi.relative_alt / 1000).toFixed(1)-->
-<!--                                        }} m</span>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position" :style="{top: (hud_gap*4)+'px', left: (myWidth-110)+'px'}">-->
-<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">mdi-speedometer</v-icon>-->
-<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{ airspeed.toFixed(1) }} m/s</span>-->
-<!--                                </div>-->
-
-<!--                                <div class="info_position" :style="{top: (hud_gap*5)+'px', left: (myWidth-110)+'px'}">-->
-<!--                                    <v-icon class="shadow_icon pl-1" :style="{color: 'white'}">{{-->
-<!--                                            iconDistance-->
-<!--                                        }}-->
-<!--                                    </v-icon>-->
-<!--                                    <span class="shadow_icon px-1" :style="{color: 'white'}">{{-->
-<!--                                            (valueDistance > 1000) ? (valueDistance / 1000).toFixed(1) + ' km' : (valueDistance.toFixed(0) + ' m')-->
-<!--                                        }}</span>-->
-<!--                                </div>-->
-
-<!--                                &lt;!&ndash;                                <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>&ndash;&gt;-->
-<!--                            </v-card>-->
-<!--                        </v-col>-->
-<!--                    </v-row>-->
                     <v-row no-gutters class="d-flex justify-center" align="center">
                         <v-col cols="12" class="align-self-center">
                             <v-card flat tile class="align-self-center justify-space-between ma-0 py-0 pt-0"
@@ -638,12 +506,12 @@
                     <v-row no-gutters justify="center" align="center">
                         <v-col cols="2" class="px-1 pt-1">
                             <v-img v-if="fc_img === 'ardupilot.png'"
-                                src="../assets/ardupilot.png"
-                                alt="Ahn"
+                                   src="../assets/ardupilot.png"
+                                   alt="Ahn"
                             ></v-img>
                             <v-img v-else-if="fc_img === 'px4.png'"
-                                src="../assets/px4.png"
-                                alt="Ahn"
+                                   src="../assets/px4.png"
+                                   alt="Ahn"
                             ></v-img>
                         </v-col>
                         <v-col cols="2">
@@ -701,47 +569,6 @@
                                         </draggable>
                                     </v-chip-group>
                                 </v-sheet>
-                                <!--                                <v-list dense>-->
-                                <!--                                    <v-list-item-group-->
-                                <!--                                        v-model="selectedItem"-->
-                                <!--                                        color="deep-orange darken-4"-->
-                                <!--                                    >-->
-                                <!--                                        <draggable v-model="positions">-->
-                                <!--                                            <v-list-item v-for="(position, i) in positions" :key="i">-->
-                                <!--                                                &lt;!&ndash;                                <v-card flat rounded shaped width="25" class="mr-2 text-center" style="{border-radius: 50%; }">{{i}}</v-card>&ndash;&gt;-->
-                                <!--                                                <v-list-item-avatar class="ma-0 mr-1" size="24" color="grey lighten-4">-->
-                                <!--                                                    <span>{{ i + 1 }}</span>-->
-                                <!--                                                </v-list-item-avatar>-->
-                                <!--                                                <v-list-item-icon>-->
-                                <!--                                                    <v-icon class="mr-2" v-text="position.icon"></v-icon>-->
-                                <!--                                                </v-list-item-icon>-->
-                                <!--                                                <v-hover>-->
-                                <!--                                                    <template v-slot:default="{ hover }">-->
-                                <!--                                                        <v-list-item-content>-->
-                                <!--                                                            <v-list-item-title v-text="position.text"></v-list-item-title>-->
-                                <!--                                                            <v-overlay-->
-                                <!--                                                                v-if="hover"-->
-                                <!--                                                                absolute-->
-                                <!--                                                                color="transparent"-->
-                                <!--                                                                style="padding-left: 88%"-->
-                                <!--                                                            >-->
-                                <!--                                                                <v-btn-->
-                                <!--                                                                    class="pa-0 ma-0"-->
-                                <!--                                                                    fab-->
-                                <!--                                                                    dark-->
-                                <!--                                                                    x-small-->
-                                <!--                                                                    color="grey darken-3"-->
-                                <!--                                                                >-->
-                                <!--                                                                    <v-icon dark>mdi-trash-can</v-icon>-->
-                                <!--                                                                </v-btn>-->
-                                <!--                                                            </v-overlay>-->
-                                <!--                                                        </v-list-item-content>-->
-                                <!--                                                    </template>-->
-                                <!--                                                </v-hover>-->
-                                <!--                                            </v-list-item>-->
-                                <!--                                        </draggable>-->
-                                <!--                                    </v-list-item-group>-->
-                                <!--                                </v-list>-->
                                 <v-overlay :absolute="absolute" :value="!flagReceiving" :opacity="opacity" color="#E0E0E0"></v-overlay>
                             </v-card>
                         </v-col>
@@ -762,21 +589,17 @@
                                         class="text-center align-center ma-0 ppa-0"
                                     >
                                         <v-btn x-small class="ma-0 pa-0">
-<!--                                            <v-icon small class="ma-0 pa-0">mdi-format-align-left</v-icon>-->
                                             T
                                         </v-btn>
                                         <v-btn x-small class="ma-0 pa-0">
-<!--                                            <v-icon small class="ma-0 pa-0">mdi-format-align-center</v-icon>-->
                                             N
                                         </v-btn>
                                         <v-btn x-small class="ma-0 pa-0">
-<!--                                            <v-icon small class="ma-0 pa-0">mdi-format-align-right</v-icon>-->
                                             F
                                         </v-btn>
                                     </v-btn-toggle>
 
                                     <v-btn x-small fab color="lime" class="ml-1 mb-0 pa-0" @click="handlePwmClick(i+4, $event);">
-<!--                                        <v-icon>mdi-send</v-icon>-->
                                         {{i+4}}
                                     </v-btn>
                                 </v-card>
@@ -2150,7 +1973,7 @@ export default {
             EventBus.$emit('do-target-drone', payload);
 
 
-                    this.$store.state.drone_infos[this.name].targeted = checked;
+            this.$store.state.drone_infos[this.name].targeted = checked;
 
             this.$store.state.drone_command_prepared = false;
             for (let dName in this.$store.state.drone_infos) {
@@ -4384,43 +4207,43 @@ export default {
                             EventBus.$emit('update-home-position', this.name);
                         }
 
-                            this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
-                            this.curArmStatus = 'ARMED';
-                            this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
-                            this.colorArm = 'td-text-red';
+                        this.colorArming = this.$store.state.refColorName[this.$store.state.drone_infos[this.name].color] + ' darken-4';
+                        this.curArmStatus = 'ARMED';
+                        this.$store.state.drone_infos[this.name].curArmStatus = 'ARMED';
+                        this.colorArm = 'td-text-red';
 
-                            // this.$store.state.commands = [];
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['선회']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['패턴']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['자동']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['고도']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['속도']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['관심']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['착륙']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
+                        // this.$store.state.commands = [];
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이동']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['선회']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['패턴']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['자동']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['고도']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['속도']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['관심']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['착륙']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['귀환']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['제어']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['임무']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['투하']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['종료']]);
                         // }
                     }
                     else {
                         // if(this.$store.state.drone_infos[this.name].curArmStatus !== 'DISARMED') {
-                            this.colorArming = 'white';
-                            this.curArmStatus = 'DISARMED';
-                            this.$store.state.drone_infos[this.name].curArmStatus = 'DISARMED';
-                            this.colorArm = 'td-text-blue';
+                        this.colorArming = 'white';
+                        this.curArmStatus = 'DISARMED';
+                        this.$store.state.drone_infos[this.name].curArmStatus = 'DISARMED';
+                        this.colorArm = 'td-text-blue';
 
-                            this.$store.state.rtlModeMonitor[this.name] = false;
+                        this.$store.state.rtlModeMonitor[this.name] = false;
 
-                            // this.$store.state.commands = [];
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
-                            // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
+                        // this.$store.state.commands = [];
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['설정']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['이륙']]);
+                        // this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['시동']]);
                         // }
                     }
 
@@ -4647,12 +4470,12 @@ export default {
                             this.watchingMissionStatus = parseInt(Math.abs((1 - (cur_dist / this.watchingInitDist))) * 100);
 
                             if (this.watchingMissionStatus >= 98) {
-                                 this.watchingCount++;
-                                 if(this.watchingCount > 32) {
-                                     this.watchingMissionStatus = 100;
-                                     this.watchingMission = 'takeoff-complete';
-                                     this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
-                                 }
+                                this.watchingCount++;
+                                if(this.watchingCount > 32) {
+                                    this.watchingMissionStatus = 100;
+                                    this.watchingMission = 'takeoff-complete';
+                                    this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
+                                }
                             }
                             else {
                                 this.watchingCount = 0;
@@ -4732,22 +4555,22 @@ export default {
                                 // this.droneStatus.startCount++;
                                 //
                                 // if(this.droneStatus.startCount > 16) {
-                                    //console.log(this.droneStatus.initHeading, this.heading)
-                                    let cur_heading = this.heading;
-                                    let diff = 0;
-                                    if(this.$store.state.drone_infos[this.name].circleType === '시계방향') {
-                                        diff = cur_heading - this.droneStatus.initHeading;
-                                    }
-                                    else {
-                                        diff = this.droneStatus.initHeading - cur_heading;
-                                    }
+                                //console.log(this.droneStatus.initHeading, this.heading)
+                                let cur_heading = this.heading;
+                                let diff = 0;
+                                if(this.$store.state.drone_infos[this.name].circleType === '시계방향') {
+                                    diff = cur_heading - this.droneStatus.initHeading;
+                                }
+                                else {
+                                    diff = this.droneStatus.initHeading - cur_heading;
+                                }
 
-                                    if(diff < 0) {
-                                        diff += 360;
-                                    }
+                                if(diff < 0) {
+                                    diff += 360;
+                                }
 
-                                    this.watchingMissionStatus = parseInt((diff / 360) * 100);
-                                    //console.log('goto-circle', 'diff, heading', diff, this.heading, this.droneStatus.initHeading);
+                                this.watchingMissionStatus = parseInt((diff / 360) * 100);
+                                //console.log('goto-circle', 'diff, heading', diff, this.heading, this.droneStatus.initHeading);
 //                                 }
 //                                 else {
 //                                     let deg = (Math.atan2((result2.y - result1.y), (result2.x - result1.x)) * (180/3.14));
@@ -4982,85 +4805,85 @@ export default {
                     //console.log("MAVLINK_MSG_ID_GPS_RAW_INT", "num_satellites ", this.num_satellites);
                 }
 
-                // else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_STATUS) {
-                //     let my_len = 101;
-                //     let ar = mavPacket.split('');
-                //     for (let i = 0; i < (my_len - msg_len); i++) {
-                //         ar.splice(ar.length-4, 0, '0');
-                //         ar.splice(ar.length-4, 0, '0');
-                //     }
-                //     mavPacket = ar.join('');
-                //
-                //     satellites = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     this.num_satellites = Buffer.from(satellites, 'hex').readUInt8(0);
-                //     this.info.num_satellites = this.num_satellites;
-                //
-                //     console.log("MAVLINK_MSG_ID_GPS_STATUS", "num_satellites ", this.num_satellites);
-                // }
+                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_STATUS) {
+                    //     let my_len = 101;
+                    //     let ar = mavPacket.split('');
+                    //     for (let i = 0; i < (my_len - msg_len); i++) {
+                    //         ar.splice(ar.length-4, 0, '0');
+                    //         ar.splice(ar.length-4, 0, '0');
+                    //     }
+                    //     mavPacket = ar.join('');
+                    //
+                    //     satellites = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     this.num_satellites = Buffer.from(satellites, 'hex').readUInt8(0);
+                    //     this.info.num_satellites = this.num_satellites;
+                    //
+                    //     console.log("MAVLINK_MSG_ID_GPS_STATUS", "num_satellites ", this.num_satellites);
+                    // }
 
-                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RADIO_STATUS) {
-                //     let my_len = 9;
-                //     let ar = mavPacket.split('');
-                //     for (let i = 0; i < (my_len - msg_len); i++) {
-                //         ar.splice(ar.length-4, 0, '0');
-                //         ar.splice(ar.length-4, 0, '0');
-                //     }
-                //     mavPacket = ar.join('');
-                //
-                //     base_offset += 2;
-                //     var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
-                //     this.info.rssi = this.rssi;
-                //     console.log('MAVLINK_MSG_ID_RADIO_STATUS', this.rssi);
-                // }
+                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_RADIO_STATUS) {
+                    //     let my_len = 9;
+                    //     let ar = mavPacket.split('');
+                    //     for (let i = 0; i < (my_len - msg_len); i++) {
+                    //         ar.splice(ar.length-4, 0, '0');
+                    //         ar.splice(ar.length-4, 0, '0');
+                    //     }
+                    //     mavPacket = ar.join('');
+                    //
+                    //     base_offset += 2;
+                    //     var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
+                    //     this.info.rssi = this.rssi;
+                    //     console.log('MAVLINK_MSG_ID_RADIO_STATUS', this.rssi);
+                    // }
 
-                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS_RAW) {
-                //     let my_len = 22;
-                //     let ar = mavPacket.split('');
-                //     for (let i = 0; i < (my_len - msg_len); i++) {
-                //         ar.splice(ar.length-4, 0, '0');
-                //         ar.splice(ar.length-4, 0, '0');
-                //     }
-                //     mavPacket = ar.join('');
-                //
-                //     base_offset += 42;
-                //     var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
-                //     this.info.rssi = this.rssi;
-                //     console.log('MAVLINK_MSG_ID_RC_CHANNELS_RAW', this.rssi);
-                // }
+                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS_RAW) {
+                    //     let my_len = 22;
+                    //     let ar = mavPacket.split('');
+                    //     for (let i = 0; i < (my_len - msg_len); i++) {
+                    //         ar.splice(ar.length-4, 0, '0');
+                    //         ar.splice(ar.length-4, 0, '0');
+                    //     }
+                    //     mavPacket = ar.join('');
+                    //
+                    //     base_offset += 42;
+                    //     var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
+                    //     this.info.rssi = this.rssi;
+                    //     console.log('MAVLINK_MSG_ID_RC_CHANNELS_RAW', this.rssi);
+                    // }
 
-                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
-                //     let my_len = 42;
-                //     let ar = mavPacket.split('');
-                //     for (let i = 0; i < (my_len - msg_len); i++) {
-                //         ar.splice(ar.length-4, 0, '0');
-                //         ar.splice(ar.length-4, 0, '0');
-                //     }
-                //     mavPacket = ar.join('');
-                //
-                //     base_offset += 82;
-                //     var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
-                //     this.info.rssi = this.rssi;
-                //     console.log('MAVLINK_MSG_ID_RC_CHANNELS', this.rssi);
-                // }
+                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
+                    //     let my_len = 42;
+                    //     let ar = mavPacket.split('');
+                    //     for (let i = 0; i < (my_len - msg_len); i++) {
+                    //         ar.splice(ar.length-4, 0, '0');
+                    //         ar.splice(ar.length-4, 0, '0');
+                    //     }
+                    //     mavPacket = ar.join('');
+                    //
+                    //     base_offset += 82;
+                    //     var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     this.rssi = Buffer.from(rssi, 'hex').readUInt8(0);
+                    //     this.info.rssi = this.rssi;
+                    //     console.log('MAVLINK_MSG_ID_RC_CHANNELS', this.rssi);
+                    // }
 
-                // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
-                //     if (ver === 'fd') {
-                //         base_offset = 20;
-                //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                //         base_offset += (8 + 2 + (4 * 18));
-                //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
-                //     else {
-                //         base_offset = 12;
-                //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
-                //         base_offset += (8 + 2 + (4 * 18));
-                //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
-                //     }
-                //
-                //     this.rssi = parseInt((Buffer.from(rssi, 'hex').readUInt8(0)) / 255 * 100);
+                    // else if (msg_id === mavlink.MAVLINK_MSG_ID_RC_CHANNELS) {
+                    //     if (ver === 'fd') {
+                    //         base_offset = 20;
+                    //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
+                    //         base_offset += (8 + 2 + (4 * 18));
+                    //         var rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     }
+                    //     else {
+                    //         base_offset = 12;
+                    //         time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();
+                    //         base_offset += (8 + 2 + (4 * 18));
+                    //         rssi = mavPacket.substr(base_offset, 2).toLowerCase();
+                    //     }
+                    //
+                    //     this.rssi = parseInt((Buffer.from(rssi, 'hex').readUInt8(0)) / 255 * 100);
                 // }
 
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_PARAM_VALUE) {
@@ -5341,6 +5164,19 @@ export default {
                         console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_ACCEL', this.params.wpnavAccel);
 
                         this.$store.state.params.wpnavAccel[this.name] = (this.params.wpnavAccel.param_value / 100);
+                    }
+                    else if (param_id.includes('WPNAV_SPEED')) {
+                        if (!Object.prototype.hasOwnProperty.call(this.params, 'wpnavSpeed')) {
+                            this.params.wpnavSpeed = {};
+                        }
+
+                        this.params.wpnavSpeed.param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+                        this.params.wpnavSpeed.param_type = Buffer.from(param_type, 'hex').readInt8(0);
+                        this.params.wpnavSpeed.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
+                        this.params.wpnavSpeed.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
+                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_SPEED', this.params.wpnavSpeed);
+
+                        this.$store.state.params.wpnavSpeed[this.name] = (this.params.wpnavSpeed.param_value / 100);
                     }
                 }
                 else if (msg_id === mavlink.MAVLINK_MSG_ID_MISSION_ITEM) {
@@ -6168,6 +6004,12 @@ export default {
                 }
                 count++;
             }
+            else if(count === 19) {
+                if(!Object.prototype.hasOwnProperty.call(this.params, 'wpnavSpeed')) {
+                    this.send_param_get_command(this.name, this.target_pub_topic, this.sys_id, 'WPNAV_SPEED');
+                }
+                count++;
+            }
             else {
                 clearInterval(tidRcParam);
             }
@@ -6407,6 +6249,17 @@ export default {
 
                     setTimeout((name, target_pub_topic, sys_id, param_value) => {
                         this.send_wpnav_accel_param_set_command(name, target_pub_topic, sys_id, param_value);
+
+                    }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
+                }
+            }
+
+            if (Object.prototype.hasOwnProperty.call(params, 'wpnavSpeed')) {
+                if (params.wpnavSpeed[this.name] !== undefined) {
+                    let param_value = parseFloat(params.wpnavSpeed[this.name]);
+
+                    setTimeout((name, target_pub_topic, sys_id, param_value) => {
+                        this.send_wpnav_speed_param_set_command(name, target_pub_topic, sys_id, param_value);
 
                     }, 5 + parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id, param_value);
                 }
@@ -6900,7 +6753,7 @@ export default {
             this.send_arm_command(this.name, this.target_pub_topic, this.sys_id, 1, 0);
             this.watchingMission = 'arm';
             this.$store.state.drone_infos[this.name].watchingMission = this.watchingMission;
-                // }, parseInt(Math.random() * 5), name, target_pub_topic, sys_id);
+            // }, parseInt(Math.random() * 5), name, target_pub_topic, sys_id);
             // }, parseInt(Math.random() * 5), this.name, this.target_pub_topic, this.sys_id);
         });
 
@@ -7196,10 +7049,10 @@ export default {
         //     }
         // }
         // else {
-            this.client = {
-                connected: false,
-                loading: false
-            };
+        this.client = {
+            connected: false,
+            loading: false
+        };
         // }
 
         //this.createConnection();
