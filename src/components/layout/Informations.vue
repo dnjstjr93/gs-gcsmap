@@ -3,32 +3,32 @@
 <!--    <div id="infos" class="d-flex flex-column" :class="{ fsInfos: data.fs }">-->
 <!--        <div id="bat" class="text-center">-->
             <v-row no-gutters align="center">
-                <v-col cols="2" class="td-text-white text-left">
+                <v-col cols="3" class="td-text-white text-center">
                     <span class="shadow_icon pl-1 text--white" :style="fontSize">
                         <v-icon class="shadow_icon pr-1" :style="iconSize">$satelliteVariant</v-icon>
                         {{ data.num_satellites }}
                     </span>
                 </v-col>
-                <v-col cols="2" class="text-left">
-                    <span class="shadow_icon pl-1" :style="fontSize">
-                        <v-icon class="shadow_icon pr-1" :style="iconSize">$accessPoint</v-icon>
-                        {{ data.rssi }}
-                    </span>
-                </v-col>
+<!--                <v-col cols="2" class="text-left">-->
+<!--                    <span class="shadow_icon pl-1" :style="fontSize">-->
+<!--                        <v-icon class="shadow_icon pr-1" :style="iconSize">$accessPoint</v-icon>-->
+<!--                        {{ data.rssi }}-->
+<!--                    </span>-->
+<!--                </v-col>-->
                 <v-spacer></v-spacer>
-                <v-col cols="2" class="text-center">
+                <v-col cols="3" class="text-center">
                     <span class="shadow_icon px-1" :style="lteFontSize">
                         <v-icon class="shadow_icon pr-1" :style="lteIconSize">{{ data.iconLte }}</v-icon>
                         {{ data.curLteVal }}
                     </span>
                 </v-col>
-                <v-col cols="3" class="text-right">
+                <v-col cols="3" class="text-center">
                     <span class="shadow_icon pr-1" :style="batFontSize">
                         <v-icon class="shadow_icon pr-1" :style="batIconSize">{{ data.iconBattery }}</v-icon>
                         {{ data.voltageBattery }} V
                     </span>
                 </v-col>
-                <v-col cols="3" class="text-right">
+                <v-col cols="3" class="text-center">
                     <span class="shadow_icon pr-1" :style="fontSize">
                         <v-icon class="shadow_icon pr-1" :style="iconSize">{{ data.iconFlightElapsed }}</v-icon>
                         {{ data.flightElapsedTime }}
