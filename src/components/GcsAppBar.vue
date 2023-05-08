@@ -588,6 +588,8 @@ export default {
     methods: {
         logout() {
             if (confirm('로그아웃 하시겠습니까?')) {
+                this.$store.state.isLogin = false;
+                this.$store.state.userInfo = null;
                 window.localStorage.removeItem('loginEmail');
                 this.$router.push({name: "login"});
             }
