@@ -439,7 +439,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from 'axios';
 import EventBus from "@/EventBus";
 // import WindowPortal from "./WindowPortal";
 // import WebrtcCard from "./WebrtcCard";
@@ -587,8 +587,13 @@ export default {
 
     methods: {
         logout() {
-            window.localStorage.removeItem('loginEmail');
-            this.$router.push({ name: "login" });
+            if (confirm('로그아웃 하시겠습니까?')) {
+                window.localStorage.removeItem('loginEmail');
+                this.$router.push({name: "login"});
+            }
+            else {
+                alert("로그아웃 실패하였습니다.");
+            }
         },
 
         mapDownload() {
