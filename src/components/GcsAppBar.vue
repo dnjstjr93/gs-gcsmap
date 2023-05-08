@@ -10,9 +10,9 @@
 
             <v-spacer></v-spacer>
 
-            <v-btn text @click.stop="mapDownload" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
-                <v-icon>$monitorArrowDown</v-icon>
-            </v-btn>
+<!--            <v-btn text @click.stop="mapDownload" :disabled="!$store.state.MOBIUS_CONNECTION.connected">-->
+<!--                <v-icon>$monitorArrowDown</v-icon>-->
+<!--            </v-btn>-->
 
             <v-btn text @click.stop="mapAngleDialog=true" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
                 <v-icon>$formatRotate90</v-icon>
@@ -594,7 +594,7 @@ export default {
                 this.$router.push({name: "login"});
             }
             else {
-                console.log('로그아웃 실패')
+                console.log('로그아웃 실패');
             }
         },
 
