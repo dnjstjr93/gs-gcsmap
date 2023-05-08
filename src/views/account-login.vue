@@ -28,6 +28,7 @@
                                 label="Enter Password"
                                 hint="At least 8 characters"
                                 counter
+                                v-on:keyup.enter="login(formData)"
                                 @click:append="show = !show"
                             ></v-text-field>
 

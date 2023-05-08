@@ -50,10 +50,11 @@
                                 @click:append="show = !show"
                             ></v-text-field>
 
-                            <h6 v-if="sameChk(chkPassword)" class="mb-5 teal--text accent-3">
-                                Please create the two passwords identical.
-                            </h6>
-                            <h6 v-else class="mb-5 red--text lighten-2">
+<!--                            <h6 v-if="sameChk(chkPassword)" class="mb-5 teal&#45;&#45;text accent-3">-->
+<!--                                Please create the two passwords identical.-->
+<!--                            </h6>-->
+<!--                            <h6 v-else class="mb-5 red&#45;&#45;text lighten-2">-->
+                            <h6 v-if="!sameChk(chkPassword)" class="mb-5 red--text lighten-2">
                                 Please create the two passwords identical.
                             </h6>
 
@@ -111,7 +112,13 @@ export default {
             })
         },
         sameChk(password) {
-            if (this.formData.password === password) return true
+            console.log('this.formData.password', this.formData.password)
+            console.log('password', password)
+            console.log(this.formData.password === password)
+            if (this.formData.password === password) {
+                this.valid = true
+                return true
+            }
             else {
                 this.valid = false
                 return false
