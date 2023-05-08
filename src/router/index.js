@@ -51,11 +51,11 @@ const getItemWithExpireTime = (keyName) => {
 
 const rejectAuthUser = (to, from, next) => {
     if(getItemWithExpireTime('loginEmail') === null) {
-        next()
+        next();
     }
     else {
-        alert("이미 로그인 하였습니다.")
-        next("/home")
+        alert("이미 로그인 하였습니다.");
+        next("/home");
     }
 
     // if (store.state.isLogin === true) {
@@ -111,8 +111,8 @@ const routes = [
 ]
 
 const router = new VueRouter({
-    mode: "history",
-    base: process.env.BASE_URL,
+    // mode: "history",
+    // base: process.env.BASE_URL,
     routes
 })
 
