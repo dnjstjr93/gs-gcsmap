@@ -287,6 +287,7 @@ export default {
                                 if (Object.prototype.hasOwnProperty.call(parsedMessage.message,'data')) {
                                     if (Object.prototype.hasOwnProperty.call(parsedMessage.message.data,'type')) {
                                         if (parsedMessage.message.data.type === "MEDIA_OBJECT_NOT_FOUND") {
+                                            console.log(errorMsg);
                                             this.info.isVideo = false;
                                             this.viewer_stop();
 

@@ -596,14 +596,14 @@
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
-                                                                    label="WPNAV_RADIUS(m), 2-50, 0.01"
+                                                                    label="WPNAV_RADIUS(m), 0.05-10, 0.01"
                                                                     class="pa-1"
                                                                     outlined dense hide-details
                                                                     v-model="$store.state.params.wpnavRadius[d.name]"
                                                                     placeholder="2.0"
                                                                     type="number"
-                                                                    min="2"
-                                                                    max="50"
+                                                                    min="0.05"
+                                                                    max="10"
                                                                     setp="0.01"
                                                                     hint="Range:2~50.0, Increment:0.01"
                                                                 ></v-text-field>
@@ -618,6 +618,20 @@
                                                                     type="number"
                                                                     min="0.5"
                                                                     max="5"
+                                                                    setp="0.1"
+                                                                    hint="Range:0.5~5.0, Increment:0.1"
+                                                                ></v-text-field>
+                                                            </v-col>
+                                                            <v-col cols="2">
+                                                                <v-text-field
+                                                                    label="WPNAV_SPEED(m/s/s), 0.2-20, 0.1"
+                                                                    class="pa-1"
+                                                                    outlined dense hide-details
+                                                                    v-model="$store.state.params.wpnavSpeed[d.name]"
+                                                                    placeholder="10.0"
+                                                                    type="number"
+                                                                    min="0.2"
+                                                                    max="20"
                                                                     setp="0.1"
                                                                     hint="Range:0.5~5.0, Increment:0.1"
                                                                 ></v-text-field>
@@ -2200,11 +2214,11 @@ export default {
                             this.$store.state.params.rtlAlt[name] = 80;
                         }
 
-                        if(this.$store.state.params.wpnavRadius[name] < 2) {
-                            this.$store.state.params.wpnavRadius[name] = 2;
+                        if(this.$store.state.params.wpnavRadius[name] < 0.05) {
+                            this.$store.state.params.wpnavRadius[name] = 0.05;
                         }
-                        else if (this.$store.state.params.wpnavRadius[name] > 50) {
-                            this.$store.state.params.wpnavRadius[name] = 50;
+                        else if (this.$store.state.params.wpnavRadius[name] > 10) {
+                            this.$store.state.params.wpnavRadius[name] = 10;
                         }
 
                         if(this.$store.state.params.wpnavAccel[name] < 0.5) {
@@ -2212,6 +2226,13 @@ export default {
                         }
                         else if (this.$store.state.params.wpnavAccel[name] > 5) {
                             this.$store.state.params.wpnavAccel[name] = 5;
+                        }
+
+                        if(this.$store.state.params.wpnavSpeed[name] < 0.2) {
+                            this.$store.state.params.wpnavSpeed[name] = 0.2;
+                        }
+                        else if (this.$store.state.params.wpnavSpeed[name] > 20) {
+                            this.$store.state.params.wpnavSpeed[name] = 20;
                         }
 
                         EventBus.$emit('command-set-params-' + name, this.$store.state.params);
