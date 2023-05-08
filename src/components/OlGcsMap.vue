@@ -4922,7 +4922,7 @@ export default {
                             return status <= 500;
                         },
                         method: 'post',
-                        url: 'http://localhost:4500/todos',
+                        url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':4500/todos',
                         headers: {
                             'Content-Type': 'application/json'
                         },
