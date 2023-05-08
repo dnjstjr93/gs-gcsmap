@@ -587,8 +587,13 @@ export default {
 
     methods: {
         logout() {
-            window.localStorage.removeItem('loginEmail');
-            this.$router.push({ name: "login" });
+            if (confirm('로그아웃 하시겠습니까?')) {
+                window.localStorage.removeItem('loginEmail');
+                this.$router.push({name: "login"});
+            }
+            else {
+                console.log('로그아웃 실패')
+            }
         },
 
         mapDownload() {
