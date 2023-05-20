@@ -16,7 +16,7 @@
                             <v-text-field
                                 v-model="formData.email"
                                 :rules="emailRules"
-                                label="Enter E-mail"
+                                label="E-mail 입력"
                                 required
                             ></v-text-field>
 
@@ -24,7 +24,7 @@
                                 v-model="formData.name"
                                 :counter="10"
                                 :rules="nameRules"
-                                label="Name"
+                                label="닉네임"
                                 required
                             ></v-text-field>
 
@@ -33,8 +33,8 @@
                                 :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
                                 :rules="[rules.required, rules.min]"
                                 :type="show ? 'text' : 'password'"
-                                label="Enter Password"
-                                hint="At least 8 characters"
+                                label="비밀번호 입력"
+                                hint="최소 8자 이상 입력해주세요."
                                 counter
                                 @click:append="show = !show"
                             ></v-text-field>
@@ -44,8 +44,8 @@
                                 :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
                                 :rules="[rules.required, rules.min]"
                                 :type="show ? 'text' : 'password'"
-                                label="Enter Password Again"
-                                hint="At least 8 characters"
+                                label="비밀번호 재입력"
+                                hint="최소 8자 이상 입력해주세요."
                                 counter
                                 @click:append="show = !show"
                             ></v-text-field>
@@ -55,21 +55,35 @@
 <!--                            </h6>-->
 <!--                            <h6 v-else class="mb-5 red&#45;&#45;text lighten-2">-->
                             <h6 v-if="!sameChk(chkPassword)" class="mb-5 red--text lighten-2">
-                                Please create the two passwords identical.
+                                비밀번호가 일치하지 않습니다.
                             </h6>
 
-                            <div class="mt-3 d-flex flex-row-reverse">
-                                <v-btn color="error" class="mr-4" @click="reset"> 리셋 </v-btn>
-
-                                <v-btn
-                                    :disabled="!valid"
-                                    color="blue"
-                                    class="mr-4"
-                                    @click="register(formData)"
-                                >
-                                    회원가입
-                                </v-btn>
-                            </div>
+                            <v-row class="mt-3 d-flex" justify="end">
+                                <v-col cols="4">
+                                    <v-btn
+                                        color="success"
+                                        class="mr-4"
+                                        link
+                                        router
+                                        :to="{ name: 'login' }"
+                                    >
+<!--                                        <v-icon>mdi-arrow-left</v-icon>-->
+                                        뒤로가기
+                                    </v-btn>
+                                </v-col>
+                                <v-spacer/>
+                                <v-col cols="6">
+                                    <v-btn
+                                        :disabled="!valid"
+                                        color="blue"
+                                        class="ml-4"
+                                        @click="register(formData)"
+                                    >
+                                        회원가입
+                                    </v-btn>
+                                    <v-btn color="error" class="ml-4" @click="reset"> 초기화</v-btn>
+                                </v-col>
+                            </v-row>
                         </v-form>
                     </div>
                 </v-card>
@@ -89,20 +103,20 @@ export default {
         formData: new RegisterObj("", "", ""),
         valid: false,
         nameRules: [
-            (v) => !!v || "Name is required",
-            (v) => (v && v.length <= 10) || "Name must be less than 10 characters"
+            (v) => !!v || "닉네임을 입력해주세요.",
+            (v) => (v && v.length <= 10) || "닉네임은 10자 미만이어야 합니다."
         ],
         isError: false,
         errorMsg: "",
         emailRules: [
-            (v) => !!v || "E-mail is required",
-            (v) => /.+@.+\..+/.test(v) || "E-mail must be valid"
+            (v) => !!v || "E-mail을 입력해주세요.",
+            (v) => /.+@.+\..+/.test(v) || "유효한 E-mail 형식이 아닙니다."
         ],
         show: false,
         chkPassword: "",
         rules: {
-            required: (value) => !!value || "Required.",
-            min: (v) => (v === null) || v.length >= 8 || "Min 8 characters"
+            required: (value) => !!value || "패스워드를 입력해주세요.",
+            min: (v) => (v === null) || v.length >= 8 || "최소 8자 이상 입력해주세요."
         }
     }),
     methods: {

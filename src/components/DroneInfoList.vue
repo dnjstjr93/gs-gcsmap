@@ -60,12 +60,12 @@
 <!--                                </v-card>-->
                             </v-col>
                             <v-col cols="3" class="text-right" >
-                                <v-btn class="mr-2" x-small @click.stop="zoomNormal">
+                                <v-btn class="mr-2" x-small @click.stop="zoomNormal" :disabled="zoomMinimum">
                                     <v-icon small>
                                         $magnifyMinusOutline
                                     </v-icon>
                                 </v-btn>
-                                <v-btn class="mr-2" x-small @click.stop="zoomDouble">
+                                <v-btn class="mr-2" x-small @click.stop="zoomDouble" :disabled="zoomMaximum">
                                     <v-icon small>
                                         $magnifyPlusOutline
                                     </v-icon>
@@ -290,6 +290,8 @@
                 distanceMonitor: false,
                 ADSBMonitor: false,
                 myMinWidth: 480,
+                zoomMaximum: false,
+                zoomMinimum: true,
                 connection: {
                     host: this.$store.state.VUE_APP_MOBIUS_HOST,
                     port: 8883,
@@ -317,10 +319,6 @@
             listHeight() {
                 return ("max-height: " + (this.myHeight-90) + "px");
             }
-        },
-
-        watch: {
-
         },
 
         methods: {
@@ -651,6 +649,16 @@
                         this.onResize();
                     }, 100);
                 }
+                if (this.myMinWidth >= 800) {
+                    this.zoomMinimum = false;
+                    this.zoomMaximum = true;
+                } else if (this.myMinWidth <= 480) {
+                    this.zoomMinimum = true;
+                    this.zoomMaximum = false;
+                } else {
+                    this.zoomMinimum = false;
+                    this.zoomMaximum = false;
+                }
             },
             zoomNormal() {
                 if(this.myMinWidth > 480) {
@@ -659,6 +667,16 @@
                     setTimeout(() => {
                         this.onResize();
                     }, 100);
+                }
+                if (this.myMinWidth >= 800) {
+                    this.zoomMinimum = false;
+                    this.zoomMaximum = true;
+                } else if (this.myMinWidth <= 480) {
+                    this.zoomMinimum = true;
+                    this.zoomMaximum = false;
+                } else {
+                    this.zoomMinimum = false;
+                    this.zoomMaximum = false;
                 }
             },
 
@@ -723,11 +741,9 @@
 
                 this.createConnection();
             }
-
         },
-
         created() {
-            for(let dName in this.$store.state.drone_infos) {
+            for (let dName in this.$store.state.drone_infos) {
                 if(Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected) {
                         if (localStorage.getItem(this.$store.state.drone_infos[dName].name + '_sortie_name')) {

@@ -16,7 +16,7 @@
                             <v-text-field
                                 v-model="formData.email"
                                 :rules="emailRules"
-                                label="Enter E-mail"
+                                label="E-mail 입력"
                                 required
                             ></v-text-field>
 
@@ -25,8 +25,8 @@
                                 :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
                                 :rules="[rules.required, rules.min]"
                                 :type="show ? 'text' : 'password'"
-                                label="Enter Password"
-                                hint="At least 8 characters"
+                                label="비밀번호 입력"
+                                hint="최소 8자 이상 입력해주세요."
                                 counter
                                 v-on:keyup.enter="login(formData)"
                                 @click:append="show = !show"
@@ -34,7 +34,6 @@
 
                             <div class="mt-3 d-flex flex-row-reverse">
                                 <v-btn color="error" class="mr-4" @click="reset"> 리셋 </v-btn>
-
                                 <v-btn
                                     color="primary"
                                     class="mr-4"

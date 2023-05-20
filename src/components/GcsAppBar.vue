@@ -4,7 +4,7 @@
             <v-toolbar-title>
                 <v-row no-gutters align="center">
                     <v-icon left>$monitorDashboard</v-icon>
-                    KETI GCS
+                    KETI GCS v1.0
                 </v-row>
             </v-toolbar-title>
 
@@ -14,18 +14,35 @@
 <!--                <v-icon>$monitorArrowDown</v-icon>-->
 <!--            </v-btn>-->
 
-            <v-btn text @click.stop="mapAngleDialog=true" :disabled="!$store.state.MOBIUS_CONNECTION.connected">
-                <v-icon>$formatRotate90</v-icon>
-            </v-btn>
+            <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn text @click.stop="mapAngleDialog=true"
+                           :disabled="!$store.state.MOBIUS_CONNECTION.connected"
+                           v-bind="attrs"
+                           v-on="on"
+                    >
+                        <v-icon>$formatRotate90</v-icon>
+                    </v-btn>
+                </template>
+                <span>지도 회전</span>
+            </v-tooltip>
 
 <!--            <v-btn text @click.stop="setGCSHomePosition" :disabled="!$store.state.MOBIUS_CONNECTION.connected">-->
 <!--                <v-icon>$crosshairsGps</v-icon>-->
 <!--            </v-btn>-->
 
-            <v-btn text @click.stop="dialogProfile">
-                <!--            <v-icon>mdi-quadcopter</v-icon>-->
-                <v-icon>$cogTransfer</v-icon>
-            </v-btn>
+            <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn text @click.stop="dialogProfile"
+                           v-bind="attrs"
+                           v-on="on"
+                    >
+                        <!--            <v-icon>mdi-quadcopter</v-icon>-->
+                        <v-icon>$cogTransfer</v-icon>
+                    </v-btn>
+                </template>
+                <span>무인이동체 관리</span>
+            </v-tooltip>
 
 
             <!--        <v-btn text @click.stop="openCam">-->
@@ -45,9 +62,18 @@
             <!--            </v-btn>-->
             <!--        </router-link>-->
 
-            <v-btn text :disabled="!$store.state.MOBIUS_CONNECTION.connected" @click="logout">
-                <v-icon>$account</v-icon>
-            </v-btn>
+            <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn text :disabled="!$store.state.MOBIUS_CONNECTION.connected"
+                           @click="logout"
+                           v-bind="attrs"
+                           v-on="on"
+                    >
+                        <v-icon>$account</v-icon>
+                    </v-btn>
+                </template>
+                <span>로그아웃</span>
+            </v-tooltip>
 
             <v-dialog
                 v-model="mapAngleDialog"
@@ -62,16 +88,17 @@
                             </v-icon>
                         </v-col>
                         <v-spacer/>
-                        <v-col cols="5">
+                        <v-col cols="7">
                             <v-text-field
-                                label="mapAngle(°)"
+                                label="지도 회전 각도(°)"
                                 v-model="mapAngle"
                                 class="ma-0 pa-0"
                                 type="number"
-                                outlined dense hide-details
+                                outlined dense
                                 color="amber"
                                 min="-360"
                                 max="360"
+                                :rules="mapAngle_rule"
                             ></v-text-field>
                         </v-col>
                     </v-row>
@@ -82,15 +109,16 @@
                                     color="green darken-1"
                                     text outlined
                                     @click="rotateMapAngle"
+                                    :disabled="mapAngle < -360 || mapAngle > 360 || mapAngle === ''"
                                 >
-                                    OK
+                                    확인
                                 </v-btn>
                                 <v-btn
                                     color="red darken-1"
                                     text outlined
                                     @click="mapAngleDialog = false"
                                 >
-                                    Cancel
+                                    취소
                                 </v-btn>
                             </v-card-actions>
                         </v-col>
@@ -102,7 +130,7 @@
                 <v-card id="create" class="mx-auto">
                     <v-toolbar color="teal" dark>
                         <v-icon left>$quadcopter</v-icon>
-                        <v-toolbar-title>Settings</v-toolbar-title>
+                        <v-toolbar-title>Mobius 연결</v-toolbar-title>
                         <template v-slot:extension>
                             <v-speed-dial
                                 v-model="fab"
@@ -120,12 +148,20 @@
                                         <v-icon v-else>$cardBulletedSettingsOutline</v-icon>
                                     </v-btn>
                                 </template>
-                                <v-btn disabled fab dark small color="green">
-                                    <v-icon>$pencil</v-icon>
-                                </v-btn>
-                                <v-btn fab dark small color="indigo" @click.stop="add_dialog = true">
-                                    <v-icon>$plus</v-icon>
-                                </v-btn>
+<!--                                <v-btn disabled fab dark small color="green">-->
+<!--                                    <v-icon>$pencil</v-icon>-->
+<!--                                </v-btn>-->
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-btn fab dark small color="indigo"
+                                               @click.stop="add_dialog = true"
+                                               v-bind="attrs"
+                                               v-on="on">
+                                            <v-icon>$plus</v-icon>
+                                        </v-btn>
+                                    </template>
+                                    <span style="font-size: 12px">무인이동체 등록</span>
+                                </v-tooltip>
                             </v-speed-dial>
 
                             <v-row no-gutters class="text-right justify-end mb-2">
@@ -137,7 +173,7 @@
                                         ref="host"
                                         v-model="host" :rules="host_rule"
                                         placeholder="203.253.128.177"
-                                        label="HOST*"
+                                        label="Mobius 주소"
                                         required
                                         :disabled="$store.state.MOBIUS_CONNECTION.connected"
                                     ></v-text-field>
@@ -149,7 +185,7 @@
                                         ref="gcs"
                                         v-model="gcs" :rules="gcs_rule"
                                         placeholder="KETI_GCS"
-                                        label="GCS*"
+                                        label="GCS 이름"
                                         required
                                         :disabled="$store.state.MOBIUS_CONNECTION.connected"
                                     ></v-text-field>
@@ -181,7 +217,7 @@
                     <v-container fluid>
                         <v-row class="mb-1">
                             <v-col cols="2">
-                                <v-subheader>Drone List</v-subheader>
+                                <v-subheader>무인이동체 목록</v-subheader>
                             </v-col>
                         </v-row>
                         <v-data-table
@@ -192,6 +228,9 @@
                             item-key="name"
                             show-select
                             class="elevation-1"
+                            :footer-props="{
+                                'items-per-page-text': '페이지 당 무인이동체 수',
+                            }"
                         >
                             <template v-slot:item.color="{item}">
                                 <v-avatar
@@ -225,7 +264,7 @@
                 <v-dialog v-model="add_dialog" persistent max-width="600px">
                     <v-card ref="form">
                         <v-card-title>
-                            <span class="headline">Drone Profile</span>
+                            <span class="headline">무인이동체 정보</span>
                         </v-card-title>
                         <v-card-text>
                             <v-container>
@@ -235,11 +274,11 @@
 <!--                                </v-col>-->
                                     <v-col cols="12" sm="6">
                                         <v-text-field ref="drone_name" v-model="drone_name" :rules="drone_name_rule"
-                                                      label="Drone Name*" required></v-text-field>
+                                                      label="이름" required></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6">
                                         <v-text-field ref="drone_id" v-model="drone_id" :rules="drone_id_rule"
-                                                      label="Drone ID*" hint="Unique ID of Drone" persistent-hint
+                                                      label="ID" hint="무인이동체 고유 ID" persistent-hint
                                                       required
                                         ></v-text-field>
                                     </v-col>
@@ -250,22 +289,22 @@
                                         <v-select
                                             v-model="type_selected"
                                             :items="['ardupilot', 'px4', 'dji', 'etc']"
-                                            label="Type*"
-                                            hint="Type of FC"
+                                            label="FC 종류"
+                                            hint="FC의 종류"
                                             required
                                             hide-details
                                         ></v-select>
                                     </v-col>
                                     <v-col cols="12" sm="3">
                                         <v-text-field ref="bat_cell" v-model="bat_cell" :rules="bat_cell_rule"
-                                                      label="Battery Cell*" required></v-text-field>
+                                                      label="배터리 셀" required></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="4">
                                         <v-text-field
                                             ref="system_id"
                                             v-model="system_id" :rules="system_id_rule"
-                                            label="System ID*"
-                                            hint="System id of Drone"
+                                            label="시스템 ID"
+                                            hint="무인이동체의 시스템 ID"
                                             persistent-hint
                                             required
                                         ></v-text-field>
@@ -274,7 +313,7 @@
                                         <v-combobox
                                             v-model="color_selected"
                                             :items="['red', 'pink', 'deep-purple', 'purple', 'indigo', 'blue', 'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey']"
-                                            label="Color"
+                                            label="색상"
                                             chips
                                             dense
                                             hide-details
@@ -456,9 +495,15 @@ export default {
         return {
             mapAngleDialog: false,
             mapAngle: 0,
+            mapAngle_rule:[
+                (v) => !!v || "각도를 입력해주세요.",
+                // v => /^[0-9]*$/.test(v) || '숫자만 입력 가능합니다.',
+                v => !(v > 360) || '입력 범위는 -360°~360° 입니다.',
+                v => !(v < -360) || '입력 범위는 -360°~360° 입니다.',
+            ],
             open: false,
-            MOBIUS_DISCONNECTION_TEXT: 'Disconnect',
-            MOBIUS_CONNECTION_TEXT: 'Connect',
+            MOBIUS_DISCONNECTION_TEXT: '연결 해제',
+            MOBIUS_CONNECTION_TEXT: '연결',
             //MOBIUS_CONNECTION_CONNECTED: this.$cookies.isKey('MOBIUS_CONNECTION_CONNECTED')?(this.$cookies.get('mobius_connected') === 'true'):false,
             MOBIUS_CONNECTION_DISABLED: false,
             update_idx: 0,
@@ -553,20 +598,20 @@ export default {
             left: false,
             transition: 'slide-y-reverse-transition',
             headers: [
-                {text: 'color', value: 'color'},
+                {text: '색상', value: 'color'},
                 {
-                    text: 'Drone Name',
+                    text: '이름',
                     align: 'start',
                     sortable: false,
                     value: 'name',
                 },
-                {text: 'id', value: 'id'},
-                {text: 'type', value: 'type'},
-                {text: 'system_id', value: 'system_id'},
-                {text: 'bat_cell', value: 'bat_cell'},
-                {text: 'gcs', value: 'gcs'},
-                {text: '...', value: 'update'},
-                {text: '...', value: 'del'},
+                {text: 'ID', value: 'id'},
+                {text: 'FC 종류', value: 'type'},
+                {text: '시스템 ID', value: 'system_id'},
+                {text: '배터리 셀', value: 'bat_cell'},
+                {text: 'GCS', value: 'gcs'},
+                {text: '수정', value: 'update'},
+                {text: '삭제', value: 'del'},
             ],
         }
     },
