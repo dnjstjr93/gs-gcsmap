@@ -1,5 +1,5 @@
 <template>
-    <v-container style="width: 450px" >
+    <v-container style="width: 450px">
         <v-layout align-center row wrap>
             <v-flex xs12>
                 <v-alert v-if="isError" type="error">
@@ -18,7 +18,7 @@
                                 :rules="emailRules"
                                 label="E-mail 입력"
                                 required
-                                :readonly="!isFocused" @focus="isFocused = true" @blur="isFocused = false"
+                                :readonly="!isFocused" @focus="isFocused=true" @blur="isFocused=false"
                             ></v-text-field>
 
                             <v-text-field
@@ -29,13 +29,12 @@
                                 label="비밀번호 입력"
                                 hint="최소 8자 이상 입력해주세요."
                                 counter
-                                :readonly="!isFocused" @focus="isFocused = true" @blur="isFocused = false"
                                 v-on:keyup.enter="login(formData)"
                                 @click:append="show = !show"
                             ></v-text-field>
 
                             <div class="mt-3 d-flex flex-row-reverse">
-                                <v-btn color="error" class="mr-4" @click="reset"> 초기화 </v-btn>
+                                <v-btn color="error" class="mr-4" @click="reset"> 초기화</v-btn>
                                 <v-btn
                                     color="primary"
                                     class="mr-4"
@@ -71,8 +70,8 @@ import crypto from "crypto"
 const setItemWithExpireTime = (keyName, keyValue, tts) => {
     // localStorage에 저장할 객체
     const obj = {
-        value : keyValue,
-        expire : Date.now() + tts
+        value: keyValue,
+        expire: Date.now() + tts
     }
 
     // 객체를 JSON 문자열로 변환
@@ -91,13 +90,13 @@ export default {
         errorMsg: "",
         isFocused: false,
         emailRules: [
-            (v) => !!v || "E-mail is required",
-            (v) => /.+@.+\..+/.test(v) || "E-mail must be valid"
+            (v) => !!v || "E-mail을 입력해주세요.",
+            (v) => /.+@.+\..+/.test(v) || "유효한 E-mail 형식이 아닙니다."
         ],
         show: false,
         rules: {
-            required: (value) => !!value || "Required.",
-            min: (v) => (v === null) || v.length >= 8 || "Min 8 characters"
+            required: (value) => !!value || "패스워드를 입력해주세요.",
+            min: (v) => (v === null) || v.length >= 8 || "최소 8자 이상 입력해주세요."
         }
     }),
     methods: {
@@ -116,7 +115,7 @@ export default {
                     return status < 500;
                 },
                 method: 'get',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + LoginObj.email.replace('@','_').replace('.', '_'),
+                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + LoginObj.email.replace('@', '_').replace('.', '_'),
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
@@ -124,24 +123,22 @@ export default {
                 },
             }).then(
                 (res) => {
-                    if(res.status === 200) {
+                    if (res.status === 200) {
                         console.log('UserInfos', res.data);
 
-                        if(pwHash === res.data['m2m:cnt'].lbl[0]) {
+                        if (pwHash === res.data['m2m:cnt'].lbl[0]) {
                             console.log('login success');
 
                             // localStorage에 12시간 만료시간을 설정하고 데이터 저장
-                            setItemWithExpireTime('loginEmail', LoginObj.email.replace('@','_').replace('.', '_'), 12 * (60 * 60 * 1000))
+                            setItemWithExpireTime('loginEmail', LoginObj.email.replace('@', '_').replace('.', '_'), 12 * (60 * 60 * 1000))
 
                             this.$store.state.isLogin = true;
                             this.$store.state.userInfo = LoginObj;
-                            this.$router.replace({ name: "Home" });
-                        }
-                        else {
+                            this.$router.replace({name: "Home"});
+                        } else {
                             console.log('password incorrect');
                         }
-                    }
-                    else {
+                    } else {
                         console.log('user do not exist');
                     }
                 }

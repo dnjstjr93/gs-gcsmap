@@ -64,7 +64,7 @@
 
             <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
-                    <v-btn text :disabled="!$store.state.MOBIUS_CONNECTION.connected"
+                    <v-btn text
                            @click="logout"
                            v-bind="attrs"
                            v-on="on"
@@ -622,7 +622,7 @@ export default {
                 this.$store.state.isLogin = false;
                 this.$store.state.userInfo = null;
                 window.localStorage.removeItem('loginEmail');
-                this.$router.push({name: "login"});
+                this.$router.push({name: "login", params: {isFocused:false}});
             }
             else {
                 console.log('로그아웃 실패');
