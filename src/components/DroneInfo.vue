@@ -116,12 +116,12 @@
                                     max-width="720"
                                 >
                                     <v-card>
-                                        <v-card-title class="text-h6">Information of {{ name }}
+                                        <v-card-title class="text-h6">{{ name }} 상세 정보
                                             <v-spacer></v-spacer>
                                             <v-file-input
                                                 class="mr-2"
                                                 accept=".waypoints,.txt,.kml,.plan"
-                                                label="Waypoints File input"
+                                                label="웨이포인트 파일 입력"
                                                 :color="'#FF5722'"
                                                 outlined dense hide-details small-chips
                                                 v-model="chosenWaypointsFile"
@@ -135,7 +135,7 @@
                                                 :disabled="showLoadWaypointsBtn"
                                             >
                                                 <v-icon dark class="mr-2">$mapMarkerPath</v-icon>
-                                                Load
+                                                열기
                                             </v-btn>
                                         </v-card-title>
                                         <v-textarea outlined name="myDroneInfo" label="drone_info" class="mx-2" height="480"
@@ -152,7 +152,7 @@
                                                 left
                                             >
                                                 <v-icon dark class="mr-2">$download</v-icon>
-                                                Save
+                                                저장
                                             </v-btn>
                                             <v-spacer></v-spacer>
 
@@ -161,7 +161,7 @@
                                                 text
                                                 @click="dialog = false"
                                             >
-                                                Cancel
+                                                취소
                                             </v-btn>
 
                                             <v-btn
@@ -169,7 +169,7 @@
                                                 text
                                                 @click="updateMyDroneInfo"
                                             >
-                                                OK
+                                                적용
                                             </v-btn>
                                         </v-card-actions>
                                     </v-card>
@@ -588,20 +588,54 @@
                                         mandatory
                                         class="text-center align-center ma-0 ppa-0"
                                     >
-                                        <v-btn x-small class="ma-0 pa-0">
-                                            T
-                                        </v-btn>
-                                        <v-btn x-small class="ma-0 pa-0">
-                                            N
-                                        </v-btn>
-                                        <v-btn x-small class="ma-0 pa-0">
-                                            F
-                                        </v-btn>
+                                        <v-tooltip bottom>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn x-small class="ma-0 pa-0"
+                                                       v-bind="attrs"
+                                                       v-on="on"
+                                                >
+                                                    T
+                                                </v-btn>
+                                            </template>
+                                            <span>PWM 1100</span>
+                                        </v-tooltip>
+                                        <v-tooltip bottom>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn x-small class="ma-0 pa-0"
+                                                       v-bind="attrs"
+                                                       v-on="on"
+                                                >
+                                                    N
+                                                </v-btn>
+                                            </template>
+                                            <span>PWM 1500</span>
+                                        </v-tooltip>
+                                        <v-tooltip bottom>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn x-small class="ma-0 pa-0"
+                                                       v-bind="attrs"
+                                                       v-on="on"
+                                                >
+                                                    F
+                                                </v-btn>
+                                            </template>
+                                            <span>PWM 1900</span>
+                                        </v-tooltip>
                                     </v-btn-toggle>
 
-                                    <v-btn x-small fab color="lime" class="ml-1 mb-0 pa-0" @click="handlePwmClick(i+4, $event);">
-                                        {{i+4}}
-                                    </v-btn>
+                                    <v-tooltip bottom>
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn x-small fab color="lime"
+                                                   class="ml-1 mb-0 pa-0"
+                                                   @click="handlePwmClick(i+4, $event);"
+                                                   v-bind="attrs"
+                                                   v-on="on"
+                                            >
+                                                {{i+4}}
+                                            </v-btn>
+                                        </template>
+                                        <span>CH {{i+4}} 제어</span>
+                                    </v-tooltip>
                                 </v-card>
                             </v-card>
                         </v-col>
@@ -5082,7 +5116,7 @@ export default {
                         this.params.wpYawBehavior.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.params.wpYawBehavior.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.params.wpYawBehavior.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WP_YAW_BEHAVIOR', this.params.wpYawBehavior);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WP_YAW_BEHAVIOR', this.params.wpYawBehavior);
 
                         this.$store.state.params.wpYawBehavior[this.name] = this.itemsWpYawBehavior[this.params.wpYawBehavior.param_value];
                         this.info.wpYawBehavior = 'YAW-' + String(this.params.wpYawBehavior.param_value);
@@ -5096,7 +5130,7 @@ export default {
                         this.params.atcSlewYaw.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.params.atcSlewYaw.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.params.atcSlewYaw.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'ATC_SLEW_YAW', this.params.atcSlewYaw);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'ATC_SLEW_YAW', this.params.atcSlewYaw);
 
                         this.$store.state.params.atcSlewYaw[this.name] = (this.params.atcSlewYaw.param_value / 100);
                     }
@@ -5109,7 +5143,7 @@ export default {
                         this.params.wpnavSpeedUp.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.params.wpnavSpeedUp.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.params.wpnavSpeedUp.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_SPEED_UP', this.params.wpnavSpeedUp);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_SPEED_UP', this.params.wpnavSpeedUp);
 
                         this.$store.state.params.wpnavSpeedUp[this.name] = (this.params.wpnavSpeedUp.param_value / 100);
                     }
@@ -5122,7 +5156,7 @@ export default {
                         this.params.wpnavSpeedDn.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.params.wpnavSpeedDn.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.params.wpnavSpeedDn.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_SPEED_DN', this.params.wpnavSpeedDn);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_SPEED_DN', this.params.wpnavSpeedDn);
 
                         this.$store.state.params.wpnavSpeedDn[this.name] = (this.params.wpnavSpeedDn.param_value / 100);
                     }
@@ -5135,7 +5169,7 @@ export default {
                         this.params.rtlAlt.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.params.rtlAlt.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.params.rtlAlt.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RTL_ALT', this.params.rtlAlt);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'RTL_ALT', this.params.rtlAlt);
 
                         this.$store.state.params.rtlAlt[this.name] = (this.params.rtlAlt.param_value / 100);
                     }
@@ -5148,7 +5182,7 @@ export default {
                         this.params.wpnavRadius.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.params.wpnavRadius.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.params.wpnavRadius.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_RADIUS', this.params.wpnavRadius);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_RADIUS', this.params.wpnavRadius);
 
                         this.$store.state.params.wpnavRadius[this.name] = (this.params.wpnavRadius.param_value / 100);
                     }
@@ -5161,7 +5195,7 @@ export default {
                         this.params.wpnavAccel.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.params.wpnavAccel.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.params.wpnavAccel.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_ACCEL', this.params.wpnavAccel);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_ACCEL', this.params.wpnavAccel);
 
                         this.$store.state.params.wpnavAccel[this.name] = (this.params.wpnavAccel.param_value / 100);
                     }
@@ -5174,7 +5208,7 @@ export default {
                         this.params.wpnavSpeed.param_type = Buffer.from(param_type, 'hex').readInt8(0);
                         this.params.wpnavSpeed.param_count = Buffer.from(param_count, 'hex').readInt16LE(0);
                         this.params.wpnavSpeed.param_index = Buffer.from(param_index, 'hex').readUInt16LE(0);
-                        console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_SPEED', this.params.wpnavSpeed);
+                        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^", this.name, 'WPNAV_SPEED', this.params.wpnavSpeed);
 
                         this.$store.state.params.wpnavSpeed[this.name] = (this.params.wpnavSpeed.param_value / 100);
                     }

@@ -1738,7 +1738,7 @@ export default {
 
                     let area = getArea(feature.getGeometry());
                     this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
-                    console.log('computeArea = ', area.toFixed(1), '㎡');
+                    // console.log('computeArea = ', area.toFixed(1), '㎡');
 
                     if(this.curInfoSurveyMarkerFlag) {
                         // console.log('do-update-survey-GcsMap', 'on-update-info-survey-marker');
@@ -2620,7 +2620,7 @@ export default {
                     svgDroneObj.svg.path._attributes['stroke-width'] = '25';
                     this.olDroneMarkers[dName].droneMarker = convert.js2xml(svgDroneObj, {compact: true, ignoreComment: true, spaces: 4});
 
-                    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx droneMarker', this.olDroneMarkers[dName].droneMarker);
+                    // console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx droneMarker', this.olDroneMarkers[dName].droneMarker);
 
                     let iconStyleDrone = this.getStyleDroneMarker(
                         dName,
@@ -2871,7 +2871,7 @@ export default {
             let tPnt = new Point([tLng, tLat]).transform('EPSG:4326', 'EPSG:3857');
             let tCoordinate = tPnt.getCoordinates();
 
-            console.log('OOOOOOOOOOOOOOOOOOOOOOOOOO tempMarkers', dName, pIndex, tCoordinate);
+            // console.log('OOOOOOOOOOOOOOOOOOOOOOOOOO tempMarkers', dName, pIndex, tCoordinate);
 
             this.olTempMarkers[dName].Coordinates.push(tCoordinate);
 
@@ -2900,7 +2900,7 @@ export default {
                 targetedColor = '#FFFDE7FF';
             }
 
-            console.log('ppppppppppppppppppppppppp tempMarker-targeted', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted, targetedColor);
+            // console.log('ppppppppppppppppppppppppp tempMarker-targeted', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted, targetedColor);
 
             let iconStyleTemp = this.getStyleTempMarker(
                 pIndex,
@@ -2938,7 +2938,7 @@ export default {
                 let tPnt = new Point([tLng, tLat]).transform('EPSG:4326', 'EPSG:3857');
                 let tCoordinate = tPnt.getCoordinates();
 
-                console.log('OOOOOOOOOOOOOOOOOOOOOOOOOO tempMarkers', dName, pIndex, tCoordinate);
+                // console.log('OOOOOOOOOOOOOOOOOOOOOOOOOO tempMarkers', dName, pIndex, tCoordinate);
 
                 this.olTempMarkers[dName].Coordinates.push(tCoordinate);
 
@@ -2967,7 +2967,7 @@ export default {
                     targetedColor = '#FFFDE7FF';
                 }
 
-                console.log('ppppppppppppppppppppppppp tempMarker-targeted', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted, targetedColor);
+                // console.log('ppppppppppppppppppppppppp tempMarker-targeted', dName, pIndex, this.$store.state.tempMarkers[dName][pIndex].targeted, targetedColor);
 
                 let iconStyleTemp = this.getStyleTempMarker(
                     pIndex,
@@ -3109,7 +3109,7 @@ export default {
                 let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
                 let svCoordinate = svPnt.getCoordinates();
 
-                console.log('sssssssssssssssssssssssssssssssssssss surveyMarkers', dName, pIndex, i, svCoordinate);
+                // console.log('sssssssssssssssssssssssssssssssssssss surveyMarkers', dName, pIndex, i, svCoordinate);
 
                 polyCoordinates.push(svCoordinate);
             }
@@ -3125,7 +3125,7 @@ export default {
 
             let area = getArea(svFeature.getGeometry());
             this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
-            console.log('computeArea = ', area.toFixed(1), '㎡');
+            // console.log('computeArea = ', area.toFixed(1), '㎡');
 
             let selectedColor = '#76FF03F0';
             if (this.$store.state.surveyMarkers[dName][pIndex].selected) {
@@ -3143,7 +3143,7 @@ export default {
                 targetedColor = this.$store.state.drone_infos[dName].color + '20';
             }
 
-            console.log('sssssssssssssssssssssssssssssss surveyMarker-targeted', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted, targetedColor);
+            // console.log('sssssssssssssssssssssssssssssss surveyMarker-targeted', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted, targetedColor);
 
             let styleSurvey = new Style({
                 stroke: new Stroke({
@@ -3177,7 +3177,7 @@ export default {
                 pathLineCoordinates.push(svCoordinate);
             }
 
-            console.log('sssssssssssssssssssssssssssssssssssss pathLines', dName, pIndex, pathLineCoordinates);
+            // console.log('sssssssssssssssssssssssssssssssssssss pathLines', dName, pIndex, pathLineCoordinates);
 
             this.olSurveyMarkers[dName].lineCoordinates[pIndex] = JSON.parse(JSON.stringify(pathLineCoordinates));
 
@@ -3248,7 +3248,7 @@ export default {
                 this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
             }
 
-            console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker');
+            // console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker');
         },
 
         async initOlSurveyMarker(dName, pIndex, survey) {
@@ -3260,7 +3260,7 @@ export default {
                 let svPnt = new Point([svLng, svLat]).transform('EPSG:4326', 'EPSG:3857')
                 let svCoordinate = svPnt.getCoordinates();
 
-                console.log('sssssssssssssssssssssssssssssssssssss surveyMarkers', dName, pIndex, i, svCoordinate);
+                // console.log('sssssssssssssssssssssssssssssssssssss surveyMarkers', dName, pIndex, i, svCoordinate);
 
                 polyCoordinates.push(svCoordinate);
             }
@@ -3284,7 +3284,7 @@ export default {
 
             let area = getArea(svFeature.getGeometry());
             this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
-            console.log('computeArea = ', area.toFixed(1), '㎡');
+            // console.log('computeArea = ', area.toFixed(1), '㎡');
 
             let selectedColor = '#76FF03F0';
             if (this.$store.state.surveyMarkers[dName][pIndex].selected) {
@@ -3302,7 +3302,7 @@ export default {
                 targetedColor = this.$store.state.drone_infos[dName].color + '20';
             }
 
-            console.log('sssssssssssssssssssssssssssssss surveyMarker-targeted', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted, targetedColor);
+            // console.log('sssssssssssssssssssssssssssssss surveyMarker-targeted', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted, targetedColor);
 
             // let styleSurvey = this.getStyleSurveyMarker(
             //     pIndex,
@@ -3342,7 +3342,7 @@ export default {
                 pathLineCoordinates.push(svCoordinate);
             }
 
-            console.log('sssssssssssssssssssssssssssssssssssss pathLines', dName, pIndex, pathLineCoordinates);
+            // console.log('sssssssssssssssssssssssssssssssssssss pathLines', dName, pIndex, pathLineCoordinates);
 
             this.olSurveyMarkers[dName].lineCoordinates[pIndex] = JSON.parse(JSON.stringify(pathLineCoordinates));
 
@@ -3412,7 +3412,7 @@ export default {
                 this.$store.state.surveyMarkers[dName][pIndex].elevations_location.push({lat: eLngLat[1], lng: eLngLat[0]});
             }
 
-            console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker');
+            // console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker');
 
 
             // this.getElevationProfile(eLngLats, async (status, result) => {
@@ -3438,7 +3438,7 @@ export default {
                     this.olSurveyMarkers[dName].surveyMarkerFeatures = [];
                     this.olSurveyMarkers[dName].surveyMarkerTranslates = [];
 
-                    console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker', dName, this.$store.state.surveyMarkers[dName]);
+                    // console.log('sssssssssssssssssssssssssssssssssssss initOlSurveyMarker', dName, this.$store.state.surveyMarkers[dName]);
 
                     this.$store.state.surveyMarkers[dName].forEach((survey, pIndex) => {
                         this.initOlSurveyMarker(dName, pIndex, survey);
@@ -4450,7 +4450,7 @@ export default {
 
                     this.$store.state.surveyMarkers[dName][pIndex].targeted = !this.$store.state.surveyMarkers[dName][pIndex].targeted;
 
-                    console.log('sssssssssssssssssssssssss single click', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted);
+                    // console.log('sssssssssssssssssssssssss single click', dName, pIndex, this.$store.state.surveyMarkers[dName][pIndex].targeted);
 
                     if (this.$store.state.surveyMarkers[dName][pIndex].targeted) {
                         this.$store.state.drone_infos[dName].curTargetedSurveyMarkerIndex = pIndex;
@@ -4801,7 +4801,7 @@ export default {
 
                     let area = getArea(this.selectedFeature.getGeometry());
                     this.$store.state.surveyMarkers[dName][pIndex].area = area.toFixed(1);
-                    console.log('computeArea = ', area.toFixed(1), '㎡');
+                    // console.log('computeArea = ', area.toFixed(1), '㎡');
 
                     setTimeout(() => {
                         this.curSelectedMarker = this.$store.state.surveyMarkers[dName][pIndex];

@@ -274,11 +274,11 @@
 <!--                                </v-col>-->
                                     <v-col cols="12" sm="6">
                                         <v-text-field ref="drone_name" v-model="drone_name" :rules="drone_name_rule"
-                                                      label="이름" required></v-text-field>
+                                                      label="이름*" required></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6">
                                         <v-text-field ref="drone_id" v-model="drone_id" :rules="drone_id_rule"
-                                                      label="ID" hint="무인이동체 고유 ID" persistent-hint
+                                                      label="ID*" hint="무인이동체 고유 ID" persistent-hint
                                                       required
                                         ></v-text-field>
                                     </v-col>
@@ -297,13 +297,13 @@
                                     </v-col>
                                     <v-col cols="12" sm="3">
                                         <v-text-field ref="bat_cell" v-model="bat_cell" :rules="bat_cell_rule"
-                                                      label="배터리 셀" required></v-text-field>
+                                                      label="배터리 셀*" required></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="4">
                                         <v-text-field
                                             ref="system_id"
                                             v-model="system_id" :rules="system_id_rule"
-                                            label="시스템 ID"
+                                            label="시스템 ID*"
                                             hint="무인이동체의 시스템 ID"
                                             persistent-hint
                                             required
@@ -339,7 +339,7 @@
                                     </v-col>
                                 </v-row>
                             </v-container>
-                            <small>*indicates required field</small>
+                            <small>*필수 입력 항목</small>
                         </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
@@ -374,14 +374,14 @@
                                     <v-col cols="12" sm="6">
                                         <v-text-field
                                             disabled ref="drone_name" v-model="drone_name"
-                                            :rules="drone_name_update_rule" label="Drone Name*"
+                                            :rules="drone_name_update_rule" label="이름*"
                                             required
                                         ></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="6">
                                         <v-text-field
                                             disabled ref="drone_id" v-model="drone_id" :rules="drone_id_rule"
-                                            label="Drone ID*" hint="Unique ID of Drone" persistent-hint
+                                            label="ID*" hint="무인이동체 고유 ID" persistent-hint
                                             required
                                         ></v-text-field>
                                     </v-col>
@@ -392,8 +392,8 @@
                                         <v-select
                                             v-model="type_selected"
                                             :items="['ardupilot', 'px4', 'dji', 'etc']"
-                                            label="Type*"
-                                            hint="Type of FC"
+                                            label="FC 종류*"
+                                            hint="FC의 종류"
                                             required
                                             hide-details
                                         ></v-select>
@@ -401,15 +401,15 @@
                                     <v-col cols="12" sm="3">
                                         <v-text-field
                                             ref="bat_cell" v-model="bat_cell" :rules="bat_cell_rule"
-                                            label="Battery Cell*" required
+                                            label="배터리 셀*" required
                                         ></v-text-field>
                                     </v-col>
                                     <v-col cols="12" sm="4">
                                         <v-text-field
                                             ref="system_id"
                                             v-model="system_id" :rules="system_id_rule"
-                                            label="System ID*"
-                                            hint="System id of Drone"
+                                            label="시스템 ID*"
+                                            hint="무인이동체의 시스템 ID"
                                             persistent-hint
                                             required
                                         ></v-text-field>
@@ -418,7 +418,7 @@
                                         <v-combobox
                                             v-model="color_selected"
                                             :items="['red', 'pink', 'deep-purple', 'purple', 'indigo', 'blue', 'light-blue', 'cyan', 'teal', 'green', 'light-green', 'lime', 'yellow', 'amber', 'orange', 'deep-orange', 'brown', 'blue-grey']"
-                                            label="Color"
+                                            label="색상"
                                             chips
                                             dense
                                             hide-details
@@ -445,7 +445,7 @@
                                     </v-col>
                                 </v-row>
                             </v-container>
-                            <small>*indicates required field</small>
+                            <small>*필수 입력 항목</small>
                         </v-card-text>
                         <v-card-actions>
                             <v-spacer></v-spacer>
@@ -949,7 +949,7 @@ export default {
                 }
             }).then(
                 (res) => {
-                    console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', res)
+                    // console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', res)
                     if (res.status === 200) {
                         callback(res.status, res.data['m2m:cin'].con);
                     }
@@ -2029,7 +2029,8 @@ export default {
 
                         let temp_markers = response.data['m2m:cin'].con;
 
-                        temp_markers.forEach((marker, pIndex) => {
+                        // temp_markers.forEach((marker, pIndex) => {
+                        temp_markers.forEach((marker) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
                                 marker.elevation = -99.0;
                             }
@@ -2058,7 +2059,7 @@ export default {
                             marker.targeted = false;
                             marker.selected = false;
 
-                            console.log('ppppppppppppppppppppppppp prepareMarkerInfos tempMarker-targeted', dName, pIndex, marker.targeted);
+                            // console.log('ppppppppppppppppppppppppp prepareMarkerInfos tempMarker-targeted', dName, pIndex, marker.targeted);
                         });
 
                         this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(temp_markers));
@@ -2141,7 +2142,8 @@ export default {
 
                         let survey_markers = response.data['m2m:cin'].con;
 
-                        survey_markers.forEach((marker, pIndex) => {
+                        // survey_markers.forEach((marker, pIndex) => {
+                        survey_markers.forEach((marker) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'angleStart')) {
                                 marker.angleStart = 0;
                             }
@@ -2255,7 +2257,7 @@ export default {
                             marker.targeted = false;
                             marker.selected = false;
 
-                            console.log('ppppppppppppppppppppppppp prepareSurveyMarkerInfos-targeted', dName, pIndex, marker.targeted);
+                            // console.log('ppppppppppppppppppppppppp prepareSurveyMarkerInfos-targeted', dName, pIndex, marker.targeted);
                         });
 
                         this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(survey_markers));
@@ -2880,7 +2882,8 @@ export default {
 
                         let temp_markers = response.data['m2m:cin'].con;
 
-                        temp_markers.forEach((marker, pIndex) => {
+                        // temp_markers.forEach((marker, pIndex) => {
+                        temp_markers.forEach((marker) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
                                 marker.elevation = -99.0;
                             }
@@ -2909,7 +2912,7 @@ export default {
                             marker.targeted = false;
                             marker.selected = false;
 
-                            console.log('ppppppppppppppppppppppppp recreated MarkerInfos tempMarker-targeted', dName, pIndex, marker.targeted);
+                            // console.log('ppppppppppppppppppppppppp recreated MarkerInfos tempMarker-targeted', dName, pIndex, marker.targeted);
                         });
 
                         this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(temp_markers));
@@ -2975,7 +2978,8 @@ export default {
 
                         let survey_markers = response.data['m2m:cin'].con;
 
-                        survey_markers.forEach((marker, pIndex) => {
+                        // survey_markers.forEach((marker, pIndex) => {
+                        survey_markers.forEach((marker) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
                                 marker.elevation = -99.0;
                             }
@@ -3004,7 +3008,7 @@ export default {
                             marker.targeted = false;
                             marker.selected = false;
 
-                            console.log('ppppppppppppppppppppppppp recreated surveyMarkerInfos-targeted', dName, pIndex, marker.targeted);
+                            // console.log('ppppppppppppppppppppppppp recreated surveyMarkerInfos-targeted', dName, pIndex, marker.targeted);
                         });
 
                         this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(survey_markers));
@@ -3307,7 +3311,8 @@ export default {
 
                         let temp_markers = response.data['m2m:cin'].con;
 
-                        temp_markers.forEach((marker, pIndex) => {
+                        // temp_markers.forEach((marker, pIndex) => {
+                        temp_markers.forEach((marker) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
                                 marker.elevation = -99.0;
                             }
@@ -3336,7 +3341,7 @@ export default {
                             marker.targeted = false;
                             marker.selected = false;
 
-                            console.log('ppppppppppppppppppppppppp confirmSelected MarkerInfos-targeted', dName, pIndex, marker.targeted);
+                            // console.log('ppppppppppppppppppppppppp confirmSelected MarkerInfos-targeted', dName, pIndex, marker.targeted);
                         });
 
                         this.$store.state.tempMarkers[dName] = JSON.parse(JSON.stringify(temp_markers));
@@ -3401,7 +3406,8 @@ export default {
 
                         let survey_markers = response.data['m2m:cin'].con;
 
-                        survey_markers.forEach((marker, pIndex) => {
+                        // survey_markers.forEach((marker, pIndex) => {
+                        survey_markers.forEach((marker) => {
                             if (!Object.prototype.hasOwnProperty.call(marker, 'elevation')) {
                                 marker.elevation = -99.0;
                             }
@@ -3430,7 +3436,7 @@ export default {
                             marker.targeted = false;
                             marker.selected = false;
 
-                            console.log('ppppppppppppppppppppppppp confirmSelected surveyMarkerInfos-targeted', dName, pIndex, marker.targeted);
+                            // console.log('ppppppppppppppppppppppppp confirmSelected surveyMarkerInfos-targeted', dName, pIndex, marker.targeted);
                         });
 
                         this.$store.state.surveyMarkers[dName] = JSON.parse(JSON.stringify(survey_markers));

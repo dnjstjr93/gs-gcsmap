@@ -72,11 +72,11 @@
                                     </v-btn>
                                 </v-col>
                                 <v-spacer/>
-                                <v-col cols="6">
+                                <v-col cols="7">
                                     <v-btn
                                         :disabled="!valid"
                                         color="blue"
-                                        class="ml-4"
+                                        class="ml-9"
                                         @click="register(formData)"
                                     >
                                         회원가입

@@ -6,10 +6,19 @@
                     <v-card flat tile outlined>
                         <v-row justify="space-around">
                             <v-col cols="1">
-                                <v-btn-toggle active-class="warning" v-model="toggle_exclusive" @change="targetDrones($event)">
-                                    <v-btn elevation="1">
-                                        <v-icon>$selectAll</v-icon>
-                                    </v-btn>
+                                <v-btn-toggle active-class="warning" v-model="toggle_exclusive"
+                                              @change="targetDrones($event)">
+                                    <v-tooltip bottom>
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-btn elevation="1"
+                                                   v-bind="attrs"
+                                                   v-on="on"
+                                            >
+                                                <v-icon>$selectAll</v-icon>
+                                            </v-btn>
+                                        </template>
+                                        <span>전체 선택</span>
+                                    </v-tooltip>
                                 </v-btn-toggle>
                             </v-col>
                             <v-col cols="11">
@@ -60,16 +69,30 @@
 <!--                                </v-card>-->
                             </v-col>
                             <v-col cols="3" class="text-right" >
-                                <v-btn class="mr-2" x-small @click.stop="zoomNormal" :disabled="zoomMinimum">
-                                    <v-icon small>
-                                        $magnifyMinusOutline
-                                    </v-icon>
-                                </v-btn>
-                                <v-btn class="mr-2" x-small @click.stop="zoomDouble" :disabled="zoomMaximum">
-                                    <v-icon small>
-                                        $magnifyPlusOutline
-                                    </v-icon>
-                                </v-btn>
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-btn class="mr-2" x-small @click.stop="zoomNormal" :disabled="zoomMinimum"
+                                               v-bind="attrs"
+                                               v-on="on">
+                                            <v-icon small>
+                                                $magnifyMinusOutline
+                                            </v-icon>
+                                        </v-btn>
+                                    </template>
+                                    <span>HUD 창 축소</span>
+                                </v-tooltip>
+                                <v-tooltip top>
+                                    <template v-slot:activator="{ on, attrs }">
+                                        <v-btn class="mr-2" x-small @click.stop="zoomDouble" :disabled="zoomMaximum"
+                                               v-bind="attrs"
+                                               v-on="on">
+                                            <v-icon small>
+                                                $magnifyPlusOutline
+                                            </v-icon>
+                                        </v-btn>
+                                    </template>
+                                    <span>HUD 창 확대</span>
+                                </v-tooltip>
                             </v-col>
                         </v-row>
                         <v-card v-if=!$store.state.client.connected class="py-3 px-2" color="orange">
@@ -407,7 +430,7 @@
 
             onResize() {
                 this.myWidth = this.$refs.prev.$el.clientWidth;
-                console.log(this.myWidth);
+                // console.log(this.myWidth);
 
                 this.$store.commit('setCommandTabLeftX', this.myWidth);
 
@@ -686,7 +709,7 @@
             },
 
             readyDroneInfoList() {
-                console.log('uuuuuuuuuuuuuuuuuuu     readyDroneInfoList')
+                // console.log('uuuuuuuuuuuuuuuuuuu     readyDroneInfoList')
 
                 this.$store.state.commands = [];
                 this.$store.state.commands.push(this.$store.state.command_menus[this.$store.state.menus['모드']]);
