@@ -17,7 +17,6 @@
                                         </div>
                                     </template>
                                 </v-checkbox>
-                                <!--                            :disabled="!flagReceiving"-->
                             </v-card>
                         </v-col>
                         <v-col cols="1">
@@ -67,11 +66,12 @@
                                             class="mr-1 my-1" dark x-small text outlined elevation="5"
                                             v-bind="attrs"
                                             v-on="on"
+                                            :disabled="$store.state.drone_infos[name].disableVideo"
                                         >
                                             <v-icon small>$video</v-icon>
                                         </v-btn>
                                     </template>
-                                    <span>Video On/Off</span>
+                                    <span>영상 관제</span>
                                 </v-tooltip>
                             </v-btn-toggle>
                         </v-col>

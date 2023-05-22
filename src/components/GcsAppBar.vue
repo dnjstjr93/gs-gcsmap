@@ -117,6 +117,7 @@
                                     color="red darken-1"
                                     text outlined
                                     @click="mapAngleDialog = false"
+                                    v-on:keyup.esc="mapAngleDialog = false"
                                 >
                                     취소
                                 </v-btn>
@@ -166,7 +167,6 @@
 
                             <v-row no-gutters class="text-right justify-end mb-2">
                                 <v-col cols="4">
-                                    <!--                            <v-text-field hide-details ref="host" v-model="host" :rules="host_rule" placeholder="203.253.128.177" label="Host*" required></v-text-field>-->
                                     <v-text-field
                                         class="pl-16 mx-2 mt-1"
                                         dense hide-details outlined
@@ -199,8 +199,6 @@
                                         :disabled="$store.state.MOBIUS_CONNECTION.connected"
                                     > {{ MOBIUS_CONNECTION_TEXT }}
                                     </v-btn>
-                                    <!--            </v-col>-->
-                                    <!--            <v-col cols="2">-->
                                     <v-btn
                                         class="mx-2 mt-1"
                                         tile text outlined @click="GcsAppBarDisconnected"
@@ -264,14 +262,11 @@
                 <v-dialog v-model="add_dialog" persistent max-width="600px">
                     <v-card ref="form">
                         <v-card-title>
-                            <span class="headline">무인이동체 정보</span>
+                            <span class="headline">무인이동체 상세 정보</span>
                         </v-card-title>
                         <v-card-text>
                             <v-container>
                                 <v-row>
-<!--                                <v-col cols="12" sm="6">-->
-<!--                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_rule" label="Drone Host*" required></v-text-field>-->
-<!--                                </v-col>-->
                                     <v-col cols="12" sm="6">
                                         <v-text-field ref="drone_name" v-model="drone_name" :rules="drone_name_rule"
                                                       label="이름*" required></v-text-field>
@@ -282,9 +277,6 @@
                                                       required
                                         ></v-text-field>
                                     </v-col>
-                                    <!--                                <v-col cols="12" sm="6">-->
-                                    <!--                                    <v-text-field ref="gcs_name" v-model="gcs_name" :rules="gcs_name_rule" value="KETI_MUV" label="GCS Name*" hint="Name of Drone GCS" persistent-hint required></v-text-field>-->
-                                    <!--                                </v-col>-->
                                     <v-col cols="12" sm="6">
                                         <v-select
                                             v-model="type_selected"
@@ -348,14 +340,14 @@
                                 text
                                 @click="cancel"
                             >
-                                Close
+                                취소
                             </v-btn>
                             <v-btn
                                 color="blue darken-1"
                                 text
                                 @click="submitAddProfile"
                             >
-                                Add
+                                추가
                             </v-btn>
                         </v-card-actions>
                     </v-card>
@@ -363,14 +355,11 @@
                 <v-dialog v-model="update_dialog" persistent max-width="600px">
                     <v-card ref="form">
                         <v-card-title>
-                            <span class="headline">Drone Profile</span>
+                            <span class="headline">무인이동체 상세 정보</span>
                         </v-card-title>
                         <v-card-text>
                             <v-container>
                                 <v-row>
-<!--                                <v-col cols="12" sm="6">-->
-<!--                                    <v-text-field ref="drone_host" v-model="drone_host" :rules="drone_host_update_rule" label="Drone Host*" required></v-text-field>-->
-<!--                                </v-col>-->
                                     <v-col cols="12" sm="6">
                                         <v-text-field
                                             disabled ref="drone_name" v-model="drone_name"
@@ -385,9 +374,6 @@
                                             required
                                         ></v-text-field>
                                     </v-col>
-<!--                                <v-col cols="12" sm="6">-->
-<!--                                    <v-text-field ref="gcs_name" v-model="gcs_name" :rules="gcs_name_rule" value="KETI_MUV" label="GCS Name*" hint="Name of Drone GCS" persistent-hint required></v-text-field>-->
-<!--                                </v-col>-->
                                     <v-col cols="12" sm="6">
                                         <v-select
                                             v-model="type_selected"
@@ -454,14 +440,14 @@
                                 text
                                 @click="update_cancel"
                             >
-                                Close
+                                취소
                             </v-btn>
                             <v-btn
                                 color="blue darken-1"
                                 text
                                 @click="update_submit"
                             >
-                                Update
+                                업데이트
                             </v-btn>
                         </v-card-actions>
                     </v-card>

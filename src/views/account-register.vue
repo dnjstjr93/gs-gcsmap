@@ -17,6 +17,7 @@
                                 v-model="formData.email"
                                 :rules="emailRules"
                                 label="E-mail 입력"
+                                :readonly="!isFocused" @focus="isFocused = true" @blur="isFocused = false"
                                 required
                             ></v-text-field>
 
@@ -34,6 +35,7 @@
                                 :rules="[rules.required, rules.min]"
                                 :type="show ? 'text' : 'password'"
                                 label="비밀번호 입력"
+                                :readonly="!isFocused" @focus="isFocused = true" @blur="isFocused = false"
                                 hint="최소 8자 이상 입력해주세요."
                                 counter
                                 @click:append="show = !show"
@@ -102,6 +104,7 @@ export default {
     data: () => ({
         formData: new RegisterObj("", "", ""),
         valid: false,
+        isFocused:false,
         nameRules: [
             (v) => !!v || "닉네임을 입력해주세요.",
             (v) => (v && v.length <= 10) || "닉네임은 10자 미만이어야 합니다."

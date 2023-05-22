@@ -18,6 +18,7 @@
                                 :rules="emailRules"
                                 label="E-mail 입력"
                                 required
+                                :readonly="!isFocused" @focus="isFocused = true" @blur="isFocused = false"
                             ></v-text-field>
 
                             <v-text-field
@@ -28,12 +29,13 @@
                                 label="비밀번호 입력"
                                 hint="최소 8자 이상 입력해주세요."
                                 counter
+                                :readonly="!isFocused" @focus="isFocused = true" @blur="isFocused = false"
                                 v-on:keyup.enter="login(formData)"
                                 @click:append="show = !show"
                             ></v-text-field>
 
                             <div class="mt-3 d-flex flex-row-reverse">
-                                <v-btn color="error" class="mr-4" @click="reset"> 리셋 </v-btn>
+                                <v-btn color="error" class="mr-4" @click="reset"> 초기화 </v-btn>
                                 <v-btn
                                     color="primary"
                                     class="mr-4"
@@ -87,6 +89,7 @@ export default {
         valid: false,
         isError: false,
         errorMsg: "",
+        isFocused: false,
         emailRules: [
             (v) => !!v || "E-mail is required",
             (v) => /.+@.+\..+/.test(v) || "E-mail must be valid"
