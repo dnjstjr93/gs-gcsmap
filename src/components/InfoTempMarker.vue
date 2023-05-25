@@ -50,7 +50,7 @@
                                   v-model="targetSelectIndex"
                                   :items="targetIndexList"
                                   color="black"
-                                  label="Index"
+                                  label="번호"
                                   required outlined dense hide-details
                                   :disabled="disableTargetSelectIndex"
                         >
@@ -58,7 +58,7 @@
                     </v-col>
                     <v-col cols="1">
                         <v-text-field
-                            label="stayTime"
+                            label="대기시간"
                             v-model="targetStayTime"
                             class="mt-0 pt-0"
                             hide-details outlined dense
@@ -72,7 +72,7 @@
                             class="px-1"
                             v-model.number="targetLat"
                             color="purple darken-2"
-                            label="Latitude"
+                            label="위도 (Latitude)"
                             min="-90" max="90"
                             hint="-90~90"
                             readonly filled dense hide-details outlined
@@ -83,7 +83,7 @@
                             class="px-1"
                             v-model.number="targetLng"
                             color="blue darken-2"
-                            label="Longitude"
+                            label="경도 (Longitude)"
                             min="-180" max="180"
                             hint="-180~180"
                             readonly filled dense hide-details outlined
@@ -94,7 +94,7 @@
                             class="px-1"
                             v-model.number="elevation"
                             color="blue darken-2"
-                            label="Elevation"
+                            label="지형고도(m)"
                             readonly filled dense hide-details outlined
                         ></v-text-field>
                     </v-col>
@@ -231,16 +231,21 @@
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn text color="primary" type="submit" outlined :disabled="conditions">
-                    Register
+                    등록
                 </v-btn>
                 <v-spacer></v-spacer>
                 <v-btn text @click="resetForm('cancel')" outlined>
-                    Cancel
+                    취소
                 </v-btn>
                 <v-spacer></v-spacer>
-                <v-btn text color="warning" fab dark @click="deleteTempMarker" outlined>
-                    <v-icon>$delete</v-icon>
-                </v-btn>
+                <v-tooltip right>
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn text color="warning" fab dark @click="deleteTempMarker" outlined v-bind="attrs" v-on="on">
+                            <v-icon>$delete</v-icon>
+                        </v-btn>
+                    </template>
+                    <span>패턴 삭제</span>
+                </v-tooltip>
                 <v-spacer></v-spacer>
             </v-card-actions>
         </v-form>

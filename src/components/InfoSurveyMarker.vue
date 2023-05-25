@@ -46,12 +46,12 @@
                             @change="changeWayOfSurvey($event)"
                         >
                             <v-radio
-                                label="촬영용 Survey"
+                                label="촬영용 패턴"
                                 value="forShooting"
                                 color="red"
                             ></v-radio>
                             <v-radio
-                                label="수색용 Survey"
+                                label="수색용 패턴"
                                 value="forSearch"
                                 color="primary"
                             ></v-radio>
@@ -221,7 +221,7 @@
                                 </v-col>
                                 <v-col cols="1">
                                     <v-select
-                                        label="direction"
+                                        label="방향"
                                         class="py-3 pr-2"
                                         :items="['cw', 'ccw']"
                                         v-model="paramDir"
@@ -233,7 +233,7 @@
                                 </v-col>
                                 <v-col cols="1">
                                     <v-text-field
-                                        label="angle(°)"
+                                        label="각도(°)"
                                         v-model="paramAngle"
                                         class="mt-0 pt-0"
                                         type="number"
@@ -246,7 +246,7 @@
                                 </v-col>
                                 <v-col cols="1">
                                     <v-text-field
-                                        label="gap(m)"
+                                        label="간격(m)"
                                         v-model="paramGap"
                                         class="mt-0 pt-0"
                                         type="number"
@@ -306,7 +306,7 @@
                                 </v-col>
                                 <v-col cols="1">
                                     <v-select
-                                        label="direction"
+                                        label="방향"
                                         class="py-3 pr-2"
                                         :items="['cw', 'ccw']"
                                         v-model="paramDir"
@@ -318,7 +318,7 @@
                                 </v-col>
                                 <v-col cols="1">
                                     <v-text-field
-                                        label="angle(°)"
+                                        label="각도(°)"
                                         v-model="paramAngle"
                                         class="mt-0 pt-0"
                                         type="number"
@@ -331,7 +331,7 @@
                                 </v-col>
                                 <v-col cols="1">
                                     <v-text-field
-                                        label="gap(m)"
+                                        label="간격(m)"
                                         v-model="paramGap"
                                         class="mt-0 pt-0"
                                         type="number"
@@ -357,16 +357,21 @@
             <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn text color="primary" type="submit" outlined :disabled="conditions">
-                    Register
+                    등록
                 </v-btn>
                 <v-spacer></v-spacer>
                 <v-btn text @click="resetForm" outlined>
-                    Close
+                    취소
                 </v-btn>
                 <v-spacer></v-spacer>
-                <v-btn text color="warning" fab dark @click="deleteMarker" outlined>
-                    <v-icon>$delete</v-icon>
-                </v-btn>
+                <v-tooltip top>
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn text color="warning" fab dark @click="deleteMarker" outlined v-bind="attrs" v-on="on">
+                            <v-icon>$delete</v-icon>
+                        </v-btn>
+                    </template>
+                    <span>패턴 삭제</span>
+                </v-tooltip>
                 <v-spacer></v-spacer>
             </v-card-actions>
         </v-form>

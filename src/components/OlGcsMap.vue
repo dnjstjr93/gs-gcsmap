@@ -183,8 +183,8 @@ const colorMapAlt = {
 };
 
 import pinIcon from '../assets/pin_drop.png';
-import centerIcon from '../assets/center.png';
-import listIcon from '../assets/view_list.png';
+// import centerIcon from '../assets/center.png';
+// import listIcon from '../assets/view_list.png';
 import surveyIcon from '../assets/grid.png';
 import InfoSurveyMarker from "./InfoSurveyMarker";
 
@@ -3912,43 +3912,43 @@ export default {
         });
 
         // Control
-        var ctrl = new Zoom({ });
+        var ctrl =  new Zoom({ });
         this.olMap.addControl(ctrl);
         this.olMap.addControl(new ScaleLine());
 
         const contextmenuItems = [
+            // {
+            //     text: 'Center map here',
+            //     classname: 'bold',
+            //     icon: centerIcon,
+            //     callback: (obj) => {
+            //         console.log('Center map here', obj);
+            //     },
+            // },
+            // {
+            //     text: 'Some Actions',
+            //     icon: listIcon,
+            //     items: [
+            //         {
+            //             text: 'Center map here',
+            //             icon: centerIcon,
+            //             callback: (obj) => {
+            //                 console.log('Center map here', obj);
+            //             },
+            //         },
+            //         {
+            //             text: '웨이포인트 추가',
+            //             icon: pinIcon,
+            //             callback: (obj) => {
+            //                 console.log('Add a Marker', obj);
+            //
+            //                 this.addOlTempMarker(obj);
+            //             },
+            //         }
+            //     ]
+            // },
             {
-                text: 'Center map here',
-                classname: 'bold',
-                icon: centerIcon,
-                callback: (obj) => {
-                    console.log('Center map here', obj);
-                },
-            },
-            {
-                text: 'Some Actions',
-                icon: listIcon,
-                items: [
-                    {
-                        text: 'Center map here',
-                        icon: centerIcon,
-                        callback: (obj) => {
-                            console.log('Center map here', obj);
-                        },
-                    },
-                    {
-                        text: 'Add a Marker',
-                        icon: pinIcon,
-                        callback: (obj) => {
-                            console.log('Add a Marker', obj);
-
-                            this.addOlTempMarker(obj);
-                        },
-                    }
-                ]
-            },
-            {
-                text: 'Add a Marker',
+                text: '웨이포인트 추가',
                 icon: pinIcon,
                 callback: (obj) => {
                     console.log('Add a Marker', obj);
@@ -3957,7 +3957,7 @@ export default {
                 },
             },
             {
-                text: 'Add a Survey',
+                text: '패턴 추가',
                 icon: surveyIcon,
                 callback: (obj) => {
                     console.log('Add a Survey', obj);
@@ -3965,17 +3965,17 @@ export default {
                     this.addOlSurveyMarker(obj);
                 },
             },
-            '-' // this is a separator
+            // '-' // this is a separator
         ];
 
         var contextmenu = new ContextMenu({
-            width: 180,
+            width: 150,
             items: contextmenuItems
         });
         this.olMap.addControl(contextmenu);
 
         var removeMarkerItem = {
-            text: 'Remove this Marker',
+            text: '웨이포인트 삭제',
             classname: 'marker',
             callback: (obj) => {
                 console.log('Remove this Marker', obj);
@@ -4012,7 +4012,7 @@ export default {
             else {
                 contextmenu.clear();
                 contextmenu.extend(contextmenuItems);
-                contextmenu.extend(contextmenu.getDefaultItems());
+                // contextmenu.extend(contextmenu.getDefaultItems());
             }
         });
 
