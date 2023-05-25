@@ -113,7 +113,7 @@
                     </v-col>
                     <v-spacer/>
                 </v-row>
-                <v-row v-if="wayOfSurvey==='forShooting'" align="center" justify="center">
+                <v-row v-if="wayOfSurvey==='forShooting'" align="center" justify="center" class="mx-2">
                     <v-col cols="12">
                         <v-card flat tile>
                             <v-row align="center" justify="center">

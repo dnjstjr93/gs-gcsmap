@@ -1,5 +1,5 @@
 <template>
-    <div ref="map-root" style="width: 100%; height: 100%">
+    <div ref="map-root" class="mt-3" style="width: 100%; height: 100%">
         <v-card flat tile class="info_markers" v-if="curInfoTempMarkerFlag">
             <InfoTempMarker v-model="curInfoTempMarkerFlag"
                             :marker-name="curNameMarker"
