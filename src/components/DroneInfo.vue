@@ -6347,8 +6347,8 @@ export default {
             await sleep(parseInt(10+Math.random()*10));
 
             if (this.curArmStatus === 'DISARMED') {
-                this.$store.state.drone_infos[name].targetTakeoffAlt = auto_goto_positions[1].split(':')[2];
-                this.$store.state.drone_infos[name].takeoffDelay = 7;
+                this.$store.state.drone_infos[this.name].targetTakeoffAlt = auto_goto_positions[1].split(':')[2];
+                this.$store.state.drone_infos[this.name].takeoffDelay = 7;
 
                 let payload = {};
                 payload.targetTakeoffAlt = auto_goto_positions[1].split(':')[2];
