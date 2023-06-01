@@ -1,13 +1,13 @@
 <template>
-    <div ref="map-root" class="mt-3" style="width: 100%; height: 100%">
-        <v-card flat tile class="info_markers" v-if="curInfoTempMarkerFlag">
+    <div ref="map-root" style="width: 100%; height: 100%">
+        <v-card flat tile class="info_markers mt-3" v-if="curInfoTempMarkerFlag">
             <InfoTempMarker v-model="curInfoTempMarkerFlag"
                             :marker-name="curNameMarker"
                             :marker-index="curIndexMarker"
                             :marker="curSelectedMarker"
             ></InfoTempMarker>
         </v-card>
-        <v-card flat tile class="info_markers" v-if="curInfoSurveyMarkerFlag">
+        <v-card flat tile class="info_markers mt-3" v-if="curInfoSurveyMarkerFlag">
             <InfoSurveyMarker v-model="curInfoSurveyMarkerFlag"
                             :marker-name="curNameMarker"
                             :marker-index="curIndexMarker"
