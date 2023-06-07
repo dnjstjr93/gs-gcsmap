@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 // import store from "@/store"
 import accountLogin from "@/views/account-login";
 import accountRegister from "@/views/account-register";
+import accountAdministrator from "@/views/account-administrator";
 
 Vue.use(VueRouter)
 
@@ -108,6 +109,13 @@ const routes = [
         beforeEnter: onlyAuthUser,
         component: Home
     },
+    {
+        path: '/admin',
+        name: 'administrator',
+        beforeEnter: rejectAuthUser,
+        component: accountAdministrator
+    }
+
 ]
 
 const router = new VueRouter({

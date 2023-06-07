@@ -297,6 +297,11 @@ export default new Vuex.Store({
         userInfo: null,
         isLogin: false,
 
+        admin: {
+            email: "admin@keti.re.kr",
+            password: "Ketis123@"
+        },
+
         SAMPLES: 96,
         viewAlt: true,
         drone_command_prepared: false,

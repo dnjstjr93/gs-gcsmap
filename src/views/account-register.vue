@@ -7,9 +7,9 @@
                 </v-alert>
                 <v-card>
                     <v-toolbar flat color="indigo">
-                        <v-toolbar-title
-                        ><span class="white--text">회원가입</span></v-toolbar-title
-                        >
+                        <v-toolbar-title>
+                            <span class="white--text">회원가입</span>
+                        </v-toolbar-title>
                     </v-toolbar>
                     <div class="pa-5">
                         <v-form ref="form" v-model="valid" lazy-validation>
@@ -32,11 +32,11 @@
                             <v-text-field
                                 v-model="formData.password"
                                 :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-                                :rules="[rules.required, rules.min]"
+                                :rules="rules"
                                 :type="show ? 'text' : 'password'"
                                 label="비밀번호 입력"
                                 :readonly="!isFocused" @focus="isFocused = true" @blur="isFocused = false"
-                                hint="최소 8자 이상 입력해주세요."
+                                hint="최소 8자 이상, 대/소문자, 숫자, 특수문자를 포함하여 입력해주세요."
                                 counter
                                 @click:append="show = !show"
                             ></v-text-field>
@@ -44,10 +44,10 @@
                             <v-text-field
                                 v-model="chkPassword"
                                 :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-                                :rules="[rules.required, rules.min]"
+                                :rules="rules"
                                 :type="show ? 'text' : 'password'"
                                 label="비밀번호 재입력"
-                                hint="최소 8자 이상 입력해주세요."
+                                hint="최소 8자 이상, 대/소문자, 숫자, 특수문자를 포함하여 입력해주세요."
                                 counter
                                 @click:append="show = !show"
                             ></v-text-field>
@@ -117,10 +117,11 @@ export default {
         ],
         show: false,
         chkPassword: "",
-        rules: {
-            required: (value) => !!value || "패스워드를 입력해주세요.",
-            min: (v) => (v === null) || v.length >= 8 || "최소 8자 이상 입력해주세요."
-        }
+        rules: [
+            (v) => (!!v) || "패스워드를 입력해주세요.",
+            (v) => (v && v.length >= 8) || "최소 8자 이상 입력해주세요.",
+            (v) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(v) || "패스워드는 대문자, 소문자, 숫자, 특수문자를 포함해야 합니다."
+        ],
     }),
     methods: {
         goToMain() {

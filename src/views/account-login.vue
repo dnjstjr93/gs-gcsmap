@@ -7,9 +7,9 @@
                 </v-alert>
                 <v-card>
                     <v-toolbar flat color="indigo">
-                        <v-toolbar-title
-                        ><span class="white--text">로그인</span></v-toolbar-title
-                        >
+                        <v-toolbar-title>
+                            <span class="white--text">로그인</span>
+                        </v-toolbar-title>
                     </v-toolbar>
                     <div class="pa-5">
                         <v-form ref="form" v-model="valid" lazy-validation>
@@ -24,17 +24,17 @@
                             <v-text-field
                                 v-model="formData.password"
                                 :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
-                                :rules="[rules.required, rules.min]"
+                                :rules="rules"
                                 :type="show ? 'text' : 'password'"
                                 label="비밀번호 입력"
-                                hint="최소 8자 이상 입력해주세요."
+                                hint="최소 8자 이상, 대/소문자, 숫자, 특수문자를 포함하여 입력해주세요."
                                 counter
                                 v-on:keyup.enter="login(formData)"
                                 @click:append="show = !show"
                             ></v-text-field>
 
                             <div class="mt-3 d-flex flex-row-reverse">
-                                <v-btn color="error" class="mr-4" @click="reset"> 초기화</v-btn>
+                                <v-btn color="error" class="mr-1" @click="reset"> 초기화</v-btn>
                                 <v-btn
                                     color="primary"
                                     class="mr-4"
@@ -52,6 +52,14 @@
                                     @click="login(formData)"
                                 >
                                     로그인
+                                </v-btn>
+
+                                <v-btn
+                                    color="blue-grey"
+                                    class="mr-16"
+                                    @click="admin(formData)"
+                                >
+                                    관리자
                                 </v-btn>
                             </div>
                         </v-form>
@@ -94,10 +102,11 @@ export default {
             (v) => /.+@.+\..+/.test(v) || "유효한 E-mail 형식이 아닙니다."
         ],
         show: false,
-        rules: {
-            required: (value) => !!value || "패스워드를 입력해주세요.",
-            min: (v) => (v === null) || v.length >= 8 || "최소 8자 이상 입력해주세요."
-        }
+        rules: [
+            (v) => (!!v) || "패스워드를 입력해주세요.",
+            (v) => (v && v.length >= 8) || "최소 8자 이상 입력해주세요.",
+            (v) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(v) || "패스워드는 대문자, 소문자, 숫자, 특수문자를 포함해야 합니다."
+        ],
     }),
     methods: {
         login(LoginObj) {
@@ -150,21 +159,31 @@ export default {
                     }
                 }
             );
-            //
-            // axios
-            //     .post("http://signin", LoginObj)
-            //     .then((res) => {
-            //         let token = res.data.token
-            //         localStorage.setItem("access_token", token)
-            //         this.$store.dispatch("getAccountInfo")
-            //         this.$router.push({ name: "Home" })
-            //     })
-            //     .catch((err) => {
-            //         if (err.response) {
-            //             this.isError = true
-            //             this.errorMsg = err.response.data.message
-            //         }
-            //     })
+        },
+        admin(LoginObj) {
+            if (!this.formData.email || !this.formData.password) {
+                this.isError = true;
+                this.errorMsg = "관리자 계정을 입력해주세요.";
+                return;
+            }
+
+            if (LoginObj.email === this.$store.state.admin.email) {
+                console.log('success email validation')
+                if (LoginObj.password === this.$store.state.admin.password) {
+                    console.log('success password validation')
+                    this.$store.state.isLogin = true;
+                    this.$store.state.userInfo = LoginObj;
+                    this.$router.push({name: "administrator"});
+                } else {
+                    this.isError = true;
+                    this.errorMsg = "관리자 이메일이 정확하지 않습니다.";
+                    return;
+                }
+            } else {
+                this.isError = true;
+                this.errorMsg = "관리자 이메일이 정확하지 않습니다.";
+                return;
+            }
         },
         validate() {
             this.$refs.form.validate()
