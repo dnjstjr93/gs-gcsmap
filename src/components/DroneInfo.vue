@@ -398,7 +398,7 @@
                                     <v-row no-gutters align="center" justify="center">
                                         <v-col cols="5">
                                             <v-text-field
-                                                label="heading(°)"
+                                                label="현재 방향(°)"
                                                 :value="heading.toFixed(1)"
                                                 class="ma-0 pa-0"
                                                 outlined dense hide-details readonly filled
@@ -413,7 +413,7 @@
                                         <v-spacer/>
                                         <v-col cols="5">
                                             <v-text-field
-                                                label="yawAngle(°)"
+                                                label="회전방향(°)"
                                                 v-model="yawAngle"
                                                 class="ma-0 pa-0"
                                                 type="number"
