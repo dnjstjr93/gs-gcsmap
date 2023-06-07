@@ -432,14 +432,14 @@
                                                     text outlined
                                                     @click="rotateYawAngle"
                                                 >
-                                                    OK
+                                                    확인
                                                 </v-btn>
                                                 <v-btn
                                                     color="red darken-1"
                                                     text outlined
                                                     @click="yawAngleDialog = false"
                                                 >
-                                                    Cancel
+                                                  취소
                                                 </v-btn>
                                             </v-card-actions>
                                         </v-col>
