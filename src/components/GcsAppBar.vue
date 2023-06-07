@@ -497,44 +497,44 @@ export default {
             errorMessages: [],
             drone_host: null,
             // drone_host_rule: [
-            //     v => !!v || '드론 호스트는 필수 입력사항입니다.',
-            //     v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.'
+            //     v => !!v || '무인이동체 호스트는 필수 입력사항입니다.',
+            //     v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '무인이동체 이름에는 특수문자를 사용할 수 없습니다.'
             // ],
             // drone_host_update_rule: [
-            //     v => !!v || '드론 호스트은 필수 입력사항입니다.',
-            //     v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.'
+            //     v => !!v || '무인이동체 호스트은 필수 입력사항입니다.',
+            //     v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '무인이동체 이름에는 특수문자를 사용할 수 없습니다.'
             // ],
             drone_name: null,
             drone_name_rule: [
-                v => !!v || '드론 이름은 필수 입력사항입니다.',
-                v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.',
+                v => !!v || '무인이동체 이름은 필수 입력사항입니다.',
+                v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '무인이동체 이름에는 특수문자를 사용할 수 없습니다.',
                 v => (this.drone_infos_list.findIndex((element) => {
                     return (element.name === v)
-                }) === -1) || '드론 이름이 이미 존재합니다.'
+                }) === -1) || '무인이동체 이름이 이미 존재합니다.'
             ],
             init_drone_name: null,
             drone_name_update_rule: [
-                v => !!v || '드론 이름은 필수 입력사항입니다.',
-                v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '드론 이름에는 특수문자를 사용할 수 없습니다.',
+                v => !!v || '무인이동체 이름은 필수 입력사항입니다.',
+                v => !/[~!@#$%^&*()+|<>?:{}]/.test(v) || '무인이동체 이름에는 특수문자를 사용할 수 없습니다.',
                 v => (this.drone_infos_list.findIndex((element) => {
                     return ((element.name === v) && (this.init_drone_name !== v))
-                }) === -1) || '드론 이름이 이미 존재합니다.'
+                }) === -1) || '무인이동체 이름이 이미 존재합니다.'
             ],
             drone_id: null,
             drone_id_rule: [
-                v => !!v || '드론 아이디는 필수 입력사항입니다.',
-                v => /^[a-zA-Z0-9]*$/.test(v) || '드론 아이디는 영문+숫자만 입력 가능합니다.',
+                v => !!v || '무인이동체 아이디는 필수 입력사항입니다.',
+                v => /^[a-zA-Z0-9]*$/.test(v) || '무인이동체 아이디는 영문+숫자만 입력 가능합니다.',
                 v => (this.drone_infos_list.findIndex((element) => {
                     return (element.id === v)
-                }) === -1) || '드론 아이디가 이미 존재합니다.'
+                }) === -1) || '무인이동체 아이디가 이미 존재합니다.'
             ],
             init_drone_id: null,
             drone_id_update_rule: [
-                v => !!v || '드론 아이디는 필수 입력사항입니다.',
-                v => /^[a-zA-Z0-9]*$/.test(v) || '드론 아이디는 영문+숫자만 입력 가능합니다.',
+                v => !!v || '무인이동체 아이디는 필수 입력사항입니다.',
+                v => /^[a-zA-Z0-9]*$/.test(v) || '무인이동체 아이디는 영문+숫자만 입력 가능합니다.',
                 v => (this.drone_infos_list.findIndex((element) => {
                     return ((element.id === v) && (this.init_drone_id !== v))
-                }) === -1) || '드론 이름이 이미 존재합니다.'
+                }) === -1) || '무인이동체 이름이 이미 존재합니다.'
             ],
             bat_cell: null,
             bat_cell_rule: [
@@ -543,10 +543,10 @@ export default {
             ],
             system_id: null,
             system_id_rule: [
-                v => !!v || '드론 시스템 아이디는 필수 입력사항입니다.',
-                v => /^[0-9]*$/.test(v) || '드론 시스템 아이디는 숫자만 입력 가능합니다.',
-                v => !(v > 254) || '드론 시스템 아이디는 254를 넘을 수 없습니다.',
-                v => !(v < 0) || '드론 시스템 아이디는 1 이상의 수만 입력 가능합니다.'
+                v => !!v || '무인이동체 시스템 아이디는 필수 입력사항입니다.',
+                v => /^[0-9]*$/.test(v) || '무인이동체 시스템 아이디는 숫자만 입력 가능합니다.',
+                v => !(v > 254) || '무인이동체 시스템 아이디는 254를 넘을 수 없습니다.',
+                v => !(v < 0) || '무인이동체 시스템 아이디는 1 이상의 수만 입력 가능합니다.'
             ],
             //host: this.$cookies.isKey('mobius_host')?(this.$cookies.get('mobius_host')):(this.$store.state.VUE_APP_MOBIUS_HOST),
             host: localStorage.getItem('mobius_host') ? (localStorage.getItem('mobius_host')) : (this.$store.state.VUE_APP_MOBIUS_HOST),

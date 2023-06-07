@@ -48,7 +48,7 @@
 <!--                                <v-switch-->
 <!--                                    dense hide-details-->
 <!--                                    v-model="distanceMonitor"-->
-<!--                                    label="드론근접감시"-->
+<!--                                    label="무인이동체근접감시"-->
 <!--                                    color="warning"-->
 <!--                                    class="ma-0 pa-0 pl-1 py-1"-->
 <!--                                ></v-switch>-->
@@ -134,7 +134,7 @@
 <!--                                    <v-switch-->
 <!--                                        dense hide-details-->
 <!--                                        v-model="distanceMonitor"-->
-<!--                                        label="드론근접감시"-->
+<!--                                        label="무인이동체근접감시"-->
 <!--                                        color="warning"-->
 <!--                                        class="ma-0 pa-0 pl-1 py-1"-->
 <!--                                    ></v-switch>-->

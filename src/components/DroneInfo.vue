@@ -108,7 +108,7 @@
                                             </v-icon>
                                         </v-btn>
                                     </template>
-                                    <span>드론 정보 관리</span>
+                                    <span>무인이동체 정보 관리</span>
                                 </v-tooltip>
 
                                 <v-dialog
@@ -6702,7 +6702,7 @@ export default {
 
         EventBus.$on('command-set-takeoff-' + this.name, async (payload) => {
             if(this.curArmStatus === 'ARMED' && parseFloat((this.gpi.alt / 1000).toFixed(1)) > 1) {
-                console.log("비행체가 이륙된 상태 입니다.");
+                console.log("무인이동체가 이륙된 상태 입니다.");
             }
             else {
                 await sleep(parseInt(1+Math.random()*4));

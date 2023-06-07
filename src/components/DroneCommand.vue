@@ -922,67 +922,67 @@
                         </div>
                     </div>
                     <span v-if="curTab === '모드'">
-                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">모드 변경</span> 명령 전송.
+                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">모드 변경</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '시동'">
-                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">시동</span> 명령 전송.
+                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">시동</span> 명령 전송.
                     </span>
                     <div v-else-if="curTab === '이륙'">
                         <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                             <span v-if="drone.selected && drone.targeted">
-                                {{i}} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{  drone.targetTakeoffAlt }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">이륙</span> 명령 전송.
+                                {{i}} 무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">{{  drone.targetTakeoffAlt }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">이륙</span> 명령 전송.
                             </span>
                         </div>
                     </div>
                     <div v-else-if="curTab === '고도'">
                         <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                              <span v-if="drone.selected && drone.targeted">
-                                 {{i}} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ drone.targetAlt }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">고도 변경</span> 명령 전송.
+                                 {{i}} 무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ drone.targetAlt }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">고도 변경</span> 명령 전송.
                              </span>
                         </div>
                     </div>
                     <span v-else-if="curTab === '이동'">
-                        비행체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">이동</span> 명령 전송.
+                        무인이동체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">이동</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '선회'">
-                        비행체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">선회</span> 명령 전송.
+                        무인이동체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">선회</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '속도'">
                         <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                             <span v-if="drone.selected && drone.targeted">
-                                {{i}} 비행체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ drone.targetSpeed }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">속도 변경</span> 명령 전송.
+                                {{i}} 무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ drone.targetSpeed }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">속도 변경</span> 명령 전송.
                             </span>
                         </div>
                     </span>
                     <span v-else-if="curTab === '관심'">
-                        비행체에 지정된 위치로 <span class="ml-2 mr-2" style="font-size: 20px">관심 설정</span> 명령 전송.
+                        무인이동체에 지정된 위치로 <span class="ml-2 mr-2" style="font-size: 20px">관심 설정</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '정지'">
-                        비행체를 현재 위치에 <span class="ml-2 mr-2" style="font-size: 20px">정지</span> 명령 전송.
+                        무인이동체를 현재 위치에 <span class="ml-2 mr-2" style="font-size: 20px">정지</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '착륙'">
-                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">착륙</span> 명령 전송.
+                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">착륙</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '귀환'">
-                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">귀환</span> 명령 전송.
+                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">귀환</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '제어'">
-                        비행체에 각 채널로 <span class="ml-2 mr-2" style="font-size: 20px">PWM 제어</span> 명령 전송.
+                        무인이동체에 각 채널로 <span class="ml-2 mr-2" style="font-size: 20px">PWM 제어</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '자동'">
-                        비행체에 비행경로 다운로드 후 <span class="ml-2 mr-2" style="font-size: 20px">자동 비행</span> 명령 전송.
+                        무인이동체에 비행경로 다운로드 후 <span class="ml-2 mr-2" style="font-size: 20px">자동 비행</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '종료'">
-                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">시동 끄기</span> 명령 전송.
+                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">시동 끄기</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === 'WP_YAW'">
-                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
+                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === 'SLEW_YAW'">
-                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
+                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '설정'">
-                        비행체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
+                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">파라미터 설정</span> 명령 전송.
                     </span>
                 </div>
             </v-sheet>

@@ -11,6 +11,23 @@
                         <v-toolbar-title>
                             <span class="white--text">관리자 페이지</span>
                         </v-toolbar-title>
+                        <v-row justify="end">
+                            <v-btn
+                                class="ma-2 mr-4"
+                                color="orange darken-2"
+                                dark
+                                link
+                                router
+                                :to="{ name: 'login' }"
+                            >
+                                <v-icon
+                                    dark
+                                    left
+                                >
+                                    mdi-arrow-left
+                                </v-icon>Back
+                            </v-btn>
+                        </v-row>
                     </v-toolbar>
                     <div class="pa-5">
                         <v-data-table
