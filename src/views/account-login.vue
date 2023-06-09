@@ -56,7 +56,7 @@
 
                                 <v-btn
                                     color="blue-grey"
-                                    class="mr-16"
+                                    class="mr-10"
                                     @click="admin(formData)"
                                 >
                                     관리자
