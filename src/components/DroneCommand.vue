@@ -70,7 +70,7 @@
                                         <span v-else-if="command.title === '정지'">정지확인</span>
                                         <span v-else-if="command.title === '착륙'">착륙확인</span>
                                         <span v-else-if="command.title === '귀환'">귀환확인</span>
-                                        <span v-else-if="command.title === '제어'">제어확인</span>
+                                        <span v-else-if="command.title === '제어'" @click="preperPwmValue">제어확인</span>
                                         <span v-else-if="command.title === '자동'">자동확인</span>
                                         <span v-else-if="command.title === '종료'">종료확인</span>
                                         <span v-else-if="command.title === '설정'">설정확인</span>
@@ -294,7 +294,7 @@
                                                             <v-spacer/>
                                                             <v-col cols="2" class="pa-1 pt-2">
                                                                 <v-text-field
-                                                                    label="Sortie Name"
+                                                                    label="패턴 임무 이름"
                                                                     class="text-right pa-1"
                                                                     outlined dense hide-details
                                                                     v-model="d.curTargetedSurveyMarkerSortie"
@@ -455,20 +455,20 @@
                                                                     <v-spacer></v-spacer>
                                                                     <v-switch
                                                                         v-model="flyMarketAlt"
-                                                                        :label="`마커고도: ${flyMarketAlt.toString()}`"
+                                                                        :label="`웨이포인트 고도: ${flyMarketAlt.toString()}`"
                                                                     ></v-switch>
                                                                     <v-spacer></v-spacer>
                                                                     <v-switch
                                                                         v-show="d.curArmStatus==='DISARMED'"
                                                                         v-model="takeoffInAuto"
-                                                                        :label="`takeoffInAuto: ${takeoffInAuto.toString()}`"
+                                                                        :label="`이륙 포함: ${takeoffInAuto.toString()}`"
                                                                     ></v-switch>
                                                                 </v-subheader>
                                                             </v-col>
                                                             <v-col cols="2" v-if="Object.prototype.hasOwnProperty.call($store.state.tempMarkers, d.name)">
                                                                 <v-select
                                                                     dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
-                                                                    label="Start Index" v-model="d.autoStartIndex"
+                                                                    label="시작 Index" v-model="d.autoStartIndex"
                                                                     class="pa-1"
                                                                     hide-details
                                                                 ></v-select>
@@ -476,7 +476,7 @@
                                                             <v-col cols="2" v-if="Object.prototype.hasOwnProperty.call($store.state.tempMarkers, d.name)">
                                                                 <v-select
                                                                     dense outlined :items="Object.keys($store.state.tempMarkers[d.name])"
-                                                                    label="End Index" v-model="d.autoEndIndex"
+                                                                    label="끝 Index" v-model="d.autoEndIndex"
                                                                     hide-details
                                                                     class="pa-1"
                                                                 ></v-select>
@@ -624,7 +624,7 @@
                                                             </v-col>
                                                             <v-col cols="2">
                                                                 <v-text-field
-                                                                    label="WPNAV_SPEED(m/s/s), 0.2-20, 0.1"
+                                                                    label="WPNAV_SPEED(m/s), 0.2-20, 0.1"
                                                                     class="pa-1"
                                                                     outlined dense hide-details
                                                                     v-model="$store.state.params.wpnavSpeed[d.name]"
@@ -633,7 +633,7 @@
                                                                     min="0.2"
                                                                     max="20"
                                                                     setp="0.1"
-                                                                    hint="Range:0.5~5.0, Increment:0.1"
+                                                                    hint="Range:0.2~20.0, Increment:0.1"
                                                                 ></v-text-field>
                                                             </v-col>
                                                         </v-row>
@@ -916,13 +916,17 @@
                 <div class="my-3" >
                     <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                         <div v-if="drone.selected && drone.targeted">
-                            <span  class="mr-2">
-                                [ {{drone.name}} ]
-                            </span>
+                                <span class="mr-2">
+                                    [ {{ drone.name }} ]
+                                </span>
                         </div>
                     </div>
                     <span v-if="curTab === '모드'">
-                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">모드 변경</span> 명령 전송.
+                        <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
+                            <span v-if="drone.selected && drone.targeted">
+                                {{i}} 무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">{{  drone.targetModeSelection }}</span>로 <span class="ml-2 mr-2" style="font-size: 20px">모드 변경</span> 명령 전송.
+                            </span>
+                        </div>
                     </span>
                     <span v-else-if="curTab === '시동'">
                         무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">시동</span> 명령 전송.
@@ -941,8 +945,16 @@
                              </span>
                         </div>
                     </div>
+                    <div v-else-if="curTab === '패턴'">
+                        무인이동체에 선택한 패턴경로로 <span class="ml-2 mr-2" style="font-size: 20px">패턴</span> 명령 전송.
+                    </div>
                     <span v-else-if="curTab === '이동'">
-                        무인이동체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">이동</span> 명령 전송.
+                        <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
+                             <span v-if="drone.selected && drone.targeted">
+                                 {{i}} 무인이동체에 웨이포인트<span class="ml-2 mr-2" style="font-size: 20px">{{ drone.curTargetedTempMarkerIndex }} ({{drone.targetAlt}} m, {{drone.targetSpeed}} m/s)</span>로 <span class="ml-2 mr-2" style="font-size: 20px">이동</span> 명령 전송.
+                             </span>
+                        </div>
+<!--                        무인이동체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">이동</span> 명령 전송.-->
                     </span>
                     <span v-else-if="curTab === '선회'">
                         무인이동체에 선택한 지점으로 <span class="ml-2 mr-2" style="font-size: 20px">선회</span> 명령 전송.
@@ -950,7 +962,7 @@
                     <span v-else-if="curTab === '속도'">
                         <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                             <span v-if="drone.selected && drone.targeted">
-                                {{i}} 무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ drone.targetSpeed }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">속도 변경</span> 명령 전송.
+                                {{i}} 무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ drone.targetSpeed }}</span>m/s로 <span class="ml-2 mr-2" style="font-size: 20px">속도 변경</span> 명령 전송.
                             </span>
                         </div>
                     </span>
@@ -961,13 +973,23 @@
                         무인이동체를 현재 위치에 <span class="ml-2 mr-2" style="font-size: 20px">정지</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '착륙'">
-                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">착륙</span> 명령 전송.
+                        무인이동체를 현재 위치에 <span class="ml-2 mr-2" style="font-size: 20px">착륙</span> 명령 전송.
                     </span>
                     <span v-else-if="curTab === '귀환'">
-                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">귀환</span> 명령 전송.
+                        <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
+                            <span v-if="drone.selected && drone.targeted">
+                                {{i}} 무인이동체에 고도 <span class="ml-2 mr-2" style="font-size: 20px">{{ $store.state.params.rtlAlt[i] }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">귀환</span> 명령 전송.
+                            </span>
+                        </div>
+<!--                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">귀환</span> 명령 전송.-->
                     </span>
                     <span v-else-if="curTab === '제어'">
-                        무인이동체에 각 채널로 <span class="ml-2 mr-2" style="font-size: 20px">PWM 제어</span> 명령 전송.
+                        <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
+                            <span v-if="drone.selected && drone.targeted">
+                                {{i}} 무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">{{ curPwmChannel[i] }} - {{ curPwmValue[i] }}</span> <span class="ml-2 mr-2" style="font-size: 20px">제어</span> 명령 전송.
+                            </span>
+                        </div>
+<!--                        무인이동체에 각 채널로 <span class="ml-2 mr-2" style="font-size: 20px">PWM 제어</span> 명령 전송.-->
                     </span>
                     <span v-else-if="curTab === '자동'">
                         무인이동체에 비행경로 다운로드 후 <span class="ml-2 mr-2" style="font-size: 20px">자동 비행</span> 명령 전송.
@@ -1895,11 +1917,11 @@ export default {
 
             for(let dName in this.curPwmChannel) {
                 if (Object.prototype.hasOwnProperty.call(this.curPwmChannel, dName)) {
-                    if (this.curPwmValue[dName] < "1100") {
-                        this.curPwmValue[dName] = "1100";
-                    } else if (this.curPwmValue[dName] > "1900") {
-                        this.curPwmValue[dName] = "1900";
-                    }
+                    // if (this.curPwmValue[dName] < "1100") {
+                    //     this.curPwmValue[dName] = "1100";
+                    // } else if (this.curPwmValue[dName] > "1900") {
+                    //     this.curPwmValue[dName] = "1900";
+                    // }
 
                     let payload = {};
                     payload.channel = this.curPwmChannel[dName];
@@ -2313,6 +2335,20 @@ export default {
 
             this.myChart[dName] = new Chart(ctx, config);
         },
+
+        preperPwmValue() {
+            for(let dName in this.curPwmChannel) {
+                if (Object.prototype.hasOwnProperty.call(this.curPwmChannel, dName)) {
+                    if (parseInt(this.curPwmValue[dName]) < 1100) {
+                        this.curPwmValue[dName] = "1100";
+                    } else if (parseInt(this.curPwmValue[dName]) > 1900) {
+                        this.curPwmValue[dName] = "1900";
+                    }
+                }
+            }
+            console.log(this.curPwmChannel)
+            console.log(this.curPwmValue)
+        }
     },
 
     created() {

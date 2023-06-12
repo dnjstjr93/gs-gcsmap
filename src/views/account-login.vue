@@ -10,6 +10,20 @@
                         <v-toolbar-title>
                             <span class="white--text">로그인</span>
                         </v-toolbar-title>
+                        <v-row justify="end">
+                            <v-tooltip bottom>
+                                <template v-slot:activator="{ on, attrs }">
+                                    <v-btn text dark rounded
+                                           @click="ContactUs=!ContactUs"
+                                           v-bind="attrs"
+                                           v-on="on"
+                                    >
+                                        <v-icon>mdi-account-box</v-icon>
+                                    </v-btn>
+                                </template>
+                                <span>문의하기</span>
+                            </v-tooltip>
+                        </v-row>
                     </v-toolbar>
                     <div class="pa-5">
                         <v-form ref="form" v-model="valid" lazy-validation>
@@ -56,6 +70,7 @@
 
                                 <v-btn
                                     color="blue-grey"
+                                    dark
                                     class="mr-10"
                                     @click="admin(formData)"
                                 >
@@ -64,6 +79,59 @@
                             </div>
                         </v-form>
                     </div>
+                    <v-dialog v-model="ContactUs" persistent max-width="450px">
+                        <v-card>
+                            <v-card-title style="background-color: #3F51B5">
+                                <span class="headline white--text">문의하기</span>
+                            </v-card-title>
+                            <v-card-text>
+                                <v-container class="mt-6">
+                                    <v-row>
+                                        <v-col cols="2">
+                                            <v-btn text
+                                                   @click="ContactUs=!ContactUs"
+                                            >
+                                                <v-icon>mdi-email</v-icon>
+                                            </v-btn>
+                                        </v-col>
+                                        <v-col cols="10">
+                                            <v-text-field
+                                                v-model="$store.state.admin.email"
+                                                dense readonly
+                                                label="E-mail"
+                                            ></v-text-field>
+                                        </v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="2">
+                                            <v-btn text
+                                                   @click="ContactUs=!ContactUs"
+                                            >
+                                                <v-icon>mdi-phone</v-icon>
+                                            </v-btn>
+                                        </v-col>
+                                        <v-col cols="10">
+                                            <v-text-field
+                                                v-model="$store.state.admin.tel"
+                                                dense readonly
+                                                label="TEL"
+                                            ></v-text-field>
+                                        </v-col>
+                                    </v-row>
+                                </v-container>
+                            </v-card-text>
+                            <v-card-actions class="mt-n8">
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="ContactUs=false"
+                                >
+                                    닫기
+                                </v-btn>
+                            </v-card-actions>
+                        </v-card>
+                    </v-dialog>
                 </v-card>
             </v-flex>
         </v-layout>
@@ -92,6 +160,7 @@ const setItemWithExpireTime = (keyName, keyValue, tts) => {
 export default {
     name: "account-login",
     data: () => ({
+        ContactUs:false,
         formData: new LoginObj("", ""),
         valid: false,
         isError: false,

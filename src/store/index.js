@@ -299,7 +299,8 @@ export default new Vuex.Store({
 
         admin: {
             email: "admin@keti.re.kr",
-            password: "Ketis123@"
+            password: "Ketis123@",
+            tel: "+82-31-789-1234"
         },
 
         SAMPLES: 96,

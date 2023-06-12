@@ -25,7 +25,7 @@
                                 v-model="formData.name"
                                 :counter="10"
                                 :rules="nameRules"
-                                label="닉네임"
+                                label="이름"
                                 required
                             ></v-text-field>
 
@@ -63,8 +63,9 @@
                             <v-row class="mt-3 d-flex" justify="end">
                                 <v-col cols="4">
                                     <v-btn
-                                        color="success"
+                                        color="orange darken-2"
                                         class="mr-4"
+                                        dark
                                         link
                                         router
                                         :to="{ name: 'login' }"
@@ -78,6 +79,7 @@
                                     <v-btn
                                         :disabled="!valid"
                                         color="blue"
+                                        dark
                                         class="ml-9"
                                         @click="register(formData)"
                                     >
@@ -106,8 +108,8 @@ export default {
         valid: false,
         isFocused:false,
         nameRules: [
-            (v) => !!v || "닉네임을 입력해주세요.",
-            (v) => (v && v.length <= 10) || "닉네임은 10자 미만이어야 합니다."
+            (v) => !!v || "이름을 입력해주세요.",
+            (v) => (v && v.length <= 10) || "이름은 10자 미만이어야 합니다."
         ],
         isError: false,
         errorMsg: "",

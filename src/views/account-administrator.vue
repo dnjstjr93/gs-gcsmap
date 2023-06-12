@@ -1,6 +1,6 @@
 <template>
     <!--    <v-container style="width: 450px">-->
-    <v-container class="mt-4">
+    <v-container class="mt-4" style="width: 450px">
         <v-layout align-center row wrap>
             <v-flex xs12>
                 <v-alert v-if="isError" type="error">
@@ -26,7 +26,7 @@
                                 >
                                     mdi-arrow-left
                                 </v-icon>
-                                Back
+                                뒤로가기
                             </v-btn>
                         </v-row>
                     </v-toolbar>
@@ -43,16 +43,16 @@
                                 'items-per-page-text': '페이지 당 사용자 수',
                             }"
                         >
-                            <template v-slot:item.editEmail="{ item }">
-                                <v-btn dark x-small color="green" @click.stop="editUser(item.email)">
-                                    <v-icon small>$pencil</v-icon>
-                                </v-btn>
-                            </template>
-                            <template v-slot:item.editPW="{ item }">
-                                <v-btn dark x-small color="green" @click.stop="editPassword(item.email)">
-                                    <v-icon small>$pencil</v-icon>
-                                </v-btn>
-                            </template>
+<!--                            <template v-slot:item.editEmail="{ item }">-->
+<!--                                <v-btn dark x-small color="green" @click.stop="editUser(item.email)">-->
+<!--                                    <v-icon small>$pencil</v-icon>-->
+<!--                                </v-btn>-->
+<!--                            </template>-->
+<!--                            <template v-slot:item.editPW="{ item }">-->
+<!--                                <v-btn dark x-small color="green" @click.stop="editPassword(item.email)">-->
+<!--                                    <v-icon small>$pencil</v-icon>-->
+<!--                                </v-btn>-->
+<!--                            </template>-->
                             <template v-slot:item.delete="{ item }">
                                 <v-btn dark x-small color="red" @click.stop="removeUseremail(item.email)">
                                     <v-icon small>$delete</v-icon>
@@ -190,9 +190,9 @@ export default {
         curUsers: [],
         headers: [
             {text: 'E-mail', value: 'email'},
-            {text: 'E-mail 수정', value: 'editEmail'},
-            {text: '비밀번호 수정', value: 'editPW'},
-            {text: '삭제', value: 'delete'}
+            // {text: 'E-mail 수정', value: 'editEmail', align: 'center'},
+            // {text: '비밀번호 수정', value: 'editPW', align: 'center'},
+            {text: '계정 삭제', value: 'delete', align: 'center'}
         ],
         selected: [],
         editUserFlag: false,
@@ -302,40 +302,44 @@ export default {
         },
         removeUseremail(user) {
             console.log('removeUseremail -', user);
-            let cntName = user.replace('@', '_').replace('.', '_');
+            if (confirm('( ' + user + ' ) 계정을 정말로 삭제하시겠습니까?')) {
+                let cntName = user.replace('@', '_').replace('.', '_');
 
-            for (var i = 0; i < this.curUsers.length; i++) {
-                if (this.curUsers[i].email === user) {
-                    this.curUsers.splice(i, 1);
-                    i--;
-                }
-            }
-
-            axios({
-                validateStatus: function (status) {
-                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
-                    return status < 500;
-                },
-                method: 'delete',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + cntName,
-                headers: {
-                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
-                    'X-M2M-Origin': 'SVue',
-                    'Content-Type': 'application/json'
-                },
-            }).then(
-                (res) => {
-                    if (res.status === 200) {
-                        console.log(res);
-                    } else {
-                        console.log('password incorrect');
+                for (var i = 0; i < this.curUsers.length; i++) {
+                    if (this.curUsers[i].email === user) {
+                        this.curUsers.splice(i, 1);
+                        i--;
                     }
                 }
-            ).catch(
-                (err) => {
-                    console.log(err);
-                }
-            );
+
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'delete',
+                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + cntName,
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json'
+                    },
+                }).then(
+                    (res) => {
+                        if (res.status === 200) {
+                            console.log(res);
+                        } else {
+                            console.log('password incorrect');
+                        }
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err);
+                    }
+                );
+            } else {
+                console.log(user + ' 계정 삭제 취소');
+            }
         },
         update_email_submit() {
             if (this.curUserEmail !== this.UserEmail) {
