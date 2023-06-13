@@ -60,20 +60,20 @@
                                     >
                                         <span v-if="command.title === '모드'">모드확인</span>
                                         <span v-else-if="command.title === '시동'">시동확인</span>
-                                        <span v-else-if="command.title === '이륙'">이륙확인</span>
-                                        <span v-else-if="command.title === '고도'">고도확인</span>
-                                        <span v-else-if="command.title === '이동'">이동확인</span>
+                                        <span v-else-if="command.title === '이륙'" @click="prepperTakeoff">이륙확인</span>
+                                        <span v-else-if="command.title === '고도'" @click="prepperGoToAlt">고도확인</span>
+                                        <span v-else-if="command.title === '이동'" @click="prepperGoTo">이동확인</span>
                                         <span v-else-if="command.title === '패턴'">패턴확인</span>
-                                        <span v-else-if="command.title === '선회'">선회확인</span>
-                                        <span v-else-if="command.title === '속도'">속도확인</span>
+                                        <span v-else-if="command.title === '선회'" @click="prepperGoToCircle">선회확인</span>
+                                        <span v-else-if="command.title === '속도'" @click="prepperChangeSpeed">속도확인</span>
                                         <span v-else-if="command.title === '관심'">관심확인</span>
                                         <span v-else-if="command.title === '정지'">정지확인</span>
                                         <span v-else-if="command.title === '착륙'">착륙확인</span>
-                                        <span v-else-if="command.title === '귀환'">귀환확인</span>
-                                        <span v-else-if="command.title === '제어'" @click="preperPwmValue">제어확인</span>
-                                        <span v-else-if="command.title === '자동'">자동확인</span>
+                                        <span v-else-if="command.title === '귀환'" @click="prepperRTL">귀환확인</span>
+                                        <span v-else-if="command.title === '제어'" @click="prepperPwmValue">제어확인</span>
+                                        <span v-else-if="command.title === '자동'" @click="prepperAuto">자동확인</span>
                                         <span v-else-if="command.title === '종료'">종료확인</span>
-                                        <span v-else-if="command.title === '설정'">설정확인</span>
+                                        <span v-else-if="command.title === '설정'" @click="preppersetParams">설정확인</span>
                                         <span v-else-if="command.title === 'WP_YAW'">설정확인</span>
                                         <span v-else-if="command.title === 'SLEW_YAW'">설정확인</span>
                                     </v-btn>
@@ -2337,7 +2337,259 @@ export default {
             this.myChart[dName] = new Chart(ctx, config);
         },
 
-        preperPwmValue() {
+        prepperTakeoff(){
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.state.drone_infos[dName].takeoffDelay = parseInt(this.$store.state.drone_infos[dName].takeoffDelay);
+                        if (this.$store.state.drone_infos[dName].takeoffDelay < 6) {
+                            this.$store.state.drone_infos[dName].takeoffDelay = 6;
+                        } else if (this.$store.state.drone_infos[dName].takeoffDelay > 20) {
+                            this.$store.state.drone_infos[dName].takeoffDelay = 20;
+                        }
+
+                        this.$store.state.drone_infos[dName].targetTakeoffAlt = parseInt(this.$store.state.drone_infos[dName].targetTakeoffAlt);
+                        if (this.$store.state.drone_infos[dName].targetTakeoffAlt < 3) {
+                            this.$store.state.drone_infos[dName].targetTakeoffAlt = 3;
+                        } else if (this.$store.state.drone_infos[dName].targetTakeoffAlt > 150) {
+                            this.$store.state.drone_infos[dName].targetTakeoffAlt = 150;
+                        }
+                    }
+                }
+            }
+        },
+        prepperGoTo() {
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        if (this.$store.state.drone_infos[dName].targetAlt < 3) {
+                            this.$store.state.drone_infos[dName].targetAlt = 3;
+                        }
+                        else if (this.$store.state.drone_infos[dName].targetAlt > 150) {
+                            this.$store.state.drone_infos[dName].targetAlt = 150;
+                        }
+
+                        if (this.$store.state.drone_infos[dName].targetSpeed < 1) {
+                            this.$store.state.drone_infos[dName].targetSpeed = 1;
+                        }
+                        else if (this.$store.state.drone_infos[dName].targetSpeed > 20) {
+                            this.$store.state.drone_infos[dName].targetSpeed = 20;
+                        }
+                    }
+                }
+            }
+        },
+        prepperGoToAlt(){
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        this.$store.state.drone_infos[dName].targetAlt = parseInt(this.$store.state.drone_infos[dName].targetAlt);
+                        if (this.$store.state.drone_infos[dName].targetAlt < 3) {
+                            this.$store.state.drone_infos[dName].targetAlt = 3;
+                        }
+                        else if (this.$store.state.drone_infos[dName].targetAlt > 150) {
+                            this.$store.state.drone_infos[dName].targetAlt = 150;
+                        }
+                    }
+                }
+            }
+        },
+        preppersetParams(){
+            for (let name in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                    if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                        if (this.$store.state.params.wpnavSpeedUp[name] < 0.5) {
+                            this.$store.state.params.wpnavSpeedUp[name] = 0.5;
+                        } else if (this.$store.state.params.wpnavSpeedUp[name] > 10) {
+                            this.$store.state.params.wpnavSpeedUp[name] = 10;
+                        }
+
+                        if (this.$store.state.params.wpnavSpeedDn[name] < 0.1) {
+                            this.$store.state.params.wpnavSpeedDn[name] = 0.1;
+                        } else if (this.$store.state.params.wpnavSpeedDn[name] > 5) {
+                            this.$store.state.params.wpnavSpeedDn[name] = 5;
+                        }
+
+                        if (this.$store.state.params.rtlAlt[name] < 2) {
+                            this.$store.state.params.rtlAlt[name] = 2;
+                        } else if (this.$store.state.params.rtlAlt[name] > 80) {
+                            this.$store.state.params.rtlAlt[name] = 80;
+                        }
+
+                        if (this.$store.state.params.wpnavRadius[name] < 0.05) {
+                            this.$store.state.params.wpnavRadius[name] = 0.05;
+                        } else if (this.$store.state.params.wpnavRadius[name] > 10) {
+                            this.$store.state.params.wpnavRadius[name] = 10;
+                        }
+
+                        if (this.$store.state.params.wpnavAccel[name] < 0.5) {
+                            this.$store.state.params.wpnavAccel[name] = 0.5;
+                        } else if (this.$store.state.params.wpnavAccel[name] > 5) {
+                            this.$store.state.params.wpnavAccel[name] = 5;
+                        }
+
+                        if (this.$store.state.params.wpnavSpeed[name] < 0.2) {
+                            this.$store.state.params.wpnavSpeed[name] = 0.2;
+                        } else if (this.$store.state.params.wpnavSpeed[name] > 20) {
+                            this.$store.state.params.wpnavSpeed[name] = 20;
+                        }
+                    }
+                }
+            }
+        },
+        prepperGoToCircle(){
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        if (this.$store.state.drone_infos[dName].targetAlt < 3) {
+                            this.$store.state.drone_infos[dName].targetAlt = 3;
+                        } else if (this.$store.state.drone_infos[dName].targetAlt > 150) {
+                            this.$store.state.drone_infos[dName].targetAlt = 150;
+                        }
+
+                        if (this.$store.state.drone_infos[dName].targetSpeed < 1) {
+                            this.$store.state.drone_infos[dName].targetSpeed = 1;
+                        } else if (this.$store.state.drone_infos[dName].targetSpeed > 20) {
+                            this.$store.state.drone_infos[dName].targetSpeed = 20;
+                        }
+
+                        if (this.$store.state.drone_infos[dName].targetSpeed < 1) {
+                            this.$store.state.drone_infos[dName].targetSpeed = 1;
+                        } else if (this.$store.state.drone_infos[dName].targetSpeed > 20) {
+                            this.$store.state.drone_infos[dName].targetSpeed = 20;
+                        }
+
+                        if (this.$store.state.drone_infos[dName].targetRadius < 10) {
+                            this.$store.state.drone_infos[dName].targetRadius = 10;
+                        } else if (this.$store.state.drone_infos[dName].targetRadius > 255) {
+                            this.$store.state.drone_infos[dName].targetRadius = 255;
+                        }
+
+                        if (this.$store.state.drone_infos[dName].targetTurningSpeed < 1) {
+                            this.$store.state.drone_infos[dName].targetTurningSpeed = 1;
+                        } else if (this.$store.state.drone_infos[dName].targetTurningSpeed > 20) {
+                            this.$store.state.drone_infos[dName].targetTurningSpeed = 20;
+                        }
+                    }
+                }
+            }
+        },
+        prepperAuto(){
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        let start_index = parseInt(this.$store.state.drone_infos[dName].autoStartIndex);
+                        let end_index = parseInt(this.$store.state.drone_infos[dName].autoEndIndex);
+
+                        if(start_index <= end_index) {
+                            for (let pIndex = start_index; pIndex <= end_index; pIndex++) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
+                                    let targetAlt = 20;
+                                    if (this.flyMarketAlt) {
+                                        targetAlt = this.$store.state.tempMarkers[dName][pIndex].alt;
+                                        if (targetAlt < 3) {
+                                            targetAlt = 3;
+                                        } else if (targetAlt > 150) {
+                                            targetAlt = 150;
+                                        }
+                                    } else {
+                                        targetAlt = this.$store.state.drone_infos[dName].targetAlt;
+                                        if (targetAlt < 3) {
+                                            targetAlt = 3;
+                                        } else if (targetAlt > 150) {
+                                            targetAlt = 150;
+                                            this.$store.state.drone_infos[dName].targetAlt = 150;
+                                        }
+                                    }
+
+                                    if (this.$store.state.drone_infos[dName].autoSpeed < 1) {
+                                        this.$store.state.drone_infos[dName].autoSpeed = 1;
+                                    } else if (this.$store.state.drone_infos[dName].autoSpeed > 20) {
+                                        this.$store.state.drone_infos[dName].autoSpeed = 20;
+                                    }
+
+                                    if (this.$store.state.drone_infos[dName].autoDelay < 0) {
+                                        this.$store.state.drone_infos[dName].autoDelay = 0;
+                                    } else if (this.$store.state.drone_infos[dName].autoDelay > 60) {
+                                        this.$store.state.drone_infos[dName].autoDelay = 60;
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            for (let pIndex = start_index; pIndex >= end_index; pIndex--) {
+                                if (Object.prototype.hasOwnProperty.call(this.$store.state.tempMarkers[dName], pIndex)) {
+
+                                    let targetAlt = 20;
+                                    if (this.flyMarketAlt) {
+                                        targetAlt = this.$store.state.tempMarkers[dName][pIndex].alt;
+                                        if (targetAlt < 3) {
+                                            targetAlt = 3;
+                                        } else if (targetAlt > 150) {
+                                            targetAlt = 150;
+                                        }
+                                    } else {
+                                        targetAlt = this.$store.state.drone_infos[dName].targetAlt;
+                                        if (targetAlt < 3) {
+                                            targetAlt = 3;
+                                        } else if (targetAlt > 150) {
+                                            targetAlt = 150;
+                                            this.$store.state.drone_infos[dName].targetAlt = 150;
+                                        }
+                                    }
+
+                                    if (this.$store.state.drone_infos[dName].autoSpeed < 1) {
+                                        this.$store.state.drone_infos[dName].autoSpeed = 1;
+                                    } else if (this.$store.state.drone_infos[dName].autoSpeed > 20) {
+                                        this.$store.state.drone_infos[dName].autoSpeed = 20;
+                                    }
+
+                                    if (this.$store.state.drone_infos[dName].autoDelay < 0) {
+                                        this.$store.state.drone_infos[dName].autoDelay = 0;
+                                    } else if (this.$store.state.drone_infos[dName].autoDelay > 60) {
+                                        this.$store.state.drone_infos[dName].autoDelay = 60;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        prepperChangeSpeed() {
+            for(let dName in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
+                    if (this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
+                        if (this.$store.state.drone_infos[dName].targetSpeed < 1) {
+                            this.$store.state.drone_infos[dName].targetSpeed = 1;
+                        } else if (this.$store.state.drone_infos[dName].targetSpeed > 20) {
+                            this.$store.state.drone_infos[dName].targetSpeed = 20;
+                        }
+                    }
+                }
+            }
+        },
+        prepperRTL() {
+            for(let name in this.$store.state.drone_infos) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
+                    if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
+                        if (this.$store.state.params.rtlAlt[name] < 2) {
+                            this.$store.state.params.rtlAlt[name] = 2;
+                        }
+                        else if (this.$store.state.params.rtlAlt[name] > 80.0) {
+                            this.$store.state.params.rtlAlt[name] = 80;
+                        }
+                        if (this.$store.state.drone_infos[name].rtlSpeed < 1) {
+                            this.$store.state.drone_infos[name].rtlSpeed = 1;
+                        }
+                        else if (this.$store.state.drone_infos[name].rtlSpeed > 20) {
+                            this.$store.state.drone_infos[name].rtlSpeed = 20;
+                        }
+                    }
+                }
+            }
+        },
+        prepperPwmValue() {
             for(let dName in this.curPwmChannel) {
                 if (Object.prototype.hasOwnProperty.call(this.curPwmChannel, dName)) {
                     if (parseInt(this.curPwmValue[dName]) < 1100) {
