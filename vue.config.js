@@ -21,7 +21,7 @@ module.exports = {
             builderOptions: {
                 // options placed here will be merged with default configuration and passed to electron-builder
                 appId: 'kr.re.keti.app',
-                productName: "ve-gcsmap",
+                productName: "gs-gcsmap",
                 win: {
                     icon: "./public/logo.png",
                     target: [
