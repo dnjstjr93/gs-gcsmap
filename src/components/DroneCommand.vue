@@ -463,6 +463,7 @@
                                                                         v-model="takeoffInAuto"
                                                                         :label="`이륙 포함: ${takeoffInAuto.toString()}`"
                                                                     ></v-switch>
+                                                                    <v-spacer></v-spacer>
                                                                 </v-subheader>
                                                             </v-col>
                                                             <v-col cols="2" v-if="Object.prototype.hasOwnProperty.call($store.state.tempMarkers, d.name)">
