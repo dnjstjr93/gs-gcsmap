@@ -978,7 +978,7 @@
                     <span v-else-if="curTab === '귀환'">
                         <div v-for="(drone, i) in $store.state.drone_infos" :key="i">
                             <span v-if="drone.selected && drone.targeted">
-                                {{i}} 무인이동체에 고도 <span class="ml-2 mr-2" style="font-size: 20px">{{ $store.state.params.rtlAlt[i] }}</span>미터로 <span class="ml-2 mr-2" style="font-size: 20px">귀환</span> 명령 전송.
+                                {{i}} 무인이동체에 고도 <span class="ml-2 mr-2" style="font-size: 20px">{{ $store.state.params.rtlAlt[i] }}</span>m, 속도 <span class="ml-2 mr-2" style="font-size: 20px">{{ $store.state.drone_infos[i].rtlSpeed }}</span>m/s 로 <span class="ml-2 mr-2" style="font-size: 20px">귀환</span> 명령 전송.
                             </span>
                         </div>
 <!--                        무인이동체에 <span class="ml-2 mr-2" style="font-size: 20px">귀환</span> 명령 전송.-->
