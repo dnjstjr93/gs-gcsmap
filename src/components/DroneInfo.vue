@@ -52,29 +52,29 @@
                                 <span>LTE 미션 확인</span>
                             </v-tooltip>
                         </v-col>
-                        <v-col cols="1">
-                            <v-btn-toggle
-                                dense dark
-                                v-model="toggle_exclusive"
-                                :background-color="$store.state.drone_infos[name].color"
-                                @change="onVideoHandler($event, name)"
-                                active-class="deep-purple--text text--accent-5"
-                            >
-                                <v-tooltip top>
-                                    <template v-slot:activator="{ on, attrs }">
-                                        <v-btn
-                                            class="mr-1 my-1" dark x-small text outlined elevation="5"
-                                            v-bind="attrs"
-                                            v-on="on"
-                                            :disabled="$store.state.drone_infos[name].disableVideo"
-                                        >
-                                            <v-icon small>$video</v-icon>
-                                        </v-btn>
-                                    </template>
-                                    <span>영상 관제</span>
-                                </v-tooltip>
-                            </v-btn-toggle>
-                        </v-col>
+<!--                        <v-col cols="1">-->
+<!--                            <v-btn-toggle-->
+<!--                                dense dark-->
+<!--                                v-model="toggle_exclusive"-->
+<!--                                :background-color="$store.state.drone_infos[name].color"-->
+<!--                                @change="onVideoHandler($event, name)"-->
+<!--                                active-class="deep-purple&#45;&#45;text text&#45;&#45;accent-5"-->
+<!--                            >-->
+<!--                                <v-tooltip top>-->
+<!--                                    <template v-slot:activator="{ on, attrs }">-->
+<!--                                        <v-btn-->
+<!--                                            class="mr-1 my-1" dark x-small text outlined elevation="5"-->
+<!--                                            v-bind="attrs"-->
+<!--                                            v-on="on"-->
+<!--                                            :disabled="$store.state.drone_infos[name].disableVideo"-->
+<!--                                        >-->
+<!--                                            <v-icon small>$video</v-icon>-->
+<!--                                        </v-btn>-->
+<!--                                    </template>-->
+<!--                                    <span>영상 관제</span>-->
+<!--                                </v-tooltip>-->
+<!--                            </v-btn-toggle>-->
+<!--                        </v-col>-->
                         <v-col cols="1">
                             <v-tooltip top>
                                 <template v-slot:activator="{ on, attrs }">

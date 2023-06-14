@@ -37,11 +37,8 @@
                             :items="curUsers"
                             :single-select="false"
                             item-key="E-mail"
-                            show-select
                             class="elevation-1"
-                            :footer-props="{
-                                'items-per-page-text': '페이지 당 사용자 수',
-                            }"
+                            hide-default-footer
                         >
 <!--                            <template v-slot:item.editEmail="{ item }">-->
 <!--                                <v-btn dark x-small color="green" @click.stop="editUser(item.email)">-->

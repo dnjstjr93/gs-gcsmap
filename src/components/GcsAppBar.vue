@@ -4,7 +4,7 @@
             <v-toolbar-title>
                 <v-row no-gutters align="center">
                     <v-icon left>$monitorDashboard</v-icon>
-                    KETI GCS v1.0
+                    KETI GCS v1.0.0
                 </v-row>
             </v-toolbar-title>
 
@@ -227,7 +227,7 @@
                             show-select
                             class="elevation-1"
                             :footer-props="{
-                                'items-per-page-text': '페이지 당 무인이동체 수',
+                                'items-per-page-text': '페이지 당 무인이동체 수'
                             }"
                         >
                             <template v-slot:item.color="{item}">
@@ -280,7 +280,7 @@
                                     <v-col cols="12" sm="6">
                                         <v-select
                                             v-model="type_selected"
-                                            :items="['ardupilot', 'px4', 'dji', 'etc']"
+                                            :items="['ardupilot', 'px4']"
                                             label="FC 종류"
                                             hint="FC의 종류"
                                             required
@@ -377,7 +377,7 @@
                                     <v-col cols="12" sm="6">
                                         <v-select
                                             v-model="type_selected"
-                                            :items="['ardupilot', 'px4', 'dji', 'etc']"
+                                            :items="['ardupilot', 'px4']"
                                             label="FC 종류*"
                                             hint="FC의 종류"
                                             required
