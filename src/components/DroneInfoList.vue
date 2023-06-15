@@ -520,6 +520,7 @@
 
                             localStorage.setItem('mqttConnection-DroneInfoList', JSON.stringify(this.$store.state.client));
 
+                            EventBus.$emit('AddLog', ({email:this.$store.state.curUserEmail, log:'Mobius 서버와 연결되었습니다.'}));
                             this.resetSubscription();
                         });
 
@@ -531,6 +532,7 @@
 
                         this.$store.state.client.on('close', () => {
                             console.log('Drone Connection closed');
+                            EventBus.$emit('AddLog', ({email:this.$store.state.curUserEmail, log:'Mobius 서버와 연결 해제되었습니다.'}));
 
                             this.destroyConnection();
 
@@ -1087,7 +1089,7 @@
                 }
             });
 
-            EventBus.$emit('ws-connect');
+            // EventBus.$emit('ws-connect');
 
             EventBus.$on('do-clear-target-drones', () => {
                 this.toggle_exclusive = [];
@@ -1138,7 +1140,7 @@
         beforeDestroy() {
             this.destroyConnection();
 
-            this.ws.close();
+            // this.ws.close();
 
             EventBus.$off('onResize-DroneInfoList');
             EventBus.$off('gcs-map-ready');

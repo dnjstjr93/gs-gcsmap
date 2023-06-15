@@ -296,12 +296,16 @@ export default new Vuex.Store({
     state: {
         userInfo: null,
         isLogin: false,
+        curUserEmail: '',
 
         admin: {
             email: "admin@keti.re.kr",
             password: "Ketis123@",
-            tel: "+82-31-789-1234"
+            tel: "+82-31-789-7598"
         },
+        Login_Host:'gcs.iotocean.org',
+
+        LogList: [],
 
         SAMPLES: 96,
         viewAlt: true,
@@ -814,6 +818,29 @@ export default new Vuex.Store({
                 );
             }
         },
+        getLogWithExpireTime(keyName) {
+            const objString = window.localStorage.getItem(keyName);
+
+            // null 체크
+            if(!objString) {
+                return null;
+            }
+
+            // 문자열을 객체로 변환
+            const obj = JSON.parse(objString);
+
+            // 현재 시간과 localStorage의 expire 시간 비교
+            if(Date.now() > obj.expire) {
+                // 만료시간이 지난 item 삭제
+                window.localStorage.removeItem(keyName);
+
+                // null 리턴
+                return null;
+            }
+
+            // 만료기간이 남아있는 경우, value 값 리턴
+            return obj.value;
+        }
     },
     actions: {
         getAccountInfo({ commit }) {

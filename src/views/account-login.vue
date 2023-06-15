@@ -142,6 +142,8 @@
 import LoginObj from "../js/loginObj"
 import axios from "axios"
 import crypto from "crypto"
+import moment from "moment";
+import EventBus from "@/EventBus";
 
 const setItemWithExpireTime = (keyName, keyValue, tts) => {
     // localStorage에 저장할 객체
@@ -185,6 +187,7 @@ export default {
                 return
             }
 
+            window.localStorage.removeItem('loginEmail');
             const pwHash = crypto.createHash('md5').update(this.formData.password).digest('base64');
 
             axios({
@@ -193,7 +196,7 @@ export default {
                     return status < 500;
                 },
                 method: 'get',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + LoginObj.email.replace('@', '_').replace('.', '_'),
+                url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + LoginObj.email.replace('@', '_').replace('.', '_'),
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
@@ -207,17 +210,32 @@ export default {
                         if (pwHash === res.data['m2m:cnt'].lbl[0]) {
                             console.log('login success');
 
+                            this.$store.state.LogList = JSON.parse(localStorage.getItem('LogList' + LoginObj.email)) ? JSON.parse(localStorage.getItem('LogList' + LoginObj.email)) : []
                             // localStorage에 12시간 만료시간을 설정하고 데이터 저장
                             setItemWithExpireTime('loginEmail', LoginObj.email.replace('@', '_').replace('.', '_'), 12 * (60 * 60 * 1000))
 
                             this.$store.state.isLogin = true;
                             this.$store.state.userInfo = LoginObj;
+
+                            let nowDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
+                            this.$store.state.LogList.push('[' + nowDateTime + '] ' + LoginObj.email + ' 계정으로 로그인 하였습니다.')
+                            window.localStorage.setItem('LogList' + LoginObj.email, JSON.stringify(this.$store.state.LogList));
+                            EventBus.$emit('diffDateTime');
+
                             this.$router.replace({name: "Home"});
+                            // this.$store.state.LogList.forEach((log)=>{
+                            //     let log_time = log.split('[')[1].split(']')[0];
+                            //     console.log(nowDateTime)
+                            //     console.log(log_time)
+                            //     console.log('일 차이: ', moment.duration(nowDateTime.diff(log_time)).asDays());
+                            // });
                         } else {
-                            console.log('password incorrect');
+                            alert('패스워드가 틀렸습니다.');
+                            console.log(pwHash, res.data['m2m:cnt'].lbl[0], 'password incorrect');
                         }
                     } else {
-                        console.log('user do not exist');
+                        alert('회원가입이 필요합니다.');
+                        console.log(res.status, 'user do not exist');
                     }
                 }
             ).catch(
@@ -263,7 +281,8 @@ export default {
         resetValidation() {
             this.$refs.form.resetValidation()
         }
-    }
+    },
+
 }
 </script>
 

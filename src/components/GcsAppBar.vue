@@ -65,14 +65,14 @@
             <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn text
-                           @click="logout"
+                           @click.stop="dialogUser"
                            v-bind="attrs"
                            v-on="on"
                     >
                         <v-icon>$account</v-icon>
                     </v-btn>
                 </template>
-                <span>로그아웃</span>
+                <span>사용자 정보 관리</span>
             </v-tooltip>
 
             <v-dialog
@@ -447,13 +447,170 @@
                                 text
                                 @click="update_submit"
                             >
-                                업데이트
+                                수정
                             </v-btn>
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
             </v-dialog>
-
+            <v-dialog v-model="dialogUserflag" persistent max-width="900px">
+                <v-card ref="UserInfoLog">
+                    <v-card-title style="background-color: #4bae4f">
+                        <span class="headline white--text">사용자 정보 관리</span>
+                    </v-card-title>
+                    <v-card-text>
+                        <v-container>
+                            <v-row class="mx-2" justify="space-between">
+                                <v-col cols="9">
+                                    <h3 class="mt-2"> 로그 내역</h3>
+                                </v-col>
+                                <v-col cols="3">
+                                    <v-btn
+                                        dark
+                                        elevation="5"
+                                        :color="'#795548'"
+                                        @click="saveLog"
+                                    >
+                                        <v-icon dark class="mr-2">$download</v-icon>
+                                        로그 저장
+                                    </v-btn>
+                                </v-col>
+                            </v-row>
+                            <v-card class="mt-2" elevation="5" ref="UserInfoLog_card">
+                                <v-virtual-scroll
+                                    id="Log_Scroll"
+                                    ref="Log_Scroll"
+                                    :items="$store.state.LogList"
+                                    height="350"
+                                    item-height="40"
+                                >
+                                    <template v-slot:default="{ item }">
+                                        <v-list-item :key="item">
+                                            <v-list-item-content class="mt-2">
+                                                <v-list-item-title>
+                                                    {{ item }}
+                                                </v-list-item-title>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                        <v-divider></v-divider>
+                                    </template>
+                                </v-virtual-scroll>
+                            </v-card>
+                        </v-container>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-btn
+                            color="blue darken-1"
+                            text
+                            @click="logout"
+                        >
+                            로그아웃
+                        </v-btn>
+                        <v-spacer></v-spacer>
+                        <v-btn
+                            color="blue darken-1"
+                            text
+                            @click="getPassword"
+                        >
+                            비밀번호 변경
+                        </v-btn>
+                        <v-spacer></v-spacer>
+                        <v-btn
+                            color="blue darken-1"
+                            text
+                            @click="dialogUserflag=false"
+                        >
+                            닫기
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+            <v-dialog v-model="changePasswordFlag" persistent max-width="470px">
+                <v-card ref="form">
+                    <v-card-title style="background-color: #4bae4f">
+                        <span class="headline white--text">사용자 정보 관리</span>
+                    </v-card-title>
+                    <v-card-text>
+                        <v-container>
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-text-field
+                                        v-model="$store.state.curUserEmail"
+                                        readonly
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-text-field
+                                        v-model="curPassword"
+                                        :rules="Password_rule" label="현재 비밀번호*"
+                                        hint="최소 8자 이상, 대/소문자, 숫자, 특수문자를 포함하여 입력해주세요."
+                                        :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                                        :type="show ? 'text' : 'password'"
+                                        @click:append="show = !show"
+                                        :readonly="!isFocused" @focus="isFocused=true" @blur="isFocused=false"
+                                        required
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-text-field
+                                        v-model="newPassword"
+                                        :rules="Password_rule" label="새 비밀번호*"
+                                        hint="최소 8자 이상, 대/소문자, 숫자, 특수문자를 포함하여 입력해주세요."
+                                        :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                                        :type="show ? 'text' : 'password'"
+                                        @click:append="show = !show"
+                                        :readonly="!isFocused" @focus="isFocused=true" @blur="isFocused=false"
+                                        required
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-text-field
+                                        v-model="newPassword_check"
+                                        :rules="Password_rule" label="새 비밀번호 확인*"
+                                        hint="최소 8자 이상, 대/소문자, 숫자, 특수문자를 포함하여 입력해주세요."
+                                        :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+                                        :type="show ? 'text' : 'password'"
+                                        @click:append="show = !show"
+                                        :readonly="!isFocused" @focus="isFocused=true" @blur="isFocused=false"
+                                        required
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col>
+                                    <h6 v-if="!sameChk(newPassword_check)" class="mb-5 red--text lighten-2">
+                                        새 비밀번호가 일치하지 않습니다.
+                                    </h6>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                        <small>*필수 입력 항목</small>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn
+                            color="blue darken-1"
+                            text
+                            @click="update_password_submit"
+                        >
+                            수정
+                        </v-btn>
+                        <v-btn
+                            color="blue darken-1"
+                            text
+                            @click="changePasswordFlag=false"
+                        >
+                            취소
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
         </v-app-bar>
 
         <!--    <WindowPortal v-model="open">-->
@@ -466,6 +623,8 @@
 <script>
 import axios from 'axios'
 import EventBus from "@/EventBus";
+import crypto from "crypto";
+import moment from "moment";
 // import WindowPortal from "./WindowPortal";
 // import WebrtcCard from "./WebrtcCard";
 
@@ -487,6 +646,8 @@ export default {
                 v => !(v > 360) || '입력 범위는 -360°~360° 입니다.',
                 v => !(v < -360) || '입력 범위는 -360°~360° 입니다.',
             ],
+            dialogUserflag:false,
+            changePasswordFlag:false,
             open: false,
             MOBIUS_DISCONNECTION_TEXT: '연결 해제',
             MOBIUS_CONNECTION_TEXT: '연결',
@@ -599,6 +760,20 @@ export default {
                 {text: '수정', value: 'update'},
                 {text: '삭제', value: 'del'},
             ],
+            curPassword: '',
+            curPasswordHash: '',
+            Password_rule: [
+                (v) => (!!v) || "패스워드를 입력해주세요.",
+                (v) => (v && v.length >= 8) || "최소 8자 이상 입력해주세요.",
+                (v) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/.test(v) || "패스워드는 대문자, 소문자, 숫자, 특수문자를 포함해야 합니다."
+            ],
+            valid: false,
+            newPassword: '',
+            newPassword_check: '',
+            show: false,
+            isFocused: false,
+            enterNewPassword: false,
+            nowDateTime:''
         }
     },
 
@@ -623,6 +798,7 @@ export default {
                 this.$store.state.userInfo = null;
                 window.localStorage.removeItem('loginEmail');
                 this.$router.push({name: "login", params: {isFocused:false}});
+                this.AddLog(this.$store.state.curUserEmail, this.$store.state.curUserEmail + ' 계정이 로그아웃 하였습니다.');
             }
             else {
                 console.log('로그아웃 실패');
@@ -3059,8 +3235,120 @@ export default {
             window.open("http://webrtc.intellicode.info:8080/", "_blank");
         },
 
+        dialogUser() {
+            this.dialogUserflag = true;
+
+        },
+        saveLog(){
+            const blob_c = new Blob([this.$store.state.LogList.toString().replaceAll(',[', '\n[')], {type: 'text/plain'})
+            const e = document.createEvent('MouseEvents'),
+                a = document.createElement('a');
+            a.download = "KETI-GCS_log-" + moment().format('YYYYMMDDHHmmss') + '.txt';
+            a.href = window.URL.createObjectURL(blob_c);
+            a.dataset.downloadurl = ['text/txt', a.download, a.href].join(':');
+            e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            a.dispatchEvent(e);
+            this.AddLog(this.$store.state.curUserEmail, '로그 내역을 파일로 저장하였습니다.');
+
+        },
+        getPassword() {
+            this.changePasswordFlag = true;
+            axios({
+                validateStatus: function (status) {
+                    // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                    return status < 500;
+                },
+                method: 'get',
+                url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + this.$store.state.curUserEmail.replace('@', '_').replace('.', '_'),
+                headers: {
+                    'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                    'X-M2M-Origin': 'SVue',
+                    'Content-Type': 'application/json'
+                }
+            }).then(
+                (res) => {
+                    if (res.status === 200) {
+                        // console.log(res);
+                        this.curPasswordHash = res.data["m2m:cnt"].lbl[0];
+                        console.log(this.curPasswordHash);
+                    } else {
+                        console.log('password incorrect');
+                    }
+                }
+            ).catch(
+                (err) => {
+                    console.log(err);
+                }
+            );
+        },
+
+        sameChk(password) {
+            if (this.newPassword === password) {
+                this.valid = true;
+                return true;
+            } else {
+                this.valid = false;
+                return false;
+            }
+        },
+
+        update_password_submit() {
+            // console.log('update_password_submit');
+            let pwHash = crypto.createHash('md5').update(this.curPassword).digest('base64');
+            // console.log(this.curPasswordHash)
+            if (pwHash !== this.curPasswordHash) {
+                alert('현재 비밀번호가 틀렸습니다.');
+                this.curPassword = '';
+                this.newPassword = '';
+                this.newPassword_check = '';
+            }
+            else {
+                let newpwHash = crypto.createHash('md5').update(this.newPassword_check).digest('base64');
+                console.log(this.newPassword_check)
+                console.log(newpwHash)
+
+                axios({
+                    validateStatus: function (status) {
+                        // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
+                        return status < 500;
+                    },
+                    method: 'put',
+                    url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + this.$store.state.curUserEmail.replace('@', '_').replace('.', '_'),
+                    headers: {
+                        'X-M2M-RI': String(parseInt(Math.random() * 10000)),
+                        'X-M2M-Origin': 'SVue',
+                        'Content-Type': 'application/json;ty=3'
+                    },
+                    data: {
+                        'm2m:cnt': {
+                            lbl: [newpwHash]
+                        }
+                    }
+                }).then(
+                    (res) => {
+                        if (res.status === 200) {
+                            console.log('패스워드 변경 성공');
+                            this.changePasswordFlag = false;
+                            this.curPassword = '';
+                            this.newPassword = '';
+                            this.newPassword_check = '';
+                            this.AddLog(this.$store.state.curUserEmail, '패스워드를 변경하였습니다.');
+                        } else {
+                            console.log('사용자 조회 오류');
+                        }
+                    }
+                ).catch(
+                    (err) => {
+                        console.log(err)
+                    }
+                );
+            }
+        },
+
         rotateMapAngle() {
             EventBus.$emit('do-rotate-map', this.mapAngle);
+
+            this.AddLog(this.$store.state.curUserEmail, '지도를 ' + this.mapAngle + '° 회전하였습니다.');
 
             this.mapAngleDialog = false;
         },
@@ -3151,6 +3439,10 @@ export default {
 
         async confirmSelected(dialog) {
             console.log('vvvvvvvvvvvvvvvvvvvvvvvvvvv confirmSelected', this.selected, this.$store.state.drone_infos);
+
+            let selectedDroneList = Object.keys(this.$store.state.drone_infos);
+            let selectedDrones = selectedDroneList.filter(dItem => dItem !== 'unknown')
+            this.AddLog(this.$store.state.curUserEmail, '무인이동체 [' + selectedDrones + ']를 선택하였습니다');
 
             // if (Object.keys(this.$store.state.drone_infos).length <= 1) {
             //     this.dialog = false;
@@ -3567,6 +3859,8 @@ export default {
                         break;
                     }
                 }
+                this.AddLog(this.$store.state.curUserEmail, '무인이동체 [' + dName + ']를 삭제하였습니다');
+
             } catch (err) {
                 console.log("Error >>", err);
             }
@@ -3912,6 +4206,7 @@ export default {
                     });
                     console.log('addProfile-SurveyMarkerInfos-' + dName, response.status, response.data['m2m:cin']);
 
+                    this.AddLog(this.$store.state.curUserEmail, '무인이동체 [' + dName + ']를 등록하였습니다');
 
                     this.add_dialog = false;
                     this.fab = false;
@@ -3968,6 +4263,8 @@ export default {
                         // }
 
                         this.postCinDroneInfoToMobius(this.drone_name, this.drone_infos_list[update_index], () => {
+                            this.AddLog(this.$store.state.curUserEmail, '무인이동체 [' + this.drone_name + '] 상세 정보를 수정하였습니다');
+
                             this.update_dialog = false;
                             this.fab = false;
 
@@ -3978,8 +4275,24 @@ export default {
                     }
                 }
             }
-
         },
+        diffDateTime() {
+            let t_now = moment();
+
+            for (let idx = this.$store.state.LogList.length; idx > -1; idx--) {
+                if (Object.prototype.hasOwnProperty.call(this.$store.state.LogList, idx)) {
+                    let log_time = this.$store.state.LogList[idx].split('[')[1].split(']')[0];
+                    if (moment.duration(t_now.diff(log_time)).asDays() > 7) {
+                        this.$store.state.LogList.splice(idx, 1);
+                    }
+                }
+            }
+        },
+        AddLog(userEmail, log){
+            this.$store.state.LogList.push('[' + moment().format('YYYY-MM-DD HH:mm:ss') + '] ' + log);
+
+            window.localStorage.setItem('LogList' + userEmail, JSON.stringify(this.$store.state.LogList));
+        }
     },
 
     created() {
@@ -4001,6 +4314,23 @@ export default {
         // else {
         //     this.GcsAppBarCreated();
         // }
+
+        this.$store.state.curUserEmail = (JSON.parse(window.localStorage.getItem('loginEmail'))).value.replace('_', '@').replace('_', '.');
+
+        this.$store.state.LogList = JSON.parse(localStorage.getItem('LogList' + this.$store.state.curUserEmail)) ? JSON.parse(localStorage.getItem('LogList' + this.$store.state.curUserEmail)) : [];
+
+        if (!this.$store.state.userInfo) {
+            this.AddLog(this.$store.state.curUserEmail, this.$store.state.curUserEmail + ' 계정으로 로그인 하였습니다.');
+        }
+
+        EventBus.$on('diffDateTime', () => {
+            this.diffDateTime();
+        });
+        EventBus.$on('AddLog', (payload) => {
+            this.AddLog(payload.email, payload.log);
+        });
+
+        this.diffDateTime();
     },
 
     beforeDestroy() {

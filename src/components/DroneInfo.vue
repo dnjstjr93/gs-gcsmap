@@ -1464,6 +1464,12 @@ export default {
             // Use the javascript reader object to load the contents
             // of the file in the v-model prop
             reader.readAsText(this.chosenWaypointsFile);
+
+            EventBus.$emit('AddLog', ({
+                email: this.$store.state.curUserEmail,
+                log: '(' + this.name + ') 웨이포인트 파일 ' + this.chosenWaypointsFile + '을 열었습니다.'
+            }));
+
             reader.onload = () => {
                 this.strWaypoints = reader.result;
 
@@ -1697,6 +1703,11 @@ export default {
             a.dataset.downloadurl = ['text/txt', a.download, a.href].join(':');
             e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
             a.dispatchEvent(e);
+
+            EventBus.$emit('AddLog', ({
+                email: this.$store.state.curUserEmail,
+                log: '무인이동체(' + this.name + ')에 할당된 웨이포인트들을 웨이포인트 파일 ' + a.download + '로 저장하였습니다.'
+            }));
         },
 
         targetTempMarkerPosition: function (i) {
@@ -1740,6 +1751,10 @@ export default {
 
             this.chosenWaypointsFile = null;
             this.dialog = true;
+            EventBus.$emit('AddLog', ({
+                email: this.$store.state.curUserEmail,
+                log: '(' + this.name + ') 무인이동체 정보 관리에 접근하였습니다.'
+            }));
         },
 
         async getElevationProfile(eLngLats, callback) {
@@ -1871,6 +1886,11 @@ export default {
                 });
 
                 EventBus.$emit('do-refresh-tempMarker', this.name);
+
+                EventBus.$emit('AddLog', ({
+                    email: this.$store.state.curUserEmail,
+                    log: '무인이동체(' + this.name + ')의 정보를 수정하였습니다.'
+                }));
             }
             catch (e) {
                 console.log('updateMyDroneInfo-JSON parsing error', e.message);
@@ -5837,6 +5857,10 @@ export default {
             localStorage.setItem('trackingLines-' + this.name, JSON.stringify(this.$store.state.trackingLines[this.name]));
 
             EventBus.$emit('clearTrackingLines', this.name);
+            EventBus.$emit('AddLog', ({
+                email: this.$store.state.curUserEmail,
+                log: '(' + this.name + ') 지난 비행 궤적을 지웠습니다.'
+            }));
         },
 
         gotoHomePosition() {
@@ -5856,14 +5880,29 @@ export default {
             this.$store.state.drone_infos[this.name].targetSpeed = 5;
             this.$store.state.drone_infos[this.name].targetAlt = 30;
             EventBus.$emit('command-set-goto-' + this.name, strPos);
+
+            EventBus.$emit('AddLog', ({
+                email: this.$store.state.curUserEmail,
+                log: '(' + this.name + ') 퀵 - 홈 위치 이동 명령'
+            }));
         },
 
         returnToLaunch() {
             EventBus.$emit('command-set-rtl-' + this.name, 5);
+
+            EventBus.$emit('AddLog', ({
+                email: this.$store.state.curUserEmail,
+                log: '(' + this.name + ') 퀵 - 귀환 명령-->귀환 속도: 5m/s'
+            }));
         },
 
         pauseCurPosition() {
             EventBus.$emit('command-set-stop-' + this.name);
+
+            EventBus.$emit('AddLog', ({
+                email: this.$store.state.curUserEmail,
+                log: '(' + this.name + ') 퀵 - 정지 명령'
+            }));
         },
 
         reservedQuick() {
@@ -5887,6 +5926,11 @@ export default {
             this.$store.state.drone_infos[this.name].targetAlt = curAlt;
 
             EventBus.$emit('command-set-roi-' + this.name, position_selection);
+
+            EventBus.$emit('AddLog', ({
+                email: this.$store.state.curUserEmail,
+                log: '(' + this.name + ') 퀵 - 무인이동체 회전 명령-->회전 방향: ' + this.yawAngle + '°'
+            }));
 
             this.yawAngleDialog = false;
         },
@@ -6759,6 +6803,10 @@ export default {
                 }
                 else {
                     console.log("시동이 걸리지 않았습니다.");
+                    EventBus.$emit('AddLog', ({
+                        email: this.$store.state.curUserEmail,
+                        log: '(' + this.name + ') 시동이 걸리지 않았습니다.'
+                    }));
                 }
             }
         });

@@ -221,7 +221,7 @@ export default {
                     return status < 500;
                 },
                 method: 'get',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos?lvl=1&fu=1&ty=3',
+                url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos?lvl=1&fu=1&ty=3',
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
@@ -261,13 +261,13 @@ export default {
         },
         editUser(user) {
             console.log('editUseremail -', user);
-            this.curUserEmail = user;
+            this.$store.state.curUserEmail = user;
             this.UserEmail = user;
             this.editUserFlag = true;
         },
         editPassword(user) {
             this.editPWFlag = true;
-            this.curUserEmail = user;
+            this.$store.state.curUserEmail = user;
 
             axios({
                 validateStatus: function (status) {
@@ -275,7 +275,7 @@ export default {
                     return status < 500;
                 },
                 method: 'get',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + user.replace('@', '_').replace('.', '_'),
+                url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + user.replace('@', '_').replace('.', '_'),
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
@@ -313,9 +313,9 @@ export default {
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
                         return status < 500;
-                    },
+                    },// 1F1LG+3aq5446YNJK9Wm3g==
                     method: 'delete',
-                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + cntName,
+                    url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + cntName,
                     headers: {
                         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                         'X-M2M-Origin': 'SVue',
@@ -339,14 +339,14 @@ export default {
             }
         },
         update_email_submit() {
-            if (this.curUserEmail !== this.UserEmail) {
+            if (this.$store.state.curUserEmail !== this.UserEmail) {
                 axios({
                     validateStatus: function (status) {
                         // 상태 코드가 500 이상일 경우 거부. 나머지(500보다 작은)는 허용.
                         return status < 500;
                     },
                     method: 'get',
-                    url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + this.curUserEmail.replace('@', '_').replace('.', '_'),
+                    url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + this.$store.state.curUserEmail.replace('@', '_').replace('.', '_'),
                     headers: {
                         'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                         'X-M2M-Origin': 'SVue',
@@ -363,7 +363,7 @@ export default {
                                     return status < 500;
                                 },
                                 method: 'post',
-                                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos',
+                                url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos',
                                 headers: {
                                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                                     'X-M2M-Origin': 'SVue',
@@ -386,7 +386,7 @@ export default {
                                                 return status < 500;
                                             },
                                             method: 'delete',
-                                            url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + this.curUserEmail.replace('@', '_').replace('.', '_'),
+                                            url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + this.$store.state.curUserEmail.replace('@', '_').replace('.', '_'),
                                             headers: {
                                                 'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                                                 'X-M2M-Origin': 'SVue',
@@ -397,7 +397,7 @@ export default {
                                                 if (res.status === 200) {
                                                     console.log(res);
                                                     this.editUserFlag = false;
-                                                    this.curUserEmail = '';
+                                                    this.$store.state.curUserEmail = '';
                                                     this.$router.go(0);
                                                 } else {
                                                     console.log('password incorrect');
@@ -429,7 +429,7 @@ export default {
                     }
                 );
 
-                let curEmail = this.curUserEmail.replace('@', '_').replace('.', '_');
+                let curEmail = this.$store.state.curUserEmail.replace('@', '_').replace('.', '_');
                 console.log(curEmail);
             }
             this.editUserFlag = false;
@@ -451,7 +451,7 @@ export default {
                     return status < 500;
                 },
                 method: 'put',
-                url: 'http://' + this.$store.state.VUE_APP_MOBIUS_HOST + ':7579/Mobius/UserInfos/' + this.curUserEmail.replace('@', '_').replace('.', '_'),
+                url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + this.$store.state.curUserEmail.replace('@', '_').replace('.', '_'),
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',

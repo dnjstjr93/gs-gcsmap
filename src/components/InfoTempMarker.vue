@@ -433,6 +433,11 @@ export default {
             payload.dNameNew = newName;
 
             EventBus.$emit('do-unsetSelectedTempMarker', payload);
+
+            EventBus.$emit('AddLog', ({
+                email: this.$store.state.curUserEmail,
+                log: '(' + payload.dNameNew + ') 새로운 웨이포인트를 할당하였습니다.'
+            }));
         },
 
         postCinTempMarkerInfoToMobius(dName) {

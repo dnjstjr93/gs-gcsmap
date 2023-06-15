@@ -1690,6 +1690,11 @@ export default {
                         console.log('**********************************************************', this.$store.state.drone_infos[name].targetModeSelection)
                         //this.$store.state.drone_infos[name].targetModeSelection = parseInt(this.targetModeSelection[name]);
                         EventBus.$emit('command-set-mode-' + name, this.$store.state.drone_infos[name].targetModeSelection);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + name + ') 모드 변경-->' + this.$store.state.drone_infos[name].targetModeSelection
+                        }));
                     }
                 }
             }
@@ -1700,7 +1705,11 @@ export default {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         EventBus.$emit('command-set-arm-' + name, '');
-                    }
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + name + ') 시동 명령'
+                        }));}
                 }
             }
         },
@@ -1728,6 +1737,14 @@ export default {
                         payload.takeoffDelay = this.$store.state.drone_infos[dName].takeoffDelay;
 
                         EventBus.$emit('command-set-takeoff-' + dName, payload);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + dName + ') 이륙 명령-->이륙고도: ' +
+                                this.$store.state.drone_infos[dName].targetTakeoffAlt +
+                                'm, 시동 후 지연시간: ' +
+                                this.$store.state.drone_infos[dName].takeoffDelay + 's'
+                        }));
                     }
                 }
             }
@@ -1745,6 +1762,11 @@ export default {
                         }
 
                         EventBus.$emit('command-set-goto-alt-' + dName, this.$store.state.drone_infos[dName].targetAlt);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + dName + ') 고도 변경-->' + this.$store.state.drone_infos[dName].targetAlt + 'm'
+                        }));
                     }
                 }
             }
@@ -1784,6 +1806,13 @@ export default {
                             //this.$store.state.drone_infos[dName].targetAlt = parseInt(this.targetAlt[dName]);
 
                             EventBus.$emit('command-set-goto-' + dName, strPos);
+
+                            EventBus.$emit('AddLog', ({
+                                email: this.$store.state.curUserEmail,
+                                log: '(' + dName + ') 이동 명령-->' + pIndex + ' 지점, 이동고도: ' +
+                                    this.$store.state.drone_infos[dName].targetAlt + 'm, 이동속도: ' +
+                                    this.$store.state.drone_infos[dName].targetSpeed + 'm/s'
+                            }));
                         }
                     }
                 }
@@ -1841,6 +1870,15 @@ export default {
 
                             console.log('DroneCommand-setGotoCircle', strPos);
                             EventBus.$emit('command-set-goto-circle-' + dName, strPos);
+
+                            EventBus.$emit('AddLog', ({
+                                email: this.$store.state.curUserEmail,
+                                log: '(' + dName + ') 선회 명령-->' + pIndex +
+                                    ' 지점, 선회 방향: ' + this.$store.state.drone_infos[dName].circleType +
+                                    ', 선회고도: ' + this.$store.state.drone_infos[dName].targetAlt +
+                                    'm/s, 반지름: ' + this.$store.state.drone_infos[dName].targetRadius +
+                                    'm, 선회속도: ' + this.$store.state.drone_infos[dName].targetTurningSpeed + 'm/s'
+                            }));
                         }
                     }
                 }
@@ -1860,6 +1898,11 @@ export default {
                                 this.$store.state.tempMarkers[dName][pIndex].elevation;
 
                             EventBus.$emit('command-set-roi-' + dName, strPos);
+
+                            EventBus.$emit('AddLog', ({
+                                email: this.$store.state.curUserEmail,
+                                log: '(' + dName + ') 관심 설정-->' + pIndex + '번째 웨이포인트로 관심 설정'
+                            }));
                         }
                     }
                 }
@@ -1877,6 +1920,11 @@ export default {
                         }
 
                         EventBus.$emit('command-set-change-speed-' + dName, this.$store.state.drone_infos[dName].targetSpeed);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + dName + ') 속도 변경-->' + this.$store.state.drone_infos[dName].targetSpeed + 'm/s'
+                        }));
                     }
                 }
             }
@@ -1887,6 +1935,11 @@ export default {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         EventBus.$emit('command-set-stop-' + dName);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + dName + ') 정지 명령'
+                        }));
                     }
                 }
             }
@@ -1897,6 +1950,11 @@ export default {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, dName)) {
                     if(this.$store.state.drone_infos[dName].selected && this.$store.state.drone_infos[dName].targeted) {
                         EventBus.$emit('command-set-land-' + dName);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + dName + ') 착륙 명령'
+                        }));
                     }
                 }
             }
@@ -1907,15 +1965,17 @@ export default {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         EventBus.$emit('command-set-rtl-' + name, this.$store.state.drone_infos[name].rtlSpeed);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + name + ') 귀환 명령-->귀환 속도: ' + this.$store.state.drone_infos[name].rtlSpeed + 'm/s'
+                        }));
                     }
                 }
             }
         },
 
         setPwms() {
-            console.log(this.curPwmChannel);
-            console.log(this.curPwmValue);
-
             for(let dName in this.curPwmChannel) {
                 if (Object.prototype.hasOwnProperty.call(this.curPwmChannel, dName)) {
                     // if (this.curPwmValue[dName] < "1100") {
@@ -1928,6 +1988,11 @@ export default {
                     payload.channel = this.curPwmChannel[dName];
                     payload.value = this.curPwmValue[dName];
                     EventBus.$emit('command-set-pwms-' + dName, payload);
+
+                    EventBus.$emit('AddLog', ({
+                        email: this.$store.state.curUserEmail,
+                        log: '(' + dName + ') PWM 제어-->채널: ' + payload.channel + ', 값: ' + payload.value
+                    }));
                 }
             }
         },
@@ -1994,6 +2059,11 @@ export default {
 
                             payload.start_index = start_index;
                             payload.end_index = end_index;
+
+                            EventBus.$emit('AddLog', ({
+                                email: this.$store.state.curUserEmail,
+                                log: '(' + dName + ') 자동 명령--> 시작 Index: ' + this.$store.state.drone_infos[dName].autoStartIndex + ', 끝 Index: ' + this.$store.state.drone_infos[dName].autoEndIndex + ', 자동 속도: '
+                            }));
                         }
                         else {
                             for (let pIndex = start_index; pIndex >= end_index; pIndex--) {
@@ -2040,6 +2110,28 @@ export default {
 
                             payload.start_index = end_index;
                             payload.end_index = start_index;
+
+                            if(this.flyMarketAlt) {
+                                EventBus.$emit('AddLog', ({
+                                    email: this.$store.state.curUserEmail,
+                                    log: '(' + dName + ') 자동 명령--> 시작 Index: ' +
+                                        payload.start_index + ', 끝 Index: ' +
+                                        payload.end_index + ', 자동 속도: ' +
+                                        this.$store.state.drone_infos[dName].autoSpeed + 'm, 지점 대기: ' +
+                                        this.$store.state.drone_infos[dName].autoDelay + 's, 웨이포인트 고도 사용'
+                                }));
+                            }
+                            else {
+                                EventBus.$emit('AddLog', ({
+                                    email: this.$store.state.curUserEmail,
+                                    log: '(' + dName + ') 자동 명령--> 시작 Index: ' +
+                                        payload.start_index + ', 끝 Index: ' +
+                                        payload.end_index + ', 자동 속도: ' +
+                                        this.$store.state.drone_infos[dName].autoSpeed + 'm, 지점 대기: ' +
+                                        this.$store.state.drone_infos[dName].autoDelay + 's, 자동 고도: ' +
+                                        this.$store.state.drone_infos[dName].targetAlt + 'm'
+                                }));
+                            }
                         }
 
                         console.log('setAutoGoto', parseInt(this.$store.state.drone_infos[dName].autoStartIndex), parseInt(this.$store.state.drone_infos[dName].autoEndIndex), this.$store.state.drone_infos[dName].autoDelay);
@@ -2164,6 +2256,11 @@ export default {
                                     EventBus.$emit('do-publish-' + dName, payload);
                                 }
                             }
+
+                            EventBus.$emit('AddLog', ({
+                                email: this.$store.state.curUserEmail,
+                                log: '(' + dName + ') 패턴 명령--> ' + pIndex + '번째 패턴 경로를 ' + this.$store.state.surveyMarkers[dName][pIndex].flyAltType + '로 비행'
+                            }));
                         }
                         else {
                             console.error(dName, ' no targeting');
@@ -2178,6 +2275,11 @@ export default {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if(this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         EventBus.$emit('command-set-disarm-' + name);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + name + ') 종료 명령'
+                        }));
                     }
                 }
             }
@@ -2195,6 +2297,11 @@ export default {
                             this.$store.state.params.atcSlewYaw[name] = 180;
                         }
                         EventBus.$emit('command-set-slew-yaw-param-' + name, this.$store.state.params);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + name + ') SLEW_YAW 설정 변경-->' + this.$store.state.params.atcSlewYaw[name] + 'meterdegree/s'
+                        }));
                     }
                 }
             }
@@ -2206,6 +2313,11 @@ export default {
                 if (Object.prototype.hasOwnProperty.call(this.$store.state.drone_infos, name)) {
                     if (this.$store.state.drone_infos[name].selected && this.$store.state.drone_infos[name].targeted) {
                         EventBus.$emit('command-set-wp-yaw-param-' + name, this.$store.state.params);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + name + ') WP_YAW 설정 변경-->' + this.items_wp_yaw_behavior[this.$store.state.params[name].wpYawBehavior]
+                        }));
                     }
                 }
             }
@@ -2259,6 +2371,17 @@ export default {
                         }
 
                         EventBus.$emit('command-set-params-' + name, this.$store.state.params);
+
+                        EventBus.$emit('AddLog', ({
+                            email: this.$store.state.curUserEmail,
+                            log: '(' + name + ') 설정 변경-->SPEED_UP: ' +
+                                this.$store.state.params.wpnavSpeedUp + 'm/s, SPEED_DN: ' +
+                                this.$store.state.params.wpnavSpeedDn + 'm/s, RTL_ALT: ' +
+                                this.$store.state.params.rtlAlt + 'm/s, WPNAV_RADIUS: ' +
+                                this.$store.state.params.wpnavRadius + 'm, WPNAV_ACCEL: ' +
+                                this.$store.state.params.wpnavAccel + 'm/s/s, WPNAV_SPEED: ' +
+                                this.$store.state.params.wpnavSpeed + 'm/s'
+                        }));
                     }
                 }
             }
