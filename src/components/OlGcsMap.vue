@@ -3974,15 +3974,15 @@ export default {
         });
         this.olMap.addControl(contextmenu);
 
-        var removeMarkerItem = {
-            text: '웨이포인트 삭제',
-            classname: 'marker',
-            callback: (obj) => {
-                console.log('Remove this Marker', obj);
-
-                this.deleteOlTempMarker(obj);
-            },
-        };
+        // var removeMarkerItem = {
+        //     text: '웨이포인트 삭제',
+        //     classname: 'marker',
+        //     callback: (obj) => {
+        //         console.log('Remove this Marker', obj);
+        //
+        //         this.deleteOlTempMarker(obj);
+        //     },
+        // };
 
         // var ctrlDroneItem = {
         //     text: '모드변경',
@@ -4000,9 +4000,11 @@ export default {
             var feature = this.olMap.forEachFeatureAtPixel(evt.pixel, ft => ft);
 
             if (feature && feature.get('type') === 'tempMarker') {
+                // contextmenu.clear();
+                // removeMarkerItem.data = { marker: feature };
+                // contextmenu.push(removeMarkerItem);
                 contextmenu.clear();
-                removeMarkerItem.data = { marker: feature };
-                contextmenu.push(removeMarkerItem);
+                contextmenu.extend(contextmenuItems);
             }
             // else if (feature && feature.get('type') === 'droneMarker') {
             //     contextmenu.clear();

@@ -79,14 +79,18 @@
                             </div>
                         </v-form>
                     </div>
-                    <v-dialog v-model="ContactUs" persistent max-width="450px">
+                    <v-dialog v-model="ContactUs" persistent max-width="520px">
                         <v-card>
+
                             <v-card-title style="background-color: #3F51B5">
                                 <span class="headline white--text">문의하기</span>
                             </v-card-title>
                             <v-card-text>
                                 <v-container class="mt-6">
-                                    <v-row>
+                                    <v-row justify="center" >
+                                        KETI GCS는 다중 무인이동체를 지원하는 통합 지상관제 프로그램입니다.
+                                    </v-row>
+                                    <v-row class="mt-7">
                                         <v-col cols="2">
                                             <v-btn text
                                                    @click="ContactUs=!ContactUs"
@@ -196,7 +200,7 @@ export default {
                     return status < 500;
                 },
                 method: 'get',
-                url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + LoginObj.email.replace('@', '_').replace('.', '_'),
+                url: 'https://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + LoginObj.email.replace('@', '_').replace('.', '_'),
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
