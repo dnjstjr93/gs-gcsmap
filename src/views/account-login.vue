@@ -231,7 +231,7 @@ export default {
                             // });
                         } else {
                             alert('패스워드가 틀렸습니다.');
-                            console.log(pwHash, res.data['m2m:cnt'].lbl[0], 'password incorrect');
+                            console.log('password incorrect');
                         }
                     } else {
                         alert('회원가입이 필요합니다.');

@@ -537,7 +537,7 @@
                                                         <v-row no-gutters>
                                                             <v-col cols="6">
                                                                 <v-text-field
-                                                                    label="SLEW_YAW (meterdgrees/s), 5-180, 1"
+                                                                    label="SLEW_YAW (meterdegrees/s), 5-180, 1"
                                                                     class="pa-1"
                                                                     outlined dense hide-details
                                                                     v-model="$store.state.params.atcSlewYaw[d.name]"
@@ -2316,7 +2316,7 @@ export default {
 
                         EventBus.$emit('AddLog', ({
                             email: this.$store.state.curUserEmail,
-                            log: '(' + name + ') WP_YAW 설정 변경-->' + this.items_wp_yaw_behavior[this.$store.state.params[name].wpYawBehavior]
+                            log: '(' + name + ') WP_YAW 설정 변경-->' + this.$store.state.params.wpYawBehavior[name]
                         }));
                     }
                 }
@@ -2375,12 +2375,12 @@ export default {
                         EventBus.$emit('AddLog', ({
                             email: this.$store.state.curUserEmail,
                             log: '(' + name + ') 설정 변경-->SPEED_UP: ' +
-                                this.$store.state.params.wpnavSpeedUp + 'm/s, SPEED_DN: ' +
-                                this.$store.state.params.wpnavSpeedDn + 'm/s, RTL_ALT: ' +
-                                this.$store.state.params.rtlAlt + 'm/s, WPNAV_RADIUS: ' +
-                                this.$store.state.params.wpnavRadius + 'm, WPNAV_ACCEL: ' +
-                                this.$store.state.params.wpnavAccel + 'm/s/s, WPNAV_SPEED: ' +
-                                this.$store.state.params.wpnavSpeed + 'm/s'
+                                this.$store.state.params.wpnavSpeedUp[name] + 'm/s, SPEED_DN: ' +
+                                this.$store.state.params.wpnavSpeedDn[name] + 'm/s, RTL_ALT: ' +
+                                this.$store.state.params.rtlAlt[name] + 'm/s, WPNAV_RADIUS: ' +
+                                this.$store.state.params.wpnavRadius[name] + 'm, WPNAV_ACCEL: ' +
+                                this.$store.state.params.wpnavAccel[name] + 'm/s/s, WPNAV_SPEED: ' +
+                                this.$store.state.params.wpnavSpeed[name] + 'm/s'
                         }));
                     }
                 }

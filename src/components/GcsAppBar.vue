@@ -453,7 +453,7 @@
                     </v-card>
                 </v-dialog>
             </v-dialog>
-            <v-dialog v-model="dialogUserflag" persistent max-width="900px">
+            <v-dialog v-model="dialogUserflag" persistent max-width="1300px">
                 <v-card ref="UserInfoLog">
                     <v-card-title style="background-color: #4bae4f">
                         <span class="headline white--text">사용자 정보 관리</span>
@@ -482,12 +482,13 @@
                                     ref="Log_Scroll"
                                     :items="$store.state.LogList"
                                     height="350"
-                                    item-height="40"
+                                    item-height="35"
+                                    style="overflow: auto"
                                 >
                                     <template v-slot:default="{ item }">
                                         <v-list-item :key="item">
                                             <v-list-item-content class="mt-2">
-                                                <v-list-item-title>
+                                                <v-list-item-title style="font-size: 12px">
                                                     {{ item }}
                                                 </v-list-item-title>
                                             </v-list-item-content>
