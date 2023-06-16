@@ -200,7 +200,7 @@ export default {
                     return status < 500;
                 },
                 method: 'get',
-                url: 'https://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + LoginObj.email.replace('@', '_').replace('.', '_'),
+                url: 'http://' + this.$store.state.Login_Host + ':7579/Mobius/UserInfos/' + LoginObj.email.replace('@', '_').replace('.', '_'),
                 headers: {
                     'X-M2M-RI': String(parseInt(Math.random() * 10000)),
                     'X-M2M-Origin': 'SVue',
