@@ -22,7 +22,7 @@ Vue.$cookies.config("7d");
 
 Vue.use(VueGoogleMaps, {
     load: {
-        key: 'AIzaSyA7lKFAy2lRdfP2QFmaeqNN1ByDibrhg9U',
+        key: '',
         //libraries: 'drawing', // This is required if you use the Autocomplete plugin
         // OR: libraries: 'places,drawing'
         // OR: libraries: 'places,drawing,visualization'
